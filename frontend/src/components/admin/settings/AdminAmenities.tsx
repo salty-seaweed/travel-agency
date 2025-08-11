@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Card, Button, LoadingSpinner } from '../../index';
 import { useNotification } from '../../../hooks';
-import { useApi } from '../../../hooks/useApi';
+import { useAmenities } from '../../../hooks/useQueries';
 import type { Amenity } from '../../../types';
 import {
   SparklesIcon,
@@ -14,9 +14,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 export function AdminAmenities() {
-  const { data: amenities, loading: isLoading, error, refetch } = useApi(() => 
-    fetch('http://localhost:8000/api/amenities/').then(res => res.json())
-  );
+  const { data: amenities, isLoading, error, refetch } = useAmenities();
   const { showSuccess, showError } = useNotification();
   const [searchTerm, setSearchTerm] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -104,7 +102,7 @@ export function AdminAmenities() {
   if (error) {
     return (
       <div className="text-center py-8">
-        <p className="text-red-600 mb-4">Error loading amenities: {error}</p>
+        <p className="text-red-600 mb-4">Error loading amenities: {error?.message || 'Unknown error'}</p>
         <Button onClick={refetch}>Retry</Button>
       </div>
     );

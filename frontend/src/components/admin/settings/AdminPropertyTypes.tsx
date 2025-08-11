@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Card, Button, LoadingSpinner } from '../../index';
 import { useNotification } from '../../../hooks';
-import { useApi } from '../../../hooks/useApi';
+import { usePropertyTypes } from '../../../hooks/useQueries';
 import type { PropertyType } from '../../../types';
 import {
   HomeIcon,
@@ -14,9 +14,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 export function AdminPropertyTypes() {
-  const { data: propertyTypes, loading: isLoading, error, refetch } = useApi(() => 
-    fetch('http://localhost:8000/api/property-types/').then(res => res.json())
-  );
+  const { data: propertyTypes, isLoading, error, refetch } = usePropertyTypes();
   const { showSuccess, showError } = useNotification();
   const [searchTerm, setSearchTerm] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -104,7 +102,7 @@ export function AdminPropertyTypes() {
   if (error) {
     return (
       <div className="text-center py-8">
-        <p className="text-red-600 mb-4">Error loading property types: {error}</p>
+        <p className="text-red-600 mb-4">Error loading property types: {error?.message || 'Unknown error'}</p>
         <Button onClick={refetch}>Retry</Button>
       </div>
     );

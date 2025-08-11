@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Card, Button, LoadingSpinner } from '../../index';
 import { useNotification } from '../../../hooks';
-import { useApi } from '../../../hooks/useApi';
+import { useLocations } from '../../../hooks/useQueries';
 import { LocationMapPicker } from '../../LocationMapPicker';
 import type { Location } from '../../../types';
 import {
@@ -15,9 +15,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 export function AdminLocations() {
-  const { data: locations, loading: isLoading, error, refetch } = useApi(() => 
-    fetch('http://localhost:8000/api/locations/').then(res => res.json())
-  );
+  const { data: locations, isLoading, error, refetch } = useLocations();
   const { showSuccess, showError } = useNotification();
   const [searchTerm, setSearchTerm] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -134,7 +132,7 @@ export function AdminLocations() {
   if (error) {
     return (
       <div className="text-center py-8">
-        <p className="text-red-600 mb-4">Error loading locations: {error}</p>
+        <p className="text-red-600 mb-4">Error loading locations: {error?.message || 'Unknown error'}</p>
         <Button onClick={refetch}>Retry</Button>
       </div>
     );

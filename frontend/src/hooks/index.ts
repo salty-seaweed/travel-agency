@@ -1,6 +1,5 @@
 export { useFilters } from './useFilters';
 export { useNotification } from './useNotification';
-export { useApi } from './useApi';
 export { useAuth } from './useAuth';
 export { useCustomerAuth } from './useCustomerAuth';
 export { useFetch } from './useFetch';

@@ -12,9 +12,9 @@ import {
   XMarkIcon,
   AdjustmentsHorizontalIcon
 } from '@heroicons/react/24/outline';
-import { usePackages } from '../hooks/useApi';
+import { usePackages } from '../hooks/useQueries';
 import { LoadingSpinner } from './LoadingSpinner';
-import type { Package as ApiPackage } from '../services/api';
+import type { Package as ApiPackage } from '../types';
 
 // Convert API package to PackageCard format
 const convertApiPackageToCardFormat = (pkg: ApiPackage) => ({
@@ -54,7 +54,7 @@ interface Package {
 }
 
 export function PackagesPage() {
-  const { data: apiPackages, loading: packagesLoading, error: packagesError } = usePackages();
+  const { data: apiPackages, isLoading: packagesLoading, error: packagesError } = usePackages();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [priceRange, setPriceRange] = useState([0, 5000]);
@@ -125,7 +125,7 @@ export function PackagesPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h3 className="text-lg font-medium text-gray-900 mb-2">Error loading packages</h3>
-          <p className="text-gray-600">{packagesError}</p>
+          <p className="text-gray-600">{packagesError?.message || 'Unknown error'}</p>
         </div>
       </div>
     );
