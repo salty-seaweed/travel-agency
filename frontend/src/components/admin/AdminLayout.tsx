@@ -1,7 +1,33 @@
 import React, { useState, useEffect, Fragment } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Dialog, Transition } from '@headlessui/react';
 import { useAuth } from '../../hooks';
+import {
+  Box,
+  Flex,
+  VStack,
+  HStack,
+  Text,
+  Icon,
+  IconButton,
+  Button,
+  Drawer,
+  DrawerBody,
+  DrawerHeader,
+  DrawerOverlay,
+  DrawerContent,
+  DrawerCloseButton,
+  useDisclosure,
+  Divider,
+  Badge,
+  Avatar,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
+  MenuDivider,
+  useColorModeValue,
+  Container,
+} from '@chakra-ui/react';
 import {
   HomeIcon,
   BuildingOffice2Icon,
@@ -14,6 +40,7 @@ import {
   BellIcon,
   UserCircleIcon,
   CogIcon,
+  DocumentTextIcon,
 } from '@heroicons/react/24/outline';
 
 interface AdminLayoutProps {
@@ -21,18 +48,28 @@ interface AdminLayoutProps {
 }
 
 const adminNav = [
-  { name: 'Dashboard', href: '/admin/dashboard', icon: HomeIcon, description: 'Overview and analytics' },
-  { name: 'Properties', href: '/admin/properties', icon: BuildingOffice2Icon, description: 'Manage properties' },
-  { name: 'Packages', href: '/admin/packages', icon: GiftIcon, description: 'Manage packages' },
-  { name: 'Reviews', href: '/admin/reviews', icon: StarIcon, description: 'Customer reviews' },
-  { name: 'Settings', href: '/admin/amenities-types-locations', icon: WrenchScrewdriverIcon, description: 'Amenities & locations' },
+  { name: 'Dashboard', href: '/dashboard/overview', icon: HomeIcon, description: 'Overview and analytics' },
+  { name: 'Properties', href: '/dashboard/properties', icon: BuildingOffice2Icon, description: 'Manage properties' },
+  { name: 'Packages', href: '/dashboard/packages', icon: GiftIcon, description: 'Manage packages' },
+  { name: 'Reviews', href: '/dashboard/reviews', icon: StarIcon, description: 'Customer reviews' },
+  { name: 'Content Management', href: '/dashboard/content', icon: DocumentTextIcon, description: 'Create and manage pages' },
+  { name: 'Settings', href: '/dashboard/settings', icon: WrenchScrewdriverIcon, description: 'Amenities & locations' },
 ];
 
 export function AdminLayout({ children }: AdminLayoutProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const navigate = useNavigate();
   const currentPath = window.location.pathname;
   const { logout } = useAuth();
+  
+  // Color mode values
+  const bg = useColorModeValue('white', 'gray.800');
+  const borderColor = useColorModeValue('gray.200', 'gray.700');
+  const textColor = useColorModeValue('gray.800', 'white');
+  const sidebarBg = useColorModeValue('white', 'gray.900');
+  const activeBg = useColorModeValue('blue.50', 'blue.900');
+  const activeColor = useColorModeValue('blue.700', 'blue.200');
+  const hoverBg = useColorModeValue('gray.50', 'gray.700');
   
   // Session monitoring
   useEffect(() => {
@@ -66,212 +103,253 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     logout();
   };
 
+  const NavItem = ({ item }: { item: typeof adminNav[0] }) => {
+    const isActive = currentPath === item.href;
+    return (
+      <Box
+        as="a"
+        href={item.href}
+        display="flex"
+        alignItems="center"
+        px={4}
+        py={3}
+        borderRadius="xl"
+        transition="all 0.2s"
+        bg={isActive ? activeBg : 'transparent'}
+        color={isActive ? activeColor : textColor}
+        border={isActive ? '1px solid' : '1px solid transparent'}
+        borderColor={isActive ? 'blue.200' : 'transparent'}
+        _hover={{
+          bg: isActive ? activeBg : hoverBg,
+          textDecoration: 'none',
+        }}
+        _active={{
+          transform: 'scale(0.98)',
+        }}
+      >
+        <Icon
+          as={item.icon}
+          mr={3}
+          h={5}
+          w={5}
+          color={isActive ? 'blue.500' : 'gray.400'}
+        />
+        <Box>
+          <Text fontWeight="semibold" fontSize="sm">{item.name}</Text>
+          <Text fontSize="xs" color="gray.500">{item.description}</Text>
+        </Box>
+      </Box>
+    );
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Mobile sidebar */}
-      <Transition.Root show={sidebarOpen} as={Fragment}>
-        <Dialog as="div" className="relative z-50 lg:hidden" onClose={setSidebarOpen}>
-          <Transition.Child
-            as={Fragment}
-            enter="transition-opacity ease-linear duration-300"
-            enterFrom="opacity-0"
-            enterTo="opacity-100"
-            leave="transition-opacity ease-linear duration-300"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-          >
-            <div className="fixed inset-0 bg-gray-600 bg-opacity-75" />
-          </Transition.Child>
-
-          <div className="fixed inset-0 z-40 flex">
-            <Transition.Child
-              as={Fragment}
-              enter="transition ease-in-out duration-300 transform"
-              enterFrom="-translate-x-full"
-              enterTo="translate-x-0"
-              leave="transition ease-in-out duration-300 transform"
-              leaveFrom="translate-x-0"
-              leaveTo="-translate-x-full"
-            >
-              <Dialog.Panel className="relative flex w-full max-w-xs flex-1 flex-col bg-white">
-                <div className="absolute top-0 right-0 -mr-12 pt-2">
-                  <button
-                    type="button"
-                    className="ml-1 flex h-10 w-10 items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
-                    onClick={() => setSidebarOpen(false)}
-                  >
-                    <span className="sr-only">Close sidebar</span>
-                    <XMarkIcon className="h-6 w-6 text-white" aria-hidden="true" />
-                  </button>
-                </div>
-                
-                {/* Mobile sidebar content */}
-                <div className="flex flex-shrink-0 items-center px-6 py-4 border-b border-gray-200">
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center mr-3">
-                    <BuildingOffice2Icon className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <span className="text-lg font-bold text-gray-800">Maldives Admin</span>
-                    <p className="text-xs text-gray-500">Travel Agency</p>
-                  </div>
-                </div>
-                
-                <nav className="flex-1 px-3 py-6 space-y-2">
-                  {adminNav.map((item) => (
-                    <a
-                      key={item.name}
-                      href={item.href}
-                      className={`group flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
-                        currentPath === item.href
-                          ? 'bg-blue-50 text-blue-700 border border-blue-200 shadow-sm'
-                          : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600'
-                      }`}
-                    >
-                      <item.icon className={`mr-3 h-5 w-5 ${currentPath === item.href ? 'text-blue-600' : 'text-gray-400 group-hover:text-blue-500'}`} aria-hidden="true" />
-                      <div>
-                        <div className="font-semibold">{item.name}</div>
-                        <div className="text-xs text-gray-500">{item.description}</div>
-                      </div>
-                    </a>
-                  ))}
-                </nav>
-                
-                {/* Mobile user menu */}
-                <div className="border-t border-gray-200 p-4">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <UserCircleIcon className="h-8 w-8 text-gray-400" />
-                    </div>
-                    <div className="ml-3">
-                      <p className="text-sm font-medium text-gray-700">Admin User</p>
-                      <p className="text-xs text-gray-500">admin@threadtravels.mv</p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={handleLogout}
-                    className="mt-3 w-full flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100"
-                  >
-                    <ArrowLeftOnRectangleIcon className="mr-3 h-5 w-5" />
-                    Sign out
-                  </button>
-                </div>
-              </Dialog.Panel>
-            </Transition.Child>
-          </div>
-        </Dialog>
-      </Transition.Root>
-
-      {/* Static sidebar for desktop */}
-      <div className="hidden lg:flex lg:flex-shrink-0">
-        <div className="flex flex-col w-72 bg-white border-r border-gray-200 shadow-lg">
-          <div className="flex items-center h-16 px-6 border-b border-gray-100">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center mr-3">
-              <BuildingOffice2Icon className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <span className="text-lg font-bold text-gray-800">Maldives Admin</span>
-              <p className="text-xs text-gray-500">Travel Agency</p>
-            </div>
-          </div>
-          <nav className="flex-1 px-3 py-6 space-y-2">
-            {adminNav.map((item) => (
-              <a
-                key={item.name}
-                href={item.href}
-                className={`group flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
-                  currentPath === item.href
-                    ? 'bg-blue-50 text-blue-700 border border-blue-200 shadow-sm'
-                    : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600'
-                }`}
+    <Flex minH="100vh" bg="gray.50">
+      {/* Mobile Drawer */}
+      <Drawer isOpen={isOpen} placement="left" onClose={onClose} size="xs">
+        <DrawerOverlay />
+        <DrawerContent bg={sidebarBg} borderRight="1px solid" borderColor={borderColor}>
+          <DrawerCloseButton />
+          <DrawerHeader borderBottom="1px solid" borderColor={borderColor}>
+            <Flex alignItems="center">
+              <Box
+                w={10}
+                h={10}
+                bgGradient="linear(to-br, blue.500, indigo.600)"
+                borderRadius="xl"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                mr={3}
               >
-                <item.icon className={`mr-3 h-5 w-5 ${currentPath === item.href ? 'text-blue-600' : 'text-gray-400 group-hover:text-blue-500'}`} aria-hidden="true" />
-                <div>
-                  <div className="font-semibold">{item.name}</div>
-                  <div className="text-xs text-gray-500">{item.description}</div>
-                </div>
-              </a>
-            ))}
-          </nav>
+                <Icon as={BuildingOffice2Icon} h={6} w={6} color="white" />
+              </Box>
+              <Box>
+                <Text fontSize="lg" fontWeight="bold" color={textColor}>Maldives Admin</Text>
+                <Text fontSize="xs" color="gray.500">Travel Agency</Text>
+              </Box>
+            </Flex>
+          </DrawerHeader>
           
-          {/* Desktop user menu */}
-          <div className="border-t border-gray-200 p-4">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <UserCircleIcon className="h-8 w-8 text-gray-400" />
-              </div>
-              <div className="ml-3 flex-1">
-                <p className="text-sm font-medium text-gray-700">Admin User</p>
-                <p className="text-xs text-gray-500">admin@threadtravels.mv</p>
-              </div>
-              <button
+          <DrawerBody p={0}>
+            <VStack spacing={2} p={3} align="stretch">
+              {adminNav.map((item) => (
+                <NavItem key={item.name} item={item} />
+              ))}
+            </VStack>
+            
+            <Divider my={4} />
+            
+            <Box p={4}>
+              <Flex alignItems="center" mb={3}>
+                <Avatar size="sm" name="Admin User" bg="gray.400" />
+                <Box ml={3}>
+                  <Text fontSize="sm" fontWeight="medium" color={textColor}>Admin User</Text>
+                  <Text fontSize="xs" color="gray.500">admin@threadtravels.mv</Text>
+                </Box>
+              </Flex>
+              <Button
+                leftIcon={<Icon as={ArrowLeftOnRectangleIcon} h={5} w={5} />}
+                variant="ghost"
+                size="sm"
+                w="full"
                 onClick={handleLogout}
-                className="p-1 rounded-lg hover:bg-gray-100"
-                title="Sign out"
+                colorScheme="gray"
               >
-                <ArrowLeftOnRectangleIcon className="h-5 w-5 text-gray-400" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+                Sign out
+              </Button>
+            </Box>
+          </DrawerBody>
+        </DrawerContent>
+      </Drawer>
 
-      {/* Main content */}
-      <div className="flex-1 flex flex-col">
-        {/* Top navigation */}
-        <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
-          <button
-            type="button"
-            className="-m-2.5 p-2.5 text-gray-700 lg:hidden"
-            onClick={() => setSidebarOpen(true)}
+      {/* Desktop Sidebar */}
+      <Box
+        display={{ base: 'none', lg: 'block' }}
+        w={72}
+        bg={sidebarBg}
+        borderRight="1px solid"
+        borderColor={borderColor}
+        shadow="lg"
+      >
+        <VStack h="full" spacing={0}>
+          {/* Header */}
+          <Flex
+            alignItems="center"
+            h={16}
+            px={6}
+            borderBottom="1px solid"
+            borderColor={borderColor}
+            w="full"
           >
-            <span className="sr-only">Open sidebar</span>
-            <Bars3Icon className="h-6 w-6" aria-hidden="true" />
-          </button>
+            <Box
+              w={10}
+              h={10}
+              bgGradient="linear(to-br, blue.500, indigo.600)"
+              borderRadius="xl"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              mr={3}
+            >
+              <Icon as={BuildingOffice2Icon} h={6} w={6} color="white" />
+            </Box>
+            <Box>
+              <Text fontSize="lg" fontWeight="bold" color={textColor}>Maldives Admin</Text>
+              <Text fontSize="xs" color="gray.500">Travel Agency</Text>
+            </Box>
+          </Flex>
+          
+          {/* Navigation */}
+          <VStack spacing={2} p={3} align="stretch" flex={1} w="full">
+            {adminNav.map((item) => (
+              <NavItem key={item.name} item={item} />
+            ))}
+          </VStack>
+          
+          {/* User Menu */}
+          <Box
+            borderTop="1px solid"
+            borderColor={borderColor}
+            p={4}
+            w="full"
+          >
+            <Flex alignItems="center" justify="space-between">
+              <Flex alignItems="center">
+                <Avatar size="sm" name="Admin User" bg="gray.400" />
+                <Box ml={3}>
+                  <Text fontSize="sm" fontWeight="medium" color={textColor}>Admin User</Text>
+                  <Text fontSize="xs" color="gray.500">admin@threadtravels.mv</Text>
+                </Box>
+              </Flex>
+              <Menu>
+                <MenuButton
+                  as={IconButton}
+                  icon={<Icon as={ArrowLeftOnRectangleIcon} h={5} w={5} />}
+                  variant="ghost"
+                  size="sm"
+                  colorScheme="gray"
+                  onClick={handleLogout}
+                />
+              </Menu>
+            </Flex>
+          </Box>
+        </VStack>
+      </Box>
 
-          {/* Separator */}
-          <div className="h-6 w-px bg-gray-200 lg:hidden" aria-hidden="true" />
-
-          <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
-            <div className="flex flex-1"></div>
-            <div className="flex items-center gap-x-4 lg:gap-x-6">
-              {/* Notifications */}
-              <button
-                type="button"
-                className="-m-2.5 p-2.5 text-gray-400 hover:text-gray-500"
-              >
-                <span className="sr-only">View notifications</span>
-                <BellIcon className="h-6 w-6" aria-hidden="true" />
-              </button>
-
-              {/* Separator */}
-              <div className="hidden lg:block lg:h-6 lg:w-px lg:bg-gray-200" aria-hidden="true" />
-
-              {/* Profile dropdown */}
-              <div className="flex items-center gap-x-4 lg:gap-x-6">
-                <button
-                  type="button"
-                  className="-m-1.5 flex items-center p-1.5"
-                  id="user-menu-button"
+      {/* Main Content */}
+      <Flex flex={1} direction="column" minH="100vh">
+        {/* Top Navigation */}
+        <Box
+          position="sticky"
+          top={0}
+          zIndex={40}
+          h={16}
+          bg={bg}
+          borderBottom="1px solid"
+          borderColor={borderColor}
+          shadow="sm"
+          px={{ base: 4, sm: 6, lg: 8 }}
+        >
+          <Flex h="full" alignItems="center" justify="space-between">
+            <HStack spacing={4}>
+              <IconButton
+                display={{ base: 'flex', lg: 'none' }}
+                icon={<Icon as={Bars3Icon} h={6} w={6} />}
+                variant="ghost"
+                onClick={onOpen}
+                aria-label="Open sidebar"
+              />
+              <Divider orientation="vertical" h={6} display={{ base: 'block', lg: 'none' }} />
+            </HStack>
+            
+            <HStack spacing={4}>
+              <IconButton
+                icon={<Icon as={BellIcon} h={6} w={6} />}
+                variant="ghost"
+                colorScheme="gray"
+                aria-label="View notifications"
+              />
+              <Divider orientation="vertical" h={6} display={{ base: 'none', lg: 'block' }} />
+              
+              <Menu>
+                <MenuButton
+                  as={Button}
+                  variant="ghost"
+                  rightIcon={<Icon as={UserCircleIcon} h={5} w={5} />}
+                  colorScheme="gray"
                 >
-                  <span className="sr-only">Open user menu</span>
-                  <div className="flex items-center">
-                    <UserCircleIcon className="h-8 w-8 text-gray-400" />
-                    <div className="ml-3 text-left">
-                      <p className="text-sm font-medium text-gray-700">Admin User</p>
-                      <p className="text-xs text-gray-500">admin@threadtravels.mv</p>
-                    </div>
-                  </div>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+                  <Flex alignItems="center">
+                    <Avatar size="sm" name="Admin User" bg="gray.400" mr={3} />
+                    <Box textAlign="left">
+                      <Text fontSize="sm" fontWeight="medium" color={textColor}>Admin User</Text>
+                      <Text fontSize="xs" color="gray.500">admin@threadtravels.mv</Text>
+                    </Box>
+                  </Flex>
+                </MenuButton>
+                <MenuList>
+                  <MenuItem icon={<Icon as={UserCircleIcon} h={4} w={4} />}>
+                    Profile
+                  </MenuItem>
+                  <MenuItem icon={<Icon as={CogIcon} h={4} w={4} />}>
+                    Settings
+                  </MenuItem>
+                  <MenuDivider />
+                  <MenuItem icon={<Icon as={ArrowLeftOnRectangleIcon} h={4} w={4} />} onClick={handleLogout}>
+                    Sign out
+                  </MenuItem>
+                </MenuList>
+              </Menu>
+            </HStack>
+          </Flex>
+        </Box>
 
-        {/* Page content */}
-        <main className="flex-1">
-          {children}
-        </main>
-      </div>
-    </div>
+        {/* Page Content */}
+        <Box flex={1} bg="gray.50" as="main">
+          <Container maxW="full" py={8}>
+            {children}
+          </Container>
+        </Box>
+      </Flex>
+    </Flex>
   );
 } 

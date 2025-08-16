@@ -1,5 +1,9 @@
 from rest_framework import serializers
-from .models import PropertyType, Amenity, Location, PropertyImage, Property, Package, Review, Booking, Availability, Customer
+from .models import (
+    PropertyType, Amenity, Location, PropertyImage, Property, Package, PackageImage, Review, 
+    Booking, Availability, Customer, Page, PageBlock, MediaAsset, Menu, MenuItem, 
+    Redirect, PageVersion, PageReview, CommentThread, Comment
+)
 
 class PropertyTypeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -36,9 +40,15 @@ class PropertySerializer(serializers.ModelSerializer):
         model = Property
         fields = '__all__'
 
+class PackageImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PackageImage
+        fields = '__all__'
+
 class PackageSerializer(serializers.ModelSerializer):
     properties = PropertySerializer(many=True, read_only=True)
     property_ids = serializers.PrimaryKeyRelatedField(queryset=Property.objects.all(), many=True, source='properties', write_only=True, required=False)
+    images = PackageImageSerializer(many=True, read_only=True)
     class Meta:
         model = Package
         fields = '__all__'
@@ -113,4 +123,90 @@ class BookingCreateSerializer(serializers.ModelSerializer):
 class BookingStatusUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Booking
-        fields = ['status'] 
+        fields = ['status']
+
+# CMS Serializers
+class PageBlockSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PageBlock
+        fields = '__all__'
+
+class PageSerializer(serializers.ModelSerializer):
+    blocks = PageBlockSerializer(many=True, read_only=True)
+    created_by = serializers.ReadOnlyField(source='created_by.username')
+    updated_by = serializers.ReadOnlyField(source='updated_by.username')
+    
+    class Meta:
+        model = Page
+        fields = '__all__'
+        read_only_fields = ['created_by', 'updated_by', 'version', 'created_at', 'updated_at']
+
+class MediaAssetSerializer(serializers.ModelSerializer):
+    created_by = serializers.ReadOnlyField(source='created_by.username')
+    
+    class Meta:
+        model = MediaAsset
+        fields = '__all__'
+        read_only_fields = ['id', 'file_url', 'thumbnail_url', 'usage_count', 'created_at', 'mime_type']
+    
+    def create(self, validated_data):
+        file_obj = validated_data.get('file')
+        if file_obj:
+            validated_data['mime_type'] = file_obj.content_type
+        return super().create(validated_data)
+    
+    def update(self, instance, validated_data):
+        file_obj = validated_data.get('file')
+        if file_obj:
+            validated_data['mime_type'] = file_obj.content_type
+        return super().update(instance, validated_data)
+
+class MenuItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MenuItem
+        fields = '__all__'
+
+class MenuSerializer(serializers.ModelSerializer):
+    items = MenuItemSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = Menu
+        fields = '__all__'
+
+class RedirectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Redirect
+        fields = '__all__'
+
+class PageVersionSerializer(serializers.ModelSerializer):
+    created_by = serializers.ReadOnlyField(source='created_by.username')
+    
+    class Meta:
+        model = PageVersion
+        fields = '__all__'
+        read_only_fields = ['created_by', 'created_at']
+
+class PageReviewSerializer(serializers.ModelSerializer):
+    reviewer = serializers.ReadOnlyField(source='reviewer.username')
+    
+    class Meta:
+        model = PageReview
+        fields = '__all__'
+        read_only_fields = ['reviewer', 'created_at']
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.ReadOnlyField(source='author.username')
+    
+    class Meta:
+        model = Comment
+        fields = '__all__'
+        read_only_fields = ['author', 'created_at', 'updated_at']
+
+class CommentThreadSerializer(serializers.ModelSerializer):
+    comments = CommentSerializer(many=True, read_only=True)
+    created_by = serializers.ReadOnlyField(source='created_by.username')
+    
+    class Meta:
+        model = CommentThread
+        fields = '__all__'
+        read_only_fields = ['created_by', 'created_at'] 

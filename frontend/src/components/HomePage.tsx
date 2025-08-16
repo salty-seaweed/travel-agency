@@ -1,5 +1,43 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import {
+  Box,
+  Flex,
+  VStack,
+  HStack,
+  Text,
+  Button,
+  Image,
+  Grid,
+  GridItem,
+  Container,
+  Heading,
+  Badge,
+  Icon,
+  useColorModeValue,
+  SimpleGrid,
+  Card,
+  CardBody,
+  CardHeader,
+  Divider,
+  List,
+  ListItem,
+  ListIcon,
+  Input,
+  InputGroup,
+  InputLeftElement,
+  Select,
+  useToast,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalCloseButton,
+  useDisclosure,
+  Progress,
+  Spinner,
+} from '@chakra-ui/react';
 import { 
   MapPinIcon, 
   StarIcon, 
@@ -19,28 +57,73 @@ import {
   ClockIcon,
   CurrencyDollarIcon,
   CameraIcon,
-  WifiIcon
+  WifiIcon,
+  BuildingOffice2Icon,
+  GiftIcon,
+  MapIcon,
+  UserGroupIcon,
+  ExclamationTriangleIcon,
+  CheckCircleIcon,
+  ArrowUpIcon,
+  ArrowDownIcon,
+  EyeIcon,
+  BookOpenIcon,
+  SunIcon,
+  CloudIcon,
+  FireIcon,
+  CreditCardIcon,
+  LockClosedIcon,
+  HeartIcon as HeartSolidIcon,
+  ArrowPathIcon,
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
 import { useHomepageData } from '../hooks/useQueries';
-import { LoadingSpinner, Card, Button } from './index';
-import { GoogleReviews } from './GoogleReviews';
+import { LoadingSpinner } from './index';
 import { SEO } from './SEO';
-import { PageErrorBoundary, ComponentErrorBoundary } from './SimpleErrorBoundary';
+import { PageErrorBoundary } from './SimpleErrorBoundary';
 import { EnhancedSearch } from './EnhancedSearch';
 import { usePerformanceMonitor } from '../utils/performanceUtils';
 import { config, getWhatsAppUrl } from '../config';
+import { PackageCard } from './ui/PackageCard';
+import { PropertyCard } from './ui/PropertyCard';
+import { useTranslation } from '../i18n';
 
 export function HomePage() {
   const { properties, packages, isLoading, isError, error } = useHomepageData();
   const { measure } = usePerformanceMonitor('HomePage');
+  const { t } = useTranslation();
+  const toast = useToast();
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // Hero background images for rotation - Using high-quality Maldives images
+  const heroImages = [
+    "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&h=1080&fit=crop&crop=center&auto=format&q=80",
+    "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=1920&h=1080&fit=crop&crop=center&auto=format&q=80",
+    "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=1920&h=1080&fit=crop&crop=center&auto=format&q=80",
+    "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=1920&h=1080&fit=crop&crop=center&auto=format&q=80",
+    "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=1920&h=1080&fit=crop&crop=center&auto=format&q=80",
+    "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=1920&h=1080&fit=crop&crop=center",
+    "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=1920&h=1080&fit=crop&crop=center",
+    "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=1920&h=1080&fit=crop&crop=center",
+  ];
+
+  // Rotate hero images
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % heroImages.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [heroImages.length]);
 
   // Handle loading state
   if (isLoading) {
     measure('loading-start');
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner size="xl" />
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+        <VStack spacing={6}>
+          <Spinner size="xl" color="blue.500" thickness="4px" />
+          <Text className="text-lg text-gray-600 font-medium">Loading your dream destinations...</Text>
+        </VStack>
       </div>
     );
   }
@@ -51,18 +134,22 @@ export function HomePage() {
     return (
       <PageErrorBoundary pageName="Homepage">
         <div className="min-h-screen flex items-center justify-center bg-red-50">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Failed to Load Homepage</h1>
-            <p className="text-gray-600 mb-6">
+          <VStack textAlign="center" spacing={6} maxW="md">
+            <Icon as={ExclamationTriangleIcon} className="w-16 h-16 text-red-500" />
+            <Heading size="2xl" color="gray.900">Failed to Load Homepage</Heading>
+            <Text color="gray.600">
               {error?.message || 'Something went wrong. Please try again.'}
-            </p>
-            <button 
+            </Text>
+            <Button 
               onClick={() => window.location.reload()}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+              colorScheme="blue"
+              size="lg"
+              className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700"
             >
+              <Icon as={ArrowPathIcon} className="w-5 h-5 mr-2" />
               Reload Page
-            </button>
-          </div>
+            </Button>
+          </VStack>
         </div>
       </PageErrorBoundary>
     );
@@ -79,446 +166,495 @@ export function HomePage() {
         keywords="Maldives travel, property booking, local accommodation, island hopping, Thread Travels"
       />
       
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-        {/* Simplified Hero Section - Improved Readability & Accessibility */}
-        <section className="relative min-h-screen flex items-center justify-center overflow-hidden" role="banner">
-          {/* Simplified Background */}
+      <Box minH="100vh" bgGradient="linear(to-br, gray.50, blue.50, indigo.100)">
+        {/* Hero Section with Dynamic Background */}
+        <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+          {/* Dynamic Background Images */}
           <div className="absolute inset-0">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-900/85 via-indigo-900/80 to-purple-900/85"></div>
-            <img 
-              src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&h=1080&fit=crop&crop=center" 
-              alt="Pristine Maldives beach with crystal clear waters and overwater bungalows"
-              className="w-full h-full object-cover"
-              loading="eager"
-            />
+            {heroImages.map((image, index) => (
+              <img 
+                key={index}
+                src={image} 
+                alt={`Maldives Paradise ${index + 1}`}
+                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
+                  index === currentImageIndex ? 'opacity-100' : 'opacity-0'
+                }`}
+              />
+            ))}
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-900/80 via-indigo-900/70 to-purple-900/80"></div>
+            <div className="absolute inset-0 bg-black/20"></div>
           </div>
 
-          <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
-            {/* Trust Badge */}
-            <div className="mb-8">
-              <div className="inline-flex items-center gap-3 bg-white/15 backdrop-blur-xl rounded-2xl px-6 py-3 border border-white/20 shadow-xl">
-                <SparklesIcon className="h-5 w-5 text-yellow-400" aria-hidden="true" />
-                <span className="text-lg font-semibold">Trusted by 15,000+ Travelers</span>
-                <div className="flex items-center gap-2">
-                  <StarSolidIcon className="h-4 w-4 text-yellow-400" aria-hidden="true" />
-                  <span className="font-bold">4.9</span>
-                </div>
-              </div>
+          {/* Enhanced Floating Elements */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            {/* Floating Islands */}
+            <div className="absolute top-20 left-10 animate-float">
+              <Box
+                w="16"
+                h="16"
+                bg="whiteAlpha.10"
+                borderRadius="full"
+                backdropFilter="blur(10px)"
+                border="1px solid"
+                borderColor="whiteAlpha.20"
+              />
+            </div>
+            <div className="absolute top-40 right-20 animate-float-delayed">
+              <Box
+                w="12"
+                h="12"
+                bg="blueAlpha.10"
+                borderRadius="full"
+                backdropFilter="blur(10px)"
+                border="1px solid"
+                borderColor="blueAlpha.20"
+              />
+            </div>
+            <div className="absolute bottom-40 left-20 animate-float-slow">
+              <Box
+                w="20"
+                h="20"
+                bg="purpleAlpha.10"
+                borderRadius="full"
+                backdropFilter="blur(10px)"
+                border="1px solid"
+                borderColor="purpleAlpha.20"
+              />
+            </div>
+            <div className="absolute bottom-20 right-10 animate-float">
+              <Box
+                w="24"
+                h="24"
+                bg="yellowAlpha.10"
+                borderRadius="full"
+                backdropFilter="blur(10px)"
+                border="1px solid"
+                borderColor="yellowAlpha.20"
+              />
             </div>
             
-            {/* Improved Main Heading - Better Typography */}
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-8 leading-tight">
-              Discover Your
-              <span className="block bg-gradient-to-r from-yellow-400 via-orange-400 to-pink-400 bg-clip-text text-transparent">
-                Maldives Paradise
-              </span>
-            </h1>
-            
-            {/* Improved Subtitle - Better Readability */}
-            <p className="text-lg sm:text-xl md:text-2xl mb-12 text-blue-100 max-w-4xl mx-auto leading-relaxed">
-              Experience the magic of the Maldives with our curated collection of 
-              <span className="text-yellow-300 font-semibold"> luxury resorts</span> and 
-              <span className="text-yellow-300 font-semibold"> authentic experiences</span>
-            </p>
-            
-            {/* Enhanced CTA Buttons - Better Accessibility */}
-            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
-              <Link
-                to="/packages"
-                className="group relative overflow-hidden bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 px-12 py-4 rounded-2xl font-bold text-xl hover:from-yellow-300 hover:to-orange-400 transition-all duration-300 transform hover:scale-105 shadow-xl focus:outline-none focus:ring-4 focus:ring-yellow-300 focus:ring-offset-2"
-                aria-label="Explore our travel packages"
-              >
-                <span className="relative flex items-center gap-4">
-                  <span className="text-2xl" aria-hidden="true">🌟</span>
-                  Explore Packages
-                  <ArrowRightIcon className="h-5 w-5" aria-hidden="true" />
-                </span>
-              </Link>
-              
-              <Link
-                to="/properties"
-                className="group relative overflow-hidden bg-transparent border-2 border-white text-white px-12 py-4 rounded-2xl font-bold text-xl hover:bg-white hover:text-gray-900 transition-all duration-300 transform hover:scale-105 backdrop-blur-sm focus:outline-none focus:ring-4 focus:ring-white focus:ring-offset-2"
-                aria-label="View our properties"
-              >
-                <span className="relative flex items-center gap-4">
-                  <span className="text-2xl" aria-hidden="true">🏠</span>
-                  View Properties
-                  <ArrowRightIcon className="h-5 w-5" aria-hidden="true" />
-                </span>
-              </Link>
+            {/* Decorative Icons */}
+            <div className="absolute top-32 left-1/4 animate-float-slow">
+              <Icon as={SunIcon} className="w-6 h-6 text-yellow-400/40" />
             </div>
-            
-            {/* Simplified Stats Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 max-w-4xl mx-auto">
-              <div className="text-center group">
-                <div className="text-3xl sm:text-4xl font-bold text-yellow-400 mb-2 group-hover:scale-105 transition-transform duration-300">500+</div>
-                <div className="text-sm text-blue-100 font-medium">Properties</div>
-              </div>
-              <div className="text-center group">
-                <div className="text-3xl sm:text-4xl font-bold text-yellow-400 mb-2 group-hover:scale-105 transition-transform duration-300">50K+</div>
-                <div className="text-sm text-blue-100 font-medium">Happy Guests</div>
-              </div>
-              <div className="text-center group">
-                <div className="text-3xl sm:text-4xl font-bold text-yellow-400 mb-2 group-hover:scale-105 transition-transform duration-300">24/7</div>
-                <div className="text-sm text-blue-100 font-medium">Support</div>
-              </div>
-              <div className="text-center group">
-                <div className="text-3xl sm:text-4xl font-bold text-yellow-400 mb-2 group-hover:scale-105 transition-transform duration-300">4.9★</div>
-                <div className="text-sm text-blue-100 font-medium">Rating</div>
-              </div>
+            <div className="absolute top-48 right-1/3 animate-float-delayed">
+              <Icon as={CloudIcon} className="w-4 h-4 text-white/30" />
+            </div>
+            <div className="absolute bottom-32 left-1/3 animate-float">
+              <Icon as={FireIcon} className="w-8 h-8 text-orange-400/30" />
+            </div>
+            <div className="absolute bottom-48 right-1/4 animate-float-slow">
+              <Icon as={SparklesIcon} className="w-5 h-5 text-blue-300/40" />
             </div>
           </div>
-          
-          {/* Simplified Scroll Indicator */}
+
+          {/* Hero Content */}
+          <Container maxW="7xl" className="relative z-10 text-center text-white px-4">
+            <VStack spacing={8} mb={8}>
+              <VStack spacing={6} className="animate-fade-in">
+                <Badge 
+                  className="bg-white/20 backdrop-blur-md text-white px-4 py-2 rounded-full text-sm font-medium border border-white/30"
+                >
+                  <Icon as={SparklesIcon} className="w-4 h-4 mr-2" />
+                  #1 Maldives Travel Agency 2024
+                </Badge>
+                
+                <Heading 
+                  size="2xl" 
+                  className="text-6xl md:text-8xl font-bold leading-tight animate-slide-up"
+                >
+                  Discover Your
+                  <span className="block bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent animate-pulse">
+                    Maldives Paradise
+                  </span>
+                </Heading>
+                
+                <Text className="text-xl md:text-2xl text-blue-100 max-w-4xl mx-auto leading-relaxed animate-slide-up-delayed">
+                  Experience authentic local accommodations and unforgettable adventures in the world's most beautiful islands. 
+                  <span className="block mt-2 text-lg text-blue-200">
+                    Where luxury meets authenticity
+                  </span>
+                </Text>
+              </VStack>
+
+              {/* Enhanced Search Bar */}
+              <div className="mb-12 w-full max-w-4xl mx-auto animate-slide-up-delayed">
+                <Card className="bg-white/10 backdrop-blur-md border border-white/20 shadow-2xl">
+                  <CardBody className="p-6">
+                    <EnhancedSearch />
+                  </CardBody>
+                </Card>
+              </div>
+
+              {/* CTA Buttons */}
+              <HStack spacing={6} flexDir={{ base: "column", sm: "row" }} justify="center" align="center" className="animate-slide-up-delayed">
+                <Link to="/packages">
+                  <Button 
+                    size="lg" 
+                    bgGradient="linear(to-r, green.500, emerald.600)"
+                    color="white"
+                    px={10}
+                    py={6}
+                    fontSize="xl"
+                    fontWeight="bold"
+                    borderRadius="full"
+                    boxShadow="2xl"
+                    _hover={{
+                      bgGradient: 'linear(to-r, green.600, emerald.700)',
+                      boxShadow: 'lg',
+                      transform: 'scale(1.05)',
+                    }}
+                    transition="all 0.3s ease"
+                  >
+                    <Icon as={GiftIcon} className="w-7 h-7 mr-3" />
+                    Explore Packages
+                    <Icon as={ArrowRightIcon} className="w-5 h-5 ml-2" />
+                  </Button>
+                </Link>
+                <Link to="/properties">
+                  <Button 
+                    size="lg" 
+                    variant="outline"
+                    border="3px solid"
+                    borderColor="white"
+                    color="white"
+                    px={10}
+                    py={6}
+                    fontSize="xl"
+                    fontWeight="bold"
+                    borderRadius="full"
+                    transition="all 0.3s ease"
+                    _hover={{
+                      bg: 'white',
+                      color: 'blue.900',
+                      transform: 'scale(1.05)',
+                    }}
+                    backdropFilter="blur(4px)"
+                  >
+                    <Icon as={BuildingOffice2Icon} className="w-7 h-7 mr-3" />
+                    View Properties
+                    <Icon as={ArrowRightIcon} className="w-5 h-5 ml-2" />
+                  </Button>
+                </Link>
+              </HStack>
+
+              {/* Trust Indicators */}
+              <HStack 
+                mt={16} 
+                spacing={8} 
+                flexWrap="wrap" 
+                justify="center" 
+                align="center" 
+                color="blue.100"
+                className="animate-fade-in-delayed"
+              >
+                <HStack spacing={3} className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-full">
+                  <Icon as={ShieldCheckIcon} className="w-5 h-5 text-green-400" />
+                  <Text className="font-medium">100% Secure Booking</Text>
+                </HStack>
+                <HStack spacing={3} className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-full">
+                  <Icon as={StarIcon} className="w-5 h-5 text-yellow-400" />
+                  <Text className="font-medium">4.9/5 Rating</Text>
+                </HStack>
+                <HStack spacing={3} className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-full">
+                  <Icon as={UsersIcon} className="w-5 h-5 text-blue-300" />
+                  <Text className="font-medium">10,000+ Happy Travelers</Text>
+                </HStack>
+                <HStack spacing={3} className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-full">
+                  <Icon as={ClockIcon} className="w-5 h-5 text-purple-300" />
+                  <Text className="font-medium">24/7 Support</Text>
+                </HStack>
+              </HStack>
+            </VStack>
+          </Container>
+
+          {/* Scroll Indicator */}
           <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-            <div className="w-8 h-12 border-2 border-white rounded-full flex justify-center">
-              <div className="w-1 h-3 bg-white rounded-full mt-2 animate-pulse"></div>
-            </div>
-            <span className="sr-only">Scroll down to see more content</span>
+            <VStack spacing={2}>
+              <Text className="text-white/70 text-sm font-medium">Scroll to explore</Text>
+              <Icon as={ArrowDownIcon} className="w-6 h-6 text-white" />
+            </VStack>
           </div>
         </section>
 
-        {/* Enhanced Search Section - Modern & Functional */}
-        <ComponentErrorBoundary componentName="SearchSection">
-          <section className="py-16 bg-white relative overflow-hidden" role="search" aria-labelledby="search-heading">
-            <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="bg-gradient-to-r from-blue-600 via-indigo-700 to-purple-800 rounded-2xl p-8 shadow-2xl">
-                <h2 id="search-heading" className="text-3xl font-bold text-white mb-6 text-center">Find Your Perfect Stay</h2>
-                <div className="max-w-2xl mx-auto">
-                  <EnhancedSearch className="w-full" />
-                </div>
-                <p className="text-blue-100 text-center mt-4 text-sm">
-                  Search across 500+ properties and packages with advanced filters
-                </p>
-              </div>
-            </div>
-          </section>
-        </ComponentErrorBoundary>
+        {/* Travel Packages Section - PRIORITY */}
+        <section className="py-24 bg-gradient-to-br from-white to-gray.50">
+          <Container maxW="7xl">
+            <VStack spacing={16} mb={16} textAlign="center">
+              <Badge 
+                className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-2 rounded-full text-sm font-bold"
+              >
+                <Icon as={GiftIcon} className="w-4 h-4 mr-2" />
+                Curated Experiences
+              </Badge>
+              
+              <Heading size="2xl" className="text-5xl md:text-6xl font-bold text-gray-900">
+                Curated Travel Packages
+              </Heading>
+              
+              <Text className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+                All-inclusive experiences designed to make your Maldives adventure unforgettable. 
+                From romantic getaways to family adventures, we have the perfect package for every traveler.
+              </Text>
+            </VStack>
 
-        {/* Enhanced Featured Packages - Better Structure */}
-        <ComponentErrorBoundary componentName="FeaturedPackages">
-          <section className="py-20 bg-gradient-to-br from-slate-50 to-blue-50 relative overflow-hidden" aria-labelledby="packages-heading">
-            <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="text-center mb-16">
-                <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2 rounded-full text-base font-semibold mb-6">
-                  <StarIcon className="h-4 w-4" aria-hidden="true" />
-                  Most Popular
-                </div>
-                <h2 id="packages-heading" className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                  Curated Travel Experiences
-                </h2>
-                <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                  Handpicked packages that combine luxury accommodation, authentic experiences, and unforgettable adventures
-                </p>
-              </div>
-              
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {packages.slice(0, 3).map((pkg, index) => {
-                  const packageImages = [
-                    'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=400&fit=crop&crop=center&auto=format&q=80',
-                    'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=600&h=400&fit=crop&crop=center&auto=format&q=80',
-                    'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=600&h=400&fit=crop&crop=center&auto=format&q=80',
-                  ];
-                  
-                  return (
-                    <article key={pkg.id} className="group relative bg-white rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 border border-gray-100">
-                      {/* Package Image */}
-                      <div className="relative h-64 overflow-hidden">
-                        <img 
-                          src={packageImages[index % packageImages.length]} 
-                          alt={`${pkg.name} - Maldives travel package`}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          loading="lazy"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
-                        
-                        {/* Price Badge */}
-                        <div className="absolute top-4 right-4">
-                          <div className="bg-white/95 backdrop-blur rounded-2xl px-4 py-3 shadow-lg">
-                            <div className="text-2xl font-bold text-green-600">${pkg.price}</div>
-                            <div className="text-xs text-gray-500 font-medium">per person</div>
-                          </div>
-                        </div>
-                        
-                        {pkg.is_featured && (
-                          <div className="absolute top-4 left-4">
-                            <span className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg">
-                              ⭐ Featured
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                      
-                      {/* Package Content */}
-                      <div className="p-6">
-                        <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2">{pkg.name}</h3>
-                        <p className="text-gray-600 text-base mb-4 line-clamp-2 leading-relaxed">{pkg.description}</p>
-                        
-                        {/* Package Details */}
-                        <div className="grid grid-cols-3 gap-3 mb-4 text-sm text-gray-600">
-                          <div className="flex items-center gap-2">
-                            <CalendarIcon className="h-4 w-4 text-blue-500 flex-shrink-0" aria-hidden="true" />
-                            <span className="font-medium">{pkg.duration} days</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <UsersIcon className="h-4 w-4 text-purple-500 flex-shrink-0" aria-hidden="true" />
-                            <span className="font-medium">Up to {pkg.maxTravelers}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <MapPinIcon className="h-4 w-4 text-green-500 flex-shrink-0" aria-hidden="true" />
-                            <span className="font-medium">{pkg.destinations.length} islands</span>
-                          </div>
-                        </div>
-                        
-                        {/* Highlights */}
-                        <div className="mb-6">
-                          <div className="flex flex-wrap gap-2">
-                            {pkg.highlights.slice(0, 3).map((highlight, idx) => (
-                              <span 
-                                key={idx}
-                                className="bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 px-3 py-1 rounded-xl text-xs font-semibold border border-blue-200"
-                              >
-                                {highlight}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                        
-                        {/* Action Buttons - Improved Accessibility */}
-                        <div className="flex flex-col sm:flex-row gap-3">
-                          <Link 
-                            to={`/packages/${pkg.id}`} 
-                            className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-xl text-base font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 text-center flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-offset-2"
-                            aria-label={`View details for ${pkg.name} package`}
-                          >
-                            <CameraIcon className="h-4 w-4" aria-hidden="true" />
-                            View Details
-                            <ArrowRightIcon className="h-4 w-4" aria-hidden="true" />
-                          </Link>
-                          <button 
-                            onClick={() => {
-                              const message = `Hi! I'm interested in the ${pkg.name} package. Can you provide more details?`;
-                              const whatsappUrl = getWhatsAppUrl(message);
-                              window.open(whatsappUrl, '_blank');
-                            }}
-                            className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 px-4 rounded-xl text-base font-semibold hover:from-green-700 hover:to-emerald-700 transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300 focus:ring-offset-2"
-                            aria-label={`Book ${pkg.name} package via WhatsApp`}
-                          >
-                            <span className="text-lg" aria-hidden="true">💬</span>
-                            Book Now
-                          </button>
-                        </div>
-                      </div>
-                    </article>
-                  );
-                })}
-              </div>
-              
-              {/* View All Packages Button */}
-              <div className="text-center mt-16">
-                <Link
-                  to="/packages"
-                  className="inline-flex items-center gap-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-12 py-4 rounded-2xl font-bold text-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-offset-2"
-                  aria-label="Explore all travel packages"
+            <Grid 
+              templateColumns={{ base: "1fr", md: "repeat(2, 1fr)", lg: "repeat(3, 1fr)" }}
+              gap={8}
+              mb={16}
+            >
+              {packages.slice(0, 6).map((pkg) => (
+                <PackageCard key={pkg.id} package={pkg} />
+              ))}
+            </Grid>
+
+            <div className="text-center">
+              <Link to="/packages">
+                <Button 
+                  size="lg" 
+                  variant="outline"
+                  border="2px solid"
+                  borderColor="green.600"
+                  color="green.600"
+                  px={10}
+                  py={4}
+                  fontSize="lg"
+                  fontWeight="semibold"
+                  borderRadius="full"
+                  transition="all 0.3s ease"
+                  _hover={{
+                    bg: 'green.600',
+                    color: 'white',
+                    transform: 'scale(1.05)',
+                  }}
                 >
+                  <Icon as={ArrowRightIcon} className="w-5 h-5 mr-2" />
                   Explore All Packages
-                  <ArrowRightIcon className="h-6 w-6" aria-hidden="true" />
-                </Link>
-              </div>
+                  <Icon as={ArrowRightIcon} className="w-5 h-5 ml-2" />
+                </Button>
+              </Link>
             </div>
-          </section>
-        </ComponentErrorBoundary>
+          </Container>
+        </section>
 
-        {/* Enhanced Why Choose Us Section */}
-        <ComponentErrorBoundary componentName="WhyChooseUs">
-          <section className="py-20 bg-gradient-to-br from-gray-900 via-blue-900 to-indigo-900 text-white relative overflow-hidden" aria-labelledby="why-choose-heading">
-            <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="text-center mb-16">
-                <h2 id="why-choose-heading" className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6">
-                  Why Choose Thread Travels?
-                </h2>
-                <p className="text-lg sm:text-xl text-blue-100 max-w-3xl mx-auto leading-relaxed">
-                  We're not just a travel agency – we're your personal gateway to the Maldives paradise
-                </p>
-              </div>
+        {/* Featured Properties Section */}
+        <section className="py-24 bg-gradient-to-br from-gray.50 to-blue.50">
+          <Container maxW="7xl">
+            <VStack spacing={16} mb={16} textAlign="center">
+              <Badge 
+                className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-2 rounded-full text-sm font-bold"
+              >
+                <Icon as={SparklesIcon} className="w-4 h-4 mr-2" />
+                Handpicked Destinations
+              </Badge>
+              
+              <Heading size="2xl" className="text-5xl md:text-6xl font-bold text-gray-900">
+                Featured Properties
+              </Heading>
+              
+              <Text className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+                Handpicked accommodations that offer the perfect blend of luxury, comfort, and authentic Maldivian experience. 
+                Each property is carefully selected to ensure your dream vacation becomes reality.
+              </Text>
+            </VStack>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div className="group text-center p-8 rounded-2xl bg-white/10 backdrop-blur-sm hover:bg-white/15 transition-all duration-500 transform hover:-translate-y-2 border border-white/20">
-                  <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-                    <GlobeAltIcon className="h-10 w-10 text-white" aria-hidden="true" />
-                  </div>
-                  <h3 className="text-2xl font-bold mb-4">Local Expertise</h3>
-                  <p className="text-blue-100 leading-relaxed">
-                    Our team has personally visited and vetted every property. We know the hidden gems that tourists rarely discover.
-                  </p>
+            <Grid 
+              templateColumns={{ base: "1fr", md: "repeat(2, 1fr)", lg: "repeat(3, 1fr)" }}
+              gap={8}
+              mb={16}
+            >
+              {properties.slice(0, 6).map((property, index) => (
+                <div key={property.id} style={{ animationDelay: `${index * 100}ms` }}>
+                  <PropertyCard 
+                    property={property}
+                    className="animate-fade-in"
+                  />
                 </div>
+              ))}
+            </Grid>
 
-                <div className="group text-center p-8 rounded-2xl bg-white/10 backdrop-blur-sm hover:bg-white/15 transition-all duration-500 transform hover:-translate-y-2 border border-white/20">
-                  <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-                    <ShieldCheckIcon className="h-10 w-10 text-white" aria-hidden="true" />
-                  </div>
-                  <h3 className="text-2xl font-bold mb-4">Quality Assured</h3>
-                  <p className="text-blue-100 leading-relaxed">
-                    Every property meets our strict standards for cleanliness, service, and authentic local experiences.
-                  </p>
-                </div>
-
-                <div className="group text-center p-8 rounded-2xl bg-white/10 backdrop-blur-sm hover:bg-white/15 transition-all duration-500 transform hover:-translate-y-2 border border-white/20">
-                  <div className="w-20 h-20 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-                    <ChatBubbleLeftRightIcon className="h-10 w-10 text-white" aria-hidden="true" />
-                  </div>
-                  <h3 className="text-2xl font-bold mb-4">Personal Support</h3>
-                  <p className="text-blue-100 leading-relaxed">
-                    From planning to check-out, we're here 24/7. Your dream vacation is our priority.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </section>
-        </ComponentErrorBoundary>
-
-        {/* Enhanced Featured Properties */}
-        <ComponentErrorBoundary componentName="FeaturedProperties">
-          <section className="py-20 bg-white relative overflow-hidden" aria-labelledby="properties-heading">
-            <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-16">
-                <div>
-                  <h2 id="properties-heading" className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4">Featured Properties</h2>
-                  <p className="text-lg sm:text-xl text-gray-600">Handpicked accommodations for the ultimate Maldives experience</p>
-                </div>
-                <Link
-                  to="/properties"
-                  className="mt-6 sm:mt-0 inline-flex items-center gap-3 text-blue-600 hover:text-blue-700 font-bold text-xl transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg px-2 py-1"
-                  aria-label="View all properties"
+            <div className="text-center">
+              <Link to="/properties">
+                <Button 
+                  size="lg" 
+                  variant="outline"
+                  border="2px solid"
+                  borderColor="blue.600"
+                  color="blue.600"
+                  px={10}
+                  py={4}
+                  fontSize="lg"
+                  fontWeight="semibold"
+                  borderRadius="full"
+                  transition="all 0.3s ease"
+                  _hover={{
+                    bg: 'blue.600',
+                    color: 'white',
+                    transform: 'scale(1.05)',
+                  }}
                 >
+                  <Icon as={ArrowRightIcon} className="w-5 h-5 mr-2" />
                   View All Properties
-                  <ArrowRightIcon className="h-6 w-6" aria-hidden="true" />
+                  <Icon as={ArrowRightIcon} className="w-5 h-5 ml-2" />
+                </Button>
+              </Link>
+            </div>
+          </Container>
+        </section>
+
+        {/* Why Choose Us Section */}
+        <section className="py-24 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+          <Container maxW="7xl">
+            <VStack spacing={16} mb={16} textAlign="center">
+              <Badge 
+                className="bg-gradient-to-r from-purple-500 to-pink-600 text-white px-6 py-2 rounded-full text-sm font-bold"
+              >
+                <Icon as={HeartIcon} className="w-4 h-4 mr-2" />
+                Why Choose Us
+              </Badge>
+              
+              <Heading size="2xl" className="text-5xl md:text-6xl font-bold text-gray-900">
+                Why Choose Thread Travels?
+              </Heading>
+              
+              <Text className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+                We're not just another travel agency - we're your local experts in the Maldives. 
+                Our deep connections and insider knowledge ensure you get the most authentic and memorable experience.
+              </Text>
+            </VStack>
+
+            <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={8}>
+              {[
+                {
+                  icon: MapIcon,
+                  title: "Local Expertise",
+                  description: "Born and raised in the Maldives, we know every hidden gem and local secret",
+                  gradient: "from-blue-500 to-indigo-600",
+                  delay: "0ms"
+                },
+                {
+                  icon: ShieldCheckIcon,
+                  title: "100% Secure",
+                  description: "Your safety and satisfaction are our top priorities with secure booking",
+                  gradient: "from-green-500 to-emerald-600",
+                  delay: "100ms"
+                },
+                {
+                  icon: SparklesIcon,
+                  title: "Unique Experiences",
+                  description: "Access to exclusive properties and experiences not available elsewhere",
+                  gradient: "from-purple-500 to-pink-600",
+                  delay: "200ms"
+                },
+                {
+                  icon: ChatBubbleLeftRightIcon,
+                  title: "24/7 Support",
+                  description: "Round-the-clock assistance before, during, and after your trip",
+                  gradient: "from-orange-500 to-red-600",
+                  delay: "300ms"
+                }
+              ].map((feature, index) => (
+                <div key={index} className="text-center group hover:-translate-y-4 transition-all duration-500" style={{ animationDelay: feature.delay }}>
+                  <Card className="bg-white rounded-3xl p-8 shadow-lg group-hover:shadow-2xl transition-all duration-500 border border-gray-100">
+                    <VStack spacing={6}>
+                      <div className={`w-20 h-20 bg-gradient-to-br ${feature.gradient} rounded-2xl flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
+                        <Icon as={feature.icon} className="w-10 h-10 text-white" />
+                      </div>
+                      <Heading size="lg" className="text-gray-900 font-bold">
+                        {feature.title}
+                      </Heading>
+                      <Text className="text-gray-600 leading-relaxed">
+                        {feature.description}
+                      </Text>
+                    </VStack>
+                  </Card>
+                </div>
+              ))}
+            </SimpleGrid>
+          </Container>
+        </section>
+
+        {/* CTA Section */}
+        <section className="py-24 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 relative overflow-hidden">
+          {/* Background Pattern */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute top-10 left-10 animate-float">
+              <Icon as={SunIcon} className="w-16 h-16 text-white" />
+            </div>
+            <div className="absolute top-20 right-20 animate-float-delayed">
+              <Icon as={CloudIcon} className="w-12 h-12 text-white" />
+            </div>
+            <div className="absolute bottom-20 left-20 animate-float-slow">
+              <Icon as={FireIcon} className="w-20 h-20 text-white" />
+            </div>
+            <div className="absolute bottom-10 right-10 animate-float">
+              <Icon as={SunIcon} className="w-24 h-24 text-yellow-400" />
+            </div>
+          </div>
+          
+          <Container maxW="5xl" className="text-center px-4 relative z-10">
+            <VStack spacing={10}>
+              <VStack spacing={6}>
+                <Badge 
+                  className="bg-white/20 backdrop-blur-md text-white px-6 py-2 rounded-full text-sm font-bold border border-white/30"
+                >
+                  <Icon as={SparklesIcon} className="w-4 h-4 mr-2" />
+                  Ready to Start Your Adventure?
+                </Badge>
+                
+                <Heading size="2xl" className="text-5xl md:text-6xl font-bold text-white">
+                  Ready to Start Your Maldives Adventure?
+                </Heading>
+                
+                <Text className="text-xl text-blue-100 max-w-3xl mx-auto leading-relaxed">
+                  Join thousands of travelers who've discovered the magic of the Maldives with Thread Travels. 
+                  Your dream vacation is just a click away.
+                </Text>
+              </VStack>
+              
+              <HStack spacing={6} flexDir={{ base: "column", sm: "row" }} justify="center" align="center">
+                <a href={getWhatsAppUrl("Hi! I'm interested in planning a Maldives trip")} target="_blank" rel="noopener noreferrer">
+                  <Button 
+                    size="lg"
+                    className="bg-green-500 hover:bg-green-600 text-white px-10 py-6 text-xl font-bold rounded-full shadow-2xl hover:shadow-glow-lg transition-all duration-300 transform hover:scale-105"
+                  >
+                    <Icon as={ChatBubbleLeftRightIcon} className="w-7 h-7 mr-3" />
+                    Chat with Us
+                    <Icon as={ArrowRightIcon} className="w-5 h-5 ml-2" />
+                  </Button>
+                </a>
+                <Link to="/packages">
+                  <Button 
+                    size="lg"
+                    variant="outline"
+                    className="border-3 border-white text-white hover:bg-white hover:text-blue-600 px-10 py-6 text-xl font-bold rounded-full transition-all duration-300 transform hover:scale-105 backdrop-blur-sm"
+                  >
+                    <Icon as={GiftIcon} className="w-7 h-7 mr-3" />
+                    Browse Packages
+                    <Icon as={ArrowRightIcon} className="w-5 h-5 ml-2" />
+                  </Button>
                 </Link>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {properties.slice(0, 6).map((property) => (
-                  <article key={property.id} className="group bg-white rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 border border-gray-100">
-                    <div className="relative h-64 overflow-hidden">
-                      <img
-                        src={property.images?.[0]?.image || 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=600&h=400&fit=crop&crop=center&auto=format&q=80'}
-                        alt={`${property.name} - ${property.location.island}, ${property.location.atoll}`}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        loading="lazy"
-                      />
-                      {property.is_featured && (
-                        <div className="absolute top-4 left-4">
-                          <span className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg">
-                            Featured
-                          </span>
-                        </div>
-                      )}
-                      <button 
-                        className="absolute top-4 right-4 p-3 bg-white/95 backdrop-blur rounded-xl hover:bg-white transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                        aria-label={`Add ${property.name} to favorites`}
-                      >
-                        <HeartIcon className="h-5 w-5 text-gray-600" />
-                      </button>
-                    </div>
-                    <div className="p-6">
-                      <h3 className="text-xl font-bold text-gray-900 mb-3">{property.name}</h3>
-                      <div className="flex items-center text-gray-600 mb-4">
-                        <MapPinIcon className="h-5 w-5 mr-2 flex-shrink-0 text-blue-500" aria-hidden="true" />
-                        <span className="font-medium">{property.location.island}, {property.location.atoll}</span>
-                      </div>
-                      <div className="flex items-center justify-between mb-6">
-                        <div className="flex items-center gap-2">
-                          <StarSolidIcon className="h-5 w-5 text-yellow-400" aria-hidden="true" />
-                          <span className="font-bold text-lg">{property.rating}</span>
-                          <span className="text-gray-500">({property.reviewCount} reviews)</span>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-2xl font-bold text-green-600">${property.price}</div>
-                          <div className="text-sm text-gray-500">per night</div>
-                        </div>
-                      </div>
-                      <div className="flex flex-col sm:flex-row gap-3">
-                        <Link
-                          to={`/properties/${property.id}`}
-                          className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 text-center flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-offset-2"
-                          aria-label={`View details for ${property.name}`}
-                        >
-                          <CameraIcon className="h-4 w-4" aria-hidden="true" />
-                          View Details
-                          <ArrowRightIcon className="h-4 w-4" aria-hidden="true" />
-                        </Link>
-                        <Link
-                          to={`/properties/${property.id}/book`}
-                          className="bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-green-700 hover:to-emerald-700 transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300 focus:ring-offset-2"
-                          aria-label={`Book ${property.name}`}
-                        >
-                          <span className="text-lg" aria-hidden="true">🏖️</span>
-                          Book Now
-                        </Link>
-                      </div>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </div>
-          </section>
-        </ComponentErrorBoundary>
-
-        {/* Enhanced Testimonials Section */}
-        <ComponentErrorBoundary componentName="Testimonials">
-          <section className="py-20 bg-gradient-to-br from-gray-50 to-blue-50 relative overflow-hidden" aria-labelledby="testimonials-heading">
-            <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="text-center mb-16">
-                <h2 id="testimonials-heading" className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                  What Our Guests Say
-                </h2>
-                <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
-                  Don't just take our word for it – hear from our satisfied guests
-                </p>
-              </div>
-              <GoogleReviews maxReviews={6} />
-            </div>
-          </section>
-        </ComponentErrorBoundary>
-
-        {/* Enhanced CTA Section */}
-        <ComponentErrorBoundary componentName="CTASection">
-          <section className="py-20 bg-gradient-to-br from-blue-600 via-indigo-700 to-purple-800 text-white relative overflow-hidden" aria-labelledby="cta-heading">
-            <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-              <h2 id="cta-heading" className="text-3xl sm:text-4xl md:text-5xl font-bold mb-8">Ready to Start Your Maldives Adventure?</h2>
-              <p className="text-lg sm:text-xl mb-12 text-blue-100 max-w-3xl mx-auto leading-relaxed">
-                Let us help you find the perfect property and create unforgettable memories in paradise
-              </p>
-              <div className="flex flex-col sm:flex-row gap-6 justify-center max-w-2xl mx-auto">
-                <a
-                  href={getWhatsAppUrl('Hi! I\'d like to know more about your Maldives travel packages.')}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group relative overflow-hidden bg-gradient-to-r from-green-500 to-green-600 text-white px-12 py-4 rounded-2xl font-bold text-xl hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-xl transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300 focus:ring-offset-2"
-                  aria-label="Contact us on WhatsApp"
-                >
-                  <span className="relative flex items-center justify-center gap-3">
-                    <ChatBubbleLeftRightIcon className="h-6 w-6" aria-hidden="true" />
-                    Chat on WhatsApp
-                  </span>
-                </a>
-                <a
-                  href={`tel:${config.whatsappNumber}`}
-                  className="group relative overflow-hidden bg-transparent border-2 border-white text-white px-12 py-4 rounded-2xl font-bold text-xl hover:bg-white hover:text-blue-600 transition-all duration-300 transform hover:scale-105 backdrop-blur-sm focus:outline-none focus:ring-4 focus:ring-white focus:ring-offset-2"
-                  aria-label={`Call us at ${config.whatsappNumber}`}
-                >
-                  <span className="relative flex items-center justify-center gap-3">
-                    <PhoneIcon className="h-6 w-6" aria-hidden="true" />
-                    Call Us Now
-                  </span>
-                </a>
-              </div>
-            </div>
-          </section>
-        </ComponentErrorBoundary>
-      </div>
+              </HStack>
+              
+              {/* Trust badges */}
+              <HStack spacing={8} flexWrap="wrap" justify="center" className="pt-8">
+                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full">
+                  <Icon as={LockClosedIcon} className="w-4 h-4 text-green-400" />
+                  <Text className="text-white text-sm font-medium">SSL Secured</Text>
+                </div>
+                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full">
+                  <Icon as={CreditCardIcon} className="w-4 h-4 text-blue-300" />
+                  <Text className="text-white text-sm font-medium">Secure Payments</Text>
+                </div>
+                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full">
+                  <Icon as={GlobeAltIcon} className="w-4 h-4 text-purple-300" />
+                  <Text className="text-white text-sm font-medium">24/7 Support</Text>
+                </div>
+              </HStack>
+            </VStack>
+          </Container>
+        </section>
+      </Box>
     </>
   );
-}
-
-export default HomePage; 
+} 

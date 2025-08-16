@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Card, Button, LoadingSpinner } from '../../index';
 import { useNotification } from '../../../hooks';
 import { usePropertyTypes } from '../../../hooks/useQueries';
+import { unifiedApi } from '../../../services/unified-api';
 import type { PropertyType } from '../../../types';
 import {
   HomeIcon,
@@ -37,7 +38,7 @@ export function AdminPropertyTypes() {
     if (!confirm('Are you sure you want to delete this property type?')) return;
     
     try {
-      const response = await fetch(`http://localhost:8000/api/property-types/${id}/`, {
+      const response = await fetch(`/api/property-types/${id}/`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('access')}`,
@@ -47,6 +48,8 @@ export function AdminPropertyTypes() {
       
       if (response.ok) {
         showSuccess('Property type deleted successfully');
+        // Invalidate cache and refetch
+        unifiedApi.utils.invalidateCache('property-types');
         refetch();
       } else {
         throw new Error('Failed to delete property type');
@@ -65,12 +68,17 @@ export function AdminPropertyTypes() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('Submitting property type form data:', formData);
+    console.log('Editing property type:', editingPropertyType);
+    
     try {
       const url = editingPropertyType 
-        ? `http://localhost:8000/api/property-types/${editingPropertyType.id}/`
-        : 'http://localhost:8000/api/property-types/';
+        ? `/api/property-types/${editingPropertyType.id}/`
+        : '/api/property-types/';
       
       const method = editingPropertyType ? 'PUT' : 'POST';
+      
+      console.log('Making request to:', url, 'with method:', method);
       
       const response = await fetch(url, {
         method,
@@ -81,17 +89,28 @@ export function AdminPropertyTypes() {
         body: JSON.stringify(formData),
       });
       
+      console.log('Response status:', response.status);
+      console.log('Response ok:', response.ok);
+      
       if (response.ok) {
+        const result = await response.json();
+        console.log('Success response:', result);
         showSuccess(`Property type ${editingPropertyType ? 'updated' : 'created'} successfully`);
         setIsFormOpen(false);
         setEditingPropertyType(undefined);
         setFormData({ name: '', description: '' });
+        // Invalidate cache and refetch
+        unifiedApi.utils.invalidateCache('property-types');
         refetch();
       } else {
-        throw new Error('Failed to save property type');
+        const errorData = await response.text();
+        console.error('Error response:', errorData);
+        throw new Error(`Failed to save property type: ${response.status} ${response.statusText}`);
       }
     } catch (error) {
-      showError(`Failed to ${editingPropertyType ? 'update' : 'create'} property type`);
+      console.error('Form submission error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      showError(`Failed to ${editingPropertyType ? 'update' : 'create'} property type: ${errorMessage}`);
     }
   };
 
@@ -194,8 +213,8 @@ export function AdminPropertyTypes() {
 
       {/* Form Modal */}
       {isFormOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg transform transition-all duration-300 scale-100">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg transform transition-all duration-300 scale-100 max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-200">
               <div className="flex items-center gap-3">

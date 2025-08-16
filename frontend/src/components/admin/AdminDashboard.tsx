@@ -1,9 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, Button, LoadingSpinner } from '../index';
+import {
+  Box,
+  Container,
+  Grid,
+  GridItem,
+  Flex,
+  VStack,
+  HStack,
+  Text,
+  Heading,
+  Icon,
+  IconButton,
+  Button,
+  Card,
+  CardBody,
+  CardHeader,
+  Stat,
+  StatLabel,
+  StatNumber,
+  StatHelpText,
+  StatArrow,
+  Progress,
+  Badge,
+  Avatar,
+  Divider,
+  useColorModeValue,
+  SimpleGrid,
+} from '@chakra-ui/react';
 import { useNotification } from '../../hooks';
 import { apiGet } from '../../api';
-import type { DashboardStats, Review } from '../../types';
+import type { Review } from '../../types';
 import {
   BuildingOffice2Icon,
   GiftIcon,
@@ -14,10 +41,17 @@ import {
   WrenchScrewdriverIcon,
   UsersIcon,
   CurrencyDollarIcon,
-  TrendingUpIcon,
   EyeIcon,
   CalendarIcon,
+  ArrowUpIcon,
+  ArrowDownIcon,
 } from '@heroicons/react/24/outline';
+
+interface DashboardStats {
+  properties: number;
+  packages: number;
+  reviews: number;
+}
 
 export function AdminDashboard() {
   const navigate = useNavigate();
@@ -31,6 +65,13 @@ export function AdminDashboard() {
     activeUsers: 0,
     conversionRate: 0,
   });
+
+  // Color mode values
+  const bg = useColorModeValue('white', 'gray.800');
+  const cardBg = useColorModeValue('white', 'gray.700');
+  const borderColor = useColorModeValue('gray.200', 'gray.600');
+  const textColor = useColorModeValue('gray.800', 'white');
+  const mutedTextColor = useColorModeValue('gray.600', 'gray.400');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -68,248 +109,331 @@ export function AdminDashboard() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white flex items-center justify-center">
-        <LoadingSpinner size="lg" />
-      </div>
+      <Flex minH="100vh" bg="gray.50" align="center" justify="center">
+        <VStack spacing={4}>
+          <Box className="animate-spin">
+            <Icon as={ChartBarIcon} h={8} w={8} color="blue.500" />
+          </Box>
+          <Text color="gray.500">Loading dashboard...</Text>
+        </VStack>
+      </Flex>
     );
   }
 
+  const StatCard = ({ 
+    title, 
+    value, 
+    icon, 
+    colorScheme, 
+    change = '+12%', 
+    changeType = 'increase' 
+  }: {
+    title: string;
+    value: string | number;
+    icon: any;
+    colorScheme: string;
+    change?: string;
+    changeType?: 'increase' | 'decrease';
+  }) => (
+    <Card bg={`${colorScheme}.50`} borderColor={`${colorScheme}.200`} borderWidth="1px">
+      <CardBody>
+        <Flex justify="space-between" align="center">
+          <VStack align="start" spacing={1}>
+            <Text fontSize="sm" fontWeight="medium" color={`${colorScheme}.600`}>
+              {title}
+            </Text>
+            <Text fontSize="3xl" fontWeight="bold" color={`${colorScheme}.900`}>
+              {value}
+            </Text>
+            <HStack spacing={1}>
+              <Icon 
+                as={changeType === 'increase' ? ArrowUpIcon : ArrowDownIcon} 
+                h={3} 
+                w={3} 
+                color={`${colorScheme}.600`} 
+              />
+              <Text fontSize="xs" color={`${colorScheme}.600`}>
+                {change} from last month
+              </Text>
+            </HStack>
+          </VStack>
+          <Box
+            w={12}
+            h={12}
+            bg={`${colorScheme}.500`}
+            borderRadius="xl"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+          >
+            <Icon as={icon} h={6} w={6} color="white" />
+          </Box>
+        </Flex>
+      </CardBody>
+    </Card>
+  );
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
+    <Container maxW="7xl" py={8}>
       {/* Header */}
-      <div className="bg-white/80 backdrop-blur border-b border-gray-200 px-6 py-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
-                <ChartBarIcon className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-800">Admin Dashboard</h1>
-                <p className="text-gray-600">Welcome back! Here's what's happening with your business.</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <Button variant="secondary" onClick={() => navigate('/admin/properties/new')}>
-                <PlusIcon className="h-4 w-4 mr-2" />
+      <Card mb={8} bg={bg} borderColor={borderColor} borderWidth="1px">
+        <CardBody p={8}>
+          <Flex justify="space-between" align="center">
+            <HStack spacing={6}>
+              <Box
+                w={16}
+                h={16}
+                bgGradient="linear(to-br, blue.500, indigo.600)"
+                borderRadius="xl"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+              >
+                <Icon as={ChartBarIcon} h={8} w={8} color="white" />
+              </Box>
+              <VStack align="start" spacing={1}>
+                <Heading size="lg" color={textColor}>
+                  Admin Dashboard
+                </Heading>
+                <Text fontSize="lg" color={mutedTextColor}>
+                  Welcome back! Here's what's happening with your business.
+                </Text>
+              </VStack>
+            </HStack>
+            <HStack spacing={4}>
+              <Button
+                leftIcon={<Icon as={PlusIcon} h={5} w={5} />}
+                variant="outline"
+                colorScheme="blue"
+                onClick={() => navigate('/dashboard/properties')}
+              >
                 Add Property
               </Button>
-              <Button variant="primary" onClick={() => navigate('/admin/packages/new')}>
-                <PlusIcon className="h-4 w-4 mr-2" />
+              <Button
+                leftIcon={<Icon as={PlusIcon} h={5} w={5} />}
+                colorScheme="blue"
+                onClick={() => navigate('/dashboard/packages')}
+              >
                 Create Package
               </Button>
-            </div>
-          </div>
-        </div>
-      </div>
+            </HStack>
+          </Flex>
+        </CardBody>
+      </Card>
 
-      <div className="max-w-7xl mx-auto px-6 py-6">
-        {/* Key Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-blue-600">Total Properties</p>
-                <p className="text-3xl font-bold text-blue-900">{stats.properties}</p>
-                <p className="text-xs text-blue-600 mt-1">+12% from last month</p>
-              </div>
-              <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center">
-                <BuildingOffice2Icon className="h-6 w-6 text-white" />
-              </div>
-            </div>
-          </Card>
+      {/* Key Metrics */}
+      <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={6} mb={8}>
+        <StatCard
+          title="Total Properties"
+          value={stats.properties}
+          icon={BuildingOffice2Icon}
+          colorScheme="blue"
+        />
+        <StatCard
+          title="Active Packages"
+          value={stats.packages}
+          icon={GiftIcon}
+          colorScheme="green"
+          change="+8%"
+        />
+        <StatCard
+          title="Total Reviews"
+          value={stats.reviews}
+          icon={StarIcon}
+          colorScheme="yellow"
+          change="+15%"
+        />
+        <StatCard
+          title="Monthly Revenue"
+          value={`$${analytics.monthlyRevenue.toLocaleString()}`}
+          icon={CurrencyDollarIcon}
+          colorScheme="purple"
+          change="+23%"
+        />
+      </SimpleGrid>
 
-          <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-green-600">Active Packages</p>
-                <p className="text-3xl font-bold text-green-900">{stats.packages}</p>
-                <p className="text-xs text-green-600 mt-1">+8% from last month</p>
-              </div>
-              <div className="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center">
-                <GiftIcon className="h-6 w-6 text-white" />
-              </div>
-            </div>
-          </Card>
+      {/* Analytics Charts */}
+      <Grid templateColumns={{ base: '1fr', lg: '1fr 1fr' }} gap={6} mb={8}>
+        <Card bg={cardBg} borderColor={borderColor} borderWidth="1px">
+          <CardHeader pb={4}>
+            <Flex justify="space-between" align="center">
+              <Heading size="md" color={textColor}>
+                Revenue Trend
+              </Heading>
+              <Button variant="outline" size="sm" colorScheme="blue">
+                View Details
+              </Button>
+            </Flex>
+          </CardHeader>
+          <CardBody>
+            <Box
+              h={64}
+              bg="gray.50"
+              borderRadius="lg"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+            >
+              <VStack spacing={2}>
+                <Icon as={ChartBarIcon} h={12} w={12} color="gray.400" />
+                <Text color="gray.500">Revenue chart will be displayed here</Text>
+              </VStack>
+            </Box>
+          </CardBody>
+        </Card>
 
-          <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-yellow-600">Total Reviews</p>
-                <p className="text-3xl font-bold text-yellow-900">{stats.reviews}</p>
-                <p className="text-xs text-yellow-600 mt-1">+15% from last month</p>
-              </div>
-              <div className="w-12 h-12 bg-yellow-500 rounded-xl flex items-center justify-center">
-                <StarIcon className="h-6 w-6 text-white" />
-              </div>
-            </div>
-          </Card>
+        <Card bg={cardBg} borderColor={borderColor} borderWidth="1px">
+          <CardHeader pb={4}>
+            <Flex justify="space-between" align="center">
+              <Heading size="md" color={textColor}>
+                Booking Analytics
+              </Heading>
+              <Button variant="outline" size="sm" colorScheme="blue">
+                View Details
+              </Button>
+            </Flex>
+          </CardHeader>
+          <CardBody>
+            <VStack spacing={4} align="stretch">
+              <Flex justify="space-between" align="center">
+                <Text fontSize="sm" color={mutedTextColor}>Total Bookings</Text>
+                <Text fontWeight="semibold">{analytics.totalBookings}</Text>
+              </Flex>
+              <Flex justify="space-between" align="center">
+                <Text fontSize="sm" color={mutedTextColor}>Active Users</Text>
+                <Text fontWeight="semibold">{analytics.activeUsers}</Text>
+              </Flex>
+              <Flex justify="space-between" align="center">
+                <Text fontSize="sm" color={mutedTextColor}>Conversion Rate</Text>
+                <Text fontWeight="semibold">{analytics.conversionRate}%</Text>
+              </Flex>
+              <Divider />
+              <Box>
+                <Text fontSize="sm" color={mutedTextColor} mb={2}>
+                  Monthly Progress
+                </Text>
+                <Progress value={75} colorScheme="blue" borderRadius="full" />
+                <Text fontSize="xs" color={mutedTextColor} mt={1}>
+                  75% of monthly target achieved
+                </Text>
+              </Box>
+            </VStack>
+          </CardBody>
+        </Card>
+      </Grid>
 
-          <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-purple-600">Monthly Revenue</p>
-                <p className="text-3xl font-bold text-purple-900">${analytics.monthlyRevenue.toLocaleString()}</p>
-                <p className="text-xs text-purple-600 mt-1">+23% from last month</p>
-              </div>
-              <div className="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center">
-                <CurrencyDollarIcon className="h-6 w-6 text-white" />
-              </div>
-            </div>
-          </Card>
-        </div>
+      {/* Recent Activity */}
+      <Grid templateColumns={{ base: '1fr', lg: '2fr 1fr' }} gap={6}>
+        <Card bg={cardBg} borderColor={borderColor} borderWidth="1px">
+          <CardHeader pb={4}>
+            <Flex justify="space-between" align="center">
+              <Heading size="md" color={textColor}>
+                Recent Reviews
+              </Heading>
+              <Button variant="outline" size="sm" colorScheme="blue" onClick={() => navigate('/dashboard/reviews')}>
+                View All
+              </Button>
+            </Flex>
+          </CardHeader>
+          <CardBody>
+            <VStack spacing={4} align="stretch">
+              {recentReviews.length > 0 ? (
+                recentReviews.map((review) => (
+                  <Box key={review.id} p={4} borderWidth="1px" borderRadius="lg" borderColor={borderColor}>
+                    <Flex justify="space-between" align="start" mb={2}>
+                                             <HStack spacing={3}>
+                         <Avatar size="sm" name={review.name} />
+                         <VStack align="start" spacing={0}>
+                           <Text fontWeight="semibold" color={textColor}>
+                             {review.name}
+                           </Text>
+                           <Text fontSize="sm" color={mutedTextColor}>
+                             Property #{review.property}
+                           </Text>
+                         </VStack>
+                       </HStack>
+                      <HStack spacing={1}>
+                        {[...Array(5)].map((_, i) => (
+                          <Icon
+                            key={i}
+                            as={StarIcon}
+                            h={4}
+                            w={4}
+                            color={i < review.rating ? 'yellow.400' : 'gray.300'}
+                          />
+                        ))}
+                      </HStack>
+                    </Flex>
+                    <Text fontSize="sm" color={mutedTextColor} noOfLines={2}>
+                      {review.comment}
+                    </Text>
+                                         <Text fontSize="xs" color={mutedTextColor} mt={2}>
+                       {review.created_at ? new Date(review.created_at).toLocaleDateString() : 'Unknown date'}
+                     </Text>
+                  </Box>
+                ))
+              ) : (
+                <Box textAlign="center" py={8}>
+                  <Icon as={StarIcon} h={12} w={12} color="gray.300" mx="auto" mb={4} />
+                  <Text color={mutedTextColor}>No reviews yet</Text>
+                </Box>
+              )}
+            </VStack>
+          </CardBody>
+        </Card>
 
-        {/* Analytics Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <Card>
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-800">Revenue Trend</h3>
-                <Button variant="secondary" size="sm">
-                  View Details
-                </Button>
-              </div>
-              <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
-                <div className="text-center">
-                  <ChartBarIcon className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-500">Revenue chart will be displayed here</p>
-                </div>
-              </div>
-            </div>
-          </Card>
-
-          <Card>
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-800">Booking Analytics</h3>
-                <Button variant="secondary" size="sm">
-                  View Details
-                </Button>
-              </div>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Total Bookings</span>
-                  <span className="font-semibold">{analytics.totalBookings}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Active Users</span>
-                  <span className="font-semibold">{analytics.activeUsers}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Conversion Rate</span>
-                  <span className="font-semibold text-green-600">{analytics.conversionRate}%</span>
-                </div>
-              </div>
-            </div>
-          </Card>
-        </div>
-
-        {/* Quick Actions & Recent Activity */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Quick Actions */}
-          <Card>
-            <div className="p-6">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h3>
-              <div className="space-y-3">
-                <Button 
-                  variant="secondary" 
-                  className="justify-start h-auto p-4 flex-col items-start gap-2 w-full"
-                  onClick={() => navigate('/admin/properties')}
-                >
-                  <BuildingOffice2Icon className="h-6 w-6" />
-                  <div className="text-left">
-                    <div className="font-semibold">Manage Properties</div>
-                    <div className="text-xs opacity-90">Add, edit, or remove properties</div>
-                  </div>
-                </Button>
-                
-                <Button 
-                  variant="secondary" 
-                  className="justify-start h-auto p-4 flex-col items-start gap-2 w-full"
-                  onClick={() => navigate('/admin/packages')}
-                >
-                  <GiftIcon className="h-6 w-6" />
-                  <div className="text-left">
-                    <div className="font-semibold">Manage Packages</div>
-                    <div className="text-xs opacity-90">Create and manage travel packages</div>
-                  </div>
-                </Button>
-                
-                <Button 
-                  variant="secondary" 
-                  className="justify-start h-auto p-4 flex-col items-start gap-2 w-full"
-                  onClick={() => navigate('/admin/reviews')}
-                >
-                  <StarIcon className="h-6 w-6" />
-                  <div className="text-left">
-                    <div className="font-semibold">Review Management</div>
-                    <div className="text-xs opacity-90">Moderate customer reviews</div>
-                  </div>
-                </Button>
-                
-                <Button 
-                  variant="secondary" 
-                  className="justify-start h-auto p-4 flex-col items-start gap-2 w-full"
-                  onClick={() => navigate('/admin/amenities-types-locations')}
-                >
-                  <WrenchScrewdriverIcon className="h-6 w-6" />
-                  <div className="text-left">
-                    <div className="font-semibold">Settings</div>
-                    <div className="text-xs opacity-90">System configuration</div>
-                  </div>
-                </Button>
-              </div>
-            </div>
-          </Card>
-
-          {/* Recent Reviews */}
-          <Card className="lg:col-span-2">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-800">Recent Reviews</h3>
-                <Button variant="secondary" size="sm" onClick={() => navigate('/admin/reviews')}>
-                  View All
-                </Button>
-              </div>
-              <div className="space-y-4">
-                {recentReviews.length > 0 ? (
-                  recentReviews.map((review) => (
-                    <div key={review.id} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                        <StarIcon className="h-4 w-4 text-blue-600" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="font-medium text-sm">{review.customer_name}</span>
-                          <span className="text-xs text-gray-500">•</span>
-                          <span className="text-xs text-gray-500">{review.property_name}</span>
-                        </div>
-                        <p className="text-sm text-gray-600 line-clamp-2">{review.comment}</p>
-                        <div className="flex items-center gap-2 mt-2">
-                          <div className="flex items-center gap-1">
-                            {Array.from({ length: 5 }, (_, i) => (
-                              <StarIcon 
-                                key={i} 
-                                className={`h-3 w-3 ${i < review.rating ? 'text-yellow-400' : 'text-gray-300'}`} 
-                              />
-                            ))}
-                          </div>
-                          <span className="text-xs text-gray-500">{review.rating}/5</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-8">
-                    <StarIcon className="h-12 w-12 text-gray-300 mx-auto mb-2" />
-                    <p className="text-gray-500">No reviews yet</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </Card>
-        </div>
-      </div>
-    </div>
+        <Card bg={cardBg} borderColor={borderColor} borderWidth="1px">
+          <CardHeader pb={4}>
+            <Heading size="md" color={textColor}>
+              Quick Actions
+            </Heading>
+          </CardHeader>
+          <CardBody>
+            <VStack spacing={3} align="stretch">
+              <Button
+                leftIcon={<Icon as={BuildingOffice2Icon} h={5} w={5} />}
+                variant="outline"
+                colorScheme="blue"
+                onClick={() => navigate('/dashboard/properties')}
+                size="lg"
+                justifyContent="flex-start"
+              >
+                Manage Properties
+              </Button>
+              <Button
+                leftIcon={<Icon as={GiftIcon} h={5} w={5} />}
+                variant="outline"
+                colorScheme="green"
+                onClick={() => navigate('/dashboard/packages')}
+                size="lg"
+                justifyContent="flex-start"
+              >
+                Manage Packages
+              </Button>
+              <Button
+                leftIcon={<Icon as={StarIcon} h={5} w={5} />}
+                variant="outline"
+                colorScheme="yellow"
+                onClick={() => navigate('/dashboard/reviews')}
+                size="lg"
+                justifyContent="flex-start"
+              >
+                View Reviews
+              </Button>
+              <Button
+                leftIcon={<Icon as={WrenchScrewdriverIcon} h={5} w={5} />}
+                variant="outline"
+                colorScheme="purple"
+                onClick={() => navigate('/dashboard/settings')}
+                size="lg"
+                justifyContent="flex-start"
+              >
+                Settings
+              </Button>
+            </VStack>
+          </CardBody>
+        </Card>
+      </Grid>
+    </Container>
   );
 } 

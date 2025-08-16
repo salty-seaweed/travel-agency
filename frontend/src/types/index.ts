@@ -58,25 +58,118 @@ export interface PackageImage extends BaseEntity {
   package: number;
   image: string;
   caption?: string;
+  is_featured?: boolean;
 }
 
-// Unified Package interface
+export interface PackageItinerary extends BaseEntity {
+  package: number;
+  day: number;
+  title: string;
+  description: string;
+  activities: string[];
+  meals: string[];
+  accommodation?: string;
+  transportation?: string;
+}
+
+export interface PackageInclusion extends BaseEntity {
+  package: number;
+  category: 'included' | 'excluded' | 'optional';
+  item: string;
+  description?: string;
+  icon?: string;
+}
+
+export interface PackageActivity extends BaseEntity {
+  package: number;
+  name: string;
+  description: string;
+  duration: string;
+  difficulty: 'easy' | 'moderate' | 'challenging';
+  category: string;
+  included: boolean;
+  price?: string;
+}
+
+export interface PackageDestination extends BaseEntity {
+  package: number;
+  location: Location;
+  duration: number; // days at this destination
+  description: string;
+  highlights: string[];
+  activities: string[];
+}
+
+// Enhanced Package interface with comprehensive information
 export interface Package extends BaseEntity {
   name: string;
   description: string;
+  detailed_description?: string;
   price: string;
+  original_price?: string;
   duration: number;
   properties: Property[];
   images?: PackageImage[];
   is_featured: boolean;
   start_date?: string;
   end_date?: string;
-  // UI-specific computed fields
-  destinations: string[]; // Computed from properties
-  highlights: string[]; // Default highlights
-  included: string[]; // Default included items
-  maxTravelers: number; // Default max travelers
-  category: string; // Default category
+  
+  // Enhanced package information
+  category: string;
+  difficulty_level: 'easy' | 'moderate' | 'challenging' | 'expert';
+  group_size: {
+    min: number;
+    max: number;
+    recommended: number;
+  };
+  
+  // Destinations and itinerary
+  destinations: PackageDestination[];
+  itinerary: PackageItinerary[];
+  
+  // What's included/excluded
+  inclusions: PackageInclusion[];
+  
+  // Activities and experiences
+  activities: PackageActivity[];
+  
+  // Accommodation details
+  accommodation_type: string;
+  room_type: string;
+  meal_plan: string;
+  
+  // Transportation
+  transportation_details: string;
+  airport_transfers: boolean;
+  
+  // Additional information
+  best_time_to_visit: string;
+  weather_info: string;
+  what_to_bring: string[];
+  important_notes: string[];
+  
+  // Pricing and availability
+  seasonal_pricing?: {
+    peak_season: string;
+    off_peak_season: string;
+    shoulder_season: string;
+  };
+  availability_calendar?: string;
+  
+  // Reviews and ratings
+  rating: number;
+  review_count: number;
+  reviews: Review[];
+  
+  // Booking information
+  booking_terms: string;
+  cancellation_policy: string;
+  payment_terms: string;
+  
+  // UI-specific computed fields (for backward compatibility)
+  highlights: string[]; // Computed from activities and destinations
+  included: string[]; // Computed from inclusions
+  maxTravelers: number; // Computed from group_size.max
 }
 
 // Review types
@@ -121,12 +214,88 @@ export interface PropertyFormData {
 export interface PackageFormData {
   name: string;
   description: string;
+  detailed_description?: string;
   price: string;
+  original_price?: string;
   duration: number;
   properties: number[];
   is_featured: boolean;
   start_date?: string;
   end_date?: string;
+  
+  // Enhanced package information
+  category: string;
+  difficulty_level: 'easy' | 'moderate' | 'challenging' | 'expert';
+  group_size: {
+    min: number;
+    max: number;
+    recommended: number;
+  };
+  
+  // Destinations and itinerary
+  destinations: {
+    location: number;
+    duration: number;
+    description: string;
+    highlights: string[];
+    activities: string[];
+  }[];
+  
+  itinerary: {
+    day: number;
+    title: string;
+    description: string;
+    activities: string[];
+    meals: string[];
+    accommodation?: string;
+    transportation?: string;
+  }[];
+  
+  // What's included/excluded
+  inclusions: {
+    category: 'included' | 'excluded' | 'optional';
+    item: string;
+    description?: string;
+    icon?: string;
+  }[];
+  
+  // Activities and experiences
+  activities: {
+    name: string;
+    description: string;
+    duration: string;
+    difficulty: 'easy' | 'moderate' | 'challenging';
+    category: string;
+    included: boolean;
+    price?: string;
+  }[];
+  
+  // Accommodation details
+  accommodation_type: string;
+  room_type: string;
+  meal_plan: string;
+  
+  // Transportation
+  transportation_details: string;
+  airport_transfers: boolean;
+  
+  // Additional information
+  best_time_to_visit: string;
+  weather_info: string;
+  what_to_bring: string[];
+  important_notes: string[];
+  
+  // Pricing and availability
+  seasonal_pricing?: {
+    peak_season: string;
+    off_peak_season: string;
+    shoulder_season: string;
+  };
+  
+  // Booking information
+  booking_terms: string;
+  cancellation_policy: string;
+  payment_terms: string;
 }
 
 export interface ReviewFormData {

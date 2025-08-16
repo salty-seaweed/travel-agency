@@ -386,15 +386,16 @@ export function BookingPage() {
                     >
                       {isSubmitting ? 'Submitting...' : 'Submit Booking'}
                     </Button>
-                    <Button
-                      type="button"
-                      onClick={handleWhatsAppBooking}
-                      variant="secondary"
-                      className="flex-1"
+                    <a
+                      href="https://wa.me/9601234567?text=Hi! I'm interested in booking. Can you help me?"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 px-4 rounded-xl text-sm font-semibold hover:from-green-700 hover:to-emerald-700 transition-all duration-300 text-center flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300 focus:ring-offset-2"
+                      style={{ backgroundColor: '#059669' }}
                     >
-                      <PhoneIcon className="h-4 w-4 mr-2" />
+                      <span className="text-lg">💬</span>
                       Book via WhatsApp
-                    </Button>
+                    </a>
                   </div>
                 </form>
               </Card>

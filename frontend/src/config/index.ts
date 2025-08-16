@@ -114,7 +114,7 @@ export const security = {
   // Content Security Policy
   csp: {
     'default-src': ["'self'"],
-    'img-src': ["'self'", 'data:', 'https://images.unsplash.com', 'https://via.placeholder.com'],
+    'img-src': ["'self'", 'data:', 'blob:', 'http://localhost:8000', 'https://images.unsplash.com', 'https://via.placeholder.com'],
     'script-src': ["'self'", "'unsafe-inline'"],
     'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
     'font-src': ["'self'", 'https://fonts.gstatic.com'],
@@ -280,8 +280,11 @@ export const getApiUrl = (endpoint: string): string => {
   const baseUrl = config.apiBaseUrl.endsWith('/') 
     ? config.apiBaseUrl.slice(0, -1) 
     : config.apiBaseUrl;
-  const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-  return `${baseUrl}${path}`;
+  
+  if (!endpoint) return baseUrl;
+  
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
+  return `${baseUrl}/${cleanEndpoint}`;
 };
 
 export const getWhatsAppUrl = (message: string): string => {

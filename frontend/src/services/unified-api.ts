@@ -34,17 +34,17 @@ const createApiError = (info: ApiErrorInfo): Error => {
 
 // Token management
 const tokenStorage = {
-  getAccessToken: (): string | null => localStorage.getItem('access_token'),
-  getRefreshToken: (): string | null => localStorage.getItem('refresh_token'),
+  getAccessToken: (): string | null => localStorage.getItem('access'),
+  getRefreshToken: (): string | null => localStorage.getItem('refresh'),
   setTokens: (tokens: AuthTokens): void => {
-    localStorage.setItem('access_token', tokens.access);
-    localStorage.setItem('refresh_token', tokens.refresh);
+    localStorage.setItem('access', tokens.access);
+    localStorage.setItem('refresh', tokens.refresh);
   },
   clearTokens: (): void => {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('access');
+    localStorage.removeItem('refresh');
   },
-  isAuthenticated: (): boolean => !!localStorage.getItem('access_token'),
+  isAuthenticated: (): boolean => !!localStorage.getItem('access'),
 };
 
 // Simple cache implementation
@@ -97,7 +97,83 @@ const sanitizeInput = (input: string, maxLength?: number): string => {
   return sanitized;
 };
 
-// Core API request function
+// Core API request function for public endpoints (no authentication required)
+const publicApiRequest = async <T>(
+  endpoint: string,
+  options: RequestInit = {},
+  useCache: boolean = false,
+  cacheTtl?: number
+): Promise<T> => {
+  const url = `${config.apiBaseUrl}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+  
+  // Check cache for GET requests
+  if (useCache && (!options.method || options.method.toUpperCase() === 'GET')) {
+    const cacheKey = `${url}:${JSON.stringify(options)}`;
+    const cachedData = cacheUtils.get(cacheKey);
+    if (cachedData) return cachedData;
+  }
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), performance.apiTimeout);
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'X-Requested-With': 'XMLHttpRequest',
+  };
+
+  const requestOptions: RequestInit = {
+    ...options,
+    headers: { ...headers, ...options.headers },
+    signal: controller.signal,
+  };
+
+  try {
+    const response = await fetch(url, requestOptions);
+    clearTimeout(timeoutId);
+
+    let data: any;
+    const contentType = response.headers.get('content-type');
+    
+    if (contentType?.includes('application/json')) {
+      data = await response.json();
+    } else {
+      data = await response.text();
+    }
+
+    if (!response.ok) {
+      const errorMessage = data?.message || data?.detail || `HTTP error! status: ${response.status}`;
+      throw createApiError({
+        message: errorMessage,
+        status: response.status,
+        code: data?.code,
+        details: data,
+      });
+    }
+
+    // Cache successful GET requests
+    if (useCache && (!options.method || options.method.toUpperCase() === 'GET')) {
+      const cacheKey = `${url}:${JSON.stringify(options)}`;
+      cacheUtils.set(cacheKey, data, cacheTtl);
+    }
+
+    return data;
+
+  } catch (error: any) {
+    clearTimeout(timeoutId);
+
+    if (error.name === 'AbortError') {
+      throw createApiError({ message: 'Request timeout. Please try again.', status: 408 });
+    }
+
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw createApiError({ message: errorMessages.network, status: 0 });
+    }
+
+    throw error;
+  }
+};
+
+// Core API request function for authenticated endpoints
 const apiRequest = async <T>(
   endpoint: string,
   options: RequestInit = {},
@@ -243,17 +319,21 @@ export const unifiedApi = {
       }
       
       const endpoint = `properties/${params.toString() ? `?${params.toString()}` : ''}`;
-      const data = await apiRequest<any[]>(endpoint, {}, true, performance.cacheTimeout.medium);
-      return Array.isArray(data) ? data.map(transformProperty) : [];
+      const data = await publicApiRequest<any>(endpoint, {}, true, performance.cacheTimeout.medium);
+      // Handle paginated response
+      const results = data?.results || data;
+      return Array.isArray(results) ? results.map(transformProperty) : [];
     },
 
     getFeatured: async (): Promise<Property[]> => {
-      const data = await apiRequest<any[]>('properties/?is_featured=true', {}, true, performance.cacheTimeout.long);
-      return Array.isArray(data) ? data.map(transformProperty) : [];
+      const data = await publicApiRequest<any>('properties/?is_featured=true', {}, true, performance.cacheTimeout.long);
+      // Handle paginated response
+      const results = data?.results || data;
+      return Array.isArray(results) ? results.map(transformProperty) : [];
     },
 
     getById: async (id: number): Promise<Property> => {
-      const data = await apiRequest<any>(`properties/${id}/`, {}, true, performance.cacheTimeout.medium);
+      const data = await publicApiRequest<any>(`properties/${id}/`, {}, true, performance.cacheTimeout.medium);
       return transformProperty(data);
     },
 
@@ -281,7 +361,7 @@ export const unifiedApi = {
     },
 
     getReviews: async (propertyId: number): Promise<Review[]> => {
-      const data = await apiRequest<Review[]>(`properties/${propertyId}/reviews/`, {}, true, performance.cacheTimeout.short);
+      const data = await publicApiRequest<Review[]>(`properties/${propertyId}/reviews/`, {}, true, performance.cacheTimeout.short);
       return Array.isArray(data) ? data : [];
     },
   },
@@ -299,17 +379,21 @@ export const unifiedApi = {
       }
       
       const endpoint = `packages/${params.toString() ? `?${params.toString()}` : ''}`;
-      const data = await apiRequest<any[]>(endpoint, {}, true, performance.cacheTimeout.medium);
-      return Array.isArray(data) ? data.map(transformPackage) : [];
+      const data = await publicApiRequest<any>(endpoint, {}, true, performance.cacheTimeout.medium);
+      // Handle paginated response
+      const results = data?.results || data;
+      return Array.isArray(results) ? results.map(transformPackage) : [];
     },
 
     getFeatured: async (): Promise<Package[]> => {
-      const data = await apiRequest<any[]>('packages/?is_featured=true', {}, true, performance.cacheTimeout.long);
-      return Array.isArray(data) ? data.map(transformPackage) : [];
+      const data = await publicApiRequest<any>('packages/?is_featured=true', {}, true, performance.cacheTimeout.long);
+      // Handle paginated response
+      const results = data?.results || data;
+      return Array.isArray(results) ? results.map(transformPackage) : [];
     },
 
     getById: async (id: number): Promise<Package> => {
-      const data = await apiRequest<any>(`packages/${id}/`, {}, true, performance.cacheTimeout.medium);
+      const data = await publicApiRequest<any>(`packages/${id}/`, {}, true, performance.cacheTimeout.medium);
       return transformPackage(data);
     },
 
@@ -340,13 +424,17 @@ export const unifiedApi = {
   // Reviews
   reviews: {
     getAll: async (): Promise<Review[]> => {
-      const data = await apiRequest<Review[]>('reviews/', {}, true, performance.cacheTimeout.short);
-      return Array.isArray(data) ? data : [];
+      const data = await publicApiRequest<any>('reviews/', {}, true, performance.cacheTimeout.short);
+      // Handle paginated response
+      const results = data?.results || data;
+      return Array.isArray(results) ? results : [];
     },
 
     getApproved: async (): Promise<Review[]> => {
-      const data = await apiRequest<Review[]>('reviews/?approved=true', {}, true, performance.cacheTimeout.medium);
-      return Array.isArray(data) ? data : [];
+      const data = await publicApiRequest<any>('reviews/?approved=true', {}, true, performance.cacheTimeout.medium);
+      // Handle paginated response
+      const results = data?.results || data;
+      return Array.isArray(results) ? results : [];
     },
 
     create: async (reviewData: ReviewFormData): Promise<Review> => {
@@ -379,22 +467,28 @@ export const unifiedApi = {
   // Reference data
   propertyTypes: {
     getAll: async (): Promise<PropertyType[]> => {
-      const data = await apiRequest<PropertyType[]>('property-types/', {}, true, performance.cacheTimeout.long);
-      return Array.isArray(data) ? data : [];
+      const data = await publicApiRequest<any>('property-types/', {}, true, performance.cacheTimeout.long);
+      // Handle paginated response
+      const results = data?.results || data;
+      return Array.isArray(results) ? results : [];
     },
   },
 
   amenities: {
     getAll: async (): Promise<Amenity[]> => {
-      const data = await apiRequest<Amenity[]>('amenities/', {}, true, performance.cacheTimeout.long);
-      return Array.isArray(data) ? data : [];
+      const data = await publicApiRequest<any>('amenities/', {}, true, performance.cacheTimeout.long);
+      // Handle paginated response
+      const results = data?.results || data;
+      return Array.isArray(results) ? results : [];
     },
   },
 
   locations: {
     getAll: async (): Promise<Location[]> => {
-      const data = await apiRequest<Location[]>('locations/', {}, true, performance.cacheTimeout.long);
-      return Array.isArray(data) ? data : [];
+      const data = await publicApiRequest<any>('locations/', {}, true, performance.cacheTimeout.long);
+      // Handle paginated response
+      const results = data?.results || data;
+      return Array.isArray(results) ? results : [];
     },
   },
 
@@ -439,13 +533,13 @@ export const unifiedApi = {
       
       try {
         const [properties, packages] = await Promise.all([
-          apiRequest<any[]>(`properties/?search=${encodedQuery}`, {}, true, performance.cacheTimeout.short),
-          apiRequest<any[]>(`packages/?search=${encodedQuery}`, {}, true, performance.cacheTimeout.short),
+          publicApiRequest<any>(`properties/?search=${encodedQuery}`, {}, true, performance.cacheTimeout.short),
+          publicApiRequest<any>(`packages/?search=${encodedQuery}`, {}, true, performance.cacheTimeout.short),
         ]);
 
         return {
-          properties: Array.isArray(properties) ? properties.map(transformProperty) : [],
-          packages: Array.isArray(packages) ? packages.map(transformPackage) : [],
+          properties: Array.isArray(properties?.results || properties) ? (properties?.results || properties).map(transformProperty) : [],
+          packages: Array.isArray(packages?.results || packages) ? (packages?.results || packages).map(transformPackage) : [],
         };
       } catch (error) {
         console.error('Search failed:', error);
@@ -473,8 +567,10 @@ export const unifiedApi = {
     },
 
     getAll: async (): Promise<Booking[]> => {
-      const data = await apiRequest<Booking[]>('bookings/', {}, true, performance.cacheTimeout.short);
-      return Array.isArray(data) ? data : [];
+      const data = await apiRequest<any>('bookings/', {}, true, performance.cacheTimeout.short);
+      // Handle paginated response
+      const results = data?.results || data;
+      return Array.isArray(results) ? results : [];
     },
 
     getById: async (id: number): Promise<Booking> => {

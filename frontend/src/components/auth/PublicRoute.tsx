@@ -19,7 +19,7 @@ export function PublicRoute({ children }: PublicRouteProps) {
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/admin/dashboard" replace />;
+    return <Navigate to="/dashboard/overview" replace />;
   }
 
   return <>{children}</>;

@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { MapPinIcon, StarIcon, HeartIcon, ArrowRightIcon, UsersIcon, WifiIcon, CameraIcon } from '@heroicons/react/24/outline';
 import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
+import { Button, Icon, HStack, Text } from '@chakra-ui/react';
 import type { Property, Location, Amenity, PropertyType } from '../../types';
+import { PropertyBookingModal } from '../PropertyBookingModal';
 
 interface PropertyCardProps {
   property: Property;
@@ -14,6 +16,7 @@ export function PropertyCard({ property, className = '', loading = false }: Prop
   const [isLiked, setIsLiked] = React.useState(false);
   const [imageLoaded, setImageLoaded] = React.useState(false);
   const [imageError, setImageError] = React.useState(false);
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
 
   const handleLike = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -87,9 +90,9 @@ export function PropertyCard({ property, className = '', loading = false }: Prop
   }
 
   return (
-    <article className={`group bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-500 transform hover:-translate-y-1 border border-gray-100 ${className}`}>
+    <article className={`group bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-500 transform hover:-translate-y-1 border border-gray-100 min-h-[600px] flex flex-col ${className}`}>
       {/* Enhanced Image Container with Error Handling */}
-      <div className="relative h-64 overflow-hidden bg-gray-100">
+      <div className="relative h-64 overflow-hidden bg-gray-100 flex-shrink-0">
         {!imageError ? (
           <img
             src={imageUrl}
@@ -142,7 +145,7 @@ export function PropertyCard({ property, className = '', loading = false }: Prop
       </div>
       
       {/* Enhanced Content with Better Information Hierarchy */}
-      <div className="p-6">
+      <div className="p-6 flex flex-col flex-grow">
         {/* Title and Location */}
         <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-1 group-hover:text-blue-600 transition-colors duration-300">
           {property.name}
@@ -169,7 +172,7 @@ export function PropertyCard({ property, className = '', loading = false }: Prop
         
         {/* Enhanced Amenities with Better Mobile Layout */}
         {amenities.length > 0 && (
-          <div className="mb-6">
+          <div className="mb-6 flex-grow">
             <div className="flex flex-wrap gap-2">
               {amenities.slice(0, 3).map((amenity, index) => (
                 <span 
@@ -188,8 +191,8 @@ export function PropertyCard({ property, className = '', loading = false }: Prop
           </div>
         )}
         
-        {/* Enhanced Action Buttons with Better Mobile Design */}
-        <div className="flex flex-col sm:flex-row gap-3">
+        {/* Enhanced Action Buttons with Better Mobile Design - Fixed Positioning */}
+        <div className="flex flex-col sm:flex-row gap-3 mt-auto">
           <Link
             to={`/properties/${property.id}`}
             className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-xl text-sm font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 text-center flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-offset-2"
@@ -199,16 +202,45 @@ export function PropertyCard({ property, className = '', loading = false }: Prop
             <span>View Details</span>
             <ArrowRightIcon className="h-4 w-4" aria-hidden="true" />
           </Link>
-          <Link
-            to={`/properties/${property.id}/book`}
-            className="sm:w-auto bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 px-4 rounded-xl text-sm font-semibold hover:from-green-700 hover:to-emerald-700 transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300 focus:ring-offset-2"
+          <Button
+            onClick={() => setIsBookingModalOpen(true)}
+            bgGradient="linear(to-r, green.600, emerald.600)"
+            color="white"
+            py={3}
+            px={4}
+            borderRadius="xl"
+            fontSize="sm"
+            fontWeight="semibold"
+            boxShadow="lg"
+            _hover={{
+              bgGradient: 'linear(to-r, green.700, emerald.700)',
+              boxShadow: 'xl',
+              transform: 'scale(1.05)',
+            }}
+            transition="all 0.3s ease"
+            _focus={{
+              outline: 'none',
+              ring: 4,
+              ringColor: 'green.300',
+              ringOffset: 2,
+            }}
             aria-label={`Book ${property.name}`}
+            w={{ base: 'full', sm: 'auto' }}
           >
-            <span className="text-base" aria-hidden="true">🏖️</span>
-            <span>Book Now</span>
-          </Link>
+            <HStack spacing={2}>
+              <Text fontSize="base" aria-hidden="true">💬</Text>
+              <Text>Book Now</Text>
+            </HStack>
+          </Button>
         </div>
       </div>
+      
+      {/* Property Booking Modal */}
+      <PropertyBookingModal
+        isOpen={isBookingModalOpen}
+        onClose={() => setIsBookingModalOpen(false)}
+        property={property}
+      />
     </article>
   );
 } 

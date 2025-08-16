@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDebounce } from '../hooks/useDebounce';
 import { LazyImage } from './LazyImage';
+import { unifiedApi } from '../services/unified-api';
 import {
   MagnifyingGlassIcon,
   MapPinIcon,
@@ -70,16 +71,10 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
     const performSearch = async () => {
       setIsLoading(true);
       try {
-        const [propertiesResponse, packagesResponse] = await Promise.all([
-          fetch(`http://127.0.0.1:8000/api/properties/?search=${encodeURIComponent(debouncedQuery)}`),
-          fetch(`http://127.0.0.1:8000/api/packages/?search=${encodeURIComponent(debouncedQuery)}`)
-        ]);
-
-        const properties = propertiesResponse.ok ? await propertiesResponse.json() : { results: [] };
-        const packages = packagesResponse.ok ? await packagesResponse.json() : { results: [] };
-
-        const searchResults: SearchResult[] = [
-          ...(properties.results || properties).map((property: any) => ({
+        const searchResults = await unifiedApi.search.global(debouncedQuery);
+        
+        const results: SearchResult[] = [
+          ...searchResults.properties.map((property: any) => ({
             id: property.id,
             type: 'property' as const,
             name: property.name,
@@ -91,18 +86,18 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
             review_count: property.review_count,
             is_featured: property.is_featured,
           })),
-          ...(packages.results || packages).map((pkg: any) => ({
+          ...searchResults.packages.map((pkg: any) => ({
             id: pkg.id,
             type: 'package' as const,
             name: pkg.name,
             description: pkg.description,
-            image: pkg.image,
+            image: pkg.images?.[0]?.image,
             price: pkg.price,
             is_featured: pkg.is_featured,
           }))
         ];
 
-        setResults(searchResults);
+        setResults(results);
         setShowResults(true);
       } catch (error) {
         console.error('Search failed:', error);

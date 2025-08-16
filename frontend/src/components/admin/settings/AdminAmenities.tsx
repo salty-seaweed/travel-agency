@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Card, Button, LoadingSpinner } from '../../index';
 import { useNotification } from '../../../hooks';
 import { useAmenities } from '../../../hooks/useQueries';
+import { unifiedApi } from '../../../services/unified-api';
 import type { Amenity } from '../../../types';
 import {
   SparklesIcon,
@@ -37,7 +38,7 @@ export function AdminAmenities() {
     if (!confirm('Are you sure you want to delete this amenity?')) return;
     
     try {
-      const response = await fetch(`http://localhost:8000/api/amenities/${id}/`, {
+      const response = await fetch(`/api/amenities/${id}/`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('access')}`,
@@ -47,6 +48,8 @@ export function AdminAmenities() {
       
       if (response.ok) {
         showSuccess('Amenity deleted successfully');
+        // Invalidate cache and refetch
+        unifiedApi.utils.invalidateCache('amenities');
         refetch();
       } else {
         throw new Error('Failed to delete amenity');
@@ -65,12 +68,17 @@ export function AdminAmenities() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('Submitting form data:', formData);
+    console.log('Editing amenity:', editingAmenity);
+    
     try {
       const url = editingAmenity 
-        ? `http://localhost:8000/api/amenities/${editingAmenity.id}/`
-        : 'http://localhost:8000/api/amenities/';
+        ? `/api/amenities/${editingAmenity.id}/`
+        : '/api/amenities/';
       
       const method = editingAmenity ? 'PUT' : 'POST';
+      
+      console.log('Making request to:', url, 'with method:', method);
       
       const response = await fetch(url, {
         method,
@@ -81,17 +89,28 @@ export function AdminAmenities() {
         body: JSON.stringify(formData),
       });
       
+      console.log('Response status:', response.status);
+      console.log('Response ok:', response.ok);
+      
       if (response.ok) {
+        const result = await response.json();
+        console.log('Success response:', result);
         showSuccess(`Amenity ${editingAmenity ? 'updated' : 'created'} successfully`);
         setIsFormOpen(false);
         setEditingAmenity(undefined);
         setFormData({ name: '', description: '' });
+        // Invalidate cache and refetch
+        unifiedApi.utils.invalidateCache('amenities');
         refetch();
       } else {
-        throw new Error('Failed to save amenity');
+        const errorData = await response.text();
+        console.error('Error response:', errorData);
+        throw new Error(`Failed to save amenity: ${response.status} ${response.statusText}`);
       }
     } catch (error) {
-      showError(`Failed to ${editingAmenity ? 'update' : 'create'} amenity`);
+      console.error('Form submission error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      showError(`Failed to ${editingAmenity ? 'update' : 'create'} amenity: ${errorMessage}`);
     }
   };
 
@@ -213,8 +232,8 @@ export function AdminAmenities() {
 
       {/* Form Modal */}
       {isFormOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg transform transition-all duration-300 scale-100">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg transform transition-all duration-300 scale-100 max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-200">
               <div className="flex items-center gap-3">

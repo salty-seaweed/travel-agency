@@ -1,5 +1,22 @@
 import React, { useState } from 'react';
-import { Card } from '../index';
+import {
+  Box,
+  Container,
+  Flex,
+  VStack,
+  HStack,
+  Text,
+  Heading,
+  Icon,
+  Card,
+  CardBody,
+  Tabs,
+  TabList,
+  TabPanels,
+  Tab,
+  TabPanel,
+  useColorModeValue,
+} from '@chakra-ui/react';
 import { AdminAmenities } from './settings/AdminAmenities';
 import { AdminPropertyTypes } from './settings/AdminPropertyTypes';
 import { AdminLocations } from './settings/AdminLocations';
@@ -13,6 +30,13 @@ import {
 export function AdminSettings() {
   const [activeTab, setActiveTab] = useState<'amenities' | 'types' | 'locations'>('amenities');
 
+  // Color mode values
+  const bg = useColorModeValue('white', 'gray.800');
+  const cardBg = useColorModeValue('white', 'gray.700');
+  const borderColor = useColorModeValue('gray.200', 'gray.600');
+  const textColor = useColorModeValue('gray.800', 'white');
+  const mutedTextColor = useColorModeValue('gray.600', 'gray.400');
+
   const tabs = [
     { id: 'amenities', name: 'Amenities', icon: SparklesIcon, color: 'purple' },
     { id: 'types', name: 'Property Types', icon: HomeIcon, color: 'blue' },
@@ -20,52 +44,75 @@ export function AdminSettings() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
+    <Box minH="100vh" bg="gray.50">
       {/* Header */}
-      <div className="bg-white/80 backdrop-blur border-b border-gray-200 px-6 py-6 mb-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center">
-              <WrenchScrewdriverIcon className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-800">Settings</h1>
-              <p className="text-gray-600">Manage amenities, property types, and locations</p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <Box bg={bg} borderBottom="1px solid" borderColor={borderColor} py={6} mb={8}>
+        <Container maxW="7xl">
+          <HStack spacing={4}>
+            <Box
+              w={12}
+              h={12}
+              bgGradient="linear(to-br, purple.500, indigo.600)"
+              borderRadius="xl"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+            >
+              <Icon as={WrenchScrewdriverIcon} h={6} w={6} color="white" />
+            </Box>
+            <VStack align="start" spacing={1}>
+              <Heading size="lg" color={textColor}>
+                Settings
+              </Heading>
+              <Text color={mutedTextColor}>
+                Manage amenities, property types, and locations
+              </Text>
+            </VStack>
+          </HStack>
+        </Container>
+      </Box>
 
-      <div className="max-w-7xl mx-auto px-6">
-        {/* Tabs */}
-        <Card>
-          <div className="border-b border-gray-200">
-            <nav className="-mb-px flex space-x-8">
+      <Container maxW="7xl">
+        <Card bg={cardBg} borderColor={borderColor} borderWidth="1px">
+          <Tabs variant="enclosed" onChange={(index) => {
+            const tabIds = ['amenities', 'types', 'locations'];
+            setActiveTab(tabIds[index] as any);
+          }} defaultIndex={0}>
+            <TabList borderBottom="1px solid" borderColor={borderColor}>
               {tabs.map((tab) => (
-                <button
+                <Tab
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center gap-2 ${
-                    activeTab === tab.id
-                      ? `border-${tab.color}-500 text-${tab.color}-600`
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                  _selected={{
+                    color: `${tab.color}.600`,
+                    borderColor: `${tab.color}.500`,
+                    bg: `${tab.color}.50`,
+                  }}
+                  _hover={{
+                    color: `${tab.color}.600`,
+                  }}
                 >
-                  <tab.icon className="h-4 w-4" />
-                  {tab.name}
-                </button>
+                  <HStack spacing={2}>
+                    <Icon as={tab.icon} h={4} w={4} />
+                    <Text>{tab.name}</Text>
+                  </HStack>
+                </Tab>
               ))}
-            </nav>
-          </div>
+            </TabList>
 
-          {/* Content */}
-          <div className="p-6">
-            {activeTab === 'amenities' && <AdminAmenities />}
-            {activeTab === 'types' && <AdminPropertyTypes />}
-            {activeTab === 'locations' && <AdminLocations />}
-          </div>
+            <TabPanels>
+              <TabPanel p={6}>
+                <AdminAmenities />
+              </TabPanel>
+              <TabPanel p={6}>
+                <AdminPropertyTypes />
+              </TabPanel>
+              <TabPanel p={6}>
+                <AdminLocations />
+              </TabPanel>
+            </TabPanels>
+          </Tabs>
         </Card>
-      </div>
-    </div>
+      </Container>
+    </Box>
   );
 } 

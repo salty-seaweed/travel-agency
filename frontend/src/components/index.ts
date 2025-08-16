@@ -51,6 +51,7 @@ export { AdminProperties } from './admin/AdminProperties';
 export { AdminPackages } from './admin/AdminPackages';
 export { AdminReviews } from './admin/AdminReviews';
 export { AdminSettings } from './admin/AdminSettings';
+export { default as AdminContentManager } from './admin/AdminContentManager';
 export { AdminAnalytics } from './admin/AdminAnalytics';
 
 // Admin Settings Components
@@ -59,4 +60,5 @@ export { default as AdminPropertyTypes } from './admin/settings/AdminPropertyTyp
 export { default as AdminLocations } from './admin/settings/AdminLocations';
 
 // Utility Components
-export { LocationMapPicker } from './LocationMapPicker'; 
+export { LocationMapPicker } from './LocationMapPicker';
+export { LanguageSwitcher } from './LanguageSwitcher'; 

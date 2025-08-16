@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.db import models
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import viewsets, status
@@ -6,16 +7,39 @@ from rest_framework.generics import ListAPIView, CreateAPIView, UpdateAPIView
 from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
 from datetime import datetime, timedelta
-from .models import PropertyType, Amenity, Location, PropertyImage, Property, Package, Review, Booking, Availability, Customer
+import os
+import uuid
+from django.conf import settings
+from .models import (
+    PropertyType, Amenity, Location, PropertyImage, Property, Package, PackageImage, Review, 
+    Booking, Availability, Customer, Page, PageBlock, MediaAsset, Menu, MenuItem, 
+    Redirect, PageVersion, PageReview, CommentThread, Comment
+)
 from .serializers import (
     PropertyTypeSerializer, AmenitySerializer, LocationSerializer, 
-    PropertyImageSerializer, PropertySerializer, PackageSerializer, 
+    PropertyImageSerializer, PackageImageSerializer, PropertySerializer, PackageSerializer, 
     ReviewSerializer, BookingSerializer, BookingCreateSerializer, 
-    BookingStatusUpdateSerializer, AvailabilitySerializer, CustomerSerializer
+    BookingStatusUpdateSerializer, AvailabilitySerializer, CustomerSerializer,
+    PageSerializer, PageBlockSerializer, MediaAssetSerializer, MenuSerializer, MenuItemSerializer,
+    RedirectSerializer, PageVersionSerializer, PageReviewSerializer, CommentThreadSerializer, CommentSerializer
 )
 from rest_framework.decorators import permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.db.models import Count, Avg
+from .models import Property, Package, Review, PropertyType, Amenity, Location, Customer
+from .serializers import (
+    PropertyTypeSerializer, 
+    AmenitySerializer, 
+    LocationSerializer,
+    PropertyImageSerializer,
+    PropertySerializer,
+    PackageSerializer,
+    ReviewSerializer,
+    BookingSerializer,
+    AvailabilitySerializer,
+    CustomerSerializer
+)
 
 # Create your views here.
 
@@ -23,17 +47,61 @@ from rest_framework_simplejwt.tokens import RefreshToken
 def hello_world(request):
     return Response({'message': 'Hello from Django API!'})
 
+@api_view(['GET'])
+def analytics(request):
+    """Get analytics data for the admin dashboard"""
+    try:
+        # Basic counts
+        total_properties = Property.objects.count()
+        total_packages = Package.objects.count()
+        total_reviews = Review.objects.count()
+        total_customers = Customer.objects.count()
+        
+        # Average ratings
+        avg_rating = Review.objects.aggregate(avg_rating=Avg('rating'))['avg_rating'] or 0
+        
+        # Recent reviews
+        recent_reviews = Review.objects.select_related('property').order_by('-created_at')[:5]
+        reviews_data = ReviewSerializer(recent_reviews, many=True).data
+        
+        # Property types distribution
+        property_types = PropertyType.objects.annotate(count=Count('properties'))
+        property_types_data = [
+            {'name': pt.name, 'count': pt.count} 
+            for pt in property_types
+        ]
+        
+        analytics_data = {
+            'total_properties': total_properties,
+            'total_packages': total_packages,
+            'total_reviews': total_reviews,
+            'total_customers': total_customers,
+            'average_rating': round(avg_rating, 1),
+            'recent_reviews': reviews_data,
+            'property_types': property_types_data,
+        }
+        
+        return Response(analytics_data)
+    except Exception as e:
+        return Response(
+            {'error': str(e)}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
 class PropertyTypeViewSet(viewsets.ModelViewSet):
     queryset = PropertyType.objects.all()
     serializer_class = PropertyTypeSerializer
+    permission_classes = [IsAuthenticated]
 
 class AmenityViewSet(viewsets.ModelViewSet):
     queryset = Amenity.objects.all()
     serializer_class = AmenitySerializer
+    permission_classes = [IsAuthenticated]
 
 class LocationViewSet(viewsets.ModelViewSet):
     queryset = Location.objects.all()
     serializer_class = LocationSerializer
+    permission_classes = [IsAuthenticated]
 
 class PropertyImageViewSet(viewsets.ModelViewSet):
     queryset = PropertyImage.objects.all()
@@ -45,9 +113,105 @@ class PropertyViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['amenities', 'property_type', 'location']
 
+    def create(self, request, *args, **kwargs):
+        images_data = request.data.pop('images', [])
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        property_obj = serializer.save()
+        
+        # Create PropertyImage objects
+        for image_data in images_data:
+            image_path = image_data.get('image')
+            if isinstance(image_path, str) and image_path.startswith(settings.MEDIA_URL):
+                image_path = image_path[len(settings.MEDIA_URL):]
+            PropertyImage.objects.create(
+                property=property_obj,
+                image=image_path,
+                caption=image_data.get('caption', ''),
+                order=image_data.get('order', 0),
+                is_featured=image_data.get('is_featured', False)
+            )
+        
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def update(self, request, *args, **kwargs):
+        images_data = request.data.pop('images', [])
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        property_obj = serializer.save()
+        
+        # Clear existing images if new ones are provided
+        if images_data:
+            PropertyImage.objects.filter(property=property_obj).delete()
+            
+            # Create new PropertyImage objects
+            for image_data in images_data:
+                image_path = image_data.get('image')
+                if isinstance(image_path, str) and image_path.startswith(settings.MEDIA_URL):
+                    image_path = image_path[len(settings.MEDIA_URL):]
+                PropertyImage.objects.create(
+                    property=property_obj,
+                    image=image_path,
+                    caption=image_data.get('caption', ''),
+                    order=image_data.get('order', 0),
+                    is_featured=image_data.get('is_featured', False)
+                )
+        
+        return Response(serializer.data)
+
 class PackageViewSet(viewsets.ModelViewSet):
     queryset = Package.objects.all()
     serializer_class = PackageSerializer
+
+    def create(self, request, *args, **kwargs):
+        images_data = request.data.pop('images', [])
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        package_obj = serializer.save()
+        
+        # Create PackageImage objects
+        for image_data in images_data:
+            image_path = image_data.get('image')
+            if isinstance(image_path, str) and image_path.startswith(settings.MEDIA_URL):
+                image_path = image_path[len(settings.MEDIA_URL):]
+            PackageImage.objects.create(
+                package=package_obj,
+                image=image_path,
+                caption=image_data.get('caption', ''),
+                order=image_data.get('order', 0),
+                is_featured=image_data.get('is_featured', False)
+            )
+        
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def update(self, request, *args, **kwargs):
+        images_data = request.data.pop('images', [])
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        package_obj = serializer.save()
+        
+        # Clear existing images if new ones are provided
+        if images_data:
+            PackageImage.objects.filter(package=package_obj).delete()
+            
+            # Create new PackageImage objects
+            for image_data in images_data:
+                image_path = image_data.get('image')
+                if isinstance(image_path, str) and image_path.startswith(settings.MEDIA_URL):
+                    image_path = image_path[len(settings.MEDIA_URL):]
+                PackageImage.objects.create(
+                    package=package_obj,
+                    image=image_path,
+                    caption=image_data.get('caption', ''),
+                    order=image_data.get('order', 0),
+                    is_featured=image_data.get('is_featured', False)
+                )
+        
+        return Response(serializer.data)
 
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
@@ -345,3 +509,245 @@ def customer_login(request):
         
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def upload_image(request):
+    """Upload an image and return the URL"""
+    try:
+        if 'image' not in request.FILES:
+            return Response({'error': 'No image file provided'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        image_file = request.FILES['image']
+        
+        # Validate file type
+        allowed_types = ['image/jpeg', 'image/png', 'image/webp']
+        if image_file.content_type not in allowed_types:
+            return Response({'error': 'Invalid file type. Only JPG, PNG, and WebP are allowed'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Validate file size (5MB limit)
+        if image_file.size > 5 * 1024 * 1024:
+            return Response({'error': 'File too large. Maximum size is 5MB'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Generate unique filename
+        file_extension = os.path.splitext(image_file.name)[1]
+        unique_filename = f"{uuid.uuid4()}{file_extension}"
+        
+        # Create upload directory if it doesn't exist
+        upload_dir = os.path.join(settings.MEDIA_ROOT, 'uploads')
+        os.makedirs(upload_dir, exist_ok=True)
+        
+        # Save file
+        file_path = os.path.join(upload_dir, unique_filename)
+        with open(file_path, 'wb+') as destination:
+            for chunk in image_file.chunks():
+                destination.write(chunk)
+        
+        # Return the URL
+        image_url = f"{settings.MEDIA_URL}uploads/{unique_filename}"
+        
+        return Response({
+            'url': image_url,
+            'filename': unique_filename,
+            'size': image_file.size
+        }, status=status.HTTP_201_CREATED)
+        
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def search(request):
+    """Search across properties, packages, and locations"""
+    try:
+        query = request.GET.get('q', '').strip()
+        if not query:
+            return Response({'error': 'Search query is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Search properties
+        properties = Property.objects.filter(
+            models.Q(name__icontains=query) |
+            models.Q(description__icontains=query) |
+            models.Q(address__icontains=query)
+        )[:10]
+        
+        # Search packages
+        packages = Package.objects.filter(
+            models.Q(name__icontains=query) |
+            models.Q(description__icontains=query)
+        )[:10]
+        
+        # Search locations
+        locations = Location.objects.filter(
+            models.Q(island__icontains=query) |
+            models.Q(atoll__icontains=query)
+        )[:10]
+        
+        results = {
+            'properties': PropertySerializer(properties, many=True).data,
+            'packages': PackageSerializer(packages, many=True).data,
+            'locations': LocationSerializer(locations, many=True).data,
+            'query': query
+        }
+        
+        return Response(results)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def content_stats(request):
+    """Get content statistics for CMS"""
+    try:
+        stats = {
+            'total_pages': Page.objects.count(),
+            'published_pages': Page.objects.filter(status='published').count(),
+            'draft_pages': Page.objects.filter(status='draft').count(),
+            'total_media': MediaAsset.objects.count(),
+            'total_menus': Menu.objects.count(),
+            'total_redirects': Redirect.objects.count(),
+            'recent_pages': PageSerializer(Page.objects.order_by('-created_at')[:5], many=True).data,
+            'recent_media': MediaAssetSerializer(MediaAsset.objects.order_by('-created_at')[:5], many=True).data,
+        }
+        return Response(stats)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def dashboard_stats(request):
+    """Get comprehensive dashboard statistics"""
+    try:
+        from django.db.models import Count, Avg, Sum
+        from datetime import datetime, timedelta
+        
+        # Date ranges
+        today = timezone.now().date()
+        last_week = today - timedelta(days=7)
+        last_month = today - timedelta(days=30)
+        
+        stats = {
+            # Property stats
+            'total_properties': Property.objects.count(),
+            'featured_properties': Property.objects.filter(is_featured=True).count(),
+            'properties_this_month': Property.objects.filter(created_at__gte=last_month).count(),
+            
+            # Package stats
+            'total_packages': Package.objects.count(),
+            'featured_packages': Package.objects.filter(is_featured=True).count(),
+            'packages_this_month': Package.objects.filter(created_at__gte=last_month).count(),
+            
+            # Booking stats
+            'total_bookings': Booking.objects.count(),
+            'pending_bookings': Booking.objects.filter(status='pending').count(),
+            'confirmed_bookings': Booking.objects.filter(status='confirmed').count(),
+            'bookings_this_week': Booking.objects.filter(created_at__gte=last_week).count(),
+            'bookings_this_month': Booking.objects.filter(created_at__gte=last_month).count(),
+            
+            # Review stats
+            'total_reviews': Review.objects.count(),
+            'approved_reviews': Review.objects.filter(approved=True).count(),
+            'average_rating': Review.objects.aggregate(avg=Avg('rating'))['avg'] or 0,
+            'reviews_this_month': Review.objects.filter(created_at__gte=last_month).count(),
+            
+            # Customer stats
+            'total_customers': Customer.objects.count(),
+            'customers_this_month': Customer.objects.filter(created_at__gte=last_month).count(),
+            
+            # Revenue stats (if you have pricing data)
+            'total_revenue': Booking.objects.filter(status='confirmed').aggregate(total=Sum('total_price'))['total'] or 0,
+            'revenue_this_month': Booking.objects.filter(status='confirmed', created_at__gte=last_month).aggregate(total=Sum('total_price'))['total'] or 0,
+        }
+        
+        return Response(stats)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# CMS Viewsets
+class PageViewSet(viewsets.ModelViewSet):
+    queryset = Page.objects.all()
+    serializer_class = PageSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['status', 'locale', 'is_home']
+    search_fields = ['title', 'slug', 'content']
+    ordering_fields = ['created_at', 'updated_at', 'title']
+    ordering = ['-updated_at']
+
+class PageBlockViewSet(viewsets.ModelViewSet):
+    queryset = PageBlock.objects.all()
+    serializer_class = PageBlockSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['page', 'type']
+    ordering_fields = ['order']
+    ordering = ['order']
+
+class MediaAssetViewSet(viewsets.ModelViewSet):
+    queryset = MediaAsset.objects.all()
+    serializer_class = MediaAssetSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['mime_type', 'created_by']
+    search_fields = ['alt_text', 'caption', 'tags']
+    ordering_fields = ['created_at', 'file_size']
+    ordering = ['-created_at']
+
+class MenuViewSet(viewsets.ModelViewSet):
+    queryset = Menu.objects.all()
+    serializer_class = MenuSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['locale', 'is_active']
+    search_fields = ['name', 'slug']
+    ordering_fields = ['name', 'created_at']
+    ordering = ['name']
+
+class MenuItemViewSet(viewsets.ModelViewSet):
+    queryset = MenuItem.objects.all()
+    serializer_class = MenuItemSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['menu', 'link_type', 'is_active', 'parent']
+    ordering_fields = ['order', 'title']
+    ordering = ['order']
+
+class RedirectViewSet(viewsets.ModelViewSet):
+    queryset = Redirect.objects.all()
+    serializer_class = RedirectSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['status_code', 'locale', 'is_active']
+    search_fields = ['from_path', 'to_path']
+    ordering_fields = ['created_at']
+    ordering = ['-created_at']
+
+class PageVersionViewSet(viewsets.ModelViewSet):
+    queryset = PageVersion.objects.all()
+    serializer_class = PageVersionSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['page', 'created_by']
+    ordering_fields = ['version_number', 'created_at']
+    ordering = ['-version_number']
+
+class PageReviewViewSet(viewsets.ModelViewSet):
+    queryset = PageReview.objects.all()
+    serializer_class = PageReviewSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['page', 'reviewer', 'status']
+    ordering_fields = ['created_at']
+    ordering = ['-created_at']
+
+class CommentThreadViewSet(viewsets.ModelViewSet):
+    queryset = CommentThread.objects.all()
+    serializer_class = CommentThreadSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['page', 'created_by', 'is_resolved']
+    search_fields = ['title']
+    ordering_fields = ['created_at']
+    ordering = ['-created_at']
+
+class CommentViewSet(viewsets.ModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['thread', 'author']
+    search_fields = ['content']
+    ordering_fields = ['created_at']
+    ordering = ['created_at']

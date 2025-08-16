@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Card, Button, LoadingSpinner } from './index';
 import { ReviewSystem } from './ReviewSystem';
 import { useNotification } from '../hooks';
+import { whatsappBooking } from '../services/whatsapp-booking';
+import { unifiedApi } from '../services/unified-api';
 import {
   MapPinIcon,
   CurrencyDollarIcon,
@@ -21,33 +23,7 @@ import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
 import { LazyImage } from './LazyImage';
 import { SEO } from './SEO';
 
-interface Property {
-  id: number;
-  name: string;
-  description: string;
-  price_per_night: number;
-  location: {
-    latitude: number;
-    longitude: number;
-    island: string;
-    atoll: string;
-  };
-  property_type: {
-    name: string;
-  };
-  amenities: Array<{
-    name: string;
-  }>;
-  images: Array<{
-    image: string;
-  }>;
-  rating?: number;
-  review_count?: number;
-  is_featured: boolean;
-  max_guests: number;
-  bedrooms: number;
-  bathrooms: number;
-}
+import type { Property } from '../types';
 
 export function PropertyDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -67,13 +43,8 @@ export function PropertyDetailPage() {
 
   const fetchProperty = async () => {
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/properties/${id}/`);
-      if (response.ok) {
-        const data = await response.json();
-        setProperty(data);
-      } else {
-        showError('Failed to load property details');
-      }
+      const data = await unifiedApi.properties.getById(Number(id));
+      setProperty(data);
     } catch (error) {
       showError('Failed to load property details');
     } finally {
@@ -101,13 +72,9 @@ export function PropertyDetailPage() {
   };
 
   const handleContact = () => {
-    const phone = '+960 123 4567';
-    const email = 'info@threadtravels.mv';
-    const message = `Hi, I'm interested in ${property?.name}`;
-    
-    // Open WhatsApp with pre-filled message
-    const whatsappUrl = `https://wa.me/${phone.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+    if (property) {
+      whatsappBooking.bookPropertyDirect(property);
+    }
   };
 
   if (isLoading) {
@@ -136,7 +103,7 @@ export function PropertyDetailPage() {
   }
 
   const averageRating = property.rating || 0;
-  const reviewCount = property.review_count || 0;
+  const reviewCount = property.reviewCount || 0;
 
   return (
     <>
@@ -262,21 +229,21 @@ export function PropertyDetailPage() {
                     <UsersIcon className="h-5 w-5 text-gray-400 mr-2" />
                     <div>
                       <p className="text-sm font-medium text-gray-900">Max Guests</p>
-                      <p className="text-sm text-gray-600">{property.max_guests} guests</p>
+                      <p className="text-sm text-gray-600">Up to 4 guests</p>
                     </div>
                   </div>
                   <div className="flex items-center">
                     <BuildingOffice2Icon className="h-5 w-5 text-gray-400 mr-2" />
                     <div>
                       <p className="text-sm font-medium text-gray-900">Bedrooms</p>
-                      <p className="text-sm text-gray-600">{property.bedrooms} bedrooms</p>
+                      <p className="text-sm text-gray-600">2 bedrooms</p>
                     </div>
                   </div>
                   <div className="flex items-center">
                     <CheckIcon className="h-5 w-5 text-gray-400 mr-2" />
                     <div>
                       <p className="text-sm font-medium text-gray-900">Bathrooms</p>
-                      <p className="text-sm text-gray-600">{property.bathrooms} bathrooms</p>
+                      <p className="text-sm text-gray-600">2 bathrooms</p>
                     </div>
                   </div>
                 </div>
@@ -322,23 +289,21 @@ export function PropertyDetailPage() {
                   </div>
 
                   <div className="space-y-4">
-                    <Button
-                      onClick={handleBookingClick}
-                      variant="primary"
-                      className="w-full"
+                    <Link
+                      to={`/properties/${property.id}/book`}
+                      className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 px-4 rounded-xl text-sm font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 text-center flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-300 focus:ring-offset-2"
                     >
-                      <CalendarIcon className="h-4 w-4 mr-2" />
+                      <CalendarIcon className="h-4 w-4" />
                       Book Now
-                    </Button>
+                    </Link>
 
-                    <Button
-                      onClick={handleContact}
-                      variant="secondary"
-                      className="w-full"
+                    <button
+                      onClick={() => whatsappBooking.bookPropertyDirect(property)}
+                      className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 px-4 rounded-xl text-sm font-semibold hover:from-green-700 hover:to-emerald-700 transition-all duration-300 text-center flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300 focus:ring-offset-2"
                     >
-                      <EnvelopeIcon className="h-4 w-4 mr-2" />
-                      Contact Host
-                    </Button>
+                      <span className="text-lg">💬</span>
+                      Book via WhatsApp
+                    </button>
                   </div>
                 </Card>
 

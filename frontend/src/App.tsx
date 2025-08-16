@@ -1,116 +1,89 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
-import { HelmetProvider } from 'react-helmet-async';
-import './App.css';
-import {
-  Notification,
-  LoadingSpinner,
-  Card,
-  Button,
-  ProtectedRoute,
-  PublicRoute,
-  AdminLogin,
-  AdminDashboard,
-  AdminLayout,
-  AdminProperties,
-  AdminReviews,
-  AdminPackages,
-  AdminSettings,
-  CustomerLogin,
-  CustomerRegister,
-  CustomerProtectedRoute,
-  CustomerDashboard,
-  Layout,
-  HomePage,
-  PropertyListPage,
-  PropertyDetailPage,
-  PackageDetailPage,
-  BookingPage,
-  PackagesPage,
-  ContactPage,
-  AboutPage,
-  FAQPage,
-  BlogPage,
-  MapPage,
-} from './components';
-import { useNotification } from './hooks';
+import { Routes, Route, Outlet } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
+import { useScrollToTop } from './hooks/useScrollToTop';
+import { Layout } from './components/Layout';
+import { HomePage } from './components/HomePage';
+import { PropertyListPage } from './components/PropertyListPage';
+import { PropertyDetailPage } from './components/PropertyDetailPage';
+import { PackagesPage } from './components/PackagesPage';
+import { PackageDetailPage } from './components/PackageDetailPage';
+import { PropertyBookingPage } from './components/PropertyBookingPage';
+import { PackageBookingPage } from './components/PackageBookingPage';
+import { ContactPage } from './components/ContactPage';
+import { AboutPage } from './components/AboutPage';
+import { BlogPage } from './components/BlogPage';
+import { FAQPage } from './components/FAQPage';
+import { MapPage } from './components/MapPage';
+import { CustomerLogin } from './components/auth/CustomerLogin';
+import { CustomerRegister } from './components/auth/CustomerRegister';
+import { CustomerProtectedRoute } from './components/auth/CustomerProtectedRoute';
+import { CustomerDashboard } from './components/CustomerDashboard';
+import { AdminLogin } from './components/auth/AdminLogin';
+import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import { AdminLayout } from './components/admin/AdminLayout';
+import { AdminDashboard } from './components/admin/AdminDashboard';
+import { AdminProperties } from './components/admin/AdminProperties';
+import { AdminPackages } from './components/admin/AdminPackages';
+import { AdminReviews } from './components/admin/AdminReviews';
+import { AdminAnalytics } from './components/admin/AdminAnalytics';
+import { AdminSettings } from './components/admin/AdminSettings';
+import AdminContentManager from './components/admin/AdminContentManager';
+import { PublicRoute } from './components/auth/PublicRoute';
 
-// Main App component
-function App() {
-  const { notification, hideNotification } = useNotification();
+function AppContent() {
+  useScrollToTop();
 
   return (
-    <HelmetProvider>
-      <Router>
-        {notification && (
-          <Notification
-            message={notification.message}
-            type={notification.type}
-            onClose={hideNotification}
-          />
-        )}
-        
-        <Routes>
-          {/* Public routes */}
-          <Route path="/" element={<Layout><HomePage /></Layout>} />
-          <Route path="/properties" element={<Layout><PropertyListPage /></Layout>} />
-          <Route path="/properties/:id" element={<Layout><PropertyDetailPage /></Layout>} />
-          <Route path="/properties/:id/book" element={<Layout><BookingPage /></Layout>} />
-          <Route path="/packages" element={<Layout><PackagesPage /></Layout>} />
-          <Route path="/packages/:id" element={<Layout><PackageDetailPage /></Layout>} />
-          <Route path="/map" element={<Layout><MapPage /></Layout>} />
-          <Route path="/about" element={<Layout><AboutPage /></Layout>} />
-          <Route path="/faq" element={<Layout><FAQPage /></Layout>} />
-          <Route path="/blog" element={<Layout><BlogPage /></Layout>} />
-          <Route path="/contact" element={<Layout><ContactPage /></Layout>} />
-          
-          {/* Customer Authentication Routes */}
-          <Route path="/login" element={
-            <PublicRoute>
-              <CustomerLogin />
-            </PublicRoute>
-          } />
-          <Route path="/register" element={
-            <PublicRoute>
-              <CustomerRegister />
-            </PublicRoute>
-          } />
-          
-          {/* Customer Dashboard Routes */}
-          <Route path="/dashboard" element={
-            <CustomerProtectedRoute>
-              <CustomerDashboard />
-            </CustomerProtectedRoute>
-          } />
-          
-          {/* Admin login - public route that redirects if authenticated */}
-          <Route path="/admin/login" element={
-            <PublicRoute>
-              <AdminLogin />
-            </PublicRoute>
-          } />
-          
-          {/* Protected admin routes */}
-          <Route path="/admin" element={
-            <ProtectedRoute>
-              <AdminLayout>
-                <Outlet />
-              </AdminLayout>
-            </ProtectedRoute>
-          }>
-            <Route path="dashboard" element={<AdminDashboard />} />
-            <Route path="properties" element={<AdminProperties />} />
-            <Route path="packages" element={<AdminPackages />} />
-            <Route path="reviews" element={<AdminReviews />} />
-            <Route path="amenities-types-locations" element={<AdminSettings />} />
-          </Route>
-          
-          {/* Catch-all route */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Router>
-    </HelmetProvider>
+    <>
+      <Helmet>
+        <title>Thread Travels & Tours - Your Maldives Paradise</title>
+        <meta name="description" content="Discover the perfect Maldives getaway with Thread Travels & Tours. Luxury accommodations, exclusive packages, and unforgettable experiences." />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+      </Helmet>
+
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<Layout><Outlet /></Layout>}>
+          <Route index element={<HomePage />} />
+          <Route path="properties" element={<PropertyListPage />} />
+          <Route path="properties/:id" element={<PropertyDetailPage />} />
+          <Route path="properties/:id/book" element={<PropertyBookingPage />} />
+          <Route path="packages" element={<PackagesPage />} />
+          <Route path="packages/:id" element={<PackageDetailPage />} />
+          <Route path="packages/:id/book" element={<PackageBookingPage />} />
+          <Route path="booking" element={<PropertyBookingPage />} />
+          <Route path="contact" element={<ContactPage />} />
+          <Route path="about" element={<AboutPage />} />
+          <Route path="blog" element={<BlogPage />} />
+          <Route path="faq" element={<FAQPage />} />
+          <Route path="map" element={<MapPage />} />
+        </Route>
+
+        {/* Customer Auth Routes */}
+        <Route path="/customer/login" element={<PublicRoute><CustomerLogin /></PublicRoute>} />
+        <Route path="/customer/register" element={<PublicRoute><CustomerRegister /></PublicRoute>} />
+
+        {/* Customer Protected Routes */}
+        <Route path="/customer/dashboard" element={<CustomerProtectedRoute><CustomerDashboard /></CustomerProtectedRoute>} />
+
+        {/* Admin Auth Routes */}
+        <Route path="/ttm/login" element={<PublicRoute><AdminLogin /></PublicRoute>} />
+
+        {/* Admin Protected Routes */}
+        <Route path="/dashboard" element={<ProtectedRoute><AdminLayout><Outlet /></AdminLayout></ProtectedRoute>}>
+          <Route path="overview" element={<AdminDashboard />} />
+          <Route path="properties" element={<AdminProperties />} />
+          <Route path="packages" element={<AdminPackages />} />
+          <Route path="reviews" element={<AdminReviews />} />
+          <Route path="analytics" element={<AdminAnalytics />} />
+          <Route path="settings" element={<AdminSettings />} />
+          <Route path="content" element={<AdminContentManager />} />
+        </Route>
+      </Routes>
+    </>
   );
 }
 
-export default App;
+export default AppContent;

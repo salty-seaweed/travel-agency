@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Button, LoadingSpinner } from '../index';
 import { BuildingOffice2Icon } from '@heroicons/react/24/outline';
+import { getApiUrl } from '../../config';
 
 export function AdminLogin() {
   const [username, setUsername] = useState('');
@@ -16,7 +17,7 @@ export function AdminLogin() {
     setIsLoading(true);
     
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/token/', {
+      const res = await fetch(getApiUrl('token/'), {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -46,7 +47,7 @@ export function AdminLogin() {
       localStorage.setItem('refresh', data.refresh);
       
       // Redirect to dashboard
-      navigate('/admin/dashboard', { replace: true });
+      navigate('/dashboard/overview', { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed. Check your credentials.');
     } finally {
@@ -62,8 +63,8 @@ export function AdminLogin() {
             <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mb-4">
               <BuildingOffice2Icon className="h-8 w-8 text-white" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Admin Login</h2>
-            <p className="text-gray-600">Access your dashboard</p>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">TTM Login</h2>
+            <p className="text-gray-600">Thread Travels & Tours Management</p>
           </div>
           
           <form onSubmit={handleSubmit} className="space-y-4">

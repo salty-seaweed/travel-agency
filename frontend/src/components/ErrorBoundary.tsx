@@ -190,7 +190,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-red-100 px-4">
           <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl p-8 text-center">
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <AlertTriangleIcon className="h-8 w-8 text-red-600" />
+              <ExclamationTriangleIcon className="h-8 w-8 text-red-600" />
             </div>
             
             <h1 className="text-2xl font-bold text-gray-900 mb-4">
@@ -217,7 +217,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                 onClick={this.handleReload}
                 className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 flex items-center justify-center gap-2"
               >
-                <RefreshCwIcon className="h-5 w-5" />
+                                  <ArrowPathIcon className="h-5 w-5" />
                 Reload Application
               </button>
               
@@ -240,7 +240,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         <div className="min-h-96 flex items-center justify-center bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl m-4">
           <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-6 text-center">
             <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <AlertTriangleIcon className="h-6 w-6 text-yellow-600" />
+              <ExclamationTriangleIcon className="h-6 w-6 text-yellow-600" />
             </div>
             
             <h2 className="text-xl font-bold text-gray-900 mb-3">
@@ -263,7 +263,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                   onClick={this.handleRetry}
                   className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-2 px-4 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 flex items-center justify-center gap-2"
                 >
-                  <RefreshCwIcon className="h-4 w-4" />
+                  <ArrowPathIcon className="h-4 w-4" />
                   Retry ({this.maxRetries - retryCount} left)
                 </button>
               )}
@@ -286,7 +286,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       <div className="bg-red-50 border border-red-200 rounded-lg p-4 m-2">
         <div className="flex items-start gap-3">
           <div className="flex-shrink-0">
-            <AlertTriangleIcon className="h-5 w-5 text-red-600" />
+            <ExclamationTriangleIcon className="h-5 w-5 text-red-600" />
           </div>
           
           <div className="flex-1">
@@ -304,7 +304,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                   onClick={this.handleRetry}
                   className="text-xs bg-red-100 text-red-800 px-3 py-1 rounded-md font-medium hover:bg-red-200 transition-colors duration-200 flex items-center gap-1"
                 >
-                  <RefreshCwIcon className="h-3 w-3" />
+                  <ArrowPathIcon className="h-3 w-3" />
                   Retry
                 </button>
               )}
@@ -386,14 +386,14 @@ export const withErrorBoundary = <P extends object>(
 export const LoadingErrorFallback: React.FC<{ onRetry?: () => void }> = ({ onRetry }) => (
   <div className="flex items-center justify-center py-8">
     <div className="text-center">
-      <AlertTriangleIcon className="h-8 w-8 text-red-500 mx-auto mb-3" />
+      <ExclamationTriangleIcon className="h-8 w-8 text-red-500 mx-auto mb-3" />
       <p className="text-gray-600 mb-4">Failed to load content</p>
       {onRetry && (
         <button
           onClick={onRetry}
           className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors duration-200 flex items-center gap-2 mx-auto"
         >
-          <RefreshCwIcon className="h-4 w-4" />
+          <ArrowPathIcon className="h-4 w-4" />
           Try Again
         </button>
       )}
@@ -408,7 +408,7 @@ export const ListErrorFallback: React.FC<{
   showHomeButton?: boolean;
 }> = ({ title, onRetry, showHomeButton }) => (
   <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
-    <AlertTriangleIcon className="h-12 w-12 text-red-500 mx-auto mb-4" />
+    <ExclamationTriangleIcon className="h-12 w-12 text-red-500 mx-auto mb-4" />
     <h3 className="text-lg font-semibold text-gray-900 mb-2">
       Failed to load {title}
     </h3>
@@ -422,7 +422,7 @@ export const ListErrorFallback: React.FC<{
           onClick={onRetry}
           className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors duration-200 flex items-center gap-2"
         >
-          <RefreshCwIcon className="h-4 w-4" />
+          <ArrowPathIcon className="h-4 w-4" />
           Retry
         </button>
       )}

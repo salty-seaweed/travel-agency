@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { InteractiveMap, Card, LoadingSpinner } from './index';
 import { useNotification } from '../hooks';
 import { SEO } from './SEO';
+import { getApiUrl } from '../config';
+import { useTranslation } from '../i18n';
 import {
   MapPinIcon,
   BuildingOffice2Icon,
@@ -36,6 +38,7 @@ interface Property {
 
 export function MapPage() {
   const { showError } = useNotification();
+  const { t } = useTranslation();
   const [properties, setProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
@@ -43,7 +46,7 @@ export function MapPage() {
   useEffect(() => {
     const fetchProperties = async () => {
       try {
-        const response = await fetch('http://127.0.0.1:8000/api/properties/');
+        const response = await fetch(getApiUrl('properties/'));
         if (response.ok) {
           const data = await response.json();
           setProperties(data.results || data);
@@ -66,7 +69,7 @@ export function MapPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center pt-20">
         <LoadingSpinner size="lg" />
       </div>
     );
@@ -80,7 +83,7 @@ export function MapPage() {
         keywords="Maldives map, interactive map, property locations, island resorts, guesthouses Maldives"
       />
       
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 pt-20">
         {/* Header */}
         <div className="bg-white shadow-sm border-b border-gray-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

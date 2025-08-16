@@ -14,6 +14,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { usePackages } from '../hooks/useQueries';
 import { LoadingSpinner } from './LoadingSpinner';
+import { PackageCard } from './ui/PackageCard';
 import type { Package as ApiPackage } from '../types';
 
 // Convert API package to PackageCard format
@@ -417,107 +418,51 @@ export function PackagesPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-              {sortedPackages.map((pkg) => (
-                <div key={pkg.id} className="bg-white rounded-lg sm:rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
-                  {/* Package Image */}
-                  <div className="relative h-48 sm:h-56 overflow-hidden">
-                    <img
-                      src={pkg.image}
-                      alt={pkg.name}
-                      className="w-full h-full object-cover"
-                    />
-                    {pkg.featured && (
-                      <div className="absolute top-3 left-3 bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full text-xs font-semibold">
-                        ⭐ Featured
-                      </div>
-                    )}
-                    <div className="absolute top-3 right-3 bg-white bg-opacity-90 rounded-full p-1">
-                      <HeartIcon className="h-5 w-5 text-gray-400 hover:text-red-500 cursor-pointer" />
-                    </div>
-                  </div>
-
-                  {/* Package Content */}
-                  <div className="p-4 sm:p-6">
-                    {/* Header */}
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex-1">
-                        <h3 className="text-lg sm:text-xl font-bold text-gray-900 line-clamp-2 mb-1">
-                          {pkg.name}
-                        </h3>
-                        <div className="flex items-center text-sm text-gray-600 mb-2">
-                          <MapPinIcon className="h-4 w-4 mr-1" />
-                          <span className="line-clamp-1">{pkg.destinations.join(', ')}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Rating and Reviews */}
-                    <div className="flex items-center mb-3">
-                      <div className="flex items-center">
-                        <StarIcon className="h-4 w-4 text-yellow-400 fill-current" />
-                        <span className="ml-1 text-sm font-medium text-gray-900">{pkg.rating}</span>
-                      </div>
-                      <span className="mx-2 text-gray-300">•</span>
-                      <span className="text-sm text-gray-600">{pkg.reviewCount} reviews</span>
-                    </div>
-
-                    {/* Highlights */}
-                    <div className="flex flex-wrap gap-1 mb-4">
-                      {pkg.highlights.slice(0, 3).map((highlight, index) => (
-                        <span
-                          key={index}
-                          className="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full"
-                        >
-                          {highlight}
-                        </span>
-                      ))}
-                    </div>
-
-                    {/* Package Details */}
-                    <div className="space-y-2 mb-4 text-sm text-gray-600">
-                      <div className="flex items-center">
-                        <CalendarIcon className="h-4 w-4 mr-2" />
-                        <span>{pkg.duration}</span>
-                      </div>
-                      <div className="flex items-center">
-                        <UsersIcon className="h-4 w-4 mr-2" />
-                        <span>Up to {pkg.maxTravelers} travelers</span>
-                      </div>
-                    </div>
-
-                    {/* Price */}
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <div className="text-2xl sm:text-3xl font-bold text-blue-600">
-                          ${pkg.price.toLocaleString()}
-                        </div>
-                        <div className="text-sm text-gray-500 line-through">
-                          ${pkg.originalPrice.toLocaleString()}
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-xs text-gray-500">per person</div>
-                      </div>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex gap-2">
-                      <Link
-                        to={`/packages/${pkg.id}`}
-                        className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white py-2.5 sm:py-3 px-4 rounded-lg font-semibold text-sm sm:text-base hover:from-blue-700 hover:to-blue-800 transition-all duration-200 text-center"
-                      >
-                        View Details
-                      </Link>
-                      <button
-                        onClick={() => handleWhatsAppBooking(pkg)}
-                        className="px-4 py-2.5 sm:py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center"
-                      >
-                        <span className="text-lg">💬</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
+              {sortedPackages.map((pkg) => {
+                // Convert the local Package format to the unified Package format
+                const unifiedPackage: ApiPackage = {
+                  id: pkg.id,
+                  name: pkg.name,
+                  description: pkg.description,
+                  price: pkg.price.toString(),
+                  duration: parseInt(pkg.duration),
+                  properties: pkg.destinations.map((dest, index) => ({
+                    id: index + 1,
+                    name: `${dest} Resort`,
+                    description: `Beautiful resort in ${dest}`,
+                    price_per_night: '200',
+                    price: 200,
+                    location: { id: index + 1, island: dest, atoll: 'Maldives', latitude: 0, longitude: 0 },
+                    property_type: { id: 1, name: 'Resort' },
+                    amenities: [],
+                    images: [],
+                    is_featured: false,
+                    reviews: [],
+                    packages: [],
+                    rating: pkg.rating,
+                    reviewCount: pkg.reviewCount,
+                  })),
+                  images: [{ id: 1, package: pkg.id, image: pkg.image }],
+                  is_featured: pkg.featured,
+                  start_date: undefined,
+                  end_date: undefined,
+                  destinations: pkg.destinations,
+                  highlights: pkg.highlights,
+                  included: pkg.included,
+                  maxTravelers: pkg.maxTravelers,
+                  category: pkg.category,
+                  created_at: undefined,
+                  updated_at: undefined,
+                };
+                
+                return (
+                  <PackageCard 
+                    key={pkg.id} 
+                    package={unifiedPackage}
+                    className="animate-fade-in"
+                  />
+                );
+              })}
             </div>
           )}
         </div>

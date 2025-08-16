@@ -52,7 +52,7 @@ export function BookingForm({ propertyId, propertyName, pricePerNight, onClose, 
     setCheckingAvailability(true);
     try {
       const response = await fetch(
-        `http://127.0.0.1:8000/api/properties/${propertyId}/availability/?check_in=${formData.check_in_date}&check_out=${formData.check_out_date}`
+        `/api/properties/${propertyId}/availability/?check_in=${formData.check_in_date}&check_out=${formData.check_out_date}`
       );
       
       if (response.ok) {
@@ -84,28 +84,33 @@ export function BookingForm({ propertyId, propertyName, pricePerNight, onClose, 
 
     setLoading(true);
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/bookings/create-booking/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          property_id: propertyId,
-          ...formData
-        }),
-      });
+      // Instead of making an API call, send the booking data to WhatsApp
+      const message = `Hi! I'm interested in booking ${propertyName}.
 
-      if (response.ok) {
-        const booking = await response.json();
-        showSuccess('Booking request submitted successfully! We will contact you soon.');
-        onBookingSuccess?.(booking);
-        onClose();
-      } else {
-        const error = await response.json();
-        showError(error.error || 'Failed to create booking');
-      }
+📋 *Booking Details:*
+• Check-in: ${formData.check_in_date}
+• Check-out: ${formData.check_out_date}
+• Guests: ${formData.number_of_guests}
+• Price per night: $${pricePerNight}
+
+👤 *Guest Information:*
+• Name: ${formData.customer_name}
+• Email: ${formData.customer_email}
+• Phone: ${formData.customer_phone}
+
+${formData.special_requests ? `📝 *Special Requests:*\n${formData.special_requests}\n` : ''}
+Please let me know if this property is available for these dates and help me with the booking process. Thank you!`;
+
+      // Open WhatsApp with the booking information
+      const cleanPhone = '+9601234567'.replace(/\D/g, '');
+      const encodedMessage = encodeURIComponent(message);
+      const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodedMessage}`;
+      window.open(whatsappUrl, '_blank');
+
+      showSuccess('Booking request sent to WhatsApp! We will contact you soon.');
+      onClose();
     } catch (error) {
-      showError('Failed to create booking');
+      showError('Failed to send booking request');
     } finally {
       setLoading(false);
     }
@@ -157,7 +162,8 @@ export function BookingForm({ propertyId, propertyName, pricePerNight, onClose, 
                   value={formData.customer_name}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-50 hover:bg-white transition-colors"
+                  placeholder="Enter your full name"
                 />
               </div>
               <div>
@@ -170,7 +176,8 @@ export function BookingForm({ propertyId, propertyName, pricePerNight, onClose, 
                   value={formData.customer_email}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-50 hover:bg-white transition-colors"
+                  placeholder="Enter your email address"
                 />
               </div>
               <div>
@@ -183,7 +190,8 @@ export function BookingForm({ propertyId, propertyName, pricePerNight, onClose, 
                   value={formData.customer_phone}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-50 hover:bg-white transition-colors"
+                  placeholder="Enter your phone number"
                 />
               </div>
               <div>
@@ -195,7 +203,7 @@ export function BookingForm({ propertyId, propertyName, pricePerNight, onClose, 
                   value={formData.number_of_guests}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-50 hover:bg-white transition-colors"
                 >
                   {[1, 2, 3, 4, 5, 6, 7, 8].map(num => (
                     <option key={num} value={num}>
@@ -217,16 +225,16 @@ export function BookingForm({ propertyId, propertyName, pricePerNight, onClose, 
                 </label>
                 <div className="relative">
                   <CalendarIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <input
-                    type="date"
-                    name="check_in_date"
-                    value={formData.check_in_date}
-                    onChange={handleInputChange}
-                    min={getMinDate()}
-                    max={getMaxDate()}
-                    required
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
+                                     <input
+                     type="date"
+                     name="check_in_date"
+                     value={formData.check_in_date}
+                     onChange={handleInputChange}
+                     min={getMinDate()}
+                     max={getMaxDate()}
+                     required
+                     className="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-50 hover:bg-white transition-colors"
+                   />
                 </div>
               </div>
               <div>
@@ -235,16 +243,16 @@ export function BookingForm({ propertyId, propertyName, pricePerNight, onClose, 
                 </label>
                 <div className="relative">
                   <CalendarIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <input
-                    type="date"
-                    name="check_out_date"
-                    value={formData.check_out_date}
-                    onChange={handleInputChange}
-                    min={formData.check_in_date || getMinDate()}
-                    max={getMaxDate()}
-                    required
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
+                                     <input
+                     type="date"
+                     name="check_out_date"
+                     value={formData.check_out_date}
+                     onChange={handleInputChange}
+                     min={formData.check_in_date || getMinDate()}
+                     max={getMaxDate()}
+                     required
+                     className="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-50 hover:bg-white transition-colors"
+                   />
                 </div>
               </div>
             </div>
@@ -296,7 +304,7 @@ export function BookingForm({ propertyId, propertyName, pricePerNight, onClose, 
               onChange={handleInputChange}
               rows={3}
               placeholder="Any special requests or requirements..."
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-50 hover:bg-white transition-colors"
             />
           </div>
 
@@ -312,7 +320,7 @@ export function BookingForm({ propertyId, propertyName, pricePerNight, onClose, 
             <button
               type="submit"
               disabled={loading || !availability?.is_available}
-              className="flex-1 bg-blue-600 text-white px-4 py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+              className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-4 py-3 rounded-lg font-semibold hover:from-green-700 hover:to-emerald-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
             >
               {loading ? (
                 <>
@@ -320,7 +328,7 @@ export function BookingForm({ propertyId, propertyName, pricePerNight, onClose, 
                   <span className="ml-2">Submitting...</span>
                 </>
               ) : (
-                'Submit Booking Request'
+                'Send to WhatsApp'
               )}
             </button>
           </div>

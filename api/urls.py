@@ -1,64 +1,37 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import (
-    hello_world,
-    PropertyTypeViewSet,
-    AmenityViewSet,
-    LocationViewSet,
-    PropertyImageViewSet,
-    PropertyViewSet,
-    PackageViewSet,
-    ReviewViewSet,
-    PropertyPackagesList,
-    PropertyReviewsList,
-    PackageReviewsList,
-    BookingViewSet,
-    BookingCreateView,
-    BookingStatusUpdateView,
-    AvailabilityViewSet,
-    CustomerViewSet,
-    check_availability,
-    property_bookings,
-    create_booking,
-    booking_summary,
-    customer_register,
-    customer_login,
-    my_bookings,
-)
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from . import views
 
 router = DefaultRouter()
-router.register(r'property-types', PropertyTypeViewSet)
-router.register(r'amenities', AmenityViewSet)
-router.register(r'locations', LocationViewSet)
-router.register(r'property-images', PropertyImageViewSet)
-router.register(r'properties', PropertyViewSet)
-router.register(r'packages', PackageViewSet)
-router.register(r'reviews', ReviewViewSet)
-router.register(r'bookings', BookingViewSet)
-router.register(r'availability', AvailabilityViewSet)
-router.register(r'customers', CustomerViewSet)
+router.register(r'properties', views.PropertyViewSet)
+router.register(r'packages', views.PackageViewSet)
+router.register(r'locations', views.LocationViewSet)
+router.register(r'property-types', views.PropertyTypeViewSet)
+router.register(r'amenities', views.AmenityViewSet)
+router.register(r'reviews', views.ReviewViewSet)
+router.register(r'bookings', views.BookingViewSet)
+router.register(r'availability', views.AvailabilityViewSet)
+router.register(r'customers', views.CustomerViewSet)
+
+# CMS routes
+router.register(r'pages', views.PageViewSet)
+router.register(r'page-blocks', views.PageBlockViewSet)
+router.register(r'media', views.MediaAssetViewSet)
+router.register(r'menus', views.MenuViewSet)
+router.register(r'menu-items', views.MenuItemViewSet)
+router.register(r'redirects', views.RedirectViewSet)
+router.register(r'page-versions', views.PageVersionViewSet)
+router.register(r'page-reviews', views.PageReviewViewSet)
+router.register(r'comment-threads', views.CommentThreadViewSet)
+router.register(r'comments', views.CommentViewSet)
 
 urlpatterns = [
-    path('hello/', hello_world, name='hello_world'),
-    path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('properties/<int:pk>/packages/', PropertyPackagesList.as_view(), name='property-packages'),
-    path('properties/<int:pk>/reviews/', PropertyReviewsList.as_view(), name='property-reviews'),
-    path('packages/<int:pk>/reviews/', PackageReviewsList.as_view(), name='package-reviews'),
-    
-    # Customer Authentication endpoints
-    path('customer/register/', customer_register, name='customer-register'),
-    path('customer/login/', customer_login, name='customer-login'),
-    
-    # Booking endpoints
-    path('bookings/create/', BookingCreateView.as_view(), name='booking-create'),
-    path('bookings/<int:pk>/status/', BookingStatusUpdateView.as_view(), name='booking-status-update'),
-    path('bookings/my-bookings/', my_bookings, name='my-bookings'),
-    path('properties/<int:property_id>/availability/', check_availability, name='check-availability'),
-    path('properties/<int:property_id>/bookings/', property_bookings, name='property-bookings'),
-    path('bookings/create-booking/', create_booking, name='create-booking'),
-    path('bookings/summary/', booking_summary, name='booking-summary'),
-    
     path('', include(router.urls)),
+    path('upload-image/', views.upload_image, name='upload_image'),
+    path('search/', views.search, name='search'),
+    path('analytics/', views.analytics, name='analytics'),
+    path('analytics/content-stats/', views.content_stats, name='content_stats'),
+    path('dashboard-stats/', views.dashboard_stats, name='dashboard_stats'),
+    path('properties/<int:property_id>/availability/', views.check_availability, name='property_availability'),
+    path('bookings/create-booking/', views.create_booking, name='create_booking'),
 ] 

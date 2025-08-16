@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Card, Button, LoadingSpinner } from '../../index';
 import { useNotification } from '../../../hooks';
 import { useLocations } from '../../../hooks/useQueries';
+import { unifiedApi } from '../../../services/unified-api';
 import { LocationMapPicker } from '../../LocationMapPicker';
 import type { Location } from '../../../types';
 import {
@@ -45,7 +46,7 @@ export function AdminLocations() {
     if (!confirm('Are you sure you want to delete this location?')) return;
     
     try {
-      const response = await fetch(`http://localhost:8000/api/locations/${id}/`, {
+      const response = await fetch(`/api/locations/${id}/`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('access')}`,
@@ -55,6 +56,8 @@ export function AdminLocations() {
       
       if (response.ok) {
         showSuccess('Location deleted successfully');
+        // Invalidate cache and refetch
+        unifiedApi.utils.invalidateCache('locations');
         refetch();
       } else {
         throw new Error('Failed to delete location');
@@ -95,12 +98,17 @@ export function AdminLocations() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('Submitting location form data:', formData);
+    console.log('Editing location:', editingLocation);
+    
     try {
       const url = editingLocation 
-        ? `http://localhost:8000/api/locations/${editingLocation.id}/`
-        : 'http://localhost:8000/api/locations/';
+        ? `/api/locations/${editingLocation.id}/`
+        : '/api/locations/';
       
       const method = editingLocation ? 'PUT' : 'POST';
+      
+      console.log('Making request to:', url, 'with method:', method);
       
       const response = await fetch(url, {
         method,
@@ -111,17 +119,28 @@ export function AdminLocations() {
         body: JSON.stringify(formData),
       });
       
+      console.log('Response status:', response.status);
+      console.log('Response ok:', response.ok);
+      
       if (response.ok) {
+        const result = await response.json();
+        console.log('Success response:', result);
         showSuccess(`Location ${editingLocation ? 'updated' : 'created'} successfully`);
         setIsFormOpen(false);
         setEditingLocation(undefined);
         setFormData({ island: '', atoll: '', description: '', latitude: 3.2028, longitude: 73.2207 });
+        // Invalidate cache and refetch
+        unifiedApi.utils.invalidateCache('locations');
         refetch();
       } else {
-        throw new Error('Failed to save location');
+        const errorData = await response.text();
+        console.error('Error response:', errorData);
+        throw new Error(`Failed to save location: ${response.status} ${response.statusText}`);
       }
     } catch (error) {
-      showError(`Failed to ${editingLocation ? 'update' : 'create'} location`);
+      console.error('Form submission error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      showError(`Failed to ${editingLocation ? 'update' : 'create'} location: ${errorMessage}`);
     }
   };
 
@@ -234,8 +253,8 @@ export function AdminLocations() {
 
       {/* Form Modal */}
       {isFormOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl transform transition-all duration-300 scale-100">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl transform transition-all duration-300 scale-100 max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-200">
               <div className="flex items-center gap-3">

@@ -1,4 +1,7 @@
-const API_BASE = 'http://127.0.0.1:8000/api';
+import { config } from './config';
+
+// Get the base API URL without trailing slash
+const API_BASE = config.apiBaseUrl.replace(/\/$/, '');
 
 // Security configuration
 const TOKEN_EXPIRY_BUFFER = 5 * 60 * 1000; // 5 minutes before expiry
@@ -108,7 +111,7 @@ async function secureRequest(
         return secureRequest(url, options, retryCount + 1);
       } else {
         clearTokens();
-        window.location.href = '/admin/login';
+        window.location.href = '/ttm/login';
         throw new Error('Authentication required');
       }
     }
@@ -141,12 +144,14 @@ async function secureRequest(
 
 // Enhanced API functions with security
 export async function apiGet(path: string) {
-  const response = await secureRequest(`${API_BASE}${path}`);
+  const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+  const response = await secureRequest(`${API_BASE}/${cleanPath}`);
   return response.json();
 }
 
 export async function apiPost(path: string, data: any) {
-  const response = await secureRequest(`${API_BASE}${path}`, {
+  const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+  const response = await secureRequest(`${API_BASE}/${cleanPath}`, {
     method: 'POST',
     body: JSON.stringify(data),
   });
@@ -154,7 +159,8 @@ export async function apiPost(path: string, data: any) {
 }
 
 export async function apiPut(path: string, data: any) {
-  const response = await secureRequest(`${API_BASE}${path}`, {
+  const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+  const response = await secureRequest(`${API_BASE}/${cleanPath}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   });
@@ -162,7 +168,8 @@ export async function apiPut(path: string, data: any) {
 }
 
 export async function apiDelete(path: string) {
-  const response = await secureRequest(`${API_BASE}${path}`, {
+  const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+  const response = await secureRequest(`${API_BASE}/${cleanPath}`, {
     method: 'DELETE',
   });
   return response;
@@ -174,12 +181,13 @@ export async function apiUpload(path: string, formData: FormData) {
   if (token && isTokenExpired(token)) {
     const refreshed = await refreshAccessToken();
     if (!refreshed) {
-      window.location.href = '/admin/login';
+      window.location.href = '/ttm/login';
       throw new Error('Authentication required');
     }
   }
 
-  const response = await fetch(`${API_BASE}${path}`, {
+  const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+  const response = await fetch(`${API_BASE}/${cleanPath}`, {
     method: 'POST',
     headers: { 
       'Authorization': `Bearer ${getToken()}`,
@@ -191,7 +199,7 @@ export async function apiUpload(path: string, formData: FormData) {
   if (!response.ok) {
     if (response.status === 401) {
       clearTokens();
-      window.location.href = '/admin/login';
+      window.location.href = '/ttm/login';
       throw new Error('Authentication required');
     }
     throw new Error(`Upload failed: ${response.status} ${response.statusText}`);
@@ -208,7 +216,7 @@ export function isAuthenticated(): boolean {
 
 export function logout() {
   clearTokens();
-  window.location.href = '/admin/login';
+  window.location.href = '/ttm/login';
 }
 
 // Export for use in components
