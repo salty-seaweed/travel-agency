@@ -101,10 +101,10 @@ export function BookingForm({ propertyId, propertyName, pricePerNight, onClose, 
 ${formData.special_requests ? `📝 *Special Requests:*\n${formData.special_requests}\n` : ''}
 Please let me know if this property is available for these dates and help me with the booking process. Thank you!`;
 
-      // Open WhatsApp with the booking information
-      const cleanPhone = '+9601234567'.replace(/\D/g, '');
-      const encodedMessage = encodeURIComponent(message);
-      const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodedMessage}`;
+              // Open WhatsApp with the booking information
+        const cleanPhone = '9607441097';
+        const encodedMessage = encodeURIComponent(message);
+        const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodedMessage}`;
       window.open(whatsappUrl, '_blank');
 
       showSuccess('Booking request sent to WhatsApp! We will contact you soon.');

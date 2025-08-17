@@ -860,7 +860,7 @@ export function PackageDetailPage() {
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Need Help?</h3>
                   <div className="space-y-3">
                     <Button
-                      onClick={() => window.open(`tel:+9601234567`)}
+                      onClick={() => window.open(`tel:+9607441097`)}
                       className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-lg text-sm font-medium transition-colors"
                     >
                       <PhoneIcon className="h-4 w-4 mr-2" />

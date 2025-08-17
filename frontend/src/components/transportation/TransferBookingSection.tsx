@@ -45,9 +45,9 @@ export const TransferBookingSection = React.memo(() => {
       description: 'Reach out through your preferred method',
       icon: ChatBubbleLeftRightIcon,
       details: [
-        'WhatsApp: +960 777-7777',
+        'WhatsApp: +960 744-1097',
         'Email: transfers@threadtravels.com',
-        'Phone: +960 777-7777',
+        'Phone: +960 744-1097',
         'Online form available'
       ]
     },
@@ -97,7 +97,7 @@ export const TransferBookingSection = React.memo(() => {
       method: 'WhatsApp',
       icon: ChatBubbleLeftRightIcon,
       color: 'green',
-      contact: '+960 777-7777',
+      contact: '+960 744-1097',
       description: 'Fastest response time, available 24/7',
       response: 'Within 5 minutes'
     },
@@ -105,7 +105,7 @@ export const TransferBookingSection = React.memo(() => {
       method: 'Phone',
       icon: PhoneIcon,
       color: 'blue',
-      contact: '+960 777-7777',
+      contact: '+960 744-1097',
       description: 'Direct conversation with our team',
       response: 'Immediate'
     },

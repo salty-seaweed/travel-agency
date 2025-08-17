@@ -9,7 +9,7 @@ const isTesting = import.meta.env.MODE === 'test';
 // API Configuration
 const API_CONFIG = {
   development: {
-    baseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8001/api',
+    baseUrl: import.meta.env.VITE_API_BASE_URL || '/api',
     timeout: 10000,
   },
   production: {
@@ -17,7 +17,7 @@ const API_CONFIG = {
     timeout: 30000,
   },
   test: {
-    baseUrl: 'http://localhost:8001/api',
+    baseUrl: '/api',
     timeout: 5000,
   },
 } as const;
@@ -32,7 +32,7 @@ export const config: AppConfig = {
     : API_CONFIG.test.baseUrl,
   
   // Contact Information
-  whatsappNumber: import.meta.env.VITE_WHATSAPP_NUMBER || '+9601234567',
+  whatsappNumber: import.meta.env.VITE_WHATSAPP_NUMBER || '+9607441097',
   supportEmail: import.meta.env.VITE_SUPPORT_EMAIL || 'support@threadtravels.com',
   companyName: import.meta.env.VITE_COMPANY_NAME || 'Thread Travels & Tours',
   

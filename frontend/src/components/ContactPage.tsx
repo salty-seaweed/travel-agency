@@ -52,10 +52,10 @@ export function ContactPage() {
     {
       icon: PhoneIcon,
       title: "Phone",
-      details: ["+960 123 4567", "+960 987 6543"],
+              details: ["+960 744 1097", "+960 987 6543"],
       description: "Call us for immediate assistance",
       action: "Call Now",
-      actionUrl: "tel:+9601234567"
+              actionUrl: "tel:+9607441097"
     },
     {
       icon: EnvelopeIcon,
@@ -79,7 +79,7 @@ export function ContactPage() {
       details: ["Mon-Fri: 9:00 AM - 6:00 PM", "Sat: 10:00 AM - 4:00 PM"],
       description: "We're here to help you",
       action: "WhatsApp",
-      actionUrl: "https://wa.me/9601234567"
+              actionUrl: "https://wa.me/9607441097"
     }
   ];
 
@@ -181,7 +181,7 @@ export function ContactPage() {
                 </div>
               </div>
               <a
-                href="https://wa.me/9601234567?text=Hi! I'm interested in your Maldives travel services. Can you help me?"
+                href="https://wa.me/9607441097?text=Hi! I'm interested in your Maldives travel services. Can you help me?"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full bg-green-500 text-white py-3 px-4 rounded-lg font-semibold text-center hover:bg-green-600 transition-colors flex items-center justify-center gap-2"

@@ -101,7 +101,7 @@ export function PackagesPage() {
 
   const handleWhatsAppBooking = (pkg: Package) => {
     const message = `Hi! I'm interested in booking the "${pkg.name}" package. Can you provide more details?`;
-    const whatsappUrl = `https://wa.me/9601234567?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/9607441097?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
 

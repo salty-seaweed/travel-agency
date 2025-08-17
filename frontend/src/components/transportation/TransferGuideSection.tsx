@@ -255,7 +255,7 @@ export const TransferGuideSection = React.memo(() => {
                   <Icon as={PhoneIcon} className="w-5 h-5 text-blue-600" />
                   <Text className="font-semibold text-gray-800">Emergency Hotline</Text>
                 </HStack>
-                <Text className="text-gray-700">+960 777-7777 (24/7)</Text>
+                <Text className="text-gray-700">+960 744-1097 (24/7)</Text>
               </Box>
               
               <Box>

@@ -407,7 +407,7 @@ export function PropertyForm({ isOpen, onClose, property, onSave }: PropertyForm
                         name="whatsapp_number"
                         value={form.whatsapp_number}
                         onChange={handleChange}
-                        placeholder="+960 123 4567"
+                        placeholder="+960 744 1097"
                         size="lg"
                         borderRadius="lg"
                         focusBorderColor="blue.500"

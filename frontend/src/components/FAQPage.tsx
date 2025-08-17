@@ -314,7 +314,7 @@ export function FAQPage() {
               Contact Us
             </a>
             <a
-              href="https://wa.me/9601234567"
+                              href="https://wa.me/9607441097"
               target="_blank"
               rel="noopener noreferrer"
               className="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors"

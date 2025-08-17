@@ -232,7 +232,7 @@ export function PropertyBookingPage() {
               <div className="space-y-3">
                 <div className="flex items-center">
                   <CurrencyDollarIcon className="h-4 w-4 text-gray-400 mr-2" />
-                  <span className="text-sm text-gray-700">+960 123 4567</span>
+                  <span className="text-sm text-gray-700">+960 744 1097</span>
                 </div>
                 <div className="flex items-center">
                   <CurrencyDollarIcon className="h-4 w-4 text-gray-400 mr-2" />

@@ -85,7 +85,7 @@ export const seoConfigs = {
       },
       "contactPoint": {
         "@type": "ContactPoint",
-        "telephone": "+960-123-4567",
+        "telephone": "+960-744-1097",
         "contactType": "customer service"
       }
     }

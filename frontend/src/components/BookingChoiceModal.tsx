@@ -76,7 +76,7 @@ export function BookingChoiceModal({ isOpen, onClose, package: pkg }: BookingCho
 
 I'd like to check availability and get more details about this package. Thank you!`;
 
-    const cleanPhone = '+9601234567'.replace(/\D/g, '');
+    const cleanPhone = '9607441097';
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodedMessage}`;
     window.open(whatsappUrl, '_blank');
@@ -262,7 +262,7 @@ I'd like to check availability and get more details about this package. Thank yo
                     Need immediate assistance?
                   </Text>
                   <Text className="text-sm text-blue-700">
-                    Call us at +960 123 4567 or WhatsApp us anytime
+                    Call us at +960 744 1097 or WhatsApp us anytime
                   </Text>
                 </div>
               </div>
