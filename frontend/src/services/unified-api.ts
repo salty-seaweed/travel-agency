@@ -105,6 +105,7 @@ const publicApiRequest = async <T>(
   cacheTtl?: number
 ): Promise<T> => {
   const url = `${config.apiBaseUrl}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+  console.log('🔍 [MOBILE DEBUG] publicApiRequest called:', { endpoint, url, useCache });
   
   // Check cache for GET requests
   if (useCache && (!options.method || options.method.toUpperCase() === 'GET')) {
@@ -131,7 +132,9 @@ const publicApiRequest = async <T>(
   };
 
   try {
+    console.log('🔍 [MOBILE DEBUG] Making fetch request to:', url);
     const response = await fetch(url, requestOptions);
+    console.log('🔍 [MOBILE DEBUG] Fetch response status:', response.status, response.statusText);
     clearTimeout(timeoutId);
 
     let data: any;
@@ -332,10 +335,19 @@ export const unifiedApi = {
     },
 
     getFeatured: async (): Promise<Property[]> => {
-      const data = await publicApiRequest<any>('properties/?is_featured=true', {}, true, performance.cacheTimeout.long);
-      // Handle paginated response
-      const results = data?.results || data;
-      return Array.isArray(results) ? results.map(transformProperty) : [];
+      console.log('🔍 [MOBILE DEBUG] API call: getFeatured properties starting...');
+      try {
+        const data = await publicApiRequest<any>('properties/?is_featured=true', {}, true, performance.cacheTimeout.long);
+        console.log('🔍 [MOBILE DEBUG] API call: getFeatured properties response:', data);
+        // Handle paginated response
+        const results = data?.results || data;
+        const transformed = Array.isArray(results) ? results.map(transformProperty) : [];
+        console.log('✅ [MOBILE DEBUG] API call: getFeatured properties transformed:', transformed.length, 'items');
+        return transformed;
+      } catch (error) {
+        console.error('❌ [MOBILE DEBUG] API call: getFeatured properties error:', error);
+        throw error;
+      }
     },
 
     getById: async (id: number): Promise<Property> => {
@@ -392,10 +404,19 @@ export const unifiedApi = {
     },
 
     getFeatured: async (): Promise<Package[]> => {
-      const data = await publicApiRequest<any>('packages/?is_featured=true', {}, true, performance.cacheTimeout.long);
-      // Handle paginated response
-      const results = data?.results || data;
-      return Array.isArray(results) ? results.map(transformPackage) : [];
+      console.log('🔍 [MOBILE DEBUG] API call: getFeatured packages starting...');
+      try {
+        const data = await publicApiRequest<any>('packages/?is_featured=true', {}, true, performance.cacheTimeout.long);
+        console.log('🔍 [MOBILE DEBUG] API call: getFeatured packages response:', data);
+        // Handle paginated response
+        const results = data?.results || data;
+        const transformed = Array.isArray(results) ? results.map(transformPackage) : [];
+        console.log('✅ [MOBILE DEBUG] API call: getFeatured packages transformed:', transformed.length, 'items');
+        return transformed;
+      } catch (error) {
+        console.error('❌ [MOBILE DEBUG] API call: getFeatured packages error:', error);
+        throw error;
+      }
     },
 
     getById: async (id: number): Promise<Package> => {

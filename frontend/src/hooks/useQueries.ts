@@ -23,11 +23,24 @@ export const useProperties = (filters?: PropertyFilters) => {
 };
 
 export const useFeaturedProperties = () => {
-  return useQuery({
+  const query = useQuery({
     queryKey: queryKeys.properties.featured(),
-    queryFn: () => unifiedApi.properties.getFeatured(),
+    queryFn: () => {
+      console.log('🔍 [MOBILE DEBUG] Fetching featured properties...');
+      return unifiedApi.properties.getFeatured();
+    },
     staleTime: 30 * 60 * 1000, // 30 minutes
   });
+
+  // Debug logging
+  if (query.isSuccess) {
+    console.log('✅ [MOBILE DEBUG] Featured properties loaded:', query.data?.length || 0, 'items');
+  }
+  if (query.isError) {
+    console.error('❌ [MOBILE DEBUG] Featured properties error:', query.error);
+  }
+
+  return query;
 };
 
 export const useProperty = (id: number) => {
@@ -58,11 +71,24 @@ export const usePackages = (filters?: PackageFilters) => {
 };
 
 export const useFeaturedPackages = () => {
-  return useQuery({
+  const query = useQuery({
     queryKey: queryKeys.packages.featured(),
-    queryFn: () => unifiedApi.packages.getFeatured(),
+    queryFn: () => {
+      console.log('🔍 [MOBILE DEBUG] Fetching featured packages...');
+      return unifiedApi.packages.getFeatured();
+    },
     staleTime: 30 * 60 * 1000, // 30 minutes
   });
+
+  // Debug logging
+  if (query.isSuccess) {
+    console.log('✅ [MOBILE DEBUG] Featured packages loaded:', query.data?.length || 0, 'items');
+  }
+  if (query.isError) {
+    console.error('❌ [MOBILE DEBUG] Featured packages error:', query.error);
+  }
+
+  return query;
 };
 
 export const usePackage = (id: number) => {
@@ -76,11 +102,24 @@ export const usePackage = (id: number) => {
 
 // Reviews hooks
 export const useReviews = (approved?: boolean) => {
-  return useQuery({
+  const query = useQuery({
     queryKey: queryKeys.reviews.list(approved),
-    queryFn: () => approved !== undefined ? unifiedApi.reviews.getApproved() : unifiedApi.reviews.getAll(),
+    queryFn: () => {
+      console.log('🔍 [MOBILE DEBUG] Fetching reviews, approved:', approved);
+      return approved !== undefined ? unifiedApi.reviews.getApproved() : unifiedApi.reviews.getAll();
+    },
     staleTime: 2 * 60 * 1000, // 2 minutes
   });
+
+  // Debug logging
+  if (query.isSuccess) {
+    console.log('✅ [MOBILE DEBUG] Reviews loaded:', query.data?.length || 0, 'items');
+  }
+  if (query.isError) {
+    console.error('❌ [MOBILE DEBUG] Reviews error:', query.error);
+  }
+
+  return query;
 };
 
 // Reference data hooks (long-lived cache)

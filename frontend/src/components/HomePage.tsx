@@ -89,7 +89,18 @@ import { PropertyCard } from './ui/PropertyCard';
 import { useTranslation } from '../i18n';
 
 export const HomePage = React.memo(() => {
+  console.log('🔍 [MOBILE DEBUG] HomePage component rendering...');
+  
   const { properties, packages, isLoading, isError, error } = useHomepageData();
+  
+  console.log('🔍 [MOBILE DEBUG] HomePage data:', {
+    propertiesCount: properties?.length || 0,
+    packagesCount: packages?.length || 0,
+    isLoading,
+    isError,
+    error: error?.message
+  });
+  
   const { measure } = usePerformanceMonitor('HomePage');
   const { t } = useTranslation();
   const toast = useToast();
