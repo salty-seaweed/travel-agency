@@ -6,10 +6,17 @@ const isDevelopment = import.meta.env.MODE === 'development';
 const isProduction = import.meta.env.MODE === 'production';
 const isTesting = import.meta.env.MODE === 'test';
 
+// Detect if we're accessing through ngrok
+const isNgrokAccess = window.location.hostname.includes('ngrok-free.app') || 
+                     window.location.hostname.includes('ngrok.io') ||
+                     window.location.hostname.includes('ngrok.app');
+
 // API Configuration
 const API_CONFIG = {
   development: {
-    baseUrl: import.meta.env.VITE_API_BASE_URL || '/api',
+    baseUrl: isNgrokAccess 
+      ? `${window.location.protocol}//${window.location.host}/api`  // Use ngrok URL when accessing through ngrok
+      : import.meta.env.VITE_API_BASE_URL || '/api',
     timeout: 10000,
   },
   production: {

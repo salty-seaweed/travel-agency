@@ -105,7 +105,14 @@ const publicApiRequest = async <T>(
   cacheTtl?: number
 ): Promise<T> => {
   const url = `${config.apiBaseUrl}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
-  console.log('🔍 [MOBILE DEBUG] publicApiRequest called:', { endpoint, url, useCache });
+  console.log('🔍 [MOBILE DEBUG] publicApiRequest called:', { 
+    endpoint, 
+    url, 
+    useCache,
+    configApiBaseUrl: config.apiBaseUrl,
+    windowLocation: window.location.href,
+    isNgrok: window.location.hostname.includes('ngrok')
+  });
   
   // Check cache for GET requests
   if (useCache && (!options.method || options.method.toUpperCase() === 'GET')) {
@@ -133,8 +140,16 @@ const publicApiRequest = async <T>(
 
   try {
     console.log('🔍 [MOBILE DEBUG] Making fetch request to:', url);
+    console.log('🔍 [MOBILE DEBUG] Request options:', {
+      method: requestOptions.method || 'GET',
+      headers: requestOptions.headers,
+      signal: requestOptions.signal ? 'AbortController attached' : 'No signal'
+    });
+    
     const response = await fetch(url, requestOptions);
     console.log('🔍 [MOBILE DEBUG] Fetch response status:', response.status, response.statusText);
+    console.log('🔍 [MOBILE DEBUG] Response headers:', Object.fromEntries(response.headers.entries()));
+    
     clearTimeout(timeoutId);
 
     let data: any;
