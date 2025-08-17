@@ -7,9 +7,10 @@ class MobileCompatibilityMiddleware:
         
         # Add mobile-friendly headers
         response['Access-Control-Allow-Origin'] = '*'
-        response['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
-        response['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With, Accept, Accept-Language'
+        response['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS, PATCH'
+        response['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With, Accept, Accept-Language, Cache-Control, Origin, User-Agent'
         response['Access-Control-Max-Age'] = '86400'
+        response['Access-Control-Allow-Credentials'] = 'true'
         
         # Add security headers for mobile
         response['X-Content-Type-Options'] = 'nosniff'
