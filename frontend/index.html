@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Security Headers (Note: X-Frame-Options must be set by server, not meta tag) -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(self), payment=()">
+    
+    <!-- Content Security Policy (Updated for port 8001 and Google Translate) -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https: http://translate.google.com https://translate.google.com; img-src 'self' data: blob: http://localhost:8000 http://localhost:8001 https:; connect-src 'self' http://localhost:8000 http://localhost:8001 https: ws: wss:;">
+    
+    <!-- Progressive Web App -->
+    <meta name="theme-color" content="#1e40af">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- SEO and Social -->
+    <meta name="description" content="Thread Travels & Tours - Your trusted Maldives travel partner. Discover luxury resorts and authentic experiences.">
+    <meta name="keywords" content="Maldives, travel, luxury resorts, vacation, island hopping, Thread Travels">
+    <meta name="author" content="Thread Travels & Tours">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="Thread Travels & Tours - Maldives Paradise">
+    <meta property="og:description" content="Discover the best properties and travel packages in the Maldives">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&h=630&fit=crop">
+    <meta property="og:url" content="https://threadtravels.com">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Thread Travels & Tours">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Thread Travels & Tours - Maldives Paradise">
+    <meta name="twitter:description" content="Discover the best properties and travel packages in the Maldives">
+    <meta name="twitter:image" content="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&h=630&fit=crop">
+    
+    <!-- Performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://images.unsplash.com">
+    <link rel="dns-prefetch" href="https://api.unsplash.com">
+    
+    <title>Thread Travels & Tours - Maldives Paradise</title>
+  </head>
+  <body>
+    <noscript>
+      <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
+        <h1>JavaScript Required</h1>
+        <p>This application requires JavaScript to function properly.</p>
+        <p>Please enable JavaScript in your browser settings and reload the page.</p>
+      </div>
+    </noscript>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

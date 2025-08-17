@@ -1,0 +1,161 @@
+{
+  "common": {
+    "loading": "加载中...",
+    "error": "错误",
+    "success": "成功",
+    "cancel": "取消",
+    "save": "保存",
+    "edit": "编辑",
+    "delete": "删除",
+    "view": "查看",
+    "book": "预订",
+    "search": "搜索",
+    "filter": "筛选",
+    "sort": "排序",
+    "close": "关闭",
+    "back": "返回",
+    "next": "下一步",
+    "previous": "上一步",
+    "submit": "提交",
+    "reset": "重置",
+    "confirm": "确认",
+    "yes": "是",
+    "no": "否",
+    "ok": "确定"
+  },
+  "navigation": {
+    "home": "首页",
+    "properties": "酒店",
+    "packages": "旅游套餐",
+    "about": "关于我们",
+    "contact": "联系我们",
+    "blog": "博客",
+    "faq": "常见问题",
+    "dashboard": "仪表板",
+    "login": "登录",
+    "register": "注册",
+    "logout": "退出",
+    "profile": "个人资料",
+    "settings": "设置"
+  },
+  "homepage": {
+    "hero": {
+      "title": "发现您的马尔代夫天堂",
+      "subtitle": "体验马尔代夫的魔力，我们精心策划的豪华度假村和真实体验",
+      "explorePackages": "探索套餐",
+      "viewProperties": "查看酒店",
+      "trustedBy": "15,000+ 旅行者信赖"
+    },
+    "search": {
+      "title": "找到您完美的住宿",
+      "subtitle": "搜索500+酒店和套餐，提供高级筛选功能"
+    },
+    "packages": {
+      "title": "精心策划的旅行体验",
+      "subtitle": "精心挑选的套餐，结合豪华住宿、真实体验和难忘冒险",
+      "viewAll": "探索所有套餐",
+      "featured": "精选"
+    },
+    "properties": {
+      "title": "精选酒店",
+      "subtitle": "精心挑选的住宿，为您提供终极马尔代夫体验",
+      "viewAll": "查看所有酒店"
+    },
+    "whyChoose": {
+      "title": "为什么选择Thread Travels？",
+      "subtitle": "我们不仅仅是旅行社——我们是您通往马尔代夫天堂的个人门户",
+      "localExpertise": "当地专业知识",
+      "localExpertiseDesc": "我们的团队亲自访问并验证了每个酒店。我们知道游客很少发现的隐藏宝石。",
+      "qualityAssured": "质量保证",
+      "qualityAssuredDesc": "每个酒店都符合我们对清洁、服务和真实当地体验的严格标准。",
+      "personalSupport": "个人支持",
+      "personalSupportDesc": "从规划到退房，我们24/7为您服务。您的梦想假期是我们的优先事项。"
+    },
+    "cta": {
+      "title": "准备开始您的马尔代夫冒险？",
+      "subtitle": "让我们帮助您找到完美的酒店，在天堂创造难忘的回忆",
+      "chatWhatsApp": "WhatsApp聊天",
+      "callUs": "立即致电"
+    }
+  },
+  "property": {
+    "details": "查看详情",
+    "bookNow": "立即预订",
+    "perNight": "每晚",
+    "reviews": "评价",
+    "amenities": "设施",
+    "location": "位置",
+    "price": "价格",
+    "rating": "评分",
+    "description": "描述",
+    "features": "特色",
+    "gallery": "画廊",
+    "availability": "可用性",
+    "contactHost": "联系房东"
+  },
+  "package": {
+    "details": "查看详情",
+    "bookNow": "立即预订",
+    "duration": "天",
+    "maxTravelers": "最大旅行者数",
+    "destinations": "目的地",
+    "highlights": "亮点",
+    "included": "包含内容",
+    "itinerary": "行程",
+    "pricing": "定价",
+    "reviews": "评价"
+  },
+  "booking": {
+    "title": "预订您的住宿",
+    "checkIn": "入住",
+    "checkOut": "退房",
+    "guests": "客人",
+    "total": "总计",
+    "specialRequests": "特殊要求",
+    "contactInfo": "联系信息",
+    "name": "姓名",
+    "email": "邮箱",
+    "phone": "电话",
+    "confirmBooking": "确认预订",
+    "bookingSummary": "预订摘要"
+  },
+  "contact": {
+    "title": "联系我们",
+    "subtitle": "联系我们的旅行专家",
+    "name": "姓名",
+    "email": "邮箱",
+    "phone": "电话",
+    "message": "消息",
+    "sendMessage": "发送消息",
+    "address": "地址",
+    "hours": "营业时间"
+  },
+  "auth": {
+    "login": "登录",
+    "register": "注册",
+    "email": "邮箱",
+    "password": "密码",
+    "confirmPassword": "确认密码",
+    "forgotPassword": "忘记密码？",
+    "rememberMe": "记住我",
+    "signIn": "登录",
+    "signUp": "注册",
+    "alreadyHaveAccount": "已有账户？",
+    "dontHaveAccount": "没有账户？"
+  },
+  "errors": {
+    "networkError": "网络错误。请检查您的连接并重试。",
+    "serverError": "服务器错误。请稍后重试。",
+    "notFound": "未找到请求的资源。",
+    "unauthorized": "您无权执行此操作。",
+    "validationError": "请检查您的输入并重试。",
+    "unknownError": "发生意外错误。请重试。"
+  },
+  "success": {
+    "bookingSent": "预订请求发送成功！",
+    "messageSent": "消息发送成功！",
+    "profileUpdated": "个人资料更新成功！",
+    "loginSuccess": "登录成功！",
+    "logoutSuccess": "退出成功！"
+  }
+} 
