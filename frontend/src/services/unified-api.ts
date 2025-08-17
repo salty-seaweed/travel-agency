@@ -119,6 +119,9 @@ const publicApiRequest = async <T>(
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     'X-Requested-With': 'XMLHttpRequest',
+    'Accept': 'application/json, text/plain, */*',
+    'Accept-Language': 'en-US,en;q=0.9',
+    'Cache-Control': 'no-cache',
   };
 
   const requestOptions: RequestInit = {
@@ -195,6 +198,9 @@ const apiRequest = async <T>(
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     'X-Requested-With': 'XMLHttpRequest',
+    'Accept': 'application/json, text/plain, */*',
+    'Accept-Language': 'en-US,en;q=0.9',
+    'Cache-Control': 'no-cache',
   };
 
   const accessToken = tokenStorage.getAccessToken();

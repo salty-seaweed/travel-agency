@@ -58,6 +58,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
+    'api.middleware.MobileCompatibilityMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -188,6 +189,10 @@ CORS_ALLOWED_ORIGINS = [
 # Allow ngrok domains for development
 CORS_ALLOW_ALL_ORIGINS = True  # For development only - remove in production
 
+# Additional CORS settings for mobile compatibility
+CORS_ALLOW_CREDENTIALS = True
+CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']
+
 # CORS_ALLOW_CREDENTIALS = True  # Not needed for JWT tokens
 
 # Allow all headers and methods for development
@@ -199,6 +204,22 @@ CORS_ALLOW_METHODS = [
     'PATCH',
     'POST',
     'PUT',
+]
+
+# Additional headers for mobile compatibility
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+    'access-control-allow-origin',
+    'access-control-allow-headers',
+    'access-control-allow-methods',
 ]
 
 MEDIA_URL = '/media/'
