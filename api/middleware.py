@@ -17,6 +17,9 @@ class MobileCompatibilityMiddleware:
         response['X-Frame-Options'] = 'DENY'
         response['X-XSS-Protection'] = '1; mode=block'
         
+        # Add CSP headers to allow ngrok fonts
+        response['Content-Security-Policy'] = "default-src 'self' https://cdn.ngrok.com 'unsafe-eval' 'unsafe-inline'; font-src 'self' https://assets.ngrok.com data:; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https:;"
+        
         # Handle preflight requests
         if request.method == 'OPTIONS':
             response.status_code = 200
