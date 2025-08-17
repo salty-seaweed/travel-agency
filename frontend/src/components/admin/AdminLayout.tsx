@@ -41,6 +41,7 @@ import {
   UserCircleIcon,
   CogIcon,
   DocumentTextIcon,
+  SparklesIcon,
 } from '@heroicons/react/24/outline';
 
 interface AdminLayoutProps {
@@ -52,6 +53,7 @@ const adminNav = [
   { name: 'Properties', href: '/dashboard/properties', icon: BuildingOffice2Icon, description: 'Manage properties' },
   { name: 'Packages', href: '/dashboard/packages', icon: GiftIcon, description: 'Manage packages' },
   { name: 'Reviews', href: '/dashboard/reviews', icon: StarIcon, description: 'Customer reviews' },
+  { name: 'Transportation', href: '/dashboard/transportation', icon: SparklesIcon, description: 'Manage transportation' },
   { name: 'Content Management', href: '/dashboard/content', icon: DocumentTextIcon, description: 'Create and manage pages' },
   { name: 'Settings', href: '/dashboard/settings', icon: WrenchScrewdriverIcon, description: 'Amenities & locations' },
 ];

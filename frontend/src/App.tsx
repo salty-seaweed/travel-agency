@@ -15,6 +15,7 @@ import { AboutPage } from './components/AboutPage';
 import { BlogPage } from './components/BlogPage';
 import { FAQPage } from './components/FAQPage';
 import { MapPage } from './components/MapPage';
+import { TransportationPage } from './components/TransportationPage';
 import { CustomerLogin } from './components/auth/CustomerLogin';
 import { CustomerRegister } from './components/auth/CustomerRegister';
 import { CustomerProtectedRoute } from './components/auth/CustomerProtectedRoute';
@@ -29,6 +30,7 @@ import { AdminReviews } from './components/admin/AdminReviews';
 import { AdminAnalytics } from './components/admin/AdminAnalytics';
 import { AdminSettings } from './components/admin/AdminSettings';
 import AdminContentManager from './components/admin/AdminContentManager';
+import { TransportationAdmin } from './components/admin/transportation/TransportationAdmin';
 import { PublicRoute } from './components/auth/PublicRoute';
 
 function AppContent() {
@@ -59,6 +61,7 @@ function AppContent() {
           <Route path="blog" element={<BlogPage />} />
           <Route path="faq" element={<FAQPage />} />
           <Route path="map" element={<MapPage />} />
+          <Route path="transportation" element={<TransportationPage />} />
         </Route>
 
         {/* Customer Auth Routes */}
@@ -78,6 +81,7 @@ function AppContent() {
           <Route path="packages" element={<AdminPackages />} />
           <Route path="reviews" element={<AdminReviews />} />
           <Route path="analytics" element={<AdminAnalytics />} />
+          <Route path="transportation" element={<TransportationAdmin />} />
           <Route path="settings" element={<AdminSettings />} />
           <Route path="content" element={<AdminContentManager />} />
         </Route>

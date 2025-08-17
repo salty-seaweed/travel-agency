@@ -1,7 +1,9 @@
 from django.contrib import admin
 from .models import (
     PropertyType, Amenity, Location, Property, PropertyImage, Package, Review,
-    Page, PageBlock, MediaAsset, Menu, MenuItem, Redirect, PageVersion, PageReview, CommentThread, Comment
+    Page, PageBlock, MediaAsset, Menu, MenuItem, Redirect, PageVersion, PageReview, CommentThread, Comment,
+    TransferType, AtollTransfer, ResortTransfer, TransferFAQ, TransferContactMethod, 
+    TransferBookingStep, TransferBenefit, TransferPricingFactor, TransferContent
 )
 
 @admin.register(PropertyType)
@@ -106,3 +108,72 @@ class CommentAdmin(admin.ModelAdmin):
     list_filter = ('created_at',)
     search_fields = ('content', 'author__username')
     readonly_fields = ('author', 'created_at', 'updated_at')
+
+# Transportation Admin Models
+@admin.register(TransferType)
+class TransferTypeAdmin(admin.ModelAdmin):
+    list_display = ('name', 'pricing_range', 'best_for', 'is_active', 'order')
+    list_filter = ('is_active',)
+    search_fields = ('name', 'description')
+    ordering = ('order',)
+
+@admin.register(AtollTransfer)
+class AtollTransferAdmin(admin.ModelAdmin):
+    list_display = ('atoll_name', 'description', 'is_active', 'order')
+    list_filter = ('is_active',)
+    search_fields = ('atoll_name', 'description')
+    ordering = ('order',)
+
+class ResortTransferInline(admin.TabularInline):
+    model = ResortTransfer
+    extra = 1
+    fields = ('resort_name', 'price', 'duration', 'transfer_type', 'is_active', 'order')
+
+@admin.register(ResortTransfer)
+class ResortTransferAdmin(admin.ModelAdmin):
+    list_display = ('resort_name', 'atoll', 'price', 'duration', 'transfer_type', 'is_active')
+    list_filter = ('atoll', 'transfer_type', 'is_active')
+    search_fields = ('resort_name',)
+    ordering = ('atoll', 'order')
+
+@admin.register(TransferFAQ)
+class TransferFAQAdmin(admin.ModelAdmin):
+    list_display = ('question', 'category', 'is_active', 'order')
+    list_filter = ('category', 'is_active')
+    search_fields = ('question', 'answer')
+    ordering = ('category', 'order')
+
+@admin.register(TransferContactMethod)
+class TransferContactMethodAdmin(admin.ModelAdmin):
+    list_display = ('method', 'contact', 'response_time', 'is_active', 'order')
+    list_filter = ('is_active',)
+    search_fields = ('method', 'contact', 'description')
+    ordering = ('order',)
+
+@admin.register(TransferBookingStep)
+class TransferBookingStepAdmin(admin.ModelAdmin):
+    list_display = ('step_number', 'title', 'is_active')
+    list_filter = ('is_active',)
+    search_fields = ('title', 'description')
+    ordering = ('step_number',)
+
+@admin.register(TransferBenefit)
+class TransferBenefitAdmin(admin.ModelAdmin):
+    list_display = ('benefit', 'color', 'is_active', 'order')
+    list_filter = ('is_active',)
+    search_fields = ('benefit', 'description')
+    ordering = ('order',)
+
+@admin.register(TransferPricingFactor)
+class TransferPricingFactorAdmin(admin.ModelAdmin):
+    list_display = ('factor', 'impact', 'is_active', 'order')
+    list_filter = ('impact', 'is_active')
+    search_fields = ('factor', 'description')
+    ordering = ('order',)
+
+@admin.register(TransferContent)
+class TransferContentAdmin(admin.ModelAdmin):
+    list_display = ('section', 'title', 'is_active', 'order')
+    list_filter = ('section', 'is_active')
+    search_fields = ('title', 'description')
+    ordering = ('order',)

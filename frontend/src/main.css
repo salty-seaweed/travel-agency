@@ -153,6 +153,20 @@ div[class*="min-h-screen"] {
   min-height: auto !important;
 }
 
+/* Force cards to be solid white */
+.solid-white-card {
+  background-color: white !important;
+  background: white !important;
+  opacity: 1 !important;
+  backdrop-filter: none !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* Ensure card content is always visible */
+.solid-white-card * {
+  color: inherit !important;
+}
+
 /* Ensure hero content doesn't cause overflow */
 .hero-section .container {
   height: 100% !important;

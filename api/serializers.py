@@ -3,7 +3,8 @@ from .models import (
     PropertyType, Amenity, Location, PropertyImage, Property, Package, PackageImage, Review, 
     Booking, Availability, Customer, Page, PageBlock, MediaAsset, Menu, MenuItem, 
     Redirect, PageVersion, PageReview, CommentThread, Comment, PackageItinerary, PackageInclusion, 
-    PackageActivity, PackageDestination
+    PackageActivity, PackageDestination, TransferType, AtollTransfer, ResortTransfer, TransferFAQ,
+    TransferContactMethod, TransferBookingStep, TransferBenefit, TransferPricingFactor, TransferContent
 )
 
 class PropertyTypeSerializer(serializers.ModelSerializer):
@@ -228,6 +229,56 @@ class CommentSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Comment
+        fields = '__all__'
+
+# Transportation Serializers
+class TransferTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TransferType
+        fields = '__all__'
+
+class ResortTransferSerializer(serializers.ModelSerializer):
+    atoll = serializers.StringRelatedField()
+    
+    class Meta:
+        model = ResortTransfer
+        fields = '__all__'
+
+class AtollTransferSerializer(serializers.ModelSerializer):
+    resorts = ResortTransferSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = AtollTransfer
+        fields = '__all__'
+
+class TransferFAQSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TransferFAQ
+        fields = '__all__'
+
+class TransferContactMethodSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TransferContactMethod
+        fields = '__all__'
+
+class TransferBookingStepSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TransferBookingStep
+        fields = '__all__'
+
+class TransferBenefitSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TransferBenefit
+        fields = '__all__'
+
+class TransferPricingFactorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TransferPricingFactor
+        fields = '__all__'
+
+class TransferContentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TransferContent
         fields = '__all__'
         read_only_fields = ['author', 'created_at', 'updated_at']
 

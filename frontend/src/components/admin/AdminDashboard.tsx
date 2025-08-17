@@ -45,6 +45,7 @@ import {
   CalendarIcon,
   ArrowUpIcon,
   ArrowDownIcon,
+  SparklesIcon,
 } from '@heroicons/react/24/outline';
 
 interface DashboardStats {
@@ -429,6 +430,16 @@ export function AdminDashboard() {
                 justifyContent="flex-start"
               >
                 Settings
+              </Button>
+              <Button
+                leftIcon={<Icon as={SparklesIcon} h={5} w={5} />}
+                variant="outline"
+                colorScheme="teal"
+                onClick={() => navigate('/dashboard/transportation')}
+                size="lg"
+                justifyContent="flex-start"
+              >
+                Transportation
               </Button>
             </VStack>
           </CardBody>

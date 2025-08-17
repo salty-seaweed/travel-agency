@@ -29,6 +29,7 @@ export { FAQPage } from './FAQPage';
 export { BlogPage } from './BlogPage';
 export { CustomerDashboard } from './CustomerDashboard';
 export { MapPage } from './MapPage';
+export { TransportationPage } from './TransportationPage';
 
 // SEO Components
 export { SEO } from './SEO';

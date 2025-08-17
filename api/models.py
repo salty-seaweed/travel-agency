@@ -514,3 +514,163 @@ class Comment(models.Model):
     
     def __str__(self):
         return f"Comment by {self.author.username} on {self.thread.title}"
+
+# Transportation Models
+class TransferType(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    icon = models.CharField(max_length=100, blank=True)
+    gradient = models.CharField(max_length=100, default='from-blue-500 to-indigo-600')
+    features = models.JSONField(default=list)  # List of features
+    pricing_range = models.CharField(max_length=100)  # e.g., "From $50 to $300 per person"
+    best_for = models.CharField(max_length=200)
+    pros = models.JSONField(default=list)  # List of pros
+    cons = models.JSONField(default=list)  # List of cons
+    is_active = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(default=0)
+    
+    class Meta:
+        ordering = ['order']
+    
+    def __str__(self):
+        return self.name
+
+class AtollTransfer(models.Model):
+    atoll_name = models.CharField(max_length=100)
+    description = models.TextField()
+    icon = models.CharField(max_length=100, blank=True)
+    gradient = models.CharField(max_length=100, default='from-blue-500 to-indigo-600')
+    is_active = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(default=0)
+    
+    class Meta:
+        ordering = ['order']
+    
+    def __str__(self):
+        return self.atoll_name
+
+class ResortTransfer(models.Model):
+    atoll = models.ForeignKey(AtollTransfer, on_delete=models.CASCADE, related_name='resorts')
+    resort_name = models.CharField(max_length=200)
+    price = models.DecimalField(max_digits=8, decimal_places=2)
+    duration = models.CharField(max_length=100)  # e.g., "45 minutes"
+    transfer_type = models.CharField(max_length=50, default='speedboat')  # speedboat, seaplane, ferry
+    is_active = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(default=0)
+    
+    class Meta:
+        ordering = ['atoll', 'order']
+    
+    def __str__(self):
+        return f"{self.resort_name} - {self.atoll.atoll_name}"
+
+class TransferFAQ(models.Model):
+    question = models.CharField(max_length=500)
+    answer = models.TextField()
+    category = models.CharField(max_length=100)
+    icon = models.CharField(max_length=100, blank=True)
+    is_active = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(default=0)
+    
+    class Meta:
+        ordering = ['category', 'order']
+        verbose_name = 'Transfer FAQ'
+        verbose_name_plural = 'Transfer FAQs'
+    
+    def __str__(self):
+        return self.question
+
+class TransferContactMethod(models.Model):
+    method = models.CharField(max_length=100)  # WhatsApp, Phone, Email
+    icon = models.CharField(max_length=100, blank=True)
+    color = models.CharField(max_length=50, default='blue')
+    contact = models.CharField(max_length=100)
+    description = models.TextField()
+    response_time = models.CharField(max_length=100)  # e.g., "Within 5 minutes"
+    is_active = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(default=0)
+    
+    class Meta:
+        ordering = ['order']
+    
+    def __str__(self):
+        return self.method
+
+class TransferBookingStep(models.Model):
+    step_number = models.PositiveIntegerField()
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    icon = models.CharField(max_length=100, blank=True)
+    details = models.JSONField(default=list)  # List of details
+    tips = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+    
+    class Meta:
+        ordering = ['step_number']
+    
+    def __str__(self):
+        return f"Step {self.step_number}: {self.title}"
+
+class TransferBenefit(models.Model):
+    benefit = models.CharField(max_length=200)
+    description = models.TextField()
+    icon = models.CharField(max_length=100, blank=True)
+    color = models.CharField(max_length=50, default='blue')
+    is_active = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(default=0)
+    
+    class Meta:
+        ordering = ['order']
+    
+    def __str__(self):
+        return self.benefit
+
+class TransferPricingFactor(models.Model):
+    factor = models.CharField(max_length=200)
+    description = models.TextField()
+    icon = models.CharField(max_length=100, blank=True)
+    impact = models.CharField(max_length=20, choices=[
+        ('High', 'High'),
+        ('Medium', 'Medium'),
+        ('Low', 'Low'),
+    ], default='Medium')
+    examples = models.JSONField(default=list)  # List of examples
+    is_active = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(default=0)
+    
+    class Meta:
+        ordering = ['order']
+    
+    def __str__(self):
+        return self.factor
+
+class TransferContent(models.Model):
+    """Main content model for transportation page sections"""
+    SECTION_CHOICES = [
+        ('hero', 'Hero Section'),
+        ('transfer_types', 'Transfer Types Section'),
+        ('atoll_transfers', 'Atoll Transfers Section'),
+        ('transfer_guide', 'Transfer Guide Section'),
+        ('pricing', 'Pricing Section'),
+        ('faq', 'FAQ Section'),
+        ('booking', 'Booking Section'),
+    ]
+    
+    section = models.CharField(max_length=50, choices=SECTION_CHOICES, unique=True)
+    title = models.CharField(max_length=200)
+    subtitle = models.TextField(blank=True)
+    description = models.TextField(blank=True)
+    badge_text = models.CharField(max_length=100, blank=True)
+    badge_icon = models.CharField(max_length=100, blank=True)
+    is_active = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['order']
+        verbose_name = 'Transfer Content'
+        verbose_name_plural = 'Transfer Content'
+    
+    def __str__(self):
+        return f"{self.get_section_display()} - {self.title}"

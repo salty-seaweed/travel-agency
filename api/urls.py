@@ -31,6 +31,17 @@ router.register(r'page-reviews', views.PageReviewViewSet)
 router.register(r'comment-threads', views.CommentThreadViewSet)
 router.register(r'comments', views.CommentViewSet)
 
+# Transportation routes
+router.register(r'transfer-types', views.TransferTypeViewSet)
+router.register(r'atoll-transfers', views.AtollTransferViewSet)
+router.register(r'resort-transfers', views.ResortTransferViewSet)
+router.register(r'transfer-faqs', views.TransferFAQViewSet)
+router.register(r'transfer-contact-methods', views.TransferContactMethodViewSet)
+router.register(r'transfer-booking-steps', views.TransferBookingStepViewSet)
+router.register(r'transfer-benefits', views.TransferBenefitViewSet)
+router.register(r'transfer-pricing-factors', views.TransferPricingFactorViewSet)
+router.register(r'transfer-content', views.TransferContentViewSet)
+
 urlpatterns = [
     path('', include(router.urls)),
     path('upload-image/', views.upload_image, name='upload_image'),
@@ -40,4 +51,5 @@ urlpatterns = [
     path('dashboard-stats/', views.dashboard_stats, name='dashboard_stats'),
     path('properties/<int:property_id>/availability/', views.check_availability, name='property_availability'),
     path('bookings/create-booking/', views.create_booking, name='create_booking'),
+    path('transportation/', views.transportation_data, name='transportation_data'),
 ] 

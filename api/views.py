@@ -14,7 +14,8 @@ from .models import (
     PropertyType, Amenity, Location, PropertyImage, Property, Package, PackageImage, Review, 
     Booking, Availability, Customer, Page, PageBlock, MediaAsset, Menu, MenuItem, 
     Redirect, PageVersion, PageReview, CommentThread, Comment, PackageItinerary, PackageInclusion,
-    PackageActivity, PackageDestination
+    PackageActivity, PackageDestination, TransferType, AtollTransfer, ResortTransfer, TransferFAQ,
+    TransferContactMethod, TransferBookingStep, TransferBenefit, TransferPricingFactor, TransferContent
 )
 from .serializers import (
     PropertyTypeSerializer, AmenitySerializer, LocationSerializer, 
@@ -23,7 +24,10 @@ from .serializers import (
     BookingStatusUpdateSerializer, AvailabilitySerializer, CustomerSerializer,
     PageSerializer, PageBlockSerializer, MediaAssetSerializer, MenuSerializer, MenuItemSerializer,
     RedirectSerializer, PageVersionSerializer, PageReviewSerializer, CommentThreadSerializer, CommentSerializer,
-    PackageItinerarySerializer, PackageInclusionSerializer, PackageActivitySerializer, PackageDestinationSerializer
+    PackageItinerarySerializer, PackageInclusionSerializer, PackageActivitySerializer, PackageDestinationSerializer,
+    TransferTypeSerializer, AtollTransferSerializer, ResortTransferSerializer, TransferFAQSerializer,
+    TransferContactMethodSerializer, TransferBookingStepSerializer, TransferBenefitSerializer,
+    TransferPricingFactorSerializer, TransferContentSerializer
 )
 from rest_framework.decorators import permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -786,3 +790,105 @@ class CommentViewSet(viewsets.ModelViewSet):
     search_fields = ['content']
     ordering_fields = ['created_at']
     ordering = ['created_at']
+
+# Transportation Viewsets
+class TransferTypeViewSet(viewsets.ModelViewSet):
+    queryset = TransferType.objects.filter(is_active=True)
+    serializer_class = TransferTypeSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['is_active']
+    ordering_fields = ['order', 'name']
+    ordering = ['order']
+
+class AtollTransferViewSet(viewsets.ModelViewSet):
+    queryset = AtollTransfer.objects.filter(is_active=True)
+    serializer_class = AtollTransferSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['is_active']
+    ordering_fields = ['order', 'atoll_name']
+    ordering = ['order']
+
+class ResortTransferViewSet(viewsets.ModelViewSet):
+    queryset = ResortTransfer.objects.filter(is_active=True)
+    serializer_class = ResortTransferSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['atoll', 'transfer_type', 'is_active']
+    ordering_fields = ['order', 'resort_name']
+    ordering = ['atoll', 'order']
+
+class TransferFAQViewSet(viewsets.ModelViewSet):
+    queryset = TransferFAQ.objects.filter(is_active=True)
+    serializer_class = TransferFAQSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['category', 'is_active']
+    search_fields = ['question', 'answer']
+    ordering_fields = ['order', 'category']
+    ordering = ['category', 'order']
+
+class TransferContactMethodViewSet(viewsets.ModelViewSet):
+    queryset = TransferContactMethod.objects.filter(is_active=True)
+    serializer_class = TransferContactMethodSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['is_active']
+    ordering_fields = ['order', 'method']
+    ordering = ['order']
+
+class TransferBookingStepViewSet(viewsets.ModelViewSet):
+    queryset = TransferBookingStep.objects.filter(is_active=True)
+    serializer_class = TransferBookingStepSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['is_active']
+    ordering_fields = ['step_number']
+    ordering = ['step_number']
+
+class TransferBenefitViewSet(viewsets.ModelViewSet):
+    queryset = TransferBenefit.objects.filter(is_active=True)
+    serializer_class = TransferBenefitSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['is_active']
+    ordering_fields = ['order', 'benefit']
+    ordering = ['order']
+
+class TransferPricingFactorViewSet(viewsets.ModelViewSet):
+    queryset = TransferPricingFactor.objects.filter(is_active=True)
+    serializer_class = TransferPricingFactorSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['impact', 'is_active']
+    ordering_fields = ['order', 'factor']
+    ordering = ['order']
+
+class TransferContentViewSet(viewsets.ModelViewSet):
+    queryset = TransferContent.objects.filter(is_active=True)
+    serializer_class = TransferContentSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['section', 'is_active']
+    search_fields = ['title', 'description']
+    ordering_fields = ['order', 'section']
+    ordering = ['order']
+
+@api_view(['GET'])
+def transportation_data(request):
+    """Get all transportation data for the frontend"""
+    try:
+        data = {
+            'transfer_types': TransferTypeSerializer(TransferType.objects.filter(is_active=True), many=True).data,
+            'atoll_transfers': AtollTransferSerializer(AtollTransfer.objects.filter(is_active=True), many=True).data,
+            'faqs': TransferFAQSerializer(TransferFAQ.objects.filter(is_active=True), many=True).data,
+            'contact_methods': TransferContactMethodSerializer(TransferContactMethod.objects.filter(is_active=True), many=True).data,
+            'booking_steps': TransferBookingStepSerializer(TransferBookingStep.objects.filter(is_active=True), many=True).data,
+            'benefits': TransferBenefitSerializer(TransferBenefit.objects.filter(is_active=True), many=True).data,
+            'pricing_factors': TransferPricingFactorSerializer(TransferPricingFactor.objects.filter(is_active=True), many=True).data,
+            'content': TransferContentSerializer(TransferContent.objects.filter(is_active=True), many=True).data,
+        }
+        return Response(data)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

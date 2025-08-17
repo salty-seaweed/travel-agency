@@ -41,6 +41,7 @@ import {
   ChevronDownIcon,
   Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
+  SparklesIcon,
 } from '@heroicons/react/24/outline';
 import { useCustomerAuth } from '../hooks/useCustomerAuth';
 import { useSmartTranslation } from '../hooks/useSmartTranslation';
@@ -64,6 +65,7 @@ export const Navigation = React.memo(() => {
     { name: 'Home', href: '/', icon: HomeIcon },
     { name: 'Packages', href: '/packages', icon: StarIcon, featured: true },
     { name: 'Properties', href: '/properties', icon: BuildingOfficeIcon },
+    { name: 'Transportation', href: '/transportation', icon: SparklesIcon },
     { name: 'Map', href: '/map', icon: MapIcon },
     { name: 'About', href: '/about', icon: InformationCircleIcon },
     { name: 'Contact', href: '/contact', icon: ChatBubbleLeftRightIcon },

@@ -95,16 +95,16 @@ export const HomePage = React.memo(() => {
   const toast = useToast();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  // Hero background images for rotation - Using responsive sizing for better mobile experience
+  // Hero background images for rotation - Using greenery and ocean views (no faces)
   const heroImages = [
-    "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&h=800&fit=crop&crop=center&auto=format&q=80",
-    "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=1200&h=800&fit=crop&crop=center&auto=format&q=80",
-    "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=1200&h=800&fit=crop&crop=center&auto=format&q=80",
-    "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=1200&h=800&fit=crop&crop=center&auto=format&q=80",
-    "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=1200&h=800&fit=crop&crop=center&auto=format&q=80",
-    "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=1200&h=800&fit=crop&crop=center&auto=format&q=80",
-    "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=1200&h=800&fit=crop&crop=center&auto=format&q=80",
-    "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=1200&h=800&fit=crop&crop=center&auto=format&q=80",
+    "/src/assets/images/ishan45.jpg", // Ocean view
+    "/src/assets/images/ishan46.jpg", // Greenery
+    "/src/assets/images/ishan47.jpg", // Ocean
+    "/src/assets/images/ishan48.jpg", // Beach with greenery
+    "/src/assets/images/ishan49.jpg", // Ocean view
+    "/src/assets/images/ishan50.jpg", // Tropical greenery
+    "/src/assets/images/ishan51.jpg", // Ocean
+    "/src/assets/images/ishan52.jpg", // Beach with trees
   ];
 
   // Rotate hero images
@@ -168,7 +168,14 @@ export const HomePage = React.memo(() => {
         keywords="Maldives travel, property booking, local accommodation, island hopping, Thread Travels"
       />
       
-      <Box bg="gray.50">
+      <Box bg="gray.50" className="bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 relative">
+        {/* Subtle background pattern */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute inset-0" style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            backgroundSize: '60px 60px'
+          }}></div>
+        </div>
         {/* Hero Section with Dynamic Background */}
         <section className="hero-section relative h-screen flex items-center justify-center overflow-hidden" style={{ height: '100vh', maxHeight: '100vh', minHeight: '100vh' }}>
           {/* Bottom fade transition to prevent visual artifacts */}
@@ -176,24 +183,16 @@ export const HomePage = React.memo(() => {
           {/* Dynamic Background Images */}
           <div className="absolute inset-0 overflow-hidden">
             {heroImages.map((image, index) => {
-              // Create responsive image URLs for different screen sizes
-              const baseUrl = image.split('?')[0];
-              const mobileUrl = `${baseUrl}?w=800&h=600&fit=crop&crop=center&auto=format&q=80`;
-              const tabletUrl = `${baseUrl}?w=1200&h=800&fit=crop&crop=center&auto=format&q=80`;
-              const desktopUrl = `${baseUrl}?w=1920&h=1080&fit=crop&crop=center&auto=format&q=80`;
-              
               return (
                 <img 
                   key={index}
-                  src={desktopUrl}
-                  srcSet={`${mobileUrl} 800w, ${tabletUrl} 1200w, ${desktopUrl} 1920w`}
-                  sizes="100vw"
-                  alt={`Maldives Paradise ${index + 1}`}
-                  className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-1000 ${
+                  src={image}
+                  alt={`Authentic Maldives Paradise ${index + 1}`}
+                  className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
                     index === currentImageIndex ? 'opacity-100' : 'opacity-0'
                   }`}
                   style={{
-                    objectPosition: 'center center',
+                    objectPosition: 'center 30%',
                     minWidth: '100%',
                     minHeight: '100%',
                     width: '100%',
@@ -205,7 +204,7 @@ export const HomePage = React.memo(() => {
                     // Ensure image is properly sized after load
                     const img = e.target as HTMLImageElement;
                     img.style.objectFit = 'cover';
-                    img.style.objectPosition = 'center center';
+                    img.style.objectPosition = 'center 30%';
                   }}
                 />
               );
@@ -318,9 +317,7 @@ export const HomePage = React.memo(() => {
         </section> */}
 
         {/* Travel Packages Section - PRIORITY */}
-        <section className="travel-packages-section py-24 bg-gradient-to-br from-white to-gray.50 relative">
-          {/* Smooth transition overlay to prevent visual artifacts */}
-          <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-transparent to-white"></div>
+        <section className="travel-packages-section py-24 bg-gradient-to-br from-white to-blue-50 relative">
           <Container maxW="7xl">
             <VStack spacing={16} mb={16} textAlign="center">
               <Badge 
@@ -330,11 +327,11 @@ export const HomePage = React.memo(() => {
                 Curated Experiences
               </Badge>
               
-              <Heading size="2xl" className="text-5xl md:text-6xl font-bold text-gray-900">
+              <Heading size="2xl" className="text-5xl md:text-6xl font-bold text-gray-900 drop-shadow-sm">
                 Curated Travel Packages
               </Heading>
               
-              <Text className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+              <Text className="text-xl text-gray-800 max-w-4xl mx-auto leading-relaxed font-medium drop-shadow-sm">
                 All-inclusive experiences designed to make your Maldives adventure unforgettable. 
                 From romantic getaways to family adventures, we have the perfect package for every traveler.
               </Text>
@@ -380,7 +377,7 @@ export const HomePage = React.memo(() => {
         </section>
 
         {/* Featured Properties Section */}
-        <section className="py-24 bg-gradient-to-br from-gray.50 to-blue.50">
+        <section className="py-24 bg-gradient-to-br from-blue-50 to-cyan-50 relative">
           <Container maxW="7xl">
             <VStack spacing={16} mb={16} textAlign="center">
               <Badge 
@@ -390,11 +387,11 @@ export const HomePage = React.memo(() => {
                 Handpicked Destinations
               </Badge>
               
-              <Heading size="2xl" className="text-5xl md:text-6xl font-bold text-gray-900">
+              <Heading size="2xl" className="text-5xl md:text-6xl font-bold text-gray-900 drop-shadow-sm">
                 Featured Properties
               </Heading>
               
-              <Text className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+              <Text className="text-xl text-gray-800 max-w-4xl mx-auto leading-relaxed font-medium drop-shadow-sm">
                 Handpicked accommodations that offer the perfect blend of luxury, comfort, and authentic Maldivian experience. 
                 Each property is carefully selected to ensure your dream vacation becomes reality.
               </Text>
@@ -445,7 +442,7 @@ export const HomePage = React.memo(() => {
         </section>
 
         {/* Why Choose Us Section */}
-        <section className="py-24 bg-gradient-to-br from-blue-50 via-indigo-50 to-blue-100">
+        <section className="py-24 bg-gradient-to-br from-blue-50 to-indigo-50 relative">
           <Container maxW="7xl">
             <VStack spacing={16} mb={16} textAlign="center">
               <Badge 
@@ -455,11 +452,11 @@ export const HomePage = React.memo(() => {
                 Why Choose Us
               </Badge>
               
-              <Heading size="2xl" className="text-5xl md:text-6xl font-bold text-gray-900">
+              <Heading size="2xl" className="text-5xl md:text-6xl font-bold text-gray-900 drop-shadow-sm">
                 Why Choose Thread Travels?
               </Heading>
               
-              <Text className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+              <Text className="text-xl text-gray-800 max-w-4xl mx-auto leading-relaxed font-medium drop-shadow-sm">
                 We're not just another travel agency - we're your local experts in the Maldives. 
                 Our deep connections and insider knowledge ensure you get the most authentic and memorable experience.
               </Text>
@@ -497,19 +494,21 @@ export const HomePage = React.memo(() => {
                 }
               ].map((feature, index) => (
                 <div key={index} className="text-center group hover:-translate-y-4 transition-all duration-500" style={{ animationDelay: feature.delay }}>
-                  <Card className="bg-white rounded-3xl p-8 shadow-lg group-hover:shadow-2xl transition-all duration-500 border border-gray-100">
+                  <div 
+                    className="bg-white rounded-3xl p-8 shadow-2xl group-hover:shadow-3xl transition-all duration-500 border-2 border-gray-200 group-hover:border-gray-300"
+                  >
                     <VStack spacing={6}>
                       <div className={`w-20 h-20 bg-gradient-to-br ${feature.gradient} rounded-2xl flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
                         <Icon as={feature.icon} className="w-10 h-10 text-white" />
                       </div>
-                      <Heading size="lg" className="text-gray-900 font-bold">
+                      <Heading size="lg" className="text-gray-900 font-bold drop-shadow-sm">
                         {feature.title}
                       </Heading>
-                      <Text className="text-gray-600 leading-relaxed">
+                      <Text className="text-gray-700 leading-relaxed font-medium">
                         {feature.description}
                       </Text>
                     </VStack>
-                  </Card>
+                  </div>
                 </div>
               ))}
             </SimpleGrid>
@@ -517,7 +516,7 @@ export const HomePage = React.memo(() => {
         </section>
 
         {/* CTA Section */}
-        <section className="py-24 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 relative overflow-hidden">
+        <section className="py-24 bg-gradient-to-r from-blue-800 via-indigo-800 to-blue-900 relative overflow-hidden">
           {/* Background Pattern */}
           <div className="absolute inset-0 opacity-10">
             <div className="absolute top-10 left-10 animate-float">
@@ -548,7 +547,7 @@ export const HomePage = React.memo(() => {
                   Ready to Start Your Maldives Adventure?
                 </Heading>
                 
-                <Text className="text-xl text-blue-100 max-w-3xl mx-auto leading-relaxed">
+                <Text className="text-xl text-blue-200 max-w-3xl mx-auto leading-relaxed">
                   Start planning your dream Maldives vacation with Thread Travels. 
                   Your perfect island getaway is just a click away.
                 </Text>
