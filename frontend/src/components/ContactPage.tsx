@@ -5,8 +5,27 @@ import {
   EnvelopeIcon,
   ClockIcon,
   ChatBubbleLeftRightIcon,
-  CheckCircleIcon
+  CheckCircleIcon,
+  SparklesIcon,
+  GlobeAltIcon,
+  MapIcon,
+  ArrowRightIcon,
+  InformationCircleIcon
 } from '@heroicons/react/24/outline';
+import { getWhatsAppUrl } from '../config';
+import {
+  Box,
+  Container,
+  VStack,
+  HStack,
+  Text,
+  Button,
+  Badge,
+  Icon,
+  useColorModeValue,
+  SimpleGrid,
+  Heading,
+} from '@chakra-ui/react';
 
 export function ContactPage() {
   const [formData, setFormData] = useState({
@@ -52,10 +71,10 @@ export function ContactPage() {
     {
       icon: PhoneIcon,
       title: "Phone",
-              details: ["+960 744 1097", "+960 987 6543"],
+      details: ["+960 744 1097", "+960 987 6543"],
       description: "Call us for immediate assistance",
       action: "Call Now",
-              actionUrl: "tel:+9607441097"
+      actionUrl: "tel:+9607441097"
     },
     {
       icon: EnvelopeIcon,
@@ -79,7 +98,7 @@ export function ContactPage() {
       details: ["Mon-Fri: 9:00 AM - 6:00 PM", "Sat: 10:00 AM - 4:00 PM"],
       description: "We're here to help you",
       action: "WhatsApp",
-              actionUrl: "https://wa.me/9607441097"
+      actionUrl: "https://wa.me/9607441097"
     }
   ];
 
@@ -103,230 +122,142 @@ export function ContactPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Hero Section - Improved Mobile */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
-          <div className="text-center">
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 sm:mb-4">Contact Us</h1>
-            <p className="text-lg sm:text-xl text-blue-100 max-w-2xl mx-auto px-4">
-              Ready to start your Maldives adventure? Get in touch with us and let's make your dream vacation a reality.
-            </p>
+    <Box bg="gray.50" className="bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
+      {/* Hero Section */}
+      <section className="py-24 bg-gradient-to-r from-blue-800 via-indigo-800 to-blue-900 relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-10 left-10 animate-float">
+            <Icon as={SparklesIcon} className="w-16 h-16 text-white" />
+          </div>
+          <div className="absolute top-20 right-20 animate-float-delayed">
+            <Icon as={GlobeAltIcon} className="w-12 h-12 text-white" />
+          </div>
+          <div className="absolute bottom-20 left-20 animate-float-slow">
+            <Icon as={MapIcon} className="w-20 h-20 text-white" />
           </div>
         </div>
-      </div>
+        
+        <Container maxW="7xl" className="relative z-10 text-center px-4">
+          <VStack spacing={8}>
+            <Badge 
+              className="bg-white/20 backdrop-blur-md text-white px-6 py-2 rounded-full text-sm font-bold border border-white/30"
+            >
+              <Icon as={SparklesIcon} className="w-4 h-4 mr-2" />
+              Get in Touch
+            </Badge>
+            
+            <Heading size="2xl" className="text-5xl md:text-6xl font-bold text-white">
+              Contact Us
+            </Heading>
+            
+            <Text className="text-xl text-blue-200 max-w-4xl mx-auto leading-relaxed">
+              Ready to start your Maldives adventure? We're here to help you plan the perfect trip. 
+              Get in touch with us through any of the channels below.
+            </Text>
+
+            <HStack spacing={6} flexDir={{ base: "column", sm: "row" }} justify="center" align="center">
+              <a href={getWhatsAppUrl("Hi! I'd like to get in touch about planning my Maldives trip")} target="_blank" rel="noopener noreferrer">
+                <Button 
+                  size="lg"
+                  bg="green.500"
+                  _hover={{ bg: "green.600", shadow: "0 0 30px rgba(34, 197, 94, 0.4)", scale: 1.05 }}
+                  color="white"
+                  px={8}
+                  py={4}
+                  fontSize="lg"
+                  fontWeight="bold"
+                  borderRadius="full"
+                  shadow="2xl"
+                  transition="all 0.3s"
+                  transform="auto"
+                  display="flex"
+                  alignItems="center"
+                >
+                  <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                  WhatsApp Us
+                  <Icon as={ArrowRightIcon} className="w-5 h-5 ml-2" />
+                </Button>
+              </a>
+              <Button 
+                size="lg"
+                variant="outline"
+                border="2px solid"
+                borderColor="white"
+                color="white"
+                _hover={{ bg: "white", color: "blue.600", scale: 1.05 }}
+                px={8}
+                py={4}
+                fontSize="lg"
+                fontWeight="bold"
+                borderRadius="full"
+                transition="all 0.3s"
+                transform="auto"
+                backdropFilter="blur(4px)"
+                display="flex"
+                alignItems="center"
+                onClick={() => {
+                  const element = document.getElementById('contact-form');
+                  element?.scrollIntoView({ behavior: 'smooth' });
+                }}
+              >
+                <Icon as={InformationCircleIcon} className="w-6 h-6 mr-3" />
+                Send Message
+                <Icon as={ArrowRightIcon} className="w-5 h-5 ml-2" />
+              </Button>
+            </HStack>
+          </VStack>
+        </Container>
+      </section>
 
       {/* Success Message */}
       {isSubmitted && (
-        <div className="fixed top-4 left-4 right-4 z-50 bg-green-50 border border-green-200 rounded-lg p-4 shadow-lg">
-          <div className="flex items-center">
-            <CheckCircleIcon className="h-5 w-5 text-green-600 mr-3" />
-            <div>
-              <h3 className="text-sm font-medium text-green-800">Message sent successfully!</h3>
-              <p className="text-sm text-green-700">We'll get back to you within 24 hours.</p>
-            </div>
-          </div>
-        </div>
+        <Box
+          position="fixed"
+          top="4"
+          left="4"
+          right="4"
+          zIndex="50"
+          bg="green.50"
+          border="1px solid"
+          borderColor="green.200"
+          borderRadius="lg"
+          p="4"
+          shadow="lg"
+        >
+          <HStack alignItems="center">
+            <Icon as={CheckCircleIcon} className="h-5 w-5 text-green-600 mr-3" />
+            <Box>
+              <Text fontSize="sm" fontWeight="medium" color="green.800">Message sent successfully!</Text>
+              <Text fontSize="sm" color="green.700">We'll get back to you within 24 hours.</Text>
+            </Box>
+          </HStack>
+        </Box>
       )}
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-          {/* Contact Information - Improved Mobile */}
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">Get in Touch</h2>
-              <p className="text-gray-600 text-base sm:text-lg">
-                Have questions about our properties or packages? We're here to help you plan the perfect Maldives getaway.
-              </p>
-            </div>
+             {/* FAQ Section - Improved Mobile */}
+       <Box mt={{ base: 12, sm: 16, lg: 20 }}>
+         <Container maxW="7xl" px={4}>
+           <VStack alignItems="center" mb={{ base: 8, sm: 12 }}>
+             <Text fontSize={{ base: "2xl", sm: "3xl", lg: "4xl" }} fontWeight="bold" color="gray.900" mb={4}>Frequently Asked Questions</Text>
+             <Text fontSize={{ base: "base", sm: "lg" }} color="gray.600" maxW="3xl" mx="auto">
+               Find quick answers to common questions about our services and the Maldives.
+             </Text>
+           </VStack>
 
-            <div className="space-y-4 sm:space-y-6">
-              {contactInfo.map((info, index) => (
-                <div key={index} className="bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200">
-                  <div className="flex items-start">
-                    <div className="flex-shrink-0">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <info.icon className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
-                      </div>
-                    </div>
-                    <div className="ml-4 flex-1">
-                      <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">{info.title}</h3>
-                      <div className="space-y-1 mb-3">
-                        {info.details.map((detail, detailIndex) => (
-                          <p key={detailIndex} className="text-sm sm:text-base text-gray-600">{detail}</p>
-                        ))}
-                      </div>
-                      <p className="text-sm text-gray-500 mb-3">{info.description}</p>
-                      <a
-                        href={info.actionUrl}
-                        className="inline-flex items-center px-3 py-2 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors"
-                      >
-                        {info.action}
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* WhatsApp Quick Contact - Mobile Optimized */}
-            <div className="bg-green-50 border border-green-200 rounded-lg sm:rounded-xl p-4 sm:p-6">
-              <div className="flex items-center mb-3">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
-                  <ChatBubbleLeftRightIcon className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
-                </div>
-                <div>
-                  <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Quick WhatsApp Chat</h3>
-                  <p className="text-sm text-gray-600">Get instant responses</p>
-                </div>
-              </div>
-              <a
-                href="https://wa.me/9607441097?text=Hi! I'm interested in your Maldives travel services. Can you help me?"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full bg-green-500 text-white py-3 px-4 rounded-lg font-semibold text-center hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
-              >
-                <span className="text-lg">💬</span>
-                Start WhatsApp Chat
-              </a>
-            </div>
-          </div>
-
-          {/* Contact Form - Improved Mobile */}
-          <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 lg:p-8">
-            <div className="mb-6">
-              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Send us a Message</h2>
-              <p className="text-gray-600">Fill out the form below and we'll get back to you as soon as possible.</p>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                    Full Name *
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
-                    placeholder="Your full name"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                    Email Address *
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
-                    placeholder="your.email@example.com"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                <div>
-                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                    Phone Number
-                  </label>
-                  <input
-                    type="tel"
-                    id="phone"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
-                    placeholder="+1 (555) 123-4567"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
-                    Subject *
-                  </label>
-                  <select
-                    id="subject"
-                    name="subject"
-                    value={formData.subject}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
-                  >
-                    <option value="">Select a subject</option>
-                    <option value="general">General Inquiry</option>
-                    <option value="booking">Booking Request</option>
-                    <option value="package">Package Information</option>
-                    <option value="support">Customer Support</option>
-                    <option value="feedback">Feedback</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
-                  Message *
-                </label>
-                <textarea
-                  id="message"
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  required
-                  rows={6}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base resize-none"
-                  placeholder="Tell us about your travel plans, questions, or any specific requirements..."
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 sm:py-4 px-6 rounded-lg font-semibold text-base sm:text-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                {isSubmitting ? (
-                  <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    Sending Message...
-                  </>
-                ) : (
-                  <>
-                    <EnvelopeIcon className="h-5 w-5" />
-                    Send Message
-                  </>
-                )}
-              </button>
-            </form>
-          </div>
-        </div>
-
-        {/* FAQ Section - Improved Mobile */}
-        <div className="mt-12 sm:mt-16 lg:mt-20">
-          <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h2>
-            <p className="text-gray-600 text-base sm:text-lg max-w-3xl mx-auto">
-              Find quick answers to common questions about our services and the Maldives.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-            {faqs.map((faq, index) => (
-              <div key={index} className="bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-sm border border-gray-200">
-                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3">{faq.question}</h3>
-                <p className="text-gray-600 text-sm sm:text-base leading-relaxed">{faq.answer}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
+           <SimpleGrid columns={{ base: 1, md: 2 }} gap={{ base: 4, sm: 6 }}>
+             {faqs.map((faq, index) => (
+               <Box key={index} bg="white" borderRadius={{ base: "lg", sm: "xl" }} p={4} shadow="sm" border="1px solid" borderColor="gray.200">
+                 <Text fontSize={{ base: "lg", sm: "xl" }} fontWeight="semibold" color="gray.900" mb={3}>{faq.question}</Text>
+                 <Text fontSize={{ base: "sm", sm: "base" }} color="gray.600" lineHeight="relaxed">{faq.answer}</Text>
+               </Box>
+             ))}
+           </SimpleGrid>
+         </Container>
+       </Box>
+    </Box>
   );
 }
 

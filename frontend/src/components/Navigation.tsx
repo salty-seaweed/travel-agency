@@ -106,12 +106,13 @@ export const Navigation = React.memo(() => {
         transition="all 0.3s ease"
         bgGradient={isScrolled ? 'linear(to-r, white, gray.50)' : 'linear(to-r, white, blue.50)'}
         className="notranslate"
+        style={{ paddingLeft: '0', paddingRight: '45px' }}
       >
         <Container maxW="7xl" px={{ base: 4, sm: 6, lg: 8 }}>
           <Flex justify="space-between" align="center" h={{ base: '4rem', md: '5rem' }}>
             {/* Logo */}
             <Flex align="center" flexShrink={0}>
-              <Link to="/">
+              <Link to="/" style={{ paddingRight: '0px', marginRight: '30px', marginLeft: '-50px' }}>
                 <Flex align="center" _hover={{ transform: 'scale(1.05)' }} transition="all 0.3s ease">
                   <Box
                     w={{ base: '10', md: '12' }}
@@ -150,22 +151,25 @@ export const Navigation = React.memo(() => {
                       animation="pulse 2s infinite"
                     />
                   </Box>
-                  <VStack align="start" ml={3} spacing={0} className="notranslate">
+                  <VStack align="start" ml={1} spacing={0} className="notranslate">
                     <Text
                       fontSize={{ base: "lg", md: "2xl", lg: "3xl" }}
-                      fontWeight="bold"
+                      fontWeight="extrabold"
                       bgGradient="linear(to-r, blue.600, purple.600)"
                       bgClip="text"
-                      lineHeight="1"
+                      lineHeight="0.9"
+                      letterSpacing="tight"
                       className="notranslate"
                     >
                       Thread Travels
                     </Text>
                     <Text
                       fontSize={{ base: "xs", md: "sm" }}
-                      color="gray.600"
-                      fontWeight="medium"
+                      color="gray.700"
+                      fontWeight="semibold"
                       lineHeight="1"
+                      letterSpacing="wide"
+                      textTransform="uppercase"
                       className="notranslate"
                     >
                       & Tours
@@ -186,33 +190,21 @@ export const Navigation = React.memo(() => {
                     px={6}
                     py={3}
                     borderRadius="2xl"
-                    fontWeight="semibold"
+                    fontWeight="medium"
                     fontSize="sm"
-                    bg={item.featured ? 'orange.500' : isActive(item.href) ? 'blue.50' : 'transparent'}
-                    color={item.featured ? 'white' : isActive(item.href) ? 'blue.700' : 'gray.700'}
-                    border={isActive(item.href) ? '2px solid' : 'none'}
+                    bg={item.featured ? 'blue.500' : isActive(item.href) ? 'blue.50' : 'transparent'}
+                    color={item.featured ? 'white' : isActive(item.href) ? 'blue.600' : 'gray.600'}
+                    border={isActive(item.href) ? '1px solid' : 'none'}
                     borderColor={isActive(item.href) ? 'blue.200' : undefined}
                     _hover={{
-                      transform: 'scale(1.05)',
-                      boxShadow: 'md',
-                      bg: item.featured ? 'orange.600' : isActive(item.href) ? 'blue.100' : 'gray.100',
+                      transform: 'scale(1.02)',
+                      boxShadow: 'sm',
+                      bg: item.featured ? 'blue.600' : isActive(item.href) ? 'blue.100' : 'gray.50',
                     }}
                     transition="all 0.3s ease"
                     position="relative"
                   >
-                    {item.featured && (
-                      <Box
-                        position="absolute"
-                        top="-2"
-                        right="-2"
-                        w="4"
-                        h="4"
-                        bg="red.500"
-                        borderRadius="full"
-                        animation="pulse 2s infinite"
-                        boxShadow="lg"
-                      />
-                    )}
+
                     <HStack spacing={2}>
                       <Icon as={item.icon} h="4" w="4" />
                       <Text>{item.name}</Text>
@@ -429,7 +421,7 @@ export const Navigation = React.memo(() => {
                 alignItems="center"
                 justifyContent="center"
                 boxShadow="xl"
-                mr={3}
+                mr={2}
               >
                 <img 
                   src={logo} 
@@ -438,10 +430,23 @@ export const Navigation = React.memo(() => {
                 />
               </Box>
               <VStack align="start" spacing={0}>
-                <Text fontSize="xl" fontWeight="bold" bgGradient="linear(to-r, blue.600, purple.600)" bgClip="text">
+                <Text 
+                  fontSize="xl" 
+                  fontWeight="extrabold" 
+                  bgGradient="linear(to-r, blue.600, purple.600)" 
+                  bgClip="text"
+                  lineHeight="0.9"
+                  letterSpacing="tight"
+                >
                   Thread Travels
                 </Text>
-                <Text fontSize="sm" color="gray.600" fontWeight="medium">
+                <Text 
+                  fontSize="sm" 
+                  color="gray.700" 
+                  fontWeight="semibold"
+                  letterSpacing="wide"
+                  textTransform="uppercase"
+                >
                   & Tours
                 </Text>
               </VStack>

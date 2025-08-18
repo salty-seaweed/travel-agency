@@ -674,3 +674,195 @@ class TransferContent(models.Model):
     
     def __str__(self):
         return f"{self.get_section_display()} - {self.title}"
+
+
+class HomepageContent(models.Model):
+    """Model for managing homepage content sections"""
+    CONTENT_TYPES = [
+        ('hero', 'Hero Section'),
+        ('features', 'Features Section'),
+        ('testimonials', 'Testimonials Section'),
+        ('about_preview', 'About Preview Section'),
+        ('cta', 'Call to Action Section'),
+        ('stats', 'Statistics Section'),
+    ]
+    
+    content_type = models.CharField(max_length=50, choices=CONTENT_TYPES, unique=True)
+    title = models.CharField(max_length=200)
+    subtitle = models.TextField(blank=True)
+    description = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+    order = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['order', 'created_at']
+    
+    def __str__(self):
+        return f"{self.get_content_type_display()} - {self.title}"
+
+
+class HomepageHero(models.Model):
+    """Model for homepage hero section"""
+    title = models.CharField(max_length=200)
+    subtitle = models.TextField()
+    description = models.TextField()
+    background_image = models.ImageField(upload_to='homepage/hero/', blank=True, null=True)
+    background_image_url = models.URLField(blank=True, null=True)
+    background_images = models.JSONField(default=list, blank=True, help_text="List of additional background images for rotation")
+    cta_primary_text = models.CharField(max_length=100, default="Get Started")
+    cta_primary_url = models.CharField(max_length=200, default="#")
+    cta_secondary_text = models.CharField(max_length=100, default="Learn More")
+    cta_secondary_url = models.CharField(max_length=200, default="#")
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "Homepage Hero"
+        verbose_name_plural = "Homepage Hero"
+    
+    def __str__(self):
+        return f"Hero - {self.title}"
+
+class HomepageImage(models.Model):
+    """Model for managing multiple images for homepage sections"""
+    IMAGE_TYPES = [
+        ('hero', 'Hero Background'),
+        ('feature', 'Feature Image'),
+        ('testimonial', 'Testimonial Image'),
+        ('gallery', 'Gallery Image'),
+    ]
+    
+    image = models.ImageField(upload_to='homepage/images/')
+    title = models.CharField(max_length=200, blank=True)
+    alt_text = models.CharField(max_length=200, blank=True)
+    image_type = models.CharField(max_length=20, choices=IMAGE_TYPES, default='gallery')
+    order = models.IntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['order', 'created_at']
+        verbose_name = 'Homepage Image'
+        verbose_name_plural = 'Homepage Images'
+    
+    def __str__(self):
+        return f"{self.get_image_type_display()}: {self.title or self.image.name}"
+
+
+class HomepageFeature(models.Model):
+    """Model for homepage features section"""
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    icon = models.CharField(max_length=100, blank=True)  # Icon class or name
+    image = models.ImageField(upload_to='homepage/features/', blank=True, null=True)
+    image_url = models.URLField(blank=True, null=True)
+    link_url = models.CharField(max_length=200, blank=True)
+    order = models.IntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['order', 'created_at']
+        verbose_name = "Homepage Feature"
+        verbose_name_plural = "Homepage Features"
+    
+    def __str__(self):
+        return f"Feature - {self.title}"
+
+
+class HomepageTestimonial(models.Model):
+    """Model for homepage testimonials section"""
+    name = models.CharField(max_length=100)
+    role = models.CharField(max_length=100, blank=True)
+    company = models.CharField(max_length=100, blank=True)
+    content = models.TextField()
+    rating = models.IntegerField(choices=[(i, i) for i in range(1, 6)], default=5)
+    avatar = models.ImageField(upload_to='homepage/testimonials/', blank=True, null=True)
+    avatar_url = models.URLField(blank=True, null=True)
+    order = models.IntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['order', 'created_at']
+        verbose_name = "Homepage Testimonial"
+        verbose_name_plural = "Homepage Testimonials"
+    
+    def __str__(self):
+        return f"Testimonial - {self.name}"
+
+
+class HomepageStatistic(models.Model):
+    """Model for homepage statistics section"""
+    label = models.CharField(max_length=100)
+    value = models.CharField(max_length=50)  # Can be "500+", "4.8", etc.
+    icon = models.CharField(max_length=100, blank=True)
+    order = models.IntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['order', 'created_at']
+        verbose_name = "Homepage Statistic"
+        verbose_name_plural = "Homepage Statistics"
+    
+    def __str__(self):
+        return f"Statistic - {self.label}: {self.value}"
+
+
+class HomepageCTASection(models.Model):
+    """Model for homepage call-to-action section"""
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    background_image = models.ImageField(upload_to='homepage/cta/', blank=True, null=True)
+    background_image_url = models.URLField(blank=True, null=True)
+    cta_primary_text = models.CharField(max_length=100, default="Get Started")
+    cta_primary_url = models.CharField(max_length=200, default="#")
+    cta_secondary_text = models.CharField(max_length=100, default="Learn More")
+    cta_secondary_url = models.CharField(max_length=200, default="#")
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "Homepage CTA Section"
+        verbose_name_plural = "Homepage CTA Section"
+    
+    def __str__(self):
+        return f"CTA - {self.title}"
+
+
+class HomepageSettings(models.Model):
+    """Model for general homepage settings"""
+    site_title = models.CharField(max_length=200, default="Thread Travels & Tours")
+    site_description = models.TextField(blank=True)
+    site_keywords = models.TextField(blank=True)
+    contact_email = models.EmailField(blank=True)
+    contact_phone = models.CharField(max_length=20, blank=True)
+    whatsapp_number = models.CharField(max_length=20, blank=True)
+    social_facebook = models.URLField(blank=True)
+    social_instagram = models.URLField(blank=True)
+    social_twitter = models.URLField(blank=True)
+    social_linkedin = models.URLField(blank=True)
+    footer_text = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "Homepage Settings"
+        verbose_name_plural = "Homepage Settings"
+    
+    def __str__(self):
+        return "Homepage Settings"
+    
+    @classmethod
+    def get_settings(cls):
+        """Get or create homepage settings"""
+        settings, created = cls.objects.get_or_create(pk=1)
+        return settings

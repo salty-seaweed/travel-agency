@@ -1,6 +1,11 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views
+from .views import (
+    HomepageHeroViewSet, HomepageFeatureViewSet, HomepageTestimonialViewSet,
+    HomepageStatisticViewSet, HomepageCTASectionViewSet, HomepageSettingsViewSet,
+    HomepageContentViewSet, HomepageManagementViewSet, HomepageImageViewSet
+)
 
 router = DefaultRouter()
 router.register(r'properties', views.PropertyViewSet)
@@ -42,6 +47,17 @@ router.register(r'transfer-benefits', views.TransferBenefitViewSet)
 router.register(r'transfer-pricing-factors', views.TransferPricingFactorViewSet)
 router.register(r'transfer-content', views.TransferContentViewSet)
 
+# Homepage Management URLs
+router.register(r'homepage/hero', HomepageHeroViewSet)
+router.register(r'homepage/features', HomepageFeatureViewSet)
+router.register(r'homepage/testimonials', HomepageTestimonialViewSet)
+router.register(r'homepage/statistics', HomepageStatisticViewSet)
+router.register(r'homepage/cta', HomepageCTASectionViewSet)
+router.register(r'homepage/settings', HomepageSettingsViewSet)
+router.register(r'homepage/content', HomepageContentViewSet)
+router.register(r'homepage/images', HomepageImageViewSet)
+router.register(r'homepage', HomepageManagementViewSet, basename='homepage')
+
 urlpatterns = [
     path('', include(router.urls)),
     path('upload-image/', views.upload_image, name='upload_image'),
@@ -52,4 +68,7 @@ urlpatterns = [
     path('properties/<int:property_id>/availability/', views.check_availability, name='property_availability'),
     path('bookings/create-booking/', views.create_booking, name='create_booking'),
     path('transportation/', views.transportation_data, name='transportation_data'),
-] 
+    path('homepage/public/', HomepageManagementViewSet.as_view({'get': 'public_content'}), name='homepage-public-content'),
+]
+
+ 

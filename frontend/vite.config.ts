@@ -54,16 +54,39 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: false,
+    minify: 'esbuild',
     rollupOptions: {
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom'],
           router: ['react-router-dom'],
+          ui: ['@chakra-ui/react', '@emotion/react', '@emotion/styled', 'framer-motion'],
+          icons: ['@heroicons/react'],
+          query: ['@tanstack/react-query'],
+          utils: ['lodash', 'date-fns'],
         },
+        chunkFileNames: 'assets/js/[name]-[hash].js',
+        entryFileNames: 'assets/js/[name]-[hash].js',
+        assetFileNames: 'assets/[ext]/[name]-[hash].[ext]',
       },
     },
+    chunkSizeWarningLimit: 1000,
   },
   define: {
     'process.env.VITE_API_URL': JSON.stringify(process.env.VITE_API_URL || 'http://localhost:8001'),
+  },
+  optimizeDeps: {
+    include: [
+      'react',
+      'react-dom',
+      'react-router-dom',
+      '@chakra-ui/react',
+      '@heroicons/react/24/outline',
+      '@heroicons/react/24/solid',
+      '@tanstack/react-query',
+    ],
+  },
+  css: {
+    devSourcemap: false,
   },
 })

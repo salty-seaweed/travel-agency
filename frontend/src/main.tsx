@@ -69,6 +69,26 @@ const theme = extendTheme({
       },
     },
   },
+  // Add animations to Chakra UI theme
+  config: {
+    initialColorMode: 'light',
+    useSystemColorMode: false,
+  },
+  // Add custom animations
+  animations: {
+    float: {
+      '0%, 100%': { transform: 'translateY(0px)' },
+      '50%': { transform: 'translateY(-20px)' },
+    },
+    'float-delayed': {
+      '0%, 100%': { transform: 'translateY(0px)' },
+      '50%': { transform: 'translateY(-15px)' },
+    },
+    'float-slow': {
+      '0%, 100%': { transform: 'translateY(0px)' },
+      '50%': { transform: 'translateY(-10px)' },
+    },
+  },
 })
 
 // Global error handler

@@ -31,6 +31,7 @@ import { AdminAnalytics } from './components/admin/AdminAnalytics';
 import { AdminSettings } from './components/admin/AdminSettings';
 import AdminContentManager from './components/admin/AdminContentManager';
 import { TransportationAdmin } from './components/admin/transportation/TransportationAdmin';
+import { HomepageAdmin } from './components/admin/HomepageAdmin';
 import { PublicRoute } from './components/auth/PublicRoute';
 
 function AppContent() {
@@ -82,6 +83,7 @@ function AppContent() {
           <Route path="reviews" element={<AdminReviews />} />
           <Route path="analytics" element={<AdminAnalytics />} />
           <Route path="transportation" element={<TransportationAdmin />} />
+          <Route path="homepage" element={<HomepageAdmin />} />
           <Route path="settings" element={<AdminSettings />} />
           <Route path="content" element={<AdminContentManager />} />
         </Route>

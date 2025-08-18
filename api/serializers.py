@@ -4,7 +4,8 @@ from .models import (
     Booking, Availability, Customer, Page, PageBlock, MediaAsset, Menu, MenuItem, 
     Redirect, PageVersion, PageReview, CommentThread, Comment, PackageItinerary, PackageInclusion, 
     PackageActivity, PackageDestination, TransferType, AtollTransfer, ResortTransfer, TransferFAQ,
-    TransferContactMethod, TransferBookingStep, TransferBenefit, TransferPricingFactor, TransferContent
+    TransferContactMethod, TransferBookingStep, TransferBenefit, TransferPricingFactor, TransferContent,
+    HomepageHero, HomepageFeature, HomepageTestimonial, HomepageStatistic, HomepageCTASection, HomepageSettings, HomepageContent, HomepageImage
 )
 
 class PropertyTypeSerializer(serializers.ModelSerializer):
@@ -290,3 +291,111 @@ class CommentThreadSerializer(serializers.ModelSerializer):
         model = CommentThread
         fields = '__all__'
         read_only_fields = ['created_by', 'created_at'] 
+
+class HomepageImageSerializer(serializers.ModelSerializer):
+    """Serializer for homepage images"""
+    image_url = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = HomepageImage
+        fields = '__all__'
+    
+    def get_image_url(self, obj):
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            return obj.image.url
+        return None
+
+class HomepageHeroSerializer(serializers.ModelSerializer):
+    """Serializer for homepage hero section"""
+    background_image_url = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = HomepageHero
+        fields = '__all__'
+    
+    def get_background_image_url(self, obj):
+        if obj.background_image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.background_image.url)
+            return obj.background_image_url
+        return obj.background_image_url
+
+
+class HomepageFeatureSerializer(serializers.ModelSerializer):
+    """Serializer for homepage features"""
+    image_url = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = HomepageFeature
+        fields = '__all__'
+    
+    def get_image_url(self, obj):
+        if obj.image:
+            return self.context['request'].build_absolute_uri(obj.image.url)
+        return obj.image_url
+
+
+class HomepageTestimonialSerializer(serializers.ModelSerializer):
+    """Serializer for homepage testimonials"""
+    avatar_url = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = HomepageTestimonial
+        fields = '__all__'
+    
+    def get_avatar_url(self, obj):
+        if obj.avatar:
+            return self.context['request'].build_absolute_uri(obj.avatar.url)
+        return obj.avatar_url
+
+
+class HomepageStatisticSerializer(serializers.ModelSerializer):
+    """Serializer for homepage statistics"""
+    
+    class Meta:
+        model = HomepageStatistic
+        fields = '__all__'
+
+
+class HomepageCTASectionSerializer(serializers.ModelSerializer):
+    """Serializer for homepage CTA section"""
+    background_image_url = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = HomepageCTASection
+        fields = '__all__'
+    
+    def get_background_image_url(self, obj):
+        if obj.background_image:
+            return self.context['request'].build_absolute_uri(obj.background_image.url)
+        return obj.background_image_url
+
+
+class HomepageSettingsSerializer(serializers.ModelSerializer):
+    """Serializer for homepage settings"""
+    
+    class Meta:
+        model = HomepageSettings
+        fields = '__all__'
+
+
+class HomepageContentSerializer(serializers.ModelSerializer):
+    """Serializer for homepage content sections"""
+    
+    class Meta:
+        model = HomepageContent
+        fields = '__all__'
+
+
+class HomepageDataSerializer(serializers.Serializer):
+    """Combined serializer for all homepage data"""
+    hero = HomepageHeroSerializer()
+    features = HomepageFeatureSerializer(many=True)
+    testimonials = HomepageTestimonialSerializer(many=True)
+    statistics = HomepageStatisticSerializer(many=True)
+    cta_section = HomepageCTASectionSerializer()
+    settings = HomepageSettingsSerializer() 

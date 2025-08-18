@@ -15,7 +15,9 @@ from .models import (
     Booking, Availability, Customer, Page, PageBlock, MediaAsset, Menu, MenuItem, 
     Redirect, PageVersion, PageReview, CommentThread, Comment, PackageItinerary, PackageInclusion,
     PackageActivity, PackageDestination, TransferType, AtollTransfer, ResortTransfer, TransferFAQ,
-    TransferContactMethod, TransferBookingStep, TransferBenefit, TransferPricingFactor, TransferContent
+    TransferContactMethod, TransferBookingStep, TransferBenefit, TransferPricingFactor, TransferContent,
+    HomepageHero, HomepageFeature, HomepageTestimonial, HomepageStatistic, 
+    HomepageCTASection, HomepageSettings, HomepageContent, HomepageImage
 )
 from .serializers import (
     PropertyTypeSerializer, AmenitySerializer, LocationSerializer, 
@@ -27,7 +29,10 @@ from .serializers import (
     PackageItinerarySerializer, PackageInclusionSerializer, PackageActivitySerializer, PackageDestinationSerializer,
     TransferTypeSerializer, AtollTransferSerializer, ResortTransferSerializer, TransferFAQSerializer,
     TransferContactMethodSerializer, TransferBookingStepSerializer, TransferBenefitSerializer,
-    TransferPricingFactorSerializer, TransferContentSerializer
+    TransferPricingFactorSerializer, TransferContentSerializer,
+    HomepageHeroSerializer, HomepageFeatureSerializer, HomepageTestimonialSerializer,
+    HomepageStatisticSerializer, HomepageCTASectionSerializer, HomepageSettingsSerializer,
+    HomepageContentSerializer, HomepageDataSerializer, HomepageImageSerializer
 )
 from rest_framework.decorators import permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -46,6 +51,11 @@ from .serializers import (
     AvailabilitySerializer,
     CustomerSerializer
 )
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework import status
+from django.db import transaction
+import json
 
 # Create your views here.
 
@@ -892,3 +902,402 @@ def transportation_data(request):
         return Response(data)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class HomepageHeroViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing homepage hero section"""
+    queryset = HomepageHero.objects.all()
+    serializer_class = HomepageHeroSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        if self.action == 'list':
+            return HomepageHero.objects.filter(is_active=True)
+        return HomepageHero.objects.all()
+    
+    @action(detail=False, methods=['get'])
+    def active(self, request):
+        """Get the active hero section"""
+        hero = HomepageHero.objects.filter(is_active=True).first()
+        if hero:
+            serializer = self.get_serializer(hero)
+            return Response(serializer.data)
+        return Response({'error': 'No active hero section found'}, status=404)
+
+
+class HomepageFeatureViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing homepage features"""
+    queryset = HomepageFeature.objects.all()
+    serializer_class = HomepageFeatureSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        if self.action == 'list':
+            return HomepageFeature.objects.filter(is_active=True).order_by('order')
+        return HomepageFeature.objects.all().order_by('order')
+    
+    @action(detail=False, methods=['post'])
+    def reorder(self, request):
+        """Reorder features"""
+        feature_ids = request.data.get('feature_ids', [])
+        for index, feature_id in enumerate(feature_ids):
+            HomepageFeature.objects.filter(id=feature_id).update(order=index)
+        return Response({'message': 'Features reordered successfully'})
+
+
+class HomepageTestimonialViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing homepage testimonials"""
+    queryset = HomepageTestimonial.objects.all()
+    serializer_class = HomepageTestimonialSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        if self.action == 'list':
+            return HomepageTestimonial.objects.filter(is_active=True).order_by('order')
+        return HomepageTestimonial.objects.all().order_by('order')
+    
+    @action(detail=False, methods=['post'])
+    def reorder(self, request):
+        """Reorder testimonials"""
+        testimonial_ids = request.data.get('testimonial_ids', [])
+        for index, testimonial_id in enumerate(testimonial_ids):
+            HomepageTestimonial.objects.filter(id=testimonial_id).update(order=index)
+        return Response({'message': 'Testimonials reordered successfully'})
+
+
+class HomepageStatisticViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing homepage statistics"""
+    queryset = HomepageStatistic.objects.all()
+    serializer_class = HomepageStatisticSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        if self.action == 'list':
+            return HomepageStatistic.objects.filter(is_active=True).order_by('order')
+        return HomepageStatistic.objects.all().order_by('order')
+    
+    @action(detail=False, methods=['post'])
+    def reorder(self, request):
+        """Reorder statistics"""
+        statistic_ids = request.data.get('statistic_ids', [])
+        for index, statistic_id in enumerate(statistic_ids):
+            HomepageStatistic.objects.filter(id=statistic_id).update(order=index)
+        return Response({'message': 'Statistics reordered successfully'})
+
+
+class HomepageCTASectionViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing homepage CTA section"""
+    queryset = HomepageCTASection.objects.all()
+    serializer_class = HomepageCTASectionSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        if self.action == 'list':
+            return HomepageCTASection.objects.filter(is_active=True)
+        return HomepageCTASection.objects.all()
+    
+    @action(detail=False, methods=['get'])
+    def active(self, request):
+        """Get the active CTA section"""
+        cta = HomepageCTASection.objects.filter(is_active=True).first()
+        if cta:
+            serializer = self.get_serializer(cta)
+            return Response(serializer.data)
+        return Response({'error': 'No active CTA section found'}, status=404)
+
+
+class HomepageImageViewSet(viewsets.ModelViewSet):
+    """ViewSet for homepage images"""
+    queryset = HomepageImage.objects.all()
+    serializer_class = HomepageImageSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        queryset = HomepageImage.objects.all()
+        image_type = self.request.query_params.get('type', None)
+        if image_type:
+            queryset = queryset.filter(image_type=image_type)
+        return queryset.order_by('order', 'created_at')
+    
+    @action(detail=False, methods=['post'])
+    def upload_multiple(self, request):
+        """Upload multiple images at once"""
+        try:
+            images = request.FILES.getlist('images')
+            image_type = request.data.get('image_type', 'gallery')
+            uploaded_images = []
+            
+            for i, image in enumerate(images):
+                image_obj = HomepageImage.objects.create(
+                    image=image,
+                    title=request.data.get('title', f'Image {i+1}'),
+                    alt_text=request.data.get('alt_text', ''),
+                    image_type=image_type,
+                    order=i
+                )
+                uploaded_images.append(self.get_serializer(image_obj).data)
+            
+            return Response({
+                'message': f'Successfully uploaded {len(uploaded_images)} images',
+                'images': uploaded_images
+            })
+        except Exception as e:
+            return Response({'error': str(e)}, status=400)
+
+class HomepageSettingsViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing homepage settings"""
+    queryset = HomepageSettings.objects.all()
+    serializer_class = HomepageSettingsSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        return HomepageSettings.objects.all()
+    
+    def list(self, request):
+        """Get or create settings"""
+        settings = HomepageSettings.get_settings()
+        serializer = self.get_serializer(settings)
+        return Response(serializer.data)
+    
+    def create(self, request):
+        """Update settings"""
+        settings = HomepageSettings.get_settings()
+        serializer = self.get_serializer(settings, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)
+
+
+class HomepageContentViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing homepage content sections"""
+    queryset = HomepageContent.objects.all()
+    serializer_class = HomepageContentSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        if self.action == 'list':
+            return HomepageContent.objects.filter(is_active=True).order_by('order')
+        return HomepageContent.objects.all().order_by('order')
+
+
+class HomepageManagementViewSet(viewsets.ViewSet):
+    """ViewSet for comprehensive homepage management"""
+    permission_classes = [IsAuthenticated]
+    
+    def get_permissions(self):
+        """Allow public access to public_content endpoint"""
+        if self.action == 'public_content':
+            return []
+        return super().get_permissions()
+    
+    @action(detail=False, methods=['get'])
+    def dashboard_data(self, request):
+        """Get all homepage data for dashboard"""
+        try:
+            hero = HomepageHero.objects.filter(is_active=True).first()
+            features = HomepageFeature.objects.filter(is_active=True).order_by('order')
+            testimonials = HomepageTestimonial.objects.filter(is_active=True).order_by('order')
+            statistics = HomepageStatistic.objects.filter(is_active=True).order_by('order')
+            cta_section = HomepageCTASection.objects.filter(is_active=True).first()
+            settings = HomepageSettings.get_settings()
+            
+            data = {
+                'hero': HomepageHeroSerializer(hero, context={'request': request}).data if hero else None,
+                'features': HomepageFeatureSerializer(features, many=True, context={'request': request}).data,
+                'testimonials': HomepageTestimonialSerializer(testimonials, many=True, context={'request': request}).data,
+                'statistics': HomepageStatisticSerializer(statistics, many=True).data,
+                'cta_section': HomepageCTASectionSerializer(cta_section, context={'request': request}).data if cta_section else None,
+                'settings': HomepageSettingsSerializer(settings).data,
+            }
+            
+            return Response(data)
+        except Exception as e:
+            return Response({'error': str(e)}, status=500)
+
+    @action(detail=False, methods=['get'])
+    def public_content(self, request):
+        """Get public homepage content (no authentication required)"""
+        try:
+            hero = HomepageHero.objects.filter(is_active=True).first()
+            features = HomepageFeature.objects.filter(is_active=True).order_by('order')
+            testimonials = HomepageTestimonial.objects.filter(is_active=True).order_by('order')
+            statistics = HomepageStatistic.objects.filter(is_active=True).order_by('order')
+            cta_section = HomepageCTASection.objects.filter(is_active=True).first()
+            settings = HomepageSettings.get_settings()
+            
+            data = {
+                'hero': HomepageHeroSerializer(hero, context={'request': request}).data if hero else None,
+                'features': HomepageFeatureSerializer(features, many=True, context={'request': request}).data,
+                'testimonials': HomepageTestimonialSerializer(testimonials, many=True, context={'request': request}).data,
+                'statistics': HomepageStatisticSerializer(statistics, many=True).data,
+                'cta_section': HomepageCTASectionSerializer(cta_section, context={'request': request}).data if cta_section else None,
+                'settings': HomepageSettingsSerializer(settings).data,
+            }
+            
+            response = Response(data)
+            # Add caching headers for better performance
+            response['Cache-Control'] = 'public, max-age=300'  # Cache for 5 minutes
+            response['ETag'] = f'"homepage-{hash(str(data))}"'  # ETag for conditional requests
+            return response
+        except Exception as e:
+            return Response({'error': str(e)}, status=500)
+    
+
+    
+    @action(detail=False, methods=['post'])
+    def bulk_update(self, request):
+        """Bulk update homepage data"""
+        try:
+            with transaction.atomic():
+                data = request.data
+                
+                # Handle hero section
+                if 'hero' in data:
+                    hero_data = data['hero']
+                    if isinstance(hero_data, str):
+                        hero_data = json.loads(hero_data)
+                    
+                    hero = HomepageHero.objects.filter(is_active=True).first()
+                    if not hero:
+                        hero = HomepageHero.objects.create(is_active=True)
+                    
+                    # Handle file upload for main background image
+                    if 'hero.background_image' in request.FILES:
+                        hero_data['background_image'] = request.FILES['hero.background_image']
+                    
+                    # Ensure background_images is properly handled
+                    if 'background_images' in hero_data:
+                        # Make sure it's a list of URLs
+                        if isinstance(hero_data['background_images'], list):
+                            # Filter out any None or empty values
+                            hero_data['background_images'] = [
+                                url for url in hero_data['background_images'] 
+                                if url and url.strip()
+                            ]
+                    
+                    serializer = HomepageHeroSerializer(hero, data=hero_data, partial=True, context={'request': request})
+                    if serializer.is_valid():
+                        serializer.save()
+                    else:
+                        print(f"Hero serializer errors: {serializer.errors}")
+                
+                # Update features
+                if 'features' in data:
+                    features_data = data['features']
+                    if isinstance(features_data, str):
+                        features_data = json.loads(features_data)
+                    
+                    # Get existing features to track which ones to keep
+                    existing_feature_ids = set(HomepageFeature.objects.filter(is_active=True).values_list('id', flat=True))
+                    updated_feature_ids = set()
+                    
+                    for feature_data in features_data:
+                        feature_id = feature_data.get('id')
+                        if feature_id and feature_id in existing_feature_ids:
+                            # Update existing feature
+                            try:
+                                feature = HomepageFeature.objects.get(id=feature_id)
+                                serializer = HomepageFeatureSerializer(feature, data=feature_data, partial=True, context={'request': request})
+                                if serializer.is_valid():
+                                    serializer.save()
+                                    updated_feature_ids.add(feature_id)
+                            except HomepageFeature.DoesNotExist:
+                                continue
+                        else:
+                            # Create new feature
+                            serializer = HomepageFeatureSerializer(data=feature_data, context={'request': request})
+                            if serializer.is_valid():
+                                feature = serializer.save()
+                                updated_feature_ids.add(feature.id)
+                    
+                    # Deactivate features that weren't updated (optional cleanup)
+                    # features_to_deactivate = existing_feature_ids - updated_feature_ids
+                    # HomepageFeature.objects.filter(id__in=features_to_deactivate).update(is_active=False)
+                
+                # Update testimonials
+                if 'testimonials' in data:
+                    testimonials_data = data['testimonials']
+                    if isinstance(testimonials_data, str):
+                        testimonials_data = json.loads(testimonials_data)
+                    
+                    # Get existing testimonials to track which ones to keep
+                    existing_testimonial_ids = set(HomepageTestimonial.objects.filter(is_active=True).values_list('id', flat=True))
+                    updated_testimonial_ids = set()
+                    
+                    for testimonial_data in testimonials_data:
+                        testimonial_id = testimonial_data.get('id')
+                        if testimonial_id and testimonial_id in existing_testimonial_ids:
+                            # Update existing testimonial
+                            try:
+                                testimonial = HomepageTestimonial.objects.get(id=testimonial_id)
+                                serializer = HomepageTestimonialSerializer(testimonial, data=testimonial_data, partial=True, context={'request': request})
+                                if serializer.is_valid():
+                                    serializer.save()
+                                    updated_testimonial_ids.add(testimonial_id)
+                            except HomepageTestimonial.DoesNotExist:
+                                continue
+                        else:
+                            # Create new testimonial
+                            serializer = HomepageTestimonialSerializer(data=testimonial_data, context={'request': request})
+                            if serializer.is_valid():
+                                testimonial = serializer.save()
+                                updated_testimonial_ids.add(testimonial.id)
+                
+                # Update statistics
+                if 'statistics' in data:
+                    statistics_data = data['statistics']
+                    if isinstance(statistics_data, str):
+                        statistics_data = json.loads(statistics_data)
+                    
+                    # Get existing statistics to track which ones to keep
+                    existing_statistic_ids = set(HomepageStatistic.objects.filter(is_active=True).values_list('id', flat=True))
+                    updated_statistic_ids = set()
+                    
+                    for statistic_data in statistics_data:
+                        statistic_id = statistic_data.get('id')
+                        if statistic_id and statistic_id in existing_statistic_ids:
+                            # Update existing statistic
+                            try:
+                                statistic = HomepageStatistic.objects.get(id=statistic_id)
+                                serializer = HomepageStatisticSerializer(statistic, data=statistic_data, partial=True)
+                                if serializer.is_valid():
+                                    serializer.save()
+                                    updated_statistic_ids.add(statistic_id)
+                            except HomepageStatistic.DoesNotExist:
+                                continue
+                        else:
+                            # Create new statistic
+                            serializer = HomepageStatisticSerializer(data=statistic_data)
+                            if serializer.is_valid():
+                                statistic = serializer.save()
+                                updated_statistic_ids.add(statistic.id)
+                
+                # Update CTA section
+                if 'cta_section' in data:
+                    cta_data = data['cta_section']
+                    if isinstance(cta_data, str):
+                        cta_data = json.loads(cta_data)
+                    
+                    cta = HomepageCTASection.objects.filter(is_active=True).first()
+                    if not cta:
+                        cta = HomepageCTASection.objects.create(is_active=True)
+                    
+                    serializer = HomepageCTASectionSerializer(cta, data=cta_data, partial=True, context={'request': request})
+                    if serializer.is_valid():
+                        serializer.save()
+                
+                # Update settings
+                if 'settings' in data:
+                    settings_data = data['settings']
+                    if isinstance(settings_data, str):
+                        settings_data = json.loads(settings_data)
+                    
+                    settings = HomepageSettings.get_settings()
+                    serializer = HomepageSettingsSerializer(settings, data=settings_data, partial=True)
+                    if serializer.is_valid():
+                        serializer.save()
+                
+                return Response({'message': 'Homepage updated successfully'})
+        except Exception as e:
+            return Response({'error': str(e)}, status=500)

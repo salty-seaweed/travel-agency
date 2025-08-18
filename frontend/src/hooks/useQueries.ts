@@ -13,12 +13,23 @@ import type {
   ReviewFormData
 } from '../types';
 
+// Optimized default query options
+const defaultQueryOptions = {
+  staleTime: 5 * 60 * 1000, // 5 minutes
+  gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
+  refetchOnWindowFocus: false,
+  refetchOnMount: false,
+  refetchOnReconnect: true,
+  retry: 2,
+  retryDelay: (attemptIndex: number) => Math.min(1000 * 2 ** attemptIndex, 30000),
+};
+
 // Properties hooks
 export const useProperties = (filters?: PropertyFilters) => {
   return useQuery({
     queryKey: queryKeys.properties.list(filters),
     queryFn: () => unifiedApi.properties.getAll(filters),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    ...defaultQueryOptions,
   });
 };
 
@@ -29,7 +40,11 @@ export const useFeaturedProperties = () => {
       console.log('🔍 [MOBILE DEBUG] Fetching featured properties...');
       return unifiedApi.properties.getFeatured();
     },
-    staleTime: 30 * 60 * 1000, // 30 minutes
+    staleTime: 30 * 60 * 1000, // 30 minutes for featured content
+    gcTime: 60 * 60 * 1000, // 1 hour
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: true,
   });
 
   // Debug logging
@@ -49,6 +64,7 @@ export const useProperty = (id: number) => {
     queryFn: () => unifiedApi.properties.getById(id),
     enabled: !!id,
     staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes
   });
 };
 
@@ -58,6 +74,7 @@ export const usePropertyReviews = (propertyId: number) => {
     queryFn: () => unifiedApi.properties.getReviews(propertyId),
     enabled: !!propertyId,
     staleTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 5 * 60 * 1000, // 5 minutes
   });
 };
 
@@ -66,7 +83,7 @@ export const usePackages = (filters?: PackageFilters) => {
   return useQuery({
     queryKey: queryKeys.packages.list(filters),
     queryFn: () => unifiedApi.packages.getAll(filters),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    ...defaultQueryOptions,
   });
 };
 
@@ -77,7 +94,11 @@ export const useFeaturedPackages = () => {
       console.log('🔍 [MOBILE DEBUG] Fetching featured packages...');
       return unifiedApi.packages.getFeatured();
     },
-    staleTime: 30 * 60 * 1000, // 30 minutes
+    staleTime: 30 * 60 * 1000, // 30 minutes for featured content
+    gcTime: 60 * 60 * 1000, // 1 hour
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: true,
   });
 
   // Debug logging
@@ -384,6 +405,26 @@ export const useHomepageData = () => {
     isError: propertiesQuery.isError || packagesQuery.isError || reviewsQuery.isError,
     error: propertiesQuery.error || packagesQuery.error || reviewsQuery.error,
   };
+};
+
+// Database-driven homepage content
+export const useHomepageContent = () => {
+  return useQuery({
+    queryKey: ['homepage-content'],
+    queryFn: async () => {
+      const response = await fetch('http://localhost:8001/api/homepage/public/');
+      if (!response.ok) {
+        throw new Error('Failed to fetch homepage content');
+      }
+      return response.json();
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes - data is fresh for 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes - keep in cache for 10 minutes
+    refetchOnWindowFocus: false, // Don't refetch on window focus
+    refetchOnMount: false, // Don't refetch on mount if data exists
+    refetchOnReconnect: true, // Only refetch on reconnect
+    refetchInterval: false, // Disable automatic refetching
+  });
 };
 
 // All hooks are already exported individually above 

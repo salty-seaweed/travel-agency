@@ -6,8 +6,26 @@ import {
   StarIcon,
   UsersIcon,
   GlobeAltIcon,
-  HeartIcon
+  HeartIcon,
+  SparklesIcon,
+  MapIcon,
+  ArrowRightIcon,
+  InformationCircleIcon
 } from '@heroicons/react/24/outline';
+import { getWhatsAppUrl } from '../config';
+import {
+  Box,
+  Container,
+  VStack,
+  HStack,
+  Text,
+  Button,
+  Badge,
+  Icon,
+  useColorModeValue,
+  SimpleGrid,
+  Heading,
+} from '@chakra-ui/react';
 
 export function AboutPage() {
   const stats = [
@@ -16,8 +34,6 @@ export function AboutPage() {
     { number: "4.8", label: "Average Rating", icon: StarIcon },
     { number: "5+", label: "Years Experience", icon: HeartIcon }
   ];
-
-
 
   const values = [
     {
@@ -43,40 +59,115 @@ export function AboutPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-white">
+    <Box bg="gray.50" className="bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
       {/* Hero Section */}
-      <section className="relative py-20 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              About Maldives Travel
-            </h1>
-            <p className="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto">
-              Your trusted partner in discovering the magic of the Maldives. We specialize in creating unforgettable travel experiences that connect you with the beauty and culture of this paradise destination.
-            </p>
+      <section className="py-24 bg-gradient-to-r from-blue-800 via-indigo-800 to-blue-900 relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-10 left-10 animate-float">
+            <Icon as={SparklesIcon} className="w-16 h-16 text-white" />
+          </div>
+          <div className="absolute top-20 right-20 animate-float-delayed">
+            <Icon as={GlobeAltIcon} className="w-12 h-12 text-white" />
+          </div>
+          <div className="absolute bottom-20 left-20 animate-float-slow">
+            <Icon as={MapIcon} className="w-20 h-20 text-white" />
           </div>
         </div>
+        
+        <Container maxW="7xl" className="relative z-10 text-center px-4">
+          <VStack spacing={8}>
+            <Badge 
+              className="bg-white/20 backdrop-blur-md text-white px-6 py-2 rounded-full text-sm font-bold border border-white/30"
+            >
+              <Icon as={SparklesIcon} className="w-4 h-4 mr-2" />
+              About Thread Travels
+            </Badge>
+            
+            <Text fontSize={{ base: "5xl", md: "6xl" }} fontWeight="bold" color="white">
+              About Maldives Travel
+            </Text>
+            
+            <Text fontSize="xl" color="white" maxW="4xl" mx="auto" lineHeight="relaxed">
+              Your trusted partner in discovering the magic of the Maldives. We specialize in creating unforgettable travel experiences 
+              that connect you with the beauty and culture of this paradise destination.
+            </Text>
+
+            <HStack spacing={6} flexDir={{ base: "column", sm: "row" }} justify="center" align="center">
+              <a href={getWhatsAppUrl("Hi! I'd like to learn more about Thread Travels and your services")} target="_blank" rel="noopener noreferrer">
+                <Button 
+                  size="lg"
+                  bg="green.500"
+                  _hover={{ bg: "green.600", shadow: "0 0 30px rgba(34, 197, 94, 0.4)", scale: 1.05 }}
+                  color="white"
+                  px={8}
+                  py={4}
+                  fontSize="lg"
+                  fontWeight="bold"
+                  borderRadius="full"
+                  shadow="2xl"
+                  transition="all 0.3s"
+                  transform="auto"
+                  display="flex"
+                  alignItems="center"
+                >
+                  <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                  Get in Touch
+                  <Icon as={ArrowRightIcon} className="w-5 h-5 ml-2" />
+                </Button>
+              </a>
+              <Button 
+                size="lg"
+                variant="outline"
+                border="2px solid"
+                borderColor="white"
+                color="white"
+                _hover={{ bg: "white", color: "blue.600", scale: 1.05 }}
+                px={8}
+                py={4}
+                fontSize="lg"
+                fontWeight="bold"
+                borderRadius="full"
+                transition="all 0.3s"
+                transform="auto"
+                backdropFilter="blur(4px)"
+                display="flex"
+                alignItems="center"
+                onClick={() => {
+                  const element = document.getElementById('our-story');
+                  element?.scrollIntoView({ behavior: 'smooth' });
+                }}
+              >
+                <Icon as={InformationCircleIcon} className="w-6 h-6 mr-3" />
+                Learn More
+                <Icon as={ArrowRightIcon} className="w-5 h-5 ml-2" />
+              </Button>
+            </HStack>
+          </VStack>
+        </Container>
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+      <Box py={16} bg="gray.50">
+        <Container maxW="7xl" px={4}>
+          <SimpleGrid columns={{ base: 2, md: 4 }} spacing={8}>
             {stats.map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <stat.icon className="h-8 w-8 text-blue-600" />
-                </div>
-                <div className="text-3xl font-bold text-gray-900 mb-2">{stat.number}</div>
-                <div className="text-gray-600">{stat.label}</div>
-              </div>
+              <Box key={index} textAlign="center">
+                <Box w={16} h={16} bg="blue.100" borderRadius="full" display="flex" alignItems="center" justifyContent="center" mx="auto" mb={4}>
+                  <Icon as={stat.icon} h={8} w={8} color="blue.600" />
+                </Box>
+                <Text fontSize="3xl" fontWeight="bold" color="gray.900" mb={2}>{stat.number}</Text>
+                <Text color="gray.600">{stat.label}</Text>
+              </Box>
             ))}
-          </div>
-        </div>
-      </section>
+          </SimpleGrid>
+        </Container>
+      </Box>
 
       {/* Story Section */}
-      <section className="py-20">
+      <section id="our-story" className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
@@ -209,6 +300,6 @@ export function AboutPage() {
           </div>
         </div>
       </section>
-    </div>
+    </Box>
   );
 } 

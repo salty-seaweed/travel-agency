@@ -217,6 +217,13 @@ export function AdminDashboard() {
               >
                 Create Package
               </Button>
+              <Button
+                leftIcon={<Icon as={SparklesIcon} h={5} w={5} />}
+                colorScheme="purple"
+                onClick={() => navigate('/dashboard/homepage')}
+              >
+                Manage Homepage
+              </Button>
             </HStack>
           </Flex>
         </CardBody>
