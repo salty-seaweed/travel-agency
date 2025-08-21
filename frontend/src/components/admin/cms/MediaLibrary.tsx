@@ -62,7 +62,11 @@ export function MediaLibrary({
   const loadAssets = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch('/api/media/');
+      const response = await fetch('/api/media/', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('access')}`,
+        },
+      });
       if (response.ok) {
         const data = await response.json();
         setAssets(data.results || data.data || data);

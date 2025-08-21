@@ -1,10 +1,10 @@
 from rest_framework import serializers
 from .models import (
-    PropertyType, Amenity, Location, PropertyImage, Property, Package, PackageImage, Review, 
+    PropertyType, Amenity, Location, Destination, Experience, PropertyImage, Property, Package, PackageImage, Review, 
     Booking, Availability, Customer, Page, PageBlock, MediaAsset, Menu, MenuItem, 
     Redirect, PageVersion, PageReview, CommentThread, Comment, PackageItinerary, PackageInclusion, 
     PackageActivity, PackageDestination, TransferType, AtollTransfer, ResortTransfer, TransferFAQ,
-    TransferContactMethod, TransferBookingStep, TransferBenefit, TransferPricingFactor, TransferContent,
+    TransferContactMethod, TransferBookingStep, TransferBenefit, TransferPricingFactor, TransferContent, FerrySchedule,
     HomepageHero, HomepageFeature, HomepageTestimonial, HomepageStatistic, HomepageCTASection, HomepageSettings, HomepageContent, HomepageImage
 )
 
@@ -21,6 +21,38 @@ class AmenitySerializer(serializers.ModelSerializer):
 class LocationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Location
+        fields = '__all__'
+
+class DestinationSerializer(serializers.ModelSerializer):
+    property_count = serializers.SerializerMethodField()
+    package_count = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Destination
+        fields = '__all__'
+    
+    def get_property_count(self, obj):
+        """Calculate property count dynamically"""
+        from .models import Property
+        return Property.objects.filter(
+            location__island__iexact=obj.island
+        ).count()
+    
+    def get_package_count(self, obj):
+        """Calculate package count dynamically"""
+        from .models import Package
+        return Package.objects.filter(
+            properties__location__island__iexact=obj.island
+        ).distinct().count()
+
+class ExperienceSerializer(serializers.ModelSerializer):
+    location = LocationSerializer(read_only=True)
+    location_id = serializers.PrimaryKeyRelatedField(queryset=Location.objects.all(), source='location', write_only=True)
+    destination = DestinationSerializer(read_only=True)
+    destination_id = serializers.PrimaryKeyRelatedField(queryset=Destination.objects.all(), source='destination', write_only=True, required=False)
+    
+    class Meta:
+        model = Experience
         fields = '__all__'
 
 class PropertyImageSerializer(serializers.ModelSerializer):
@@ -166,11 +198,130 @@ class PageSerializer(serializers.ModelSerializer):
     blocks = PageBlockSerializer(many=True, read_only=True)
     created_by = serializers.ReadOnlyField(source='created_by.username')
     updated_by = serializers.ReadOnlyField(source='updated_by.username')
+    parent = serializers.PrimaryKeyRelatedField(queryset=Page.objects.all(), required=False, allow_null=True)
+    parent_title = serializers.ReadOnlyField(source='parent.title')
+    children_count = serializers.SerializerMethodField()
+    versions_count = serializers.SerializerMethodField()
+    reviews_count = serializers.SerializerMethodField()
+    full_url = serializers.SerializerMethodField()
     
     class Meta:
         model = Page
+        fields = [
+            'id', 'title', 'slug', 'content', 'meta_description', 'meta_keywords',
+            'status', 'locale', 'is_home', 'template', 'path',
+            'seo_title', 'seo_description', 'canonical_url', 'robots', 'json_ld',
+            'og_title', 'og_description', 'og_image',
+            'publish_at', 'unpublish_at', 'parent', 'parent_title',
+            'created_by', 'updated_by', 'created_at', 'updated_at', 'version',
+            'blocks', 'children_count', 'versions_count', 'reviews_count', 'full_url',
+            'notes'
+        ]
+        read_only_fields = ['created_by', 'updated_by', 'version', 'created_at', 'updated_at', 'children_count', 'versions_count', 'reviews_count']
+
+    def get_children_count(self, obj):
+        return obj.children.count()
+
+    def get_versions_count(self, obj):
+        return obj.versions.count()
+
+    def get_reviews_count(self, obj):
+        return obj.reviews.count()
+
+    def get_full_url(self, obj):
+        return f"/{obj.slug}/"
+
+    def validate_slug(self, value):
+        """Validate slug uniqueness"""
+        if self.instance:
+            if Page.objects.filter(slug=value).exclude(id=self.instance.id).exists():
+                raise serializers.ValidationError("A page with this slug already exists.")
+        else:
+            if Page.objects.filter(slug=value).exists():
+                raise serializers.ValidationError("A page with this slug already exists.")
+        return value
+
+    def validate(self, data):
+        """Custom validation"""
+        # Auto-generate slug from title if not provided
+        if not data.get('slug') and data.get('title'):
+            data['slug'] = self.generate_slug(data['title'])
+        
+        # Auto-generate path if not provided
+        if not data.get('path') and data.get('slug'):
+            data['path'] = f"/{data['slug']}/"
+        
+        # Validate publish/unpublish dates
+        if data.get('publish_at') and data.get('unpublish_at'):
+            if data['publish_at'] >= data['unpublish_at']:
+                raise serializers.ValidationError("Publish date must be before unpublish date.")
+        
+        return data
+
+    def generate_slug(self, title):
+        """Generate URL-friendly slug from title"""
+        import re
+        slug = title.lower()
+        slug = re.sub(r'[^a-z0-9\s-]', '', slug)
+        slug = re.sub(r'\s+', '-', slug)
+        slug = re.sub(r'-+', '-', slug)
+        slug = slug.strip('-')
+        
+        # Ensure uniqueness
+        base_slug = slug
+        counter = 1
+        while Page.objects.filter(slug=slug).exists():
+            slug = f"{base_slug}-{counter}"
+            counter += 1
+        
+        return slug
+
+class PageVersionSerializer(serializers.ModelSerializer):
+    created_by = serializers.ReadOnlyField(source='created_by.username')
+    
+    class Meta:
+        model = PageVersion
         fields = '__all__'
-        read_only_fields = ['created_by', 'updated_by', 'version', 'created_at', 'updated_at']
+        read_only_fields = ['created_by', 'created_at']
+
+class PageReviewSerializer(serializers.ModelSerializer):
+    reviewer = serializers.ReadOnlyField(source='reviewer.username')
+    
+    class Meta:
+        model = PageReview
+        fields = '__all__'
+        read_only_fields = ['reviewer', 'created_at']
+
+class PageDetailSerializer(PageSerializer):
+    """Detailed page serializer with all related data"""
+    blocks = PageBlockSerializer(many=True, read_only=True)
+    versions = PageVersionSerializer(many=True, read_only=True)
+    reviews = PageReviewSerializer(many=True, read_only=True)
+    children = serializers.SerializerMethodField()
+    
+    def get_children(self, obj):
+        children = obj.children.all()
+        return PageSerializer(children, many=True).data
+
+class PageCreateSerializer(PageSerializer):
+    """Serializer for creating new pages"""
+    class Meta(PageSerializer.Meta):
+        fields = [
+            'title', 'slug', 'content', 'meta_description', 'meta_keywords',
+            'status', 'locale', 'template', 'seo_title', 'seo_description',
+            'canonical_url', 'robots', 'og_title', 'og_description',
+            'publish_at', 'unpublish_at', 'parent', 'notes'
+        ]
+
+class PageUpdateSerializer(PageSerializer):
+    """Serializer for updating existing pages"""
+    class Meta(PageSerializer.Meta):
+        fields = [
+            'title', 'slug', 'content', 'meta_description', 'meta_keywords',
+            'status', 'locale', 'template', 'seo_title', 'seo_description',
+            'canonical_url', 'robots', 'og_title', 'og_description',
+            'publish_at', 'unpublish_at', 'parent', 'notes'
+        ]
 
 class MediaAssetSerializer(serializers.ModelSerializer):
     created_by = serializers.ReadOnlyField(source='created_by.username')
@@ -208,22 +359,6 @@ class RedirectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Redirect
         fields = '__all__'
-
-class PageVersionSerializer(serializers.ModelSerializer):
-    created_by = serializers.ReadOnlyField(source='created_by.username')
-    
-    class Meta:
-        model = PageVersion
-        fields = '__all__'
-        read_only_fields = ['created_by', 'created_at']
-
-class PageReviewSerializer(serializers.ModelSerializer):
-    reviewer = serializers.ReadOnlyField(source='reviewer.username')
-    
-    class Meta:
-        model = PageReview
-        fields = '__all__'
-        read_only_fields = ['reviewer', 'created_at']
 
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.ReadOnlyField(source='author.username')
@@ -398,4 +533,12 @@ class HomepageDataSerializer(serializers.Serializer):
     testimonials = HomepageTestimonialSerializer(many=True)
     statistics = HomepageStatisticSerializer(many=True)
     cta_section = HomepageCTASectionSerializer()
-    settings = HomepageSettingsSerializer() 
+    settings = HomepageSettingsSerializer()
+
+
+class FerryScheduleSerializer(serializers.ModelSerializer):
+    """Serializer for ferry schedules"""
+    
+    class Meta:
+        model = FerrySchedule
+        fields = '__all__' 

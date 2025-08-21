@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react-swc'
 import tailwindcss from '@tailwindcss/vite'
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [tailwindcss(), react()],
   server: {
     host: '0.0.0.0',
@@ -22,14 +22,14 @@ export default defineConfig({
         target: 'http://localhost:8001',
         changeOrigin: true,
         secure: false,
-        configure: (proxy, options) => {
-          proxy.on('error', (err, req, res) => {
+        configure: (proxy, _options) => {
+          proxy.on('error', (err, _req, _res) => {
             console.log('proxy error', err);
           });
-          proxy.on('proxyReq', (proxyReq, req, res) => {
+          proxy.on('proxyReq', (_proxyReq, req, _res) => {
             console.log('Sending Request to the Target:', req.method, req.url);
           });
-          proxy.on('proxyRes', (proxyRes, req, res) => {
+          proxy.on('proxyRes', (proxyRes, req, _res) => {
             console.log('Received Response from the Target:', proxyRes.statusCode, req.url);
           });
         },
@@ -55,23 +55,72 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: false,
     minify: 'esbuild',
+    target: 'es2015',
+    cssTarget: 'chrome80',
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ['react', 'react-dom'],
-          router: ['react-router-dom'],
-          ui: ['@chakra-ui/react', '@emotion/react', '@emotion/styled', 'framer-motion'],
-          icons: ['@heroicons/react'],
-          query: ['@tanstack/react-query'],
-          utils: ['lodash', 'date-fns'],
+          // Core React libraries
+          'react-core': ['react', 'react-dom'],
+          'react-router': ['react-router-dom'],
+          
+          // UI libraries
+          'chakra-ui': ['@chakra-ui/react', '@emotion/react', '@emotion/styled', 'framer-motion'],
+          'heroicons': ['@heroicons/react'],
+          
+          // Data management
+          'react-query': ['@tanstack/react-query'],
+          
+          // Utilities
+          'utils': ['lodash', 'date-fns'],
+          
+          // Maps and location
+          'maps': ['leaflet', 'react-leaflet', 'react-leaflet-cluster'],
+          
+          // Forms and inputs
+          'forms': ['react-select', 'react-color'],
+          
+          // Internationalization
+          'i18n': ['i18next', 'react-i18next'],
+          
+          // Syntax highlighting
+          'syntax': ['react-syntax-highlighter'],
+          
+          // SEO and meta
+          'seo': ['react-helmet-async'],
         },
-        chunkFileNames: 'assets/js/[name]-[hash].js',
+        chunkFileNames: (chunkInfo) => {
+          const facadeModuleId = chunkInfo.facadeModuleId ? chunkInfo.facadeModuleId.split('/').pop() : 'chunk';
+          return `assets/js/[name]-[hash].js`;
+        },
         entryFileNames: 'assets/js/[name]-[hash].js',
-        assetFileNames: 'assets/[ext]/[name]-[hash].[ext]',
+        assetFileNames: (assetInfo) => {
+          if (!assetInfo.name) return `assets/[ext]/[name]-[hash].[ext]`;
+          const info = assetInfo.name.split('.');
+          const ext = info[info.length - 1];
+          if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(ext)) {
+            return `assets/images/[name]-[hash].[ext]`;
+          }
+          if (/css/i.test(ext)) {
+            return `assets/css/[name]-[hash].[ext]`;
+          }
+          return `assets/[ext]/[name]-[hash].[ext]`;
+        },
       },
     },
     chunkSizeWarningLimit: 1000,
+    // Enable compression for production builds
+    reportCompressedSize: true,
+    // Optimize dependencies
+    commonjsOptions: {
+      include: [/node_modules/],
+    },
   },
+  // Strip all console calls and debugger statements from production builds
+  esbuild: mode === 'production' ? { 
+    drop: ['console', 'debugger'],
+    pure: ['console.log', 'console.info', 'console.debug', 'console.warn'],
+  } : {},
   define: {
     'process.env.VITE_API_URL': JSON.stringify(process.env.VITE_API_URL || 'http://localhost:8001'),
   },
@@ -84,9 +133,30 @@ export default defineConfig({
       '@heroicons/react/24/outline',
       '@heroicons/react/24/solid',
       '@tanstack/react-query',
+      'lodash',
+      'date-fns',
+    ],
+    exclude: [
+      '@tanstack/react-query-devtools', // Exclude dev tools from production
     ],
   },
   css: {
     devSourcemap: false,
+    postcss: {
+      plugins: [
+        // Add autoprefixer for better browser compatibility
+        require('autoprefixer'),
+      ],
+    },
   },
-})
+  // Performance optimizations
+  experimental: {
+    renderBuiltUrl(filename, { hostType }) {
+      if (hostType === 'js') {
+        return { js: `/${filename}` };
+      } else {
+        return { relative: true };
+      }
+    },
+  },
+}))

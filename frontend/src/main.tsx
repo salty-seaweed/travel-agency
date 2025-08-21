@@ -10,6 +10,32 @@ import { queryClient } from './lib/query-client'
 import './i18n'
 import './main.css'
 
+// Silence all console output in production (prevents third-party logs too)
+if (import.meta.env.PROD) {
+  /* eslint-disable no-console */
+  const noop = () => {}
+  const consoleMethods = [
+    'log',
+    'debug',
+    'info',
+    'warn',
+    'error',
+    'group',
+    'groupCollapsed',
+    'groupEnd',
+    'time',
+    'timeEnd',
+    'trace',
+    'table',
+    'dir',
+  ] as const
+  const c: any = console
+  for (const method of consoleMethods) {
+    try { c[method] = noop } catch {}
+  }
+  /* eslint-enable no-console */
+}
+
 // Extend Chakra UI theme
 const theme = extendTheme({
   colors: {

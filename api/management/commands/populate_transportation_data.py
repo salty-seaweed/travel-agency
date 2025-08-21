@@ -37,10 +37,10 @@ class Command(BaseCommand):
                 'icon': 'GlobeAltIcon',
                 'gradient': 'from-green-500 to-emerald-600',
                 'features': [
-                    'Scheduled departures',
-                    'Very affordable rates',
+                    'Scheduled departures (6:00 AM - 6:00 PM)',
+                    'Very affordable rates ($2-15)',
                     'Local island connections',
-                    'Regular schedules',
+                    'Regular schedules (every 1-2 hours)',
                     'Authentic local experience',
                     'Luggage space available'
                 ],
@@ -60,7 +60,7 @@ class Command(BaseCommand):
                     'Fast transfers to remote locations',
                     'Luxury experience',
                     'Professional pilots',
-                    'Baggage included',
+                    'Baggage included (20kg limit)',
                     'Resort coordination'
                 ],
                 'pricing_range': 'From $200 to $500 per person',
@@ -73,14 +73,14 @@ class Command(BaseCommand):
                 'name': 'Domestic Flights',
                 'description': 'Domestic air travel between atolls and major islands',
                 'icon': 'ShieldCheckIcon',
-                'gradient': 'from-orange-500 to-red-600',
+                'gradient': 'from-indigo-500 to-purple-600',
                 'features': [
                     'Inter-atoll connections',
                     'Regular scheduled flights',
                     'Air-conditioned comfort',
                     'Professional service',
                     'Reliable schedules',
-                    'Baggage allowance'
+                    'Baggage allowance (15kg)'
                 ],
                 'pricing_range': 'From $80 to $200 per person',
                 'best_for': 'Inter-atoll travel, major islands',
@@ -125,6 +125,20 @@ class Command(BaseCommand):
                 'icon': 'CheckCircleIcon',
                 'gradient': 'from-orange-500 to-red-600',
                 'order': 4
+            },
+            {
+                'atoll_name': 'Vaavu Atoll',
+                'description': 'Remote atoll with pristine reefs and limited development',
+                'icon': 'MapPinIcon',
+                'gradient': 'from-teal-500 to-cyan-600',
+                'order': 5
+            },
+            {
+                'atoll_name': 'Meemu Atoll',
+                'description': 'Traditional Maldivian culture with beautiful beaches',
+                'icon': 'GlobeAltIcon',
+                'gradient': 'from-yellow-500 to-orange-600',
+                'order': 6
             }
         ]
 
@@ -137,14 +151,17 @@ class Command(BaseCommand):
         # Create Resort Transfers for Male Atoll
         male_atoll = AtollTransfer.objects.get(atoll_name='Male Atoll')
         male_resorts = [
-            {'resort_name': 'Adaaran Hudhuranfushi', 'price': 130, 'duration': '45 minutes'},
-            {'resort_name': 'Adaaran Rannalhi', 'price': 180, 'duration': '60 minutes'},
-            {'resort_name': 'Adaaran Vadoo', 'price': 80, 'duration': '25 minutes'},
-            {'resort_name': 'Anantara Veli', 'price': 115, 'duration': '40 minutes'},
-            {'resort_name': 'Sheraton Full Moon', 'price': 55, 'duration': '15 minutes'},
-            {'resort_name': 'Kurumba Maldives', 'price': 58, 'duration': '15 minutes'},
-            {'resort_name': 'Paradise Island', 'price': 70, 'duration': '20 minutes'},
-            {'resort_name': 'Velassaru', 'price': 90, 'duration': '30 minutes'},
+            {'resort_name': 'Adaaran Hudhuranfushi', 'price': 130, 'duration': '45 minutes', 'transfer_type': 'speedboat'},
+            {'resort_name': 'Adaaran Rannalhi', 'price': 180, 'duration': '60 minutes', 'transfer_type': 'speedboat'},
+            {'resort_name': 'Adaaran Vadoo', 'price': 80, 'duration': '25 minutes', 'transfer_type': 'speedboat'},
+            {'resort_name': 'Anantara Veli', 'price': 115, 'duration': '40 minutes', 'transfer_type': 'speedboat'},
+            {'resort_name': 'Sheraton Full Moon', 'price': 55, 'duration': '15 minutes', 'transfer_type': 'speedboat'},
+            {'resort_name': 'Kurumba Maldives', 'price': 58, 'duration': '15 minutes', 'transfer_type': 'speedboat'},
+            {'resort_name': 'Paradise Island', 'price': 70, 'duration': '20 minutes', 'transfer_type': 'speedboat'},
+            {'resort_name': 'Velassaru', 'price': 90, 'duration': '30 minutes', 'transfer_type': 'speedboat'},
+            {'resort_name': 'Hulhumale Ferry', 'price': 2, 'duration': '20 minutes', 'transfer_type': 'ferry'},
+            {'resort_name': 'Maafushi Ferry', 'price': 5, 'duration': '90 minutes', 'transfer_type': 'ferry'},
+            {'resort_name': 'Gulhi Ferry', 'price': 4, 'duration': '75 minutes', 'transfer_type': 'ferry'},
         ]
 
         for i, resort_data in enumerate(male_resorts):
@@ -154,7 +171,7 @@ class Command(BaseCommand):
                 defaults={
                     'price': resort_data['price'],
                     'duration': resort_data['duration'],
-                    'transfer_type': 'speedboat',
+                    'transfer_type': resort_data['transfer_type'],
                     'order': i + 1
                 }
             )
@@ -162,10 +179,12 @@ class Command(BaseCommand):
         # Create Resort Transfers for Baa Atoll
         baa_atoll = AtollTransfer.objects.get(atoll_name='Baa Atoll')
         baa_resorts = [
-            {'resort_name': 'Dusit Thani Maldives', 'price': 150, 'duration': '2 hours 40 minutes'},
-            {'resort_name': 'Four Seasons Landaa Giraavaru', 'price': 180, 'duration': '2 hours 40 minutes'},
-            {'resort_name': 'Soneva Fushi', 'price': 104, 'duration': '2 hours 40 minutes'},
-            {'resort_name': 'The Nautilus Maldives', 'price': 180, 'duration': '2 hours 40 minutes'},
+            {'resort_name': 'Dusit Thani Maldives', 'price': 150, 'duration': '2 hours 40 minutes', 'transfer_type': 'seaplane'},
+            {'resort_name': 'Four Seasons Landaa Giraavaru', 'price': 180, 'duration': '2 hours 40 minutes', 'transfer_type': 'seaplane'},
+            {'resort_name': 'Soneva Fushi', 'price': 104, 'duration': '2 hours 40 minutes', 'transfer_type': 'seaplane'},
+            {'resort_name': 'The Nautilus Maldives', 'price': 180, 'duration': '2 hours 40 minutes', 'transfer_type': 'seaplane'},
+            {'resort_name': 'Eydhafushi Ferry', 'price': 8, 'duration': '4 hours', 'transfer_type': 'ferry'},
+            {'resort_name': 'Thulhaadhoo Ferry', 'price': 7, 'duration': '3.5 hours', 'transfer_type': 'ferry'},
         ]
 
         for i, resort_data in enumerate(baa_resorts):
@@ -175,7 +194,88 @@ class Command(BaseCommand):
                 defaults={
                     'price': resort_data['price'],
                     'duration': resort_data['duration'],
-                    'transfer_type': 'seaplane',
+                    'transfer_type': resort_data['transfer_type'],
+                    'order': i + 1
+                }
+            )
+
+        # Create Resort Transfers for Ari Atoll
+        ari_atoll = AtollTransfer.objects.get(atoll_name='Ari Atoll')
+        ari_resorts = [
+            {'resort_name': 'Conrad Maldives Rangali Island', 'price': 220, 'duration': '2 hours 15 minutes', 'transfer_type': 'seaplane'},
+            {'resort_name': 'W Maldives', 'price': 200, 'duration': '2 hours', 'transfer_type': 'seaplane'},
+            {'resort_name': 'Lily Beach Resort', 'price': 180, 'duration': '1 hour 45 minutes', 'transfer_type': 'seaplane'},
+            {'resort_name': 'Mirihi Island Resort', 'price': 160, 'duration': '1 hour 30 minutes', 'transfer_type': 'seaplane'},
+            {'resort_name': 'Maamigili Ferry', 'price': 10, 'duration': '5 hours', 'transfer_type': 'ferry'},
+            {'resort_name': 'Mahibadhoo Ferry', 'price': 9, 'duration': '4.5 hours', 'transfer_type': 'ferry'},
+        ]
+
+        for i, resort_data in enumerate(ari_resorts):
+            ResortTransfer.objects.get_or_create(
+                resort_name=resort_data['resort_name'],
+                atoll=ari_atoll,
+                defaults={
+                    'price': resort_data['price'],
+                    'duration': resort_data['duration'],
+                    'transfer_type': resort_data['transfer_type'],
+                    'order': i + 1
+                }
+            )
+
+        # Create Resort Transfers for Lhaviyani Atoll
+        lhaviyani_atoll = AtollTransfer.objects.get(atoll_name='Lhaviyani Atoll')
+        lhaviyani_resorts = [
+            {'resort_name': 'Kuredu Island Resort', 'price': 140, 'duration': '1 hour 30 minutes', 'transfer_type': 'seaplane'},
+            {'resort_name': 'Komandoo Island Resort', 'price': 150, 'duration': '1 hour 45 minutes', 'transfer_type': 'seaplane'},
+            {'resort_name': 'Kunfunadhoo Ferry', 'price': 6, 'duration': '3 hours', 'transfer_type': 'ferry'},
+        ]
+
+        for i, resort_data in enumerate(lhaviyani_resorts):
+            ResortTransfer.objects.get_or_create(
+                resort_name=resort_data['resort_name'],
+                atoll=lhaviyani_atoll,
+                defaults={
+                    'price': resort_data['price'],
+                    'duration': resort_data['duration'],
+                    'transfer_type': resort_data['transfer_type'],
+                    'order': i + 1
+                }
+            )
+
+        # Create Resort Transfers for Vaavu Atoll
+        vaavu_atoll = AtollTransfer.objects.get(atoll_name='Vaavu Atoll')
+        vaavu_resorts = [
+            {'resort_name': 'Alimatha Ferry', 'price': 12, 'duration': '6 hours', 'transfer_type': 'ferry'},
+            {'resort_name': 'Fulidhoo Ferry', 'price': 11, 'duration': '5.5 hours', 'transfer_type': 'ferry'},
+        ]
+
+        for i, resort_data in enumerate(vaavu_resorts):
+            ResortTransfer.objects.get_or_create(
+                resort_name=resort_data['resort_name'],
+                atoll=vaavu_atoll,
+                defaults={
+                    'price': resort_data['price'],
+                    'duration': resort_data['duration'],
+                    'transfer_type': resort_data['transfer_type'],
+                    'order': i + 1
+                }
+            )
+
+        # Create Resort Transfers for Meemu Atoll
+        meemu_atoll = AtollTransfer.objects.get(atoll_name='Meemu Atoll')
+        meemu_resorts = [
+            {'resort_name': 'Muli Ferry', 'price': 13, 'duration': '6.5 hours', 'transfer_type': 'ferry'},
+            {'resort_name': 'Veyvah Ferry', 'price': 14, 'duration': '7 hours', 'transfer_type': 'ferry'},
+        ]
+
+        for i, resort_data in enumerate(meemu_resorts):
+            ResortTransfer.objects.get_or_create(
+                resort_name=resort_data['resort_name'],
+                atoll=meemu_atoll,
+                defaults={
+                    'price': resort_data['price'],
+                    'duration': resort_data['duration'],
+                    'transfer_type': resort_data['transfer_type'],
                     'order': i + 1
                 }
             )
@@ -184,7 +284,7 @@ class Command(BaseCommand):
         faq_data = [
             {
                 'question': 'How to get to Maldives islands?',
-                'answer': 'To reach any island in the Maldives, you will require either a speedboat transfer or a domestic flight. The choice depends on your destination and budget.',
+                'answer': 'To reach any island in the Maldives, you will require either a speedboat transfer, seaplane, domestic flight, or public ferry. The choice depends on your destination, budget, and time constraints.',
                 'category': 'General',
                 'icon': 'MapPinIcon',
                 'order': 1
@@ -198,7 +298,7 @@ class Command(BaseCommand):
             },
             {
                 'question': 'Is it safe to travel by sea?',
-                'answer': 'I can tell you it\'s safer than flights. You will have floating life jackets on speedboats, but during stormy weather, it is not recommended to travel by very small boats.',
+                'answer': 'Yes, it\'s generally safe to travel by sea. You will have floating life jackets on speedboats, but during stormy weather, it is not recommended to travel by very small boats.',
                 'category': 'Safety',
                 'icon': 'CheckCircleIcon',
                 'order': 3
@@ -209,6 +309,34 @@ class Command(BaseCommand):
                 'category': 'Pricing',
                 'icon': 'CurrencyDollarIcon',
                 'order': 4
+            },
+            {
+                'question': 'What are the ferry schedules?',
+                'answer': 'Public ferries typically operate from 6:00 AM to 6:00 PM with departures every 1-2 hours. Schedules vary by route and may be affected by weather conditions.',
+                'category': 'Schedules',
+                'icon': 'ClockIcon',
+                'order': 5
+            },
+            {
+                'question': 'How much luggage can I bring on transfers?',
+                'answer': 'Speedboats allow 20kg per person, seaplanes have a 20kg limit, domestic flights allow 15kg, and ferries have no strict limit but space is limited.',
+                'category': 'Luggage',
+                'icon': 'InformationCircleIcon',
+                'order': 6
+            },
+            {
+                'question': 'Do I need to book transfers in advance?',
+                'answer': 'Yes, all transfers should be booked at least 48 hours in advance, especially for seaplanes and speedboats. Ferry tickets can be purchased on the day of travel.',
+                'category': 'Booking',
+                'icon': 'ShieldCheckIcon',
+                'order': 7
+            },
+            {
+                'question': 'What happens if my transfer is cancelled due to weather?',
+                'answer': 'In case of weather-related cancellations, we will reschedule your transfer at no additional cost. We monitor weather conditions and provide updates.',
+                'category': 'Weather',
+                'icon': 'ExclamationTriangleIcon',
+                'order': 8
             }
         ]
 
@@ -363,7 +491,7 @@ class Command(BaseCommand):
         pricing_factors_data = [
             {
                 'factor': 'Distance',
-                'description': 'Longer distances generally cost more',
+                'description': 'Longer distances generally cost more due to fuel consumption and time',
                 'icon': 'MapPinIcon',
                 'impact': 'High',
                 'examples': ['Male to nearby islands: $50-80', 'Male to Baa Atoll: $150-200', 'Male to Ari Atoll: $200-300'],
@@ -371,19 +499,35 @@ class Command(BaseCommand):
             },
             {
                 'factor': 'Transfer Type',
-                'description': 'Different transportation methods have different costs',
+                'description': 'Different transportation methods have different costs and luxury levels',
                 'icon': 'SparklesIcon',
                 'impact': 'High',
-                'examples': ['Speedboat: $50-300', 'Seaplane: $200-500', 'Ferry: $2-25'],
+                'examples': ['Speedboat: $50-300', 'Seaplane: $200-500', 'Ferry: $2-25', 'Domestic Flight: $80-200'],
                 'order': 2
             },
             {
                 'factor': 'Season',
-                'description': 'Peak season may have higher rates',
+                'description': 'Peak season may have higher rates due to increased demand',
                 'icon': 'StarIcon',
                 'impact': 'Medium',
                 'examples': ['Peak season (Dec-Apr): +10-20%', 'Off-season (May-Nov): Standard rates', 'Holiday periods: +15-25%'],
                 'order': 3
+            },
+            {
+                'factor': 'Group Size',
+                'description': 'Larger groups may qualify for discounts or require special arrangements',
+                'icon': 'UserGroupIcon',
+                'impact': 'Medium',
+                'examples': ['Individual travelers: Standard rates', 'Groups 4-8: 5-10% discount', 'Groups 8+: Custom pricing'],
+                'order': 4
+            },
+            {
+                'factor': 'Time of Day',
+                'description': 'Early morning or late evening transfers may have different rates',
+                'icon': 'ClockIcon',
+                'impact': 'Low',
+                'examples': ['Regular hours (6AM-6PM): Standard rates', 'After hours: +15-25%', 'Emergency transfers: +50%'],
+                'order': 5
             }
         ]
 

@@ -11,6 +11,8 @@ router = DefaultRouter()
 router.register(r'properties', views.PropertyViewSet)
 router.register(r'packages', views.PackageViewSet)
 router.register(r'locations', views.LocationViewSet)
+router.register(r'destinations', views.DestinationViewSet)
+router.register(r'experiences', views.ExperienceViewSet)
 router.register(r'property-types', views.PropertyTypeViewSet)
 router.register(r'amenities', views.AmenityViewSet)
 router.register(r'reviews', views.ReviewViewSet)
@@ -46,6 +48,7 @@ router.register(r'transfer-booking-steps', views.TransferBookingStepViewSet)
 router.register(r'transfer-benefits', views.TransferBenefitViewSet)
 router.register(r'transfer-pricing-factors', views.TransferPricingFactorViewSet)
 router.register(r'transfer-content', views.TransferContentViewSet)
+router.register(r'ferry-schedules', views.FerryScheduleViewSet)
 
 # Homepage Management URLs
 router.register(r'homepage/hero', HomepageHeroViewSet)
@@ -69,6 +72,8 @@ urlpatterns = [
     path('bookings/create-booking/', views.create_booking, name='create_booking'),
     path('transportation/', views.transportation_data, name='transportation_data'),
     path('homepage/public/', HomepageManagementViewSet.as_view({'get': 'public_content'}), name='homepage-public-content'),
+    path('pages/', include(router.urls)),
+    path('pages/by-slug/<str:slug>/', views.page_by_slug, name='page_by_slug'),
 ]
 
  

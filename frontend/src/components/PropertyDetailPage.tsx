@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Card, LoadingSpinner } from './index';
+import { Card } from './Card';
+import { LoadingSpinner } from './LoadingSpinner';
 import { Button } from './ui/Button';
 import { ReviewSystem } from './ReviewSystem';
 import { useNotification } from '../hooks';

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Container,
@@ -16,6 +16,11 @@ import {
   ListIcon,
   HStack,
   Divider,
+  Skeleton,
+  Alert,
+  AlertIcon,
+  AlertTitle,
+  AlertDescription,
 } from '@chakra-ui/react';
 import {
   CheckCircleIcon,
@@ -29,89 +34,121 @@ import {
   UserGroupIcon,
   ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
+import { config } from '../../config';
+
+// Icon mapping for dynamic icons
+const iconMap: { [key: string]: any } = {
+  'SparklesIcon': SparklesIcon,
+  'GlobeAltIcon': GlobeAltIcon,
+  'UserGroupIcon': UserGroupIcon,
+  'ShieldCheckIcon': ShieldCheckIcon,
+  'ClockIcon': ClockIcon,
+  'CurrencyDollarIcon': CurrencyDollarIcon,
+  'MapPinIcon': MapPinIcon,
+  'CheckCircleIcon': CheckCircleIcon,
+  'ExclamationTriangleIcon': ExclamationTriangleIcon,
+  'InformationCircleIcon': InformationCircleIcon,
+};
+
+interface TransferType {
+  id: number;
+  name: string;
+  description: string;
+  icon: string;
+  gradient: string;
+  features: string[];
+  pricing_range: string;
+  best_for: string;
+  pros: string[];
+  cons: string[];
+  is_active: boolean;
+  order: number;
+}
 
 export const TransferTypesSection = React.memo(() => {
-  const transferTypes = [
-    {
-      id: 'speedboat',
-      title: 'Speedboat Transfers',
-      description: 'Fast and efficient transfers for nearby islands and resorts',
-      icon: SparklesIcon,
-      gradient: 'from-blue-500 to-indigo-600',
-      features: [
-        '15-60 minutes travel time',
-        'Available 24/7 for resort guests',
-        'Comfortable seating with shade',
-        'Life jackets provided',
-        'Direct transfers from airport',
-        'Suitable for all weather conditions'
-      ],
-      pricing: 'From $50 to $300 per person',
-      bestFor: 'Resort transfers, nearby islands',
-      pros: ['Fastest option for nearby destinations', 'Flexible scheduling', 'Direct service'],
-      cons: ['Limited to nearby islands', 'Weather dependent', 'Can be expensive']
-    },
-    {
-      id: 'ferry',
-      title: 'Public Ferry Services',
-      description: 'Budget-friendly transportation between local islands',
-      icon: GlobeAltIcon,
-      gradient: 'from-green-500 to-emerald-600',
-      features: [
-        'Scheduled departures',
-        'Very affordable rates',
-        'Local island connections',
-        'Regular schedules',
-        'Authentic local experience',
-        'Luggage space available'
-      ],
-      pricing: 'From $2 to $15 per person',
-      bestFor: 'Budget travelers, local island hopping',
-      pros: ['Most affordable option', 'Regular schedules', 'Local experience'],
-      cons: ['Limited schedules', 'Longer travel times', 'Basic amenities']
-    },
-    {
-      id: 'seaplane',
-      title: 'Seaplane Transfers',
-      description: 'Luxury aerial transfers to remote resorts and islands',
-      icon: UserGroupIcon,
-      gradient: 'from-purple-500 to-pink-600',
-      features: [
-        'Breathtaking aerial views',
-        'Fast transfers to remote locations',
-        'Luxury experience',
-        'Professional pilots',
-        'Baggage included',
-        'Resort coordination'
-      ],
-      pricing: 'From $200 to $500 per person',
-      bestFor: 'Luxury resorts, remote islands',
-      pros: ['Stunning views', 'Fast to remote locations', 'Luxury experience'],
-      cons: ['Most expensive option', 'Weather dependent', 'Limited luggage']
-    },
-    {
-      id: 'domestic-flight',
-      title: 'Domestic Flights',
-      description: 'Domestic air travel between atolls and major islands',
-      icon: ShieldCheckIcon,
-      gradient: 'from-orange-500 to-red-600',
-      features: [
-        'Inter-atoll connections',
-        'Regular scheduled flights',
-        'Air-conditioned comfort',
-        'Professional service',
-        'Reliable schedules',
-        'Baggage allowance'
-      ],
-      pricing: 'From $80 to $200 per person',
-      bestFor: 'Inter-atoll travel, major islands',
-      pros: ['Reliable schedules', 'Comfortable travel', 'Good for long distances'],
-      cons: ['Limited destinations', 'Additional transfer needed', 'Weather dependent']
-    }
-  ];
+  const [transferTypes, setTransferTypes] = useState<TransferType[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchTransferTypes = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const response = await fetch(`${config.apiBaseUrl}/transportation/`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        setTransferTypes(data.transfer_types || []);
+      } catch (err) {
+        console.error('Failed to fetch transfer types:', err);
+        setError('Failed to load transportation information. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTransferTypes();
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="py-24 bg-gradient-to-br from-blue-50 to-indigo-50">
+        <Container maxW="7xl">
+          <VStack spacing={16} mb={16} textAlign="center">
+            <Skeleton height="40px" width="300px" />
+            <Skeleton height="60px" width="600px" />
+            <Skeleton height="24px" width="800px" />
+          </VStack>
+          <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={8}>
+            {[1, 2, 3, 4].map((i) => (
+              <Skeleton key={i} height="400px" />
+            ))}
+          </SimpleGrid>
+        </Container>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="py-24 bg-gradient-to-br from-blue-50 to-indigo-50">
+        <Container maxW="7xl">
+          <Alert status="error" className="rounded-xl">
+            <AlertIcon />
+            <Box>
+              <AlertTitle>Error Loading Transportation Information</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Box>
+          </Alert>
+        </Container>
+      </section>
+    );
+  }
+
+  if (transferTypes.length === 0) {
+    return (
+      <section className="py-24 bg-gradient-to-br from-blue-50 to-indigo-50">
+        <Container maxW="7xl">
+          <Alert status="info" className="rounded-xl">
+            <AlertIcon />
+            <Box>
+              <AlertTitle>No Transportation Information Available</AlertTitle>
+              <AlertDescription>
+                Transportation information is currently being updated. Please check back later or contact us directly for assistance.
+              </AlertDescription>
+            </Box>
+          </Alert>
+        </Container>
+      </section>
+    );
+  }
 
   return (
-    <section id="transfer-types" className="py-24 bg-white">
+    <section className="py-24 bg-gradient-to-br from-blue-50 to-indigo-50">
       <Container maxW="7xl">
         <VStack spacing={16} mb={16} textAlign="center">
           <Badge 
@@ -122,103 +159,109 @@ export const TransferTypesSection = React.memo(() => {
           </Badge>
           
           <Heading size="2xl" className="text-5xl md:text-6xl font-bold text-gray-900">
-            Types of Transfers in Maldives
+            Transfer Types & Services
           </Heading>
           
           <Text className="text-xl text-gray-800 max-w-4xl mx-auto leading-relaxed">
-            From budget-friendly ferries to luxury seaplane transfers, discover the perfect 
-            transportation option for your Maldives adventure.
+            Choose the perfect transportation option for your Maldives adventure. 
+            From budget-friendly ferries to luxury seaplane transfers, we have you covered.
           </Text>
         </VStack>
 
-        <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={8}>
-          {transferTypes.map((type) => (
-            <Card 
-              key={type.id}
-              className="group hover:-translate-y-2 transition-all duration-500 border-2 border-gray-200 hover:border-gray-300 shadow-xl hover:shadow-2xl"
-            >
-              <CardHeader className="pb-4">
-                <HStack spacing={4}>
-                  <div className={`w-16 h-16 bg-gradient-to-br ${type.gradient} rounded-2xl flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
-                    <Icon as={type.icon} className="w-8 h-8 text-white" />
-                  </div>
-                  <VStack align="start" spacing={2}>
-                    <Heading size="lg" className="text-gray-900 font-bold">
-                      {type.title}
-                    </Heading>
-                    <Text className="text-gray-600 font-medium">
-                      {type.description}
-                    </Text>
+        <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={8}>
+          {transferTypes.map((type) => {
+            const IconComponent = iconMap[type.icon] || SparklesIcon;
+            const isDomestic = typeof type.name === 'string' && type.name.toLowerCase().includes('domestic');
+            const headerClasses = isDomestic
+              ? 'bg-gradient-to-br from-blue-700 to-indigo-700 text-white rounded-t-xl'
+              : `bg-gradient-to-br ${type.gradient} text-white rounded-t-xl`;
+            
+            return (
+              <Card key={type.id} className="shadow-2xl border-2 border-gray-200 hover:border-blue-300 transition-all duration-300 hover:shadow-glow-lg">
+                <CardHeader className={headerClasses}>
+                  <VStack spacing={4} align="center">
+                    <div className={`w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center`}>
+                      <Icon as={IconComponent} className="w-8 h-8 text-white" />
+                    </div>
+                    <VStack spacing={2} align="center">
+                      <Heading size="md" className="text-white text-center">
+                        {type.name}
+                      </Heading>
+                      <Text className="text-blue-100 text-center text-sm">
+                        {type.description}
+                      </Text>
+                    </VStack>
                   </VStack>
-                </HStack>
-              </CardHeader>
-              
-              <CardBody className="pt-0">
-                <VStack spacing={6} align="stretch">
-                  {/* Features */}
-                  <Box>
-                    <Text className="text-lg font-semibold text-gray-800 mb-3">Key Features</Text>
-                    <List spacing={2}>
-                      {type.features.map((feature, index) => (
-                        <ListItem key={index} className="flex items-start">
-                          <ListIcon as={CheckCircleIcon} color="green.500" className="mt-1 mr-3 flex-shrink-0" />
-                          <Text className="text-gray-700">{feature}</Text>
-                        </ListItem>
-                      ))}
-                    </List>
-                  </Box>
-
-                  <Divider />
-
-                  {/* Pricing & Best For */}
-                  <SimpleGrid columns={2} spacing={4}>
+                </CardHeader>
+                
+                <CardBody className="p-6">
+                  <VStack spacing={6} align="stretch">
+                    {/* Features */}
                     <Box>
-                      <HStack spacing={2} mb={2}>
-                        <Icon as={CurrencyDollarIcon} className="w-5 h-5 text-green-600" />
-                        <Text className="font-semibold text-gray-800">Pricing</Text>
-                      </HStack>
-                      <Text className="text-gray-700 text-sm">{type.pricing}</Text>
-                    </Box>
-                    <Box>
-                      <HStack spacing={2} mb={2}>
-                        <Icon as={MapPinIcon} className="w-5 h-5 text-blue-600" />
-                        <Text className="font-semibold text-gray-800">Best For</Text>
-                      </HStack>
-                      <Text className="text-gray-700 text-sm">{type.bestFor}</Text>
-                    </Box>
-                  </SimpleGrid>
-
-                  <Divider />
-
-                  {/* Pros & Cons */}
-                  <SimpleGrid columns={2} spacing={4}>
-                    <Box>
-                      <Text className="font-semibold text-green-700 mb-2">Pros</Text>
-                      <List spacing={1}>
-                        {type.pros.map((pro, index) => (
-                          <ListItem key={index} className="text-sm text-gray-700">
-                            <ListIcon as={CheckCircleIcon} color="green.500" className="w-4 h-4" />
-                            {pro}
+                      <Heading size="sm" className="text-gray-900 mb-3">Features</Heading>
+                      <List spacing={2}>
+                        {type.features.map((feature, index) => (
+                          <ListItem key={index} className="flex items-start">
+                            <ListIcon as={CheckCircleIcon} color="green.500" className="mt-1 mr-3 flex-shrink-0" />
+                            <Text className="text-gray-700 text-sm">{feature}</Text>
                           </ListItem>
                         ))}
                       </List>
                     </Box>
+
+                    <Divider />
+
+                    {/* Pricing */}
                     <Box>
-                      <Text className="font-semibold text-red-700 mb-2">Cons</Text>
-                      <List spacing={1}>
-                        {type.cons.map((con, index) => (
-                          <ListItem key={index} className="text-sm text-gray-700">
-                            <ListIcon as={ExclamationTriangleIcon} color="red.500" className="w-4 h-4" />
-                            {con}
-                          </ListItem>
-                        ))}
-                      </List>
+                      <HStack spacing={2} mb={2}>
+                        <Icon as={CurrencyDollarIcon} className="w-4 h-4 text-green-600" />
+                        <Text className="font-semibold text-gray-900">Pricing</Text>
+                      </HStack>
+                      <Text className="text-gray-700 text-sm">{type.pricing_range}</Text>
                     </Box>
-                  </SimpleGrid>
-                </VStack>
-              </CardBody>
-            </Card>
-          ))}
+
+                    {/* Best For */}
+                    <Box>
+                      <HStack spacing={2} mb={2}>
+                        <Icon as={MapPinIcon} className="w-4 h-4 text-blue-600" />
+                        <Text className="font-semibold text-gray-900">Best For</Text>
+                      </HStack>
+                      <Text className="text-gray-700 text-sm">{type.best_for}</Text>
+                    </Box>
+
+                    <Divider />
+
+                    {/* Pros & Cons */}
+                    <SimpleGrid columns={2} spacing={4}>
+                      <Box>
+                        <Heading size="sm" className="text-green-700 mb-2">Pros</Heading>
+                        <List spacing={1}>
+                          {type.pros.map((pro, index) => (
+                            <ListItem key={index} className="text-xs text-green-600">
+                              <ListIcon as={CheckCircleIcon} color="green.500" className="w-3 h-3" />
+                              {pro}
+                            </ListItem>
+                          ))}
+                        </List>
+                      </Box>
+                      
+                      <Box>
+                        <Heading size="sm" className="text-red-700 mb-2">Cons</Heading>
+                        <List spacing={1}>
+                          {type.cons.map((con, index) => (
+                            <ListItem key={index} className="text-xs text-red-600">
+                              <ListIcon as={ExclamationTriangleIcon} color="red.500" className="w-3 h-3" />
+                              {con}
+                            </ListItem>
+                          ))}
+                        </List>
+                      </Box>
+                    </SimpleGrid>
+                  </VStack>
+                </CardBody>
+              </Card>
+            );
+          })}
         </SimpleGrid>
       </Container>
     </section>

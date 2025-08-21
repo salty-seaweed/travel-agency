@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Box,
   Container,
@@ -7,57 +7,24 @@ import {
   Text,
   Badge,
   Icon,
-  useColorModeValue,
   SimpleGrid,
-  Card,
-  CardBody,
-  CardHeader,
-  Divider,
-  List,
-  ListItem,
-  ListIcon,
   Button,
   HStack,
-  Accordion,
-  AccordionItem,
-  AccordionButton,
-  AccordionPanel,
-  AccordionIcon,
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  TableContainer,
-  Alert,
-  AlertIcon,
-  AlertTitle,
-  AlertDescription,
   useToast,
 } from '@chakra-ui/react';
 import {
-  MapPinIcon,
-  ClockIcon,
   CurrencyDollarIcon,
-  ExclamationTriangleIcon,
-  CheckCircleIcon,
   InformationCircleIcon,
-  PhoneIcon,
-  EnvelopeIcon,
   ChatBubbleLeftRightIcon,
   ArrowRightIcon,
-  ShieldCheckIcon,
   SparklesIcon,
   GlobeAltIcon,
-  UserGroupIcon,
   CalendarIcon,
   MapIcon,
-  StarIcon,
 } from '@heroicons/react/24/outline';
 import { SEO } from './SEO';
 import { PageErrorBoundary } from './SimpleErrorBoundary';
-import { config, getWhatsAppUrl } from '../config';
+import { getWhatsAppUrl } from '../config';
 import { useTranslation } from '../i18n';
 
 // Import sub-components
@@ -67,10 +34,11 @@ import { TransferGuideSection } from './transportation/TransferGuideSection';
 import { TransferPricingSection } from './transportation/TransferPricingSection';
 import { TransferFAQSection } from './transportation/TransferFAQSection';
 import { TransferBookingSection } from './transportation/TransferBookingSection';
+import { FerryTimetablesSection } from './transportation/FerryTimetablesSection';
 
 export const TransportationPage = React.memo(() => {
-  const { t } = useTranslation();
-  const toast = useToast();
+  useTranslation();
+  useToast();
 
   return (
     <>
@@ -147,10 +115,11 @@ export const TransportationPage = React.memo(() => {
           {/* Quick Navigation */}
           <section className="py-8 bg-white border-b border-gray-200">
             <Container maxW="7xl">
-              <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4}>
+              <SimpleGrid columns={{ base: 2, md: 5 }} spacing={4}>
                 {[
                   { id: 'transfer-types', label: 'Transfer Types', icon: SparklesIcon },
                   { id: 'atoll-transfers', label: 'Atoll Transfers', icon: MapIcon },
+                  { id: 'ferry-timetables', label: 'Ferry Timetables', icon: CalendarIcon },
                   { id: 'pricing', label: 'Pricing Guide', icon: CurrencyDollarIcon },
                   { id: 'faq', label: 'FAQ', icon: InformationCircleIcon },
                 ].map((item) => (
@@ -180,6 +149,9 @@ export const TransportationPage = React.memo(() => {
 
           {/* Transfer Guide Section */}
           <TransferGuideSection />
+
+          {/* Ferry Timetables Section */}
+          <FerryTimetablesSection />
 
           {/* Transfer Pricing Section */}
           <TransferPricingSection />

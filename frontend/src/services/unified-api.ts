@@ -6,8 +6,11 @@ import type {
   PropertyType, 
   Amenity, 
   Location,
+  Destination,
+  Experience,
   PropertyFilters,
   PackageFilters,
+  ExperienceFilters,
   PropertyFormData,
   PackageFormData,
   ReviewFormData,
@@ -531,6 +534,70 @@ export const unifiedApi = {
       // Handle paginated response
       const results = data?.results || data;
       return Array.isArray(results) ? results : [];
+    },
+  },
+
+  destinations: {
+    getAll: async (featured?: boolean): Promise<Destination[]> => {
+      const url = featured !== undefined ? `destinations/?featured=${featured}` : 'destinations/';
+      const data = await publicApiRequest<any>(url, {}, true, performance.cacheTimeout.medium);
+      // Handle paginated response
+      const results = data?.results || data;
+      return Array.isArray(results) ? results : [];
+    },
+
+    getFeatured: async (): Promise<Destination[]> => {
+      const data = await publicApiRequest<any>('destinations/?featured=true', {}, true, performance.cacheTimeout.medium);
+      // Handle paginated response
+      const results = data?.results || data;
+      return Array.isArray(results) ? results : [];
+    },
+  },
+
+  experiences: {
+    getAll: async (filters?: ExperienceFilters): Promise<Experience[]> => {
+      const params = new URLSearchParams();
+      if (filters) {
+        Object.entries(filters).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            params.append(key, value.toString());
+          }
+        });
+      }
+      const endpoint = `experiences/${params.toString() ? `?${params.toString()}` : ''}`;
+      const data = await publicApiRequest<any>(endpoint, {}, true, performance.cacheTimeout.medium);
+      const results = data?.results || data;
+      return results || [];
+    },
+
+    getFeatured: async (): Promise<Experience[]> => {
+      const data = await publicApiRequest<any>('experiences/?featured=true', {}, true, performance.cacheTimeout.medium);
+      const results = data?.results || data;
+      return results || [];
+    },
+
+    getById: async (id: number): Promise<Experience> => {
+      return await publicApiRequest<Experience>(`experiences/${id}/`, {}, true, performance.cacheTimeout.medium);
+    },
+
+    create: async (data: any): Promise<Experience> => {
+      return await apiRequest<Experience>('experiences/', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+
+    update: async (id: number, data: any): Promise<Experience> => {
+      return await apiRequest<Experience>(`experiences/${id}/`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
+
+    delete: async (id: number): Promise<void> => {
+      return await apiRequest<void>(`experiences/${id}/`, {
+        method: 'DELETE',
+      });
     },
   },
 

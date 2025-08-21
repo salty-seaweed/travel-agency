@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Container,
@@ -28,6 +28,7 @@ import {
   List,
   ListItem,
   ListIcon,
+  Skeleton,
 } from '@chakra-ui/react';
 import {
   CurrencyDollarIcon,
@@ -40,117 +41,142 @@ import {
   CheckCircleIcon,
   StarIcon,
 } from '@heroicons/react/24/outline';
+import { config } from '../../config';
+
+// Icon mapping for dynamic icons
+const iconMap: { [key: string]: any } = {
+  'SparklesIcon': SparklesIcon,
+  'StarIcon': StarIcon,
+  'UserGroupIcon': UserGroupIcon,
+  'CurrencyDollarIcon': CurrencyDollarIcon,
+  'ClockIcon': ClockIcon,
+  'MapPinIcon': MapPinIcon,
+  'CheckCircleIcon': CheckCircleIcon,
+  'ExclamationTriangleIcon': ExclamationTriangleIcon,
+  'InformationCircleIcon': InformationCircleIcon,
+};
+
+interface TransferType {
+  id: number;
+  name: string;
+  description: string;
+  icon: string;
+  gradient: string;
+  features: string[];
+  pricing_range: string;
+  best_for: string;
+  pros: string[];
+  cons: string[];
+  is_active: boolean;
+  order: number;
+}
+
+interface TransferPricingFactor {
+  id: number;
+  factor: string;
+  description: string;
+  icon: string;
+  impact: 'High' | 'Medium' | 'Low';
+  examples: string[];
+  is_active: boolean;
+  order: number;
+}
 
 export const TransferPricingSection = React.memo(() => {
-  const [selectedCategory, setSelectedCategory] = useState('speedboat');
+  const [transferTypes, setTransferTypes] = useState<TransferType[]>([]);
+  const [pricingFactors, setPricingFactors] = useState<TransferPricingFactor[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const pricingData = {
-    speedboat: {
-      title: 'Speedboat Transfers',
-      description: 'Fast and efficient transfers for nearby destinations',
-      icon: SparklesIcon,
-      gradient: 'from-blue-500 to-indigo-600',
-      pricing: [
-        { distance: '15-30 minutes', price: '50-80', resorts: 'Sheraton, Kurumba, Paradise Island' },
-        { distance: '30-45 minutes', price: '80-120', resorts: 'Anantara, Cinnamon, Centara' },
-        { distance: '45-60 minutes', price: '120-180', resorts: 'Adaaran, Club Med, Coco' },
-        { distance: '60+ minutes', price: '180-300', resorts: 'Remote resorts, outer islands' },
-      ],
-      features: [
-        'Round-trip transfers included',
-        'Children under 2: Free',
-        'Children 2-12: 50% discount',
-        'Luggage allowance: 20kg per person',
-        'Refreshments provided',
-        'Professional crew'
-      ]
-    },
-    seaplane: {
-      title: 'Seaplane Transfers',
-      description: 'Luxury aerial transfers to remote resorts',
-      icon: StarIcon,
-      gradient: 'from-purple-500 to-pink-600',
-      pricing: [
-        { distance: '30-45 minutes', price: '200-300', resorts: 'Baa Atoll resorts' },
-        { distance: '45-60 minutes', price: '300-400', resorts: 'Ari Atoll resorts' },
-        { distance: '60+ minutes', price: '400-500', resorts: 'Remote luxury resorts' },
-      ],
-      features: [
-        'Round-trip transfers included',
-        'Children under 2: Free (lap child)',
-        'Children 2-12: 50% discount',
-        'Luggage allowance: 15kg per person',
-        'Breathtaking aerial views',
-        'Professional pilots'
-      ]
-    },
-    ferry: {
-      title: 'Public Ferry Services',
-      description: 'Budget-friendly transportation between local islands',
-      icon: UserGroupIcon,
-      gradient: 'from-green-500 to-emerald-600',
-      pricing: [
-        { distance: 'Local routes', price: '2-5', resorts: 'Local island connections' },
-        { distance: 'Inter-atoll routes', price: '5-15', resorts: 'Major island connections' },
-        { distance: 'Long distance', price: '15-25', resorts: 'Remote local islands' },
-      ],
-      features: [
-        'One-way tickets available',
-        'Children under 2: Free',
-        'Children 2-12: 50% discount',
-        'Luggage: No weight restrictions',
-        'Local experience',
-        'Scheduled departures'
-      ]
-    }
-  };
+  useEffect(() => {
+    const fetchPricingData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const response = await fetch(`${config.apiBaseUrl}/transportation/`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        const types = data.transfer_types || [];
+        const factors = data.pricing_factors || [];
+        
+        setTransferTypes(types);
+        setPricingFactors(factors);
+        
+        // Set the first transfer type as selected by default
+        if (types.length > 0 && !selectedCategory) {
+          setSelectedCategory(types[0].id);
+        }
+      } catch (err) {
+        console.error('Failed to fetch pricing data:', err);
+        setError('Failed to load pricing information. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const pricingFactors = [
-    {
-      factor: 'Distance',
-      description: 'Longer distances generally cost more',
-      icon: MapPinIcon,
-      impact: 'High',
-      examples: ['Male to nearby islands: $50-80', 'Male to Baa Atoll: $150-200', 'Male to Ari Atoll: $200-300']
-    },
-    {
-      factor: 'Transfer Type',
-      description: 'Different transportation methods have different costs',
-      icon: SparklesIcon,
-      impact: 'High',
-      examples: ['Speedboat: $50-300', 'Seaplane: $200-500', 'Ferry: $2-25']
-    },
-    {
-      factor: 'Season',
-      description: 'Peak season may have higher rates',
-      icon: StarIcon,
-      impact: 'Medium',
-      examples: ['Peak season (Dec-Apr): +10-20%', 'Off-season (May-Nov): Standard rates', 'Holiday periods: +15-25%']
-    },
-    {
-      factor: 'Group Size',
-      description: 'Larger groups may get discounts',
-      icon: UserGroupIcon,
-      impact: 'Medium',
-      examples: ['Individual: Standard rates', 'Group 4-8: 5-10% discount', 'Group 8+: 10-15% discount']
-    },
-    {
-      factor: 'Booking Time',
-      description: 'Early booking often gets better rates',
-      icon: ClockIcon,
-      impact: 'Medium',
-      examples: ['Last minute: +20-30%', '2-4 weeks advance: Standard rates', '1+ month advance: 5-10% discount']
-    },
-    {
-      factor: 'Special Requirements',
-      description: 'Additional services may incur extra costs',
-      icon: ExclamationTriangleIcon,
-      impact: 'Low',
-      examples: ['Wheelchair assistance: +$20', 'Extra luggage: +$10-30', 'Private transfer: +50-100%']
-    }
-  ];
+    fetchPricingData();
+  }, [selectedCategory]);
 
-  const currentCategory = pricingData[selectedCategory as keyof typeof pricingData];
+  const currentCategory = transferTypes.find(type => type.id === selectedCategory);
+
+  if (loading) {
+    return (
+      <section id="pricing" className="py-24 bg-gradient-to-br from-green-50 to-emerald-50">
+        <Container maxW="7xl">
+          <VStack spacing={16} mb={16} textAlign="center">
+            <Skeleton height="40px" width="300px" />
+            <Skeleton height="60px" width="600px" />
+            <Skeleton height="24px" width="800px" />
+          </VStack>
+          <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4} mb={12}>
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} height="100px" />
+            ))}
+          </SimpleGrid>
+          <Skeleton height="400px" />
+        </Container>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section id="pricing" className="py-24 bg-gradient-to-br from-green-50 to-emerald-50">
+        <Container maxW="7xl">
+          <Alert status="error" className="rounded-xl">
+            <AlertIcon />
+            <Box>
+              <AlertTitle>Error Loading Pricing Information</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Box>
+          </Alert>
+        </Container>
+      </section>
+    );
+  }
+
+  if (transferTypes.length === 0) {
+    return (
+      <section id="pricing" className="py-24 bg-gradient-to-br from-green-50 to-emerald-50">
+        <Container maxW="7xl">
+          <Alert status="info" className="rounded-xl">
+            <AlertIcon />
+            <Box>
+              <AlertTitle>No Pricing Information Available</AlertTitle>
+              <AlertDescription>
+                Pricing information is currently being updated. Please check back later or contact us directly for assistance.
+              </AlertDescription>
+            </Box>
+          </Alert>
+        </Container>
+      </section>
+    );
+  }
 
   return (
     <section id="pricing" className="py-24 bg-gradient-to-br from-green-50 to-emerald-50">
@@ -175,135 +201,140 @@ export const TransferPricingSection = React.memo(() => {
 
         {/* Transfer Type Selection */}
         <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4} mb={12}>
-          {Object.entries(pricingData).map(([key, category]) => (
-            <Button
-              key={key}
-              variant={selectedCategory === key ? "solid" : "outline"}
-              size="lg"
-              className={`flex flex-col items-center justify-center p-6 h-auto rounded-xl transition-all duration-300 ${
-                selectedCategory === key 
-                  ? 'bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-xl' 
-                  : 'text-gray-700 hover:text-green-600 hover:bg-green-50 border-2 border-gray-200 hover:border-green-300'
-              }`}
-              onClick={() => setSelectedCategory(key)}
-            >
-              <Icon as={category.icon} className="w-8 h-8 mb-3" />
-              <Text className="text-sm font-bold">{category.title}</Text>
-            </Button>
-          ))}
+          {transferTypes.map((type) => {
+            const IconComponent = iconMap[type.icon] || SparklesIcon;
+            
+            return (
+              <Button
+                key={type.id}
+                variant={selectedCategory === type.id ? "solid" : "outline"}
+                size="lg"
+                className={`flex flex-col items-center justify-center p-6 h-auto rounded-xl transition-all duration-300 ${
+                  selectedCategory === type.id 
+                    ? 'bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-xl' 
+                    : 'text-gray-700 hover:text-green-600 hover:bg-green-50 border-2 border-gray-200 hover:border-green-300'
+                }`}
+                onClick={() => setSelectedCategory(type.id)}
+              >
+                <Icon as={IconComponent} className="w-8 h-8 mb-3" />
+                <Text className="text-sm font-bold">{type.name}</Text>
+              </Button>
+            );
+          })}
         </SimpleGrid>
 
         {/* Selected Category Pricing */}
-        <Card className="shadow-2xl border-2 border-gray-200 mb-12">
-          <CardHeader className="bg-gradient-to-r from-green-600 to-emerald-700 text-white">
-            <HStack spacing={4}>
-              <div className={`w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center`}>
-                <Icon as={currentCategory.icon} className="w-8 h-8 text-white" />
-              </div>
-              <VStack align="start" spacing={2}>
-                <Heading size="lg" className="text-white">
-                  {currentCategory.title}
-                </Heading>
-                <Text className="text-green-100">
-                  {currentCategory.description}
-                </Text>
-              </VStack>
-            </HStack>
-          </CardHeader>
-          
-          <CardBody>
-            <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={8}>
-              {/* Pricing Table */}
-              <Box>
-                <Heading size="md" className="text-gray-900 mb-4">Pricing by Distance</Heading>
-                <TableContainer>
-                  <Table variant="simple">
-                    <Thead className="bg-gray-50">
-                      <Tr>
-                        <Th className="text-gray-800 font-bold">Distance</Th>
-                        <Th className="text-gray-800 font-bold text-center">Price (USD)</Th>
-                        <Th className="text-gray-800 font-bold">Example Destinations</Th>
-                      </Tr>
-                    </Thead>
-                    <Tbody>
-                      {currentCategory.pricing.map((item, index) => (
-                        <Tr key={index} className="hover:bg-gray-50 transition-colors">
-                          <Td className="font-medium text-gray-900">{item.distance}</Td>
-                          <Td className="text-center">
-                            <Badge colorScheme="green" className="px-3 py-1 rounded-full font-bold">
-                              ${item.price}
-                            </Badge>
-                          </Td>
-                          <Td className="text-gray-700 text-sm">{item.resorts}</Td>
-                        </Tr>
-                      ))}
-                    </Tbody>
-                  </Table>
-                </TableContainer>
-              </Box>
+        {currentCategory && (
+          <Card className="shadow-2xl border-2 border-gray-200 mb-12">
+            <CardHeader className="bg-gradient-to-r from-green-600 to-emerald-700 text-white">
+              <HStack spacing={4}>
+                <div className={`w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center`}>
+                  <Icon as={iconMap[currentCategory.icon] || SparklesIcon} className="w-8 h-8 text-white" />
+                </div>
+                <VStack align="start" spacing={2}>
+                  <Heading size="lg" className="text-white">
+                    {currentCategory.name}
+                  </Heading>
+                  <Text className="text-green-100">
+                    {currentCategory.description}
+                  </Text>
+                </VStack>
+              </HStack>
+            </CardHeader>
+            
+            <CardBody>
+              <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={8}>
+                {/* Pricing Information */}
+                <Box>
+                  <Heading size="md" className="text-gray-900 mb-4">Pricing Information</Heading>
+                  <VStack spacing={4} align="stretch">
+                    <Box>
+                      <HStack spacing={2} mb={2}>
+                        <Icon as={CurrencyDollarIcon} className="w-5 h-5 text-green-600" />
+                        <Text className="font-semibold text-gray-800">Price Range</Text>
+                      </HStack>
+                      <Text className="text-gray-700">{currentCategory.pricing_range}</Text>
+                    </Box>
+                    
+                    <Box>
+                      <HStack spacing={2} mb={2}>
+                        <Icon as={MapPinIcon} className="w-5 h-5 text-blue-600" />
+                        <Text className="font-semibold text-gray-800">Best For</Text>
+                      </HStack>
+                      <Text className="text-gray-700">{currentCategory.best_for}</Text>
+                    </Box>
+                  </VStack>
+                </Box>
 
-              {/* Features */}
-              <Box>
-                <Heading size="md" className="text-gray-900 mb-4">What's Included</Heading>
-                <List spacing={3}>
-                  {currentCategory.features.map((feature, index) => (
-                    <ListItem key={index} className="flex items-start">
-                      <ListIcon as={CheckCircleIcon} color="green.500" className="mt-1 mr-3 flex-shrink-0" />
-                      <Text className="text-gray-700">{feature}</Text>
-                    </ListItem>
-                  ))}
-                </List>
-              </Box>
-            </SimpleGrid>
-          </CardBody>
-        </Card>
-
-        {/* Pricing Factors */}
-        <VStack spacing={12}>
-          <VStack spacing={6} textAlign="center">
-            <Heading size="xl" className="text-4xl font-bold text-gray-900">
-              Factors Affecting Transfer Pricing
-            </Heading>
-            <Text className="text-lg text-gray-700 max-w-3xl">
-              Understanding what influences transfer costs helps you plan and budget effectively
-            </Text>
-          </VStack>
-
-          <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={8}>
-            {pricingFactors.map((factor) => (
-              <Card key={factor.factor} className="shadow-lg border-2 border-gray-200 hover:border-green-300 transition-all duration-300">
-                <CardHeader>
-                  <HStack spacing={4}>
-                    <Icon as={factor.icon} className="w-8 h-8 text-green-600" />
-                    <VStack align="start" spacing={1}>
-                      <Heading size="md" className="text-gray-900">
-                        {factor.factor}
-                      </Heading>
-                      <Badge 
-                        colorScheme={factor.impact === 'High' ? 'red' : factor.impact === 'Medium' ? 'orange' : 'green'}
-                        className="text-xs"
-                      >
-                        {factor.impact} Impact
-                      </Badge>
-                    </VStack>
-                  </HStack>
-                </CardHeader>
-                
-                <CardBody className="pt-0">
-                  <Text className="text-gray-700 mb-4">{factor.description}</Text>
-                  <List spacing={2}>
-                    {factor.examples.map((example, index) => (
-                      <ListItem key={index} className="text-sm text-gray-600">
-                        <ListIcon as={CheckCircleIcon} color="green.500" className="w-3 h-3" />
-                        {example}
+                {/* Features */}
+                <Box>
+                  <Heading size="md" className="text-gray-900 mb-4">What's Included</Heading>
+                  <List spacing={3}>
+                    {currentCategory.features.map((feature, index) => (
+                      <ListItem key={index} className="flex items-start">
+                        <ListIcon as={CheckCircleIcon} color="green.500" className="mt-1 mr-3 flex-shrink-0" />
+                        <Text className="text-gray-700">{feature}</Text>
                       </ListItem>
                     ))}
                   </List>
-                </CardBody>
-              </Card>
-            ))}
-          </SimpleGrid>
-        </VStack>
+                </Box>
+              </SimpleGrid>
+            </CardBody>
+          </Card>
+        )}
+
+        {/* Pricing Factors */}
+        {pricingFactors.length > 0 && (
+          <VStack spacing={12}>
+            <VStack spacing={6} textAlign="center">
+              <Heading size="xl" className="text-4xl font-bold text-gray-900">
+                Factors Affecting Transfer Pricing
+              </Heading>
+              <Text className="text-lg text-gray-700 max-w-3xl">
+                Understanding what influences transfer costs helps you plan and budget effectively
+              </Text>
+            </VStack>
+
+            <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={8}>
+              {pricingFactors.map((factor) => {
+                const IconComponent = iconMap[factor.icon] || InformationCircleIcon;
+                
+                return (
+                  <Card key={factor.id} className="shadow-lg border-2 border-gray-200 hover:border-green-300 transition-all duration-300">
+                    <CardHeader>
+                      <HStack spacing={4}>
+                        <Icon as={IconComponent} className="w-8 h-8 text-green-600" />
+                        <VStack align="start" spacing={1}>
+                          <Heading size="md" className="text-gray-900">
+                            {factor.factor}
+                          </Heading>
+                          <Badge 
+                            colorScheme={factor.impact === 'High' ? 'red' : factor.impact === 'Medium' ? 'orange' : 'green'}
+                            className="text-xs"
+                          >
+                            {factor.impact} Impact
+                          </Badge>
+                        </VStack>
+                      </HStack>
+                    </CardHeader>
+                    
+                    <CardBody className="pt-0">
+                      <Text className="text-gray-700 mb-4">{factor.description}</Text>
+                      <List spacing={2}>
+                        {factor.examples.map((example, index) => (
+                          <ListItem key={index} className="text-sm text-gray-600">
+                            <ListIcon as={CheckCircleIcon} color="green.500" className="w-3 h-3" />
+                            {example}
+                          </ListItem>
+                        ))}
+                      </List>
+                    </CardBody>
+                  </Card>
+                );
+              })}
+            </SimpleGrid>
+          </VStack>
+        )}
 
         {/* Important Notes */}
         <Alert status="info" className="mt-12 rounded-xl">

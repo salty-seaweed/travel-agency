@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Container,
@@ -21,6 +21,8 @@ import {
   AlertIcon,
   AlertTitle,
   AlertDescription,
+  Skeleton,
+  Button,
 } from '@chakra-ui/react';
 import {
   InformationCircleIcon,
@@ -32,110 +34,128 @@ import {
   UserGroupIcon,
   SparklesIcon,
 } from '@heroicons/react/24/outline';
+import { config } from '../../config';
+
+// Icon mapping for dynamic icons
+const iconMap: { [key: string]: any } = {
+  'InformationCircleIcon': InformationCircleIcon,
+  'ExclamationTriangleIcon': ExclamationTriangleIcon,
+  'CheckCircleIcon': CheckCircleIcon,
+  'ClockIcon': ClockIcon,
+  'CurrencyDollarIcon': CurrencyDollarIcon,
+  'MapPinIcon': MapPinIcon,
+  'UserGroupIcon': UserGroupIcon,
+  'SparklesIcon': SparklesIcon,
+};
+
+interface TransferFAQ {
+  id: number;
+  question: string;
+  answer: string;
+  category: string;
+  icon: string;
+  is_active: boolean;
+  order: number;
+}
 
 export const TransferFAQSection = React.memo(() => {
-  const faqData = [
-    {
-      question: 'How to get to Maldives islands?',
-      answer: 'To reach any island in the Maldives, you will require either a speedboat transfer or a domestic flight. The choice depends on your destination and budget. Speedboats are used for nearby islands and resorts, while domestic flights are used for inter-atoll travel to more distant locations.',
-      category: 'General',
-      icon: MapPinIcon
-    },
-    {
-      question: 'Is there transfer service available at the international airport on arrival to book?',
-      answer: 'No, everything needs to be pre-arranged before your arrival. However, if you are staying in Male or Hulhumale city, you can grab a taxi from the airport. All other islands require either a speedboat transfer or air transfer that must be booked in advance.',
-      category: 'Booking',
-      icon: ClockIcon
-    },
-    {
-      question: 'Is it possible to visit islands by domestic flight?',
-      answer: 'The total 200 inhabited islands and 158 resorts are divided into 20 atolls, and 15 atolls have domestic airports on mostly uninhabited islands. However, in many atolls, you will still require a speedboat transfer after arriving at the domestic airport to reach your final destination.',
-      category: 'Transportation',
-      icon: SparklesIcon
-    },
-    {
-      question: 'What types of hotels are there in Maldives?',
-      answer: 'Mostly there are village hotels and city hotels with 3-star and 4-star services. The Maldives offers a wide range of accommodation options from budget guesthouses on local islands to luxury overwater villas at exclusive resorts.',
-      category: 'Accommodation',
-      icon: UserGroupIcon
-    },
-    {
-      question: 'Is it possible to book shared seaplane for any island?',
-      answer: 'No. Shared seaplanes are operated on request for some resorts only. Only those resorts have the rights to book these seaplanes. However, we can arrange private seaplane transfers to any island for an additional cost.',
-      category: 'Seaplane',
-      icon: SparklesIcon
-    },
-    {
-      question: 'Is it safe to travel by sea?',
-      answer: 'I can tell you it\'s safer than flights. You will have floating life jackets on speedboats, but during stormy weather, it is not recommended to travel by very small boats. Some incidents have occurred, but so far not with any tourist transfers because we usually arrange bigger boats for tourists.',
-      category: 'Safety',
-      icon: CheckCircleIcon
-    },
-    {
-      question: 'Why is the Maldives transfer so expensive?',
-      answer: 'Because of the small populations and dispersity, it\'s very difficult to organize daily schedules on different times for an island. Additionally, speedboats consume a lot of fuel with high horsepower petrol engines to reduce travel time. The costs reflect the logistics and fuel expenses involved.',
-      category: 'Pricing',
-      icon: CurrencyDollarIcon
-    },
-    {
-      question: 'When is the best time for sea transfers?',
-      answer: 'During the Northeast monsoon (January to March), the sea is mostly very calm and flat. However, during other monsoon periods, we also have many calm and quiet days. It is very difficult to predict rough sea conditions in advance.',
-      category: 'Weather',
-      icon: ClockIcon
-    },
-    {
-      question: 'What should I do if my transfer is delayed due to weather?',
-      answer: 'If your transfer is delayed due to weather conditions, our team will keep you informed and arrange alternative transportation when safe. We recommend having flexible travel plans and allowing extra time for weather-related delays.',
-      category: 'Weather',
-      icon: ExclamationTriangleIcon
-    },
-    {
-      question: 'Can I bring extra luggage on transfers?',
-      answer: 'Luggage allowances vary by transfer type. Speedboats typically allow 20kg per person, while seaplanes have a 15kg limit. Additional luggage may incur extra charges. We recommend packing light and checking with us for specific requirements.',
-      category: 'Luggage',
-      icon: UserGroupIcon
-    },
-    {
-      question: 'Do I need to tip the transfer crew?',
-      answer: 'Tipping is not mandatory but appreciated for good service. A tip of $5-10 per person for speedboat transfers and $10-20 for seaplane transfers is customary. Tips can be given directly to the crew or included in your booking.',
-      category: 'Etiquette',
-      icon: CurrencyDollarIcon
-    },
-    {
-      question: 'What happens if I miss my transfer?',
-      answer: 'If you miss your scheduled transfer, contact us immediately. We will do our best to arrange an alternative transfer, but additional charges may apply. We recommend arriving at the airport with sufficient time to clear immigration and customs.',
-      category: 'Booking',
-      icon: ExclamationTriangleIcon
-    }
-  ];
+  const [faqs, setFaqs] = useState<TransferFAQ[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const categories = [
-    { name: 'General', icon: InformationCircleIcon, color: 'blue' },
-    { name: 'Booking', icon: ClockIcon, color: 'green' },
-    { name: 'Transportation', icon: SparklesIcon, color: 'purple' },
-    { name: 'Safety', icon: CheckCircleIcon, color: 'green' },
-    { name: 'Pricing', icon: CurrencyDollarIcon, color: 'orange' },
-    { name: 'Weather', icon: ExclamationTriangleIcon, color: 'red' },
-    { name: 'Luggage', icon: UserGroupIcon, color: 'blue' },
-    { name: 'Etiquette', icon: CurrencyDollarIcon, color: 'purple' },
-  ];
+  useEffect(() => {
+    const fetchFAQs = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const response = await fetch(`${config.apiBaseUrl}/transportation/`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        setFaqs(data.faqs || []);
+      } catch (err) {
+        console.error('Failed to fetch FAQs:', err);
+        setError('Failed to load FAQ information. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const getCategoryIcon = (categoryName: string) => {
-    const category = categories.find(cat => cat.name === categoryName);
-    return category ? category.icon : InformationCircleIcon;
-  };
+    fetchFAQs();
+  }, []);
 
-  const getCategoryColor = (categoryName: string) => {
-    const category = categories.find(cat => cat.name === categoryName);
-    return category ? category.color : 'blue';
-  };
+  // Get unique categories
+  const categories = ['all', ...Array.from(new Set(faqs.map(faq => faq.category)))];
+
+  // Filter FAQs by selected category
+  const filteredFaqs = selectedCategory === 'all' 
+    ? faqs 
+    : faqs.filter(faq => faq.category === selectedCategory);
+
+  if (loading) {
+    return (
+      <section className="py-24 bg-gradient-to-br from-purple-50 to-pink-50">
+        <Container maxW="7xl">
+          <VStack spacing={16} mb={16} textAlign="center">
+            <Skeleton height="40px" width="300px" />
+            <Skeleton height="60px" width="600px" />
+            <Skeleton height="24px" width="800px" />
+          </VStack>
+          <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4} mb={12}>
+            {[1, 2, 3, 4].map((i) => (
+              <Skeleton key={i} height="60px" />
+            ))}
+          </SimpleGrid>
+          <Skeleton height="400px" />
+        </Container>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="py-24 bg-gradient-to-br from-purple-50 to-pink-50">
+        <Container maxW="7xl">
+          <Alert status="error" className="rounded-xl">
+            <AlertIcon />
+            <Box>
+              <AlertTitle>Error Loading FAQ Information</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Box>
+          </Alert>
+        </Container>
+      </section>
+    );
+  }
+
+  if (faqs.length === 0) {
+    return (
+      <section className="py-24 bg-gradient-to-br from-purple-50 to-pink-50">
+        <Container maxW="7xl">
+          <Alert status="info" className="rounded-xl">
+            <AlertIcon />
+            <Box>
+              <AlertTitle>No FAQ Information Available</AlertTitle>
+              <AlertDescription>
+                FAQ information is currently being updated. Please check back later or contact us directly for assistance.
+              </AlertDescription>
+            </Box>
+          </Alert>
+        </Container>
+      </section>
+    );
+  }
 
   return (
-    <section id="faq" className="py-24 bg-white">
+    <section id="faq" className="py-24 bg-gradient-to-br from-purple-50 to-pink-50">
       <Container maxW="7xl">
         <VStack spacing={16} mb={16} textAlign="center">
           <Badge 
-            className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-6 py-2 rounded-full text-sm font-bold"
+            className="bg-gradient-to-r from-purple-500 to-pink-600 text-white px-6 py-2 rounded-full text-sm font-bold"
           >
             <Icon as={InformationCircleIcon} className="w-4 h-4 mr-2" />
             Frequently Asked Questions
@@ -146,133 +166,116 @@ export const TransferFAQSection = React.memo(() => {
           </Heading>
           
           <Text className="text-xl text-gray-800 max-w-4xl mx-auto leading-relaxed">
-            Find answers to the most common questions about transfers in the Maldives. 
-            Everything you need to know about getting around the islands.
+            Find answers to common questions about transportation and transfers in the Maldives. 
+            Everything you need to know for a smooth travel experience.
           </Text>
         </VStack>
 
-        {/* FAQ Accordion */}
-        <Accordion allowMultiple className="mb-16">
-          {faqData.map((faq, index) => (
-            <AccordionItem key={index} className="border-2 border-gray-200 rounded-lg mb-4 hover:border-blue-300 transition-all duration-300">
-              <AccordionButton className="p-6 hover:bg-gray-50">
-                <HStack spacing={4} flex="1" textAlign="left">
-                  <Icon as={getCategoryIcon(faq.category)} className={`w-6 h-6 text-${getCategoryColor(faq.category)}-600`} />
-                  <VStack align="start" spacing={1} flex="1">
-                    <Text className="font-semibold text-gray-900 text-lg">
-                      {faq.question}
-                    </Text>
-                    <Badge 
-                      colorScheme={getCategoryColor(faq.category) as any}
-                      className="text-xs"
-                    >
-                      {faq.category}
-                    </Badge>
-                  </VStack>
-                  <AccordionIcon className="w-6 h-6 text-gray-500" />
-                </HStack>
-              </AccordionButton>
-              <AccordionPanel className="px-6 pb-6">
-                <Text className="text-gray-700 leading-relaxed">
-                  {faq.answer}
-                </Text>
-              </AccordionPanel>
-            </AccordionItem>
+        {/* Category Filter */}
+        <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4} mb={12}>
+          {categories.map((category) => (
+            <Button
+              key={category}
+              variant={selectedCategory === category ? "solid" : "outline"}
+              size="lg"
+              className={`flex flex-col items-center justify-center p-4 h-auto rounded-xl transition-all duration-300 ${
+                selectedCategory === category 
+                  ? 'bg-gradient-to-br from-purple-500 to-pink-600 text-white shadow-xl' 
+                  : 'text-gray-700 hover:text-purple-600 hover:bg-purple-50 border-2 border-gray-200 hover:border-purple-300'
+              }`}
+              onClick={() => setSelectedCategory(category)}
+            >
+              <Text className="text-sm font-bold capitalize">
+                {category === 'all' ? 'All Questions' : category}
+              </Text>
+            </Button>
           ))}
-        </Accordion>
+        </SimpleGrid>
 
-        {/* Quick Tips */}
-        <VStack spacing={12}>
-          <VStack spacing={6} textAlign="center">
-            <Heading size="xl" className="text-4xl font-bold text-gray-900">
-              Quick Transfer Tips
-            </Heading>
-            <Text className="text-lg text-gray-700 max-w-3xl">
-              Essential information to make your transfer experience smooth and enjoyable
-            </Text>
-          </VStack>
-
-          <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={6}>
-            <Card className="text-center p-6 border-2 border-blue-200 hover:border-blue-300 transition-all duration-300">
-              <Icon as={ClockIcon} className="w-12 h-12 text-blue-600 mx-auto mb-4" />
-              <Heading size="md" className="text-gray-900 mb-2">Book Early</Heading>
-              <Text className="text-gray-700 text-sm">
-                Arrange transfers at least 48 hours before arrival for best availability and rates.
-              </Text>
-            </Card>
-
-            <Card className="text-center p-6 border-2 border-green-200 hover:border-green-300 transition-all duration-300">
-              <Icon as={CheckCircleIcon} className="w-12 h-12 text-green-600 mx-auto mb-4" />
-              <Heading size="md" className="text-gray-900 mb-2">Safety First</Heading>
-              <Text className="text-gray-700 text-sm">
-                Always wear provided life jackets and follow crew safety instructions during transfers.
-              </Text>
-            </Card>
-
-            <Card className="text-center p-6 border-2 border-purple-200 hover:border-purple-300 transition-all duration-300">
-              <Icon as={CurrencyDollarIcon} className="w-12 h-12 text-purple-600 mx-auto mb-4" />
-              <Heading size="md" className="text-gray-900 mb-2">Budget Wisely</Heading>
-              <Text className="text-gray-700 text-sm">
-                Factor transfer costs into your travel budget - they can be a significant expense.
-              </Text>
-            </Card>
-
-            <Card className="text-center p-6 border-2 border-orange-200 hover:border-orange-300 transition-all duration-300">
-              <Icon as={ExclamationTriangleIcon} className="w-12 h-12 text-orange-600 mx-auto mb-4" />
-              <Heading size="md" className="text-gray-900 mb-2">Weather Aware</Heading>
-              <Text className="text-gray-700 text-sm">
-                Be prepared for weather delays and have flexible travel plans during monsoon seasons.
-              </Text>
-            </Card>
-          </SimpleGrid>
-        </VStack>
+        {/* FAQ Accordion */}
+        <Card className="shadow-2xl border-2 border-gray-200">
+          <CardHeader className="bg-gradient-to-r from-purple-600 to-pink-700 text-white">
+            <HStack spacing={4}>
+              <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center">
+                <Icon as={InformationCircleIcon} className="w-8 h-8 text-white" />
+              </div>
+              <VStack align="start" spacing={2}>
+                <Heading size="lg" className="text-white">
+                  Transfer FAQ
+                </Heading>
+                <Text className="text-purple-100">
+                  {filteredFaqs.length} question{filteredFaqs.length !== 1 ? 's' : ''} in {selectedCategory === 'all' ? 'all categories' : selectedCategory}
+                </Text>
+              </VStack>
+            </HStack>
+          </CardHeader>
+          
+          <CardBody className="p-0">
+            {filteredFaqs.length > 0 ? (
+              <Accordion allowMultiple className="divide-y divide-gray-200">
+                {filteredFaqs.map((faq) => {
+                  const IconComponent = iconMap[faq.icon] || InformationCircleIcon;
+                  
+                  return (
+                    <AccordionItem key={faq.id} className="border-0">
+                      <AccordionButton className="p-6 hover:bg-gray-50 transition-colors">
+                        <HStack spacing={4} flex="1" align="start">
+                          <Icon as={IconComponent} className="w-6 h-6 text-purple-600 mt-1 flex-shrink-0" />
+                          <VStack align="start" spacing={1} flex="1">
+                            <Text className="font-semibold text-gray-900 text-left">
+                              {faq.question}
+                            </Text>
+                            <Badge 
+                              colorScheme="purple" 
+                              className="text-xs"
+                            >
+                              {faq.category}
+                            </Badge>
+                          </VStack>
+                          <AccordionIcon className="text-purple-600" />
+                        </HStack>
+                      </AccordionButton>
+                      <AccordionPanel className="px-6 pb-6">
+                        <Text className="text-gray-700 leading-relaxed">
+                          {faq.answer}
+                        </Text>
+                      </AccordionPanel>
+                    </AccordionItem>
+                  );
+                })}
+              </Accordion>
+            ) : (
+              <Box className="p-8 text-center">
+                <Text className="text-gray-500">No questions available for this category.</Text>
+              </Box>
+            )}
+          </CardBody>
+        </Card>
 
         {/* Contact Information */}
-        <Alert status="info" className="mt-16 rounded-xl">
-          <AlertIcon />
-          <Box>
-            <AlertTitle>Still Have Questions?</AlertTitle>
-            <AlertDescription>
-              If you couldn't find the answer to your question here, don't hesitate to contact us directly. 
-              Our team is available 24/7 to help with any transfer-related inquiries.
-            </AlertDescription>
-          </Box>
-        </Alert>
-
-        {/* Additional Resources */}
-        <SimpleGrid columns={{ base: 1, md: 2 }} spacing={8} className="mt-12">
-          <Card className="shadow-lg border-2 border-blue-200">
-            <CardHeader className="text-center">
-              <Icon as={InformationCircleIcon} className="w-12 h-12 text-blue-600 mx-auto mb-4" />
-              <Heading size="md" className="text-gray-900">
-                Transfer Guide
-              </Heading>
-            </CardHeader>
-            <CardBody className="text-center">
-              <Text className="text-gray-700 mb-4">
-                Complete step-by-step guide on how to arrange and use transfers in the Maldives.
-              </Text>
-              <Text className="text-sm text-gray-600">
-                Includes arrival procedures, safety tips, and important information for a smooth experience.
-              </Text>
-            </CardBody>
+        <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6} className="mt-12">
+          <Card className="text-center p-6 border-2 border-purple-200">
+            <Icon as={InformationCircleIcon} className="w-12 h-12 text-purple-600 mx-auto mb-4" />
+            <Heading size="md" className="text-gray-900 mb-2">Still Have Questions?</Heading>
+            <Text className="text-gray-700">
+              Can't find what you're looking for? Our team is here to help with any specific questions.
+            </Text>
           </Card>
-
-          <Card className="shadow-lg border-2 border-green-200">
-            <CardHeader className="text-center">
-              <Icon as={CurrencyDollarIcon} className="w-12 h-12 text-green-600 mx-auto mb-4" />
-              <Heading size="md" className="text-gray-900">
-                Pricing Guide
-              </Heading>
-            </CardHeader>
-            <CardBody className="text-center">
-              <Text className="text-gray-700 mb-4">
-                Detailed pricing information for all types of transfers and transportation options.
-              </Text>
-              <Text className="text-sm text-gray-600">
-                Understand costs, factors affecting pricing, and how to get the best value for your transfer.
-              </Text>
-            </CardBody>
+          
+          <Card className="text-center p-6 border-2 border-pink-200">
+            <Icon as={ClockIcon} className="w-12 h-12 text-pink-600 mx-auto mb-4" />
+            <Heading size="md" className="text-gray-900 mb-2">24/7 Support</Heading>
+            <Text className="text-gray-700">
+              We provide round-the-clock support for all your transportation and transfer needs.
+            </Text>
+          </Card>
+          
+          <Card className="text-center p-6 border-2 border-purple-200">
+            <Icon as={CheckCircleIcon} className="w-12 h-12 text-purple-600 mx-auto mb-4" />
+            <Heading size="md" className="text-gray-900 mb-2">Expert Guidance</Heading>
+            <Text className="text-gray-700">
+              Get personalized advice from our experienced travel and transportation specialists.
+            </Text>
           </Card>
         </SimpleGrid>
       </Container>

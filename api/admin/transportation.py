@@ -5,7 +5,7 @@ from django.utils.safestring import mark_safe
 from ..models import (
     TransferType, AtollTransfer, ResortTransfer, TransferFAQ, 
     TransferContactMethod, TransferBookingStep, TransferBenefit, 
-    TransferPricingFactor, TransferContent
+    TransferPricingFactor, TransferContent, FerrySchedule
 )
 
 # Inline Admin Classes
@@ -240,6 +240,31 @@ class TransferContentAdmin(admin.ModelAdmin):
         return obj.description[:80] + '...' if len(obj.description) > 80 else obj.description
     get_description_preview.short_description = 'Description Preview'
 
+# Ferry Schedule Admin
+@admin.register(FerrySchedule)
+class FerryScheduleAdmin(admin.ModelAdmin):
+    list_display = ('route_name', 'departure_time', 'arrival_time', 'duration', 'price', 'is_active', 'order')
+    list_filter = ('is_active', 'order')
+    search_fields = ('route_name', 'notes')
+    ordering = ('route_name', 'departure_time')
+    list_editable = ('price', 'is_active', 'order')
+    
+    fieldsets = (
+        ('Route Information', {
+            'fields': ('route_name', 'departure_time', 'arrival_time', 'duration')
+        }),
+        ('Pricing & Schedule', {
+            'fields': ('price', 'days_of_week')
+        }),
+        ('Additional Information', {
+            'fields': ('notes',),
+            'classes': ('collapse',)
+        }),
+        ('Settings', {
+            'fields': ('is_active', 'order')
+        })
+    )
+
 # Custom Admin Site Configuration
 class TransportationAdminSite(admin.AdminSite):
     site_header = 'Thread Travels Transportation Admin'
@@ -258,4 +283,5 @@ transportation_admin_site.register(TransferContactMethod, TransferContactMethodA
 transportation_admin_site.register(TransferBookingStep, TransferBookingStepAdmin)
 transportation_admin_site.register(TransferBenefit, TransferBenefitAdmin)
 transportation_admin_site.register(TransferPricingFactor, TransferPricingFactorAdmin)
-transportation_admin_site.register(TransferContent, TransferContentAdmin) 
+transportation_admin_site.register(TransferContent, TransferContentAdmin)
+transportation_admin_site.register(FerrySchedule, FerryScheduleAdmin) 

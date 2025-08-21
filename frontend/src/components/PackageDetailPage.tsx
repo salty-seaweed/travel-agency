@@ -34,7 +34,10 @@ import {
   DocumentTextIcon
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
-import { Card, Button, LoadingSpinner, SEO } from './index';
+import { Card } from './Card';
+import { Button } from './ui/Button';
+import { LoadingSpinner } from './LoadingSpinner';
+import { SEO } from './SEO';
 import { useNotification } from '../hooks/useNotification';
 import { config, getWhatsAppUrl } from '../config';
 import { unifiedApi } from '../services/unified-api';

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Container,
@@ -30,6 +30,7 @@ import {
   AlertIcon,
   AlertTitle,
   AlertDescription,
+  Skeleton,
 } from '@chakra-ui/react';
 import {
   MapPinIcon,
@@ -42,92 +43,133 @@ import {
   ExclamationTriangleIcon,
   CheckCircleIcon,
 } from '@heroicons/react/24/outline';
+import { config } from '../../config';
+
+// Icon mapping for dynamic icons
+const iconMap: { [key: string]: any } = {
+  'SparklesIcon': SparklesIcon,
+  'GlobeAltIcon': GlobeAltIcon,
+  'StarIcon': StarIcon,
+  'CheckCircleIcon': CheckCircleIcon,
+  'MapPinIcon': MapPinIcon,
+  'ClockIcon': ClockIcon,
+  'CurrencyDollarIcon': CurrencyDollarIcon,
+  'InformationCircleIcon': InformationCircleIcon,
+  'ExclamationTriangleIcon': ExclamationTriangleIcon,
+};
+
+interface AtollTransfer {
+  id: number;
+  atoll_name: string;
+  description: string;
+  icon: string;
+  gradient: string;
+  is_active: boolean;
+  order: number;
+  resorts: ResortTransfer[];
+}
+
+interface ResortTransfer {
+  id: number;
+  resort_name: string;
+  price: string;
+  duration: string;
+  transfer_type: string;
+  is_active: boolean;
+  order: number;
+}
 
 export const AtollTransfersSection = React.memo(() => {
-  const [selectedAtoll, setSelectedAtoll] = useState('male');
+  const [atollTransfers, setAtollTransfers] = useState<AtollTransfer[]>([]);
+  const [selectedAtoll, setSelectedAtoll] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const atollData = {
-    male: {
-      name: 'Male Atoll',
-      description: 'The most accessible atoll with the highest concentration of resorts',
-      icon: SparklesIcon,
-      gradient: 'from-blue-500 to-indigo-600',
-      transfers: [
-        { resort: 'Adaaran Hudhuranfushi', price: 130, duration: '45 minutes' },
-        { resort: 'Adaaran Rannalhi', price: 180, duration: '60 minutes' },
-        { resort: 'Adaaran Vadoo', price: 80, duration: '25 minutes' },
-        { resort: 'Anantara Veli', price: 115, duration: '40 minutes' },
-        { resort: 'Anantara Digu', price: 115, duration: '40 minutes' },
-        { resort: 'Angsana Ihuru', price: 72, duration: '25 minutes' },
-        { resort: 'Bandos Island', price: 65, duration: '20 minutes' },
-        { resort: 'Banyan Tree', price: 72, duration: '25 minutes' },
-        { resort: 'Centara Rasfushi', price: 65, duration: '20 minutes' },
-        { resort: 'Club Med Finolhu', price: 110, duration: '30 minutes' },
-        { resort: 'Coco Bodu Hithi', price: 125, duration: '45 minutes' },
-        { resort: 'Cinnamon Dhonveli', price: 95, duration: '30 minutes' },
-        { resort: 'Sheraton Full Moon', price: 55, duration: '15 minutes' },
-        { resort: 'Kurumba Maldives', price: 58, duration: '15 minutes' },
-        { resort: 'Paradise Island', price: 70, duration: '20 minutes' },
-        { resort: 'Velassaru', price: 90, duration: '30 minutes' },
-        { resort: 'Taj Exotica', price: 75, duration: '25 minutes' },
-        { resort: 'Waldorf Astoria', price: 150, duration: '40 minutes' },
-      ]
-    },
-    baa: {
-      name: 'Baa Atoll',
-      description: 'UNESCO Biosphere Reserve with luxury resorts and pristine nature',
-      icon: GlobeAltIcon,
-      gradient: 'from-green-500 to-emerald-600',
-      transfers: [
-        { resort: 'Dusit Thani Maldives', price: 150, duration: '2 hours 40 minutes' },
-        { resort: 'Finolhu Baa Atoll', price: 180, duration: '2 hours 40 minutes' },
-        { resort: 'Four Seasons Private Island', price: 230, duration: '2 hours 40 minutes' },
-        { resort: 'Four Seasons Landaa Giraavaru', price: 180, duration: '2 hours 40 minutes' },
-        { resort: 'Kihaa Maldives', price: 100, duration: '2 hours 40 minutes' },
-        { resort: 'Milaidhoo Island', price: 140, duration: '2 hours 40 minutes' },
-        { resort: 'Reethi Beach Resort', price: 200, duration: '2 hours 40 minutes' },
-        { resort: 'Royal Island Resort', price: 110, duration: '2 hours 40 minutes' },
-        { resort: 'Soneva Fushi', price: 104, duration: '2 hours 40 minutes' },
-        { resort: 'The Nautilus Maldives', price: 180, duration: '2 hours 40 minutes' },
-        { resort: 'The Westin Maldives', price: 100, duration: '2 hours 40 minutes' },
-        { resort: 'Vakkaru Maldives', price: 180, duration: '2 hours 40 minutes' },
-      ]
-    },
-    ari: {
-      name: 'Ari Atoll',
-      description: 'Famous for diving and water sports with diverse accommodation options',
-      icon: StarIcon,
-      gradient: 'from-purple-500 to-pink-600',
-      transfers: [
-        { resort: 'Conrad Maldives', price: 250, duration: '3 hours' },
-        { resort: 'Diamonds Athuruga', price: 180, duration: '2 hours 30 minutes' },
-        { resort: 'Diamonds Thudufushi', price: 180, duration: '2 hours 30 minutes' },
-        { resort: 'Ellaidhoo Maldives', price: 120, duration: '2 hours' },
-        { resort: 'Fihalhohi Island', price: 145, duration: '2 hours 15 minutes' },
-        { resort: 'Lily Beach Resort', price: 200, duration: '2 hours 45 minutes' },
-        { resort: 'Maafushivaru Maldives', price: 160, duration: '2 hours 30 minutes' },
-        { resort: 'Mirihi Island Resort', price: 140, duration: '2 hours 15 minutes' },
-        { resort: 'Nika Island Resort', price: 130, duration: '2 hours' },
-        { resort: 'Vakarufalhi Island Resort', price: 150, duration: '2 hours 30 minutes' },
-      ]
-    },
-    lhaviyani: {
-      name: 'Lhaviyani Atoll',
-      description: 'Known for its crystal clear waters and excellent diving spots',
-      icon: CheckCircleIcon,
-      gradient: 'from-orange-500 to-red-600',
-      transfers: [
-        { resort: 'Cocoon Maldives', price: 160, duration: '2 hours 15 minutes' },
-        { resort: 'Hurawalhi Island Resort', price: 180, duration: '2 hours 30 minutes' },
-        { resort: 'Kuredu Island Resort', price: 140, duration: '2 hours' },
-        { resort: 'Komandoo Island Resort', price: 150, duration: '2 hours 15 minutes' },
-        { resort: 'Palm Beach Island Resort', price: 130, duration: '2 hours' },
-        { resort: 'Sun Siyam Iru Fushi', price: 170, duration: '2 hours 30 minutes' },
-      ]
-    }
-  };
+  useEffect(() => {
+    const fetchAtollTransfers = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const response = await fetch(`${config.apiBaseUrl}/transportation/`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        const atolls = data.atoll_transfers || [];
+        setAtollTransfers(atolls);
+        
+        // Set the first atoll as selected by default
+        if (atolls.length > 0 && !selectedAtoll) {
+          setSelectedAtoll(atolls[0].id);
+        }
+      } catch (err) {
+        console.error('Failed to fetch atoll transfers:', err);
+        setError('Failed to load atoll transfer information. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const currentAtoll = atollData[selectedAtoll as keyof typeof atollData];
+    fetchAtollTransfers();
+  }, [selectedAtoll]);
+
+  const currentAtoll = atollTransfers.find(atoll => atoll.id === selectedAtoll);
+
+  if (loading) {
+    return (
+      <section className="py-24 bg-gradient-to-br from-blue-50 to-indigo-50">
+        <Container maxW="7xl">
+          <VStack spacing={16} mb={16} textAlign="center">
+            <Skeleton height="40px" width="300px" />
+            <Skeleton height="60px" width="600px" />
+            <Skeleton height="24px" width="800px" />
+          </VStack>
+          <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4} mb={12}>
+            {[1, 2, 3, 4].map((i) => (
+              <Skeleton key={i} height="100px" />
+            ))}
+          </SimpleGrid>
+          <Skeleton height="400px" />
+        </Container>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="py-24 bg-gradient-to-br from-blue-50 to-indigo-50">
+        <Container maxW="7xl">
+          <Alert status="error" className="rounded-xl">
+            <AlertIcon />
+            <Box>
+              <AlertTitle>Error Loading Atoll Transfer Information</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Box>
+          </Alert>
+        </Container>
+      </section>
+    );
+  }
+
+  if (atollTransfers.length === 0) {
+    return (
+      <section className="py-24 bg-gradient-to-br from-blue-50 to-indigo-50">
+        <Container maxW="7xl">
+          <Alert status="info" className="rounded-xl">
+            <AlertIcon />
+            <Box>
+              <AlertTitle>No Atoll Transfer Information Available</AlertTitle>
+              <AlertDescription>
+                Atoll transfer information is currently being updated. Please check back later or contact us directly for assistance.
+              </AlertDescription>
+            </Box>
+          </Alert>
+        </Container>
+      </section>
+    );
+  }
 
   return (
     <section id="atoll-transfers" className="py-24 bg-gradient-to-br from-blue-50 to-indigo-50">
@@ -152,83 +194,95 @@ export const AtollTransfersSection = React.memo(() => {
 
         {/* Atoll Selection */}
         <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4} mb={12}>
-          {Object.entries(atollData).map(([key, atoll]) => (
-            <Button
-              key={key}
-              variant={selectedAtoll === key ? "solid" : "outline"}
-              size="lg"
-              className={`flex flex-col items-center justify-center p-6 h-auto rounded-xl transition-all duration-300 ${
-                selectedAtoll === key 
-                  ? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-xl' 
-                  : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 border-2 border-gray-200 hover:border-blue-300'
-              }`}
-              onClick={() => setSelectedAtoll(key)}
-            >
-              <Icon as={atoll.icon} className="w-8 h-8 mb-3" />
-              <Text className="text-sm font-bold">{atoll.name}</Text>
-            </Button>
-          ))}
+          {atollTransfers.map((atoll) => {
+            const IconComponent = iconMap[atoll.icon] || SparklesIcon;
+            
+            return (
+              <Button
+                key={atoll.id}
+                variant={selectedAtoll === atoll.id ? "solid" : "outline"}
+                size="lg"
+                className={`flex flex-col items-center justify-center p-6 h-auto rounded-xl transition-all duration-300 ${
+                  selectedAtoll === atoll.id 
+                    ? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-xl' 
+                    : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 border-2 border-gray-200 hover:border-blue-300'
+                }`}
+                onClick={() => setSelectedAtoll(atoll.id)}
+              >
+                <Icon as={IconComponent} className="w-8 h-8 mb-3" />
+                <Text className="text-sm font-bold">{atoll.atoll_name}</Text>
+              </Button>
+            );
+          })}
         </SimpleGrid>
 
         {/* Selected Atoll Information */}
-        <Card className="shadow-2xl border-2 border-gray-200">
-          <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
-            <HStack spacing={4}>
-              <div className={`w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center`}>
-                <Icon as={currentAtoll.icon} className="w-8 h-8 text-white" />
-              </div>
-              <VStack align="start" spacing={2}>
-                <Heading size="lg" className="text-white">
-                  {currentAtoll.name} Transfers
-                </Heading>
-                <Text className="text-blue-100">
-                  {currentAtoll.description}
-                </Text>
-              </VStack>
-            </HStack>
-          </CardHeader>
-          
-          <CardBody className="p-0">
-            <TableContainer>
-              <Table variant="simple">
-                <Thead className="bg-gray-50">
-                  <Tr>
-                    <Th className="text-gray-800 font-bold">Resort/Hotel</Th>
-                    <Th className="text-gray-800 font-bold text-center">Price (USD)</Th>
-                    <Th className="text-gray-800 font-bold text-center">Duration</Th>
-                    <Th className="text-gray-800 font-bold text-center">Transfer Type</Th>
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  {currentAtoll.transfers.map((transfer, index) => (
-                    <Tr key={index} className="hover:bg-gray-50 transition-colors">
-                      <Td className="font-medium text-gray-900">{transfer.resort}</Td>
-                      <Td className="text-center">
-                        <Badge colorScheme="green" className="px-3 py-1 rounded-full font-bold">
-                          ${transfer.price}
-                        </Badge>
-                      </Td>
-                      <Td className="text-center text-gray-700">
-                        <HStack spacing={1} justify="center">
-                          <Icon as={ClockIcon} className="w-4 h-4" />
-                          <Text>{transfer.duration}</Text>
-                        </HStack>
-                      </Td>
-                      <Td className="text-center">
-                        <Badge 
-                          colorScheme={transfer.duration.includes('hours') ? 'purple' : 'blue'}
-                          className="px-3 py-1 rounded-full"
-                        >
-                          {transfer.duration.includes('hours') ? 'Seaplane' : 'Speedboat'}
-                        </Badge>
-                      </Td>
-                    </Tr>
-                  ))}
-                </Tbody>
-              </Table>
-            </TableContainer>
-          </CardBody>
-        </Card>
+        {currentAtoll && (
+          <Card className="shadow-2xl border-2 border-gray-200">
+            <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
+              <HStack spacing={4}>
+                <div className={`w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center`}>
+                  <Icon as={iconMap[currentAtoll.icon] || SparklesIcon} className="w-8 h-8 text-white" />
+                </div>
+                <VStack align="start" spacing={2}>
+                  <Heading size="lg" className="text-white">
+                    {currentAtoll.atoll_name} Transfers
+                  </Heading>
+                  <Text className="text-blue-100">
+                    {currentAtoll.description}
+                  </Text>
+                </VStack>
+              </HStack>
+            </CardHeader>
+            
+            <CardBody className="p-0">
+              {currentAtoll.resorts && currentAtoll.resorts.length > 0 ? (
+                <TableContainer>
+                  <Table variant="simple">
+                    <Thead className="bg-gray-50">
+                      <Tr>
+                        <Th className="text-gray-800 font-bold">Resort/Hotel</Th>
+                        <Th className="text-gray-800 font-bold text-center">Price (USD)</Th>
+                        <Th className="text-gray-800 font-bold text-center">Duration</Th>
+                        <Th className="text-gray-800 font-bold text-center">Transfer Type</Th>
+                      </Tr>
+                    </Thead>
+                    <Tbody>
+                      {currentAtoll.resorts.map((resort) => (
+                        <Tr key={resort.id} className="hover:bg-gray-50 transition-colors">
+                          <Td className="font-medium text-gray-900">{resort.resort_name}</Td>
+                          <Td className="text-center">
+                            <Badge colorScheme="green" className="px-3 py-1 rounded-full font-bold">
+                              ${resort.price}
+                            </Badge>
+                          </Td>
+                          <Td className="text-center text-gray-700">
+                            <HStack spacing={1} justify="center">
+                              <Icon as={ClockIcon} className="w-4 h-4" />
+                              <Text>{resort.duration}</Text>
+                            </HStack>
+                          </Td>
+                          <Td className="text-center">
+                            <Badge 
+                              colorScheme={resort.transfer_type === 'seaplane' ? 'purple' : 'blue'}
+                              className="px-3 py-1 rounded-full"
+                            >
+                              {resort.transfer_type === 'seaplane' ? 'Seaplane' : 'Speedboat'}
+                            </Badge>
+                          </Td>
+                        </Tr>
+                      ))}
+                    </Tbody>
+                  </Table>
+                </TableContainer>
+              ) : (
+                <Box className="p-8 text-center">
+                  <Text className="text-gray-500">No resort transfers available for this atoll at the moment.</Text>
+                </Box>
+              )}
+            </CardBody>
+          </Card>
+        )}
 
         {/* Important Notes */}
         <Alert status="info" className="mt-8 rounded-xl">

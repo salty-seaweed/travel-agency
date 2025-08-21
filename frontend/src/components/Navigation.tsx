@@ -112,8 +112,9 @@ export const Navigation = React.memo(() => {
           <Flex justify="space-between" align="center" h={{ base: '4rem', md: '5rem' }}>
             {/* Logo */}
             <Flex align="center" flexShrink={0}>
-              <Link to="/" style={{ paddingRight: '0px', marginRight: '30px', marginLeft: '-50px' }}>
-                <Flex align="center" _hover={{ transform: 'scale(1.05)' }} transition="all 0.3s ease">
+              <Box pr={0} mr={{ base: 0, md: '30px' }} ml={{ base: 0, md: '-50px' }}>
+                <Link to="/">
+                  <Flex align="center" _hover={{ transform: 'scale(1.05)' }} transition="all 0.3s ease">
                   <Box
                     w={{ base: '10', md: '12' }}
                     h={{ base: '10', md: '12' }}
@@ -175,8 +176,9 @@ export const Navigation = React.memo(() => {
                       & Tours
                     </Text>
                   </VStack>
-                </Flex>
-              </Link>
+                  </Flex>
+                </Link>
+              </Box>
             </Flex>
 
             {/* Desktop Navigation */}

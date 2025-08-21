@@ -18,7 +18,7 @@ export { GoogleReviews } from './GoogleReviews';
 export { default as Layout } from './Layout';
 
 // Page Components
-export { HomePage } from './HomePage';
+// export { HomePage } from './HomePage'; // Removed - moved to backup
 export { PropertyListPage } from './PropertyListPage';
 export { PropertyDetailPage } from './PropertyDetailPage';
 export { BookingPage } from './BookingPage';
@@ -52,7 +52,7 @@ export { AdminProperties } from './admin/AdminProperties';
 export { AdminPackages } from './admin/AdminPackages';
 export { AdminReviews } from './admin/AdminReviews';
 export { AdminSettings } from './admin/AdminSettings';
-export { default as AdminContentManager } from './admin/AdminContentManager';
+export { AdminContentManager } from './admin/AdminContentManager';
 export { AdminAnalytics } from './admin/AdminAnalytics';
 
 // Admin Settings Components
@@ -62,4 +62,22 @@ export { default as AdminLocations } from './admin/settings/AdminLocations';
 
 // Utility Components
 export { LocationMapPicker } from './LocationMapPicker';
-export { LanguageSwitcher } from './LanguageSwitcher'; 
+export { LanguageSwitcher } from './LanguageSwitcher';
+
+// CMS Components
+export { CMSPageRenderer } from './CMSPageRenderer';
+export { TemplateSelector } from './admin/cms/components/TemplateSelector';
+export { AdvancedPageEditor } from './admin/cms/AdvancedPageEditor';
+export { StyleCustomizer } from './admin/cms/components/StyleCustomizer';
+export { CustomCSSEditor } from './admin/cms/components/CustomCSSEditor';
+export { ComponentLibrary } from './admin/cms/components/ComponentLibrary';
+export { AnimationBuilder } from './admin/cms/components/AnimationBuilder';
+export { ContentEditor } from './admin/cms/components/ContentEditor';
+export { LayoutBuilder } from './admin/cms/components/LayoutBuilder';
+export { PreviewPanel } from './admin/cms/components/PreviewPanel';
+export { ResponsiveDesigner } from './admin/cms/components/ResponsiveDesigner';
+export { SEOOptimizer } from './admin/cms/components/SEOOptimizer';
+export { AdvancedSettings } from './admin/cms/components/AdvancedSettings';
+export { DragDropEditor } from './admin/cms/components/DragDropEditor';
+export { ImageEditor } from './admin/cms/components/ImageEditor';
+export { FormBuilder } from './admin/cms/components/FormBuilder'; 

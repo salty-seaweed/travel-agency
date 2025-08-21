@@ -8,20 +8,34 @@ import type {
   Review, 
   PropertyFilters, 
   PackageFilters,
+  ExperienceFilters,
   PropertyFormData,
   PackageFormData,
-  ReviewFormData
+  ReviewFormData,
+  Destination,
+  Experience
 } from '../types';
 
-// Optimized default query options
+// Optimized default query options for better performance
 const defaultQueryOptions = {
+  staleTime: 10 * 60 * 1000, // 10 minutes - increased from 5
+  gcTime: 30 * 60 * 1000, // 30 minutes - increased from 10
+  refetchOnWindowFocus: false,
+  refetchOnMount: false,
+  refetchOnReconnect: true,
+  retry: 1, // Reduced from 2 for faster failure
+  retryDelay: (attemptIndex: number) => Math.min(500 * 2 ** attemptIndex, 5000), // Faster retry
+};
+
+// Critical data options - for above-the-fold content
+const criticalQueryOptions = {
   staleTime: 5 * 60 * 1000, // 5 minutes
-  gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
+  gcTime: 15 * 60 * 1000, // 15 minutes
   refetchOnWindowFocus: false,
   refetchOnMount: false,
   refetchOnReconnect: true,
   retry: 2,
-  retryDelay: (attemptIndex: number) => Math.min(1000 * 2 ** attemptIndex, 30000),
+  retryDelay: (attemptIndex: number) => Math.min(1000 * 2 ** attemptIndex, 10000),
 };
 
 // Properties hooks
@@ -45,6 +59,8 @@ export const useFeaturedProperties = () => {
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: true,
+    // Add placeholder data for better perceived performance
+    placeholderData: (previousData) => previousData,
   });
 
   // Debug logging
@@ -99,6 +115,8 @@ export const useFeaturedPackages = () => {
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: true,
+    // Add placeholder data for better perceived performance
+    placeholderData: (previousData) => previousData,
   });
 
   // Debug logging
@@ -143,12 +161,15 @@ export const useReviews = (approved?: boolean) => {
   return query;
 };
 
-// Reference data hooks (long-lived cache)
+// Reference data hooks (long-lived cache) - optimized for performance
 export const usePropertyTypes = () => {
   return useQuery({
     queryKey: queryKeys.reference.propertyTypes,
     queryFn: () => unifiedApi.propertyTypes.getAll(),
     staleTime: 60 * 60 * 1000, // 1 hour
+    gcTime: 24 * 60 * 60 * 1000, // 24 hours
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 };
 
@@ -157,6 +178,9 @@ export const useAmenities = () => {
     queryKey: queryKeys.reference.amenities,
     queryFn: () => unifiedApi.amenities.getAll(),
     staleTime: 60 * 60 * 1000, // 1 hour
+    gcTime: 24 * 60 * 60 * 1000, // 24 hours
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 };
 
@@ -165,6 +189,94 @@ export const useLocations = () => {
     queryKey: queryKeys.reference.locations,
     queryFn: () => unifiedApi.locations.getAll(),
     staleTime: 60 * 60 * 1000, // 1 hour
+    gcTime: 24 * 60 * 60 * 1000, // 24 hours
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const useDestinations = (featured?: boolean) => {
+  return useQuery({
+    queryKey: queryKeys.reference.destinations(featured),
+    queryFn: () => unifiedApi.destinations.getAll(featured),
+    staleTime: 30 * 60 * 1000, // 30 minutes
+    gcTime: 60 * 60 * 1000, // 1 hour
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const useFeaturedDestinations = () => {
+  return useQuery({
+    queryKey: queryKeys.reference.featuredDestinations,
+    queryFn: () => unifiedApi.destinations.getFeatured(),
+    staleTime: 30 * 60 * 1000, // 30 minutes
+    gcTime: 60 * 60 * 1000, // 1 hour
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+  });
+};
+
+// Experiences hooks
+export const useExperiences = (filters?: ExperienceFilters) => {
+  return useQuery({
+    queryKey: ['experiences', filters],
+    queryFn: () => unifiedApi.experiences.getAll(filters),
+    ...defaultQueryOptions,
+  });
+};
+
+export const useFeaturedExperiences = () => {
+  return useQuery({
+    queryKey: ['experiences', 'featured'],
+    queryFn: () => unifiedApi.experiences.getFeatured(),
+    ...defaultQueryOptions,
+  });
+};
+
+// Experience mutation hooks
+export const useCreateExperience = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: (data: any) => unifiedApi.experiences.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['experiences'] });
+    },
+    onError: (error) => {
+      console.error('Failed to create experience:', error);
+    },
+  });
+};
+
+export const useUpdateExperience = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: any }) => 
+      unifiedApi.experiences.update(id, data),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ['experiences'] });
+      queryClient.invalidateQueries({ queryKey: ['experiences', 'featured'] });
+    },
+    onError: (error) => {
+      console.error('Failed to update experience:', error);
+    },
+  });
+};
+
+export const useDeleteExperience = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: (id: number) => unifiedApi.experiences.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['experiences'] });
+      queryClient.invalidateQueries({ queryKey: ['experiences', 'featured'] });
+    },
+    onError: (error) => {
+      console.error('Failed to delete experience:', error);
+    },
   });
 };
 
@@ -175,6 +287,7 @@ export const useGlobalSearch = (query: string) => {
     queryFn: () => unifiedApi.search.global(query),
     enabled: query.length >= 2, // Only search if query is at least 2 characters
     staleTime: 1 * 60 * 1000, // 1 minute
+    gcTime: 5 * 60 * 1000, // 5 minutes
   });
 };
 
@@ -365,7 +478,7 @@ export const useOptimisticFavorite = () => {
   });
 };
 
-// Custom hook for prefetching related data
+// Enhanced prefetching hook with better performance
 export const usePrefetchRelatedData = () => {
   const queryClient = useQueryClient();
   
@@ -374,6 +487,7 @@ export const usePrefetchRelatedData = () => {
       queryKey: queryKeys.properties.detail(id),
       queryFn: () => unifiedApi.properties.getById(id),
       staleTime: 10 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
     });
   };
   
@@ -382,16 +496,35 @@ export const usePrefetchRelatedData = () => {
       queryKey: queryKeys.packages.detail(id),
       queryFn: () => unifiedApi.packages.getById(id),
       staleTime: 10 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
+    });
+  };
+
+  const prefetchCriticalData = () => {
+    // Prefetch critical data for better performance
+    queryClient.prefetchQuery({
+      queryKey: queryKeys.properties.featured(),
+      queryFn: () => unifiedApi.properties.getFeatured(),
+      staleTime: 30 * 60 * 1000,
+      gcTime: 60 * 60 * 1000,
+    });
+
+    queryClient.prefetchQuery({
+      queryKey: queryKeys.packages.featured(),
+      queryFn: () => unifiedApi.packages.getFeatured(),
+      staleTime: 30 * 60 * 1000,
+      gcTime: 60 * 60 * 1000,
     });
   };
   
   return {
     prefetchPropertyDetails,
     prefetchPackageDetails,
+    prefetchCriticalData,
   };
 };
 
-// Batch data fetcher for homepage
+// Optimized batch data fetcher for homepage with better performance
 export const useHomepageData = () => {
   const propertiesQuery = useFeaturedProperties();
   const packagesQuery = useFeaturedPackages();
@@ -404,10 +537,14 @@ export const useHomepageData = () => {
     isLoading: propertiesQuery.isLoading || packagesQuery.isLoading || reviewsQuery.isLoading,
     isError: propertiesQuery.isError || packagesQuery.isError || reviewsQuery.isError,
     error: propertiesQuery.error || packagesQuery.error || reviewsQuery.error,
+    // Add individual loading states for progressive loading
+    propertiesLoading: propertiesQuery.isLoading,
+    packagesLoading: packagesQuery.isLoading,
+    reviewsLoading: reviewsQuery.isLoading,
   };
 };
 
-// Database-driven homepage content
+// Database-driven homepage content with optimized caching
 export const useHomepageContent = () => {
   return useQuery({
     queryKey: ['homepage-content'],
@@ -424,6 +561,8 @@ export const useHomepageContent = () => {
     refetchOnMount: false, // Don't refetch on mount if data exists
     refetchOnReconnect: true, // Only refetch on reconnect
     refetchInterval: false, // Disable automatic refetching
+    // Add placeholder data for better perceived performance
+    placeholderData: (previousData) => previousData,
   });
 };
 

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import (
-    PropertyType, Amenity, Location, Property, PropertyImage, Package, Review,
+    PropertyType, Amenity, Location, Destination, Experience, Property, PropertyImage, Package, Review,
     Page, PageBlock, MediaAsset, Menu, MenuItem, Redirect, PageVersion, PageReview, CommentThread, Comment,
     TransferType, AtollTransfer, ResortTransfer, TransferFAQ, TransferContactMethod, 
     TransferBookingStep, TransferBenefit, TransferPricingFactor, TransferContent
@@ -17,6 +17,68 @@ class AmenityAdmin(admin.ModelAdmin):
 @admin.register(Location)
 class LocationAdmin(admin.ModelAdmin):
     list_display = ('island', 'atoll', 'latitude', 'longitude')
+
+@admin.register(Destination)
+class DestinationAdmin(admin.ModelAdmin):
+    list_display = ['name', 'island', 'atoll', 'is_featured', 'property_count', 'package_count', 'is_active']
+    list_filter = ['is_featured', 'is_active', 'atoll']
+    search_fields = ['name', 'island', 'atoll', 'description']
+    list_editable = ['is_featured', 'is_active']
+    readonly_fields = ['property_count', 'package_count', 'created_at', 'updated_at']
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('name', 'description', 'island', 'atoll')
+        }),
+        ('Location', {
+            'fields': ('latitude', 'longitude')
+        }),
+        ('Media', {
+            'fields': ('image',)
+        }),
+        ('Settings', {
+            'fields': ('is_featured', 'is_active')
+        }),
+        ('Statistics', {
+            'fields': ('property_count', 'package_count'),
+            'classes': ('collapse',)
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+@admin.register(Experience)
+class ExperienceAdmin(admin.ModelAdmin):
+    list_display = ['name', 'experience_type', 'duration', 'price', 'location', 'is_featured', 'is_active']
+    list_filter = ['experience_type', 'is_featured', 'is_active', 'difficulty_level', 'location']
+    search_fields = ['name', 'description', 'location__island', 'location__atoll']
+    list_editable = ['is_featured', 'is_active', 'price']
+    readonly_fields = ['created_at', 'updated_at']
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('name', 'description', 'experience_type', 'duration', 'price', 'currency')
+        }),
+        ('Location', {
+            'fields': ('location', 'destination')
+        }),
+        ('Details', {
+            'fields': ('max_participants', 'min_age', 'difficulty_level')
+        }),
+        ('Content', {
+            'fields': ('includes', 'excludes', 'requirements')
+        }),
+        ('Media', {
+            'fields': ('image',)
+        }),
+        ('Settings', {
+            'fields': ('is_featured', 'is_active')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
 
 class PropertyImageInline(admin.TabularInline):
     model = PropertyImage

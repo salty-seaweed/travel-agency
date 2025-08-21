@@ -11,16 +11,16 @@ import os
 import uuid
 from django.conf import settings
 from .models import (
-    PropertyType, Amenity, Location, PropertyImage, Property, Package, PackageImage, Review, 
+    PropertyType, Amenity, Location, Destination, Experience, PropertyImage, Property, Package, PackageImage, Review, 
     Booking, Availability, Customer, Page, PageBlock, MediaAsset, Menu, MenuItem, 
     Redirect, PageVersion, PageReview, CommentThread, Comment, PackageItinerary, PackageInclusion,
     PackageActivity, PackageDestination, TransferType, AtollTransfer, ResortTransfer, TransferFAQ,
-    TransferContactMethod, TransferBookingStep, TransferBenefit, TransferPricingFactor, TransferContent,
+    TransferContactMethod, TransferBookingStep, TransferBenefit, TransferPricingFactor, TransferContent, FerrySchedule,
     HomepageHero, HomepageFeature, HomepageTestimonial, HomepageStatistic, 
     HomepageCTASection, HomepageSettings, HomepageContent, HomepageImage
 )
 from .serializers import (
-    PropertyTypeSerializer, AmenitySerializer, LocationSerializer, 
+    PropertyTypeSerializer, AmenitySerializer, LocationSerializer, DestinationSerializer, ExperienceSerializer,
     PropertyImageSerializer, PackageImageSerializer, PropertySerializer, PackageSerializer, 
     ReviewSerializer, BookingSerializer, BookingCreateSerializer, 
     BookingStatusUpdateSerializer, AvailabilitySerializer, CustomerSerializer,
@@ -29,13 +29,13 @@ from .serializers import (
     PackageItinerarySerializer, PackageInclusionSerializer, PackageActivitySerializer, PackageDestinationSerializer,
     TransferTypeSerializer, AtollTransferSerializer, ResortTransferSerializer, TransferFAQSerializer,
     TransferContactMethodSerializer, TransferBookingStepSerializer, TransferBenefitSerializer,
-    TransferPricingFactorSerializer, TransferContentSerializer,
+    TransferPricingFactorSerializer, TransferContentSerializer, FerryScheduleSerializer,
     HomepageHeroSerializer, HomepageFeatureSerializer, HomepageTestimonialSerializer,
     HomepageStatisticSerializer, HomepageCTASectionSerializer, HomepageSettingsSerializer,
     HomepageContentSerializer, HomepageDataSerializer, HomepageImageSerializer
 )
 from rest_framework.decorators import permission_classes
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.db.models import Count, Avg
 from .models import Property, Package, Review, PropertyType, Amenity, Location, Customer
@@ -118,6 +118,37 @@ class LocationViewSet(viewsets.ModelViewSet):
     queryset = Location.objects.all()
     serializer_class = LocationSerializer
     permission_classes = [IsAuthenticated]
+
+class DestinationViewSet(viewsets.ModelViewSet):
+    queryset = Destination.objects.filter(is_active=True)
+    serializer_class = DestinationSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['is_featured', 'atoll', 'is_active']
+    
+    def get_queryset(self):
+        queryset = Destination.objects.filter(is_active=True)
+        featured = self.request.query_params.get('featured', None)
+        if featured is not None:
+            queryset = queryset.filter(is_featured=featured.lower() == 'true')
+        return queryset
+
+class ExperienceViewSet(viewsets.ModelViewSet):
+    queryset = Experience.objects.filter(is_active=True)
+    serializer_class = ExperienceSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['experience_type', 'is_featured', 'is_active', 'difficulty_level']
+    
+    def get_queryset(self):
+        queryset = Experience.objects.filter(is_active=True)
+        featured = self.request.query_params.get('featured', None)
+        experience_type = self.request.query_params.get('experience_type', None)
+        if featured is not None:
+            queryset = queryset.filter(is_featured=featured.lower() == 'true')
+        if experience_type:
+            queryset = queryset.filter(experience_type=experience_type)
+        return queryset
 
 class PropertyImageViewSet(viewsets.ModelViewSet):
     queryset = PropertyImage.objects.all()
@@ -718,10 +749,261 @@ class PageViewSet(viewsets.ModelViewSet):
     serializer_class = PageSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['status', 'locale', 'is_home']
-    search_fields = ['title', 'slug', 'content']
-    ordering_fields = ['created_at', 'updated_at', 'title']
+    filterset_fields = ['status', 'locale', 'is_home', 'template', 'created_by']
+    search_fields = ['title', 'slug', 'content', 'meta_description', 'meta_keywords']
+    ordering_fields = ['created_at', 'updated_at', 'title', 'status']
     ordering = ['-updated_at']
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user, updated_by=self.request.user)
+
+    def perform_update(self, serializer):
+        serializer.save(updated_by=self.request.user)
+
+    @action(detail=True, methods=['post'])
+    def duplicate(self, request, pk=None):
+        """Duplicate a page with all its content and blocks"""
+        try:
+            page = self.get_object()
+            
+            # Create new page
+            new_page = Page.objects.create(
+                title=f"{page.title} (Copy)",
+                slug=f"{page.slug}-copy-{uuid.uuid4().hex[:8]}",
+                content=page.content,
+                meta_description=page.meta_description,
+                meta_keywords=page.meta_keywords,
+                status='draft',
+                locale=page.locale,
+                template=page.template,
+                seo_title=page.seo_title,
+                seo_description=page.seo_description,
+                canonical_url=page.canonical_url,
+                robots=page.robots,
+                og_title=page.og_title,
+                og_description=page.og_description,
+                json_ld=page.json_ld,
+                path=page.path,
+                created_by=request.user,
+                updated_by=request.user
+            )
+            
+            # Duplicate blocks
+            for block in page.blocks.all():
+                PageBlock.objects.create(
+                    page=new_page,
+                    type=block.type,
+                    order=block.order,
+                    data=block.data,
+                    locale_override=block.locale_override,
+                    visibility_rules=block.visibility_rules
+                )
+            
+            serializer = self.get_serializer(new_page)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['post'])
+    def publish(self, request, pk=None):
+        """Publish a page"""
+        try:
+            page = self.get_object()
+            page.status = 'published'
+            page.updated_by = request.user
+            page.save()
+            
+            # Create version snapshot
+            PageVersion.objects.create(
+                page=page,
+                version_number=page.version + 1,
+                title=page.title,
+                content=page.content,
+                meta_description=page.meta_description,
+                meta_keywords=page.meta_keywords,
+                blocks_data={'blocks': list(page.blocks.values())},
+                seo_data={
+                    'seo_title': page.seo_title,
+                    'seo_description': page.seo_description,
+                    'canonical_url': page.canonical_url,
+                    'robots': page.robots,
+                    'json_ld': page.json_ld,
+                },
+                created_by=request.user
+            )
+            
+            page.version += 1
+            page.save()
+            
+            serializer = self.get_serializer(page)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['post'])
+    def archive(self, request, pk=None):
+        """Archive a page"""
+        try:
+            page = self.get_object()
+            page.status = 'archived'
+            page.updated_by = request.user
+            page.save()
+            serializer = self.get_serializer(page)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['post'])
+    def restore(self, request, pk=None):
+        """Restore an archived page"""
+        try:
+            page = self.get_object()
+            page.status = 'draft'
+            page.updated_by = request.user
+            page.save()
+            serializer = self.get_serializer(page)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['post'])
+    def bulk_publish(self, request):
+        """Bulk publish multiple pages"""
+        try:
+            page_ids = request.data.get('page_ids', [])
+            pages = Page.objects.filter(id__in=page_ids)
+            
+            for page in pages:
+                page.status = 'published'
+                page.updated_by = request.user
+                page.save()
+            
+            return Response({'message': f'{pages.count()} pages published successfully'})
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['post'])
+    def bulk_archive(self, request):
+        """Bulk archive multiple pages"""
+        try:
+            page_ids = request.data.get('page_ids', [])
+            pages = Page.objects.filter(id__in=page_ids)
+            
+            for page in pages:
+                page.status = 'archived'
+                page.updated_by = request.user
+                page.save()
+            
+            return Response({'message': f'{pages.count()} pages archived successfully'})
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['post'])
+    def bulk_delete(self, request):
+        """Bulk delete multiple pages"""
+        try:
+            page_ids = request.data.get('page_ids', [])
+            pages = Page.objects.filter(id__in=page_ids)
+            count = pages.count()
+            pages.delete()
+            
+            return Response({'message': f'{count} pages deleted successfully'})
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['get'])
+    def versions(self, request, pk=None):
+        """Get all versions of a page"""
+        try:
+            page = self.get_object()
+            versions = page.versions.all()
+            serializer = PageVersionSerializer(versions, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['post'])
+    def revert_to_version(self, request, pk=None):
+        """Revert page to a specific version"""
+        try:
+            page = self.get_object()
+            version_number = request.data.get('version_number')
+            
+            if not version_number:
+                return Response({'error': 'Version number is required'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            version = page.versions.filter(version_number=version_number).first()
+            if not version:
+                return Response({'error': 'Version not found'}, status=status.HTTP_404_NOT_FOUND)
+            
+            # Revert page content
+            page.title = version.title
+            page.content = version.content
+            page.meta_description = version.meta_description
+            page.meta_keywords = version.meta_keywords
+            page.updated_by = request.user
+            page.save()
+            
+            # Revert blocks if available
+            if version.blocks_data:
+                page.blocks.all().delete()
+                for block_data in version.blocks_data.get('blocks', []):
+                    PageBlock.objects.create(
+                        page=page,
+                        type=block_data['type'],
+                        order=block_data['order'],
+                        data=block_data['data'],
+                        locale_override=block_data.get('locale_override', ''),
+                        visibility_rules=block_data.get('visibility_rules', {})
+                    )
+            
+            serializer = self.get_serializer(page)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['get'])
+    def templates(self, request):
+        """Get available page templates"""
+        templates = [
+            {'id': 'default', 'name': 'Default Template', 'description': 'Standard page layout'},
+            {'id': 'full-width', 'name': 'Full Width', 'description': 'Full width content layout'},
+            {'id': 'sidebar', 'name': 'Sidebar Layout', 'description': 'Content with sidebar'},
+            {'id': 'landing', 'name': 'Landing Page', 'description': 'Landing page template'},
+            {'id': 'blog', 'name': 'Blog Post', 'description': 'Blog post template'},
+            {'id': 'contact', 'name': 'Contact Page', 'description': 'Contact page template'},
+            {'id': 'about', 'name': 'About Page', 'description': 'About page template'},
+        ]
+        return Response(templates)
+
+    @action(detail=False, methods=['get'])
+    def stats(self, request):
+        """Get page statistics"""
+        try:
+            total_pages = Page.objects.count()
+            published_pages = Page.objects.filter(status='published').count()
+            draft_pages = Page.objects.filter(status='draft').count()
+            archived_pages = Page.objects.filter(status='archived').count()
+            
+            # Pages by locale
+            pages_by_locale = Page.objects.values('locale').annotate(count=Count('id'))
+            
+            # Recent activity
+            recent_pages = Page.objects.select_related('created_by', 'updated_by').order_by('-updated_at')[:10]
+            recent_data = PageSerializer(recent_pages, many=True).data
+            
+            stats = {
+                'total_pages': total_pages,
+                'published_pages': published_pages,
+                'draft_pages': draft_pages,
+                'archived_pages': archived_pages,
+                'pages_by_locale': list(pages_by_locale),
+                'recent_pages': recent_data,
+            }
+            
+            return Response(stats)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 class PageBlockViewSet(viewsets.ModelViewSet):
     queryset = PageBlock.objects.all()
@@ -740,6 +1022,9 @@ class MediaAssetViewSet(viewsets.ModelViewSet):
     search_fields = ['alt_text', 'caption', 'tags']
     ordering_fields = ['created_at', 'file_size']
     ordering = ['-created_at']
+    
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 class MenuViewSet(viewsets.ModelViewSet):
     queryset = Menu.objects.all()
@@ -885,6 +1170,16 @@ class TransferContentViewSet(viewsets.ModelViewSet):
     ordering_fields = ['order', 'section']
     ordering = ['order']
 
+class FerryScheduleViewSet(viewsets.ModelViewSet):
+    queryset = FerrySchedule.objects.filter(is_active=True)
+    serializer_class = FerryScheduleSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['is_active']
+    search_fields = ['route_name']
+    ordering_fields = ['route_name', 'departure_time']
+    ordering = ['route_name', 'departure_time']
+
 @api_view(['GET'])
 def transportation_data(request):
     """Get all transportation data for the frontend"""
@@ -898,6 +1193,7 @@ def transportation_data(request):
             'benefits': TransferBenefitSerializer(TransferBenefit.objects.filter(is_active=True), many=True).data,
             'pricing_factors': TransferPricingFactorSerializer(TransferPricingFactor.objects.filter(is_active=True), many=True).data,
             'content': TransferContentSerializer(TransferContent.objects.filter(is_active=True), many=True).data,
+            'ferry_schedules': FerryScheduleSerializer(FerrySchedule.objects.filter(is_active=True), many=True).data,
         }
         return Response(data)
     except Exception as e:
@@ -1301,3 +1597,17 @@ class HomepageManagementViewSet(viewsets.ViewSet):
                 return Response({'message': 'Homepage updated successfully'})
         except Exception as e:
             return Response({'error': str(e)}, status=500)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def page_by_slug(request, slug):
+    """Get a published page by slug"""
+    try:
+        page = Page.objects.filter(slug=slug, status='published').first()
+        if not page:
+            return Response({'error': 'Page not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = PageSerializer(page, context={'request': request})
+        return Response(serializer.data)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -26,6 +26,96 @@ class Location(models.Model):
     def __str__(self):
         return f"{self.island}, {self.atoll}" if self.atoll else self.island
 
+class Destination(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    island = models.CharField(max_length=100)
+    atoll = models.CharField(max_length=100)
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    image = models.ImageField(upload_to='destinations/', null=True, blank=True)
+    is_featured = models.BooleanField(default=False)
+    property_count = models.IntegerField(default=0)  # Computed field
+    package_count = models.IntegerField(default=0)   # Computed field
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-is_featured', 'name']
+    
+    def __str__(self):
+        return self.name
+    
+    def save(self, *args, **kwargs):
+        # Update computed fields
+        self.update_counts()
+        super().save(*args, **kwargs)
+    
+    def update_counts(self):
+        """Update property and package counts for this destination"""
+        # Count properties in this destination (by island name)
+        self.property_count = Property.objects.filter(
+            location__island__iexact=self.island
+        ).count()
+        
+        # Count packages that include properties from this destination
+        self.package_count = Package.objects.filter(
+            properties__location__island__iexact=self.island
+        ).distinct().count()
+    
+    @classmethod
+    def update_all_counts(cls):
+        """Update property and package counts for all destinations"""
+        for destination in cls.objects.all():
+            destination.update_counts()
+            destination.save(update_fields=['property_count', 'package_count'])
+
+class Experience(models.Model):
+    EXPERIENCE_TYPES = [
+        ('water_sports', 'Water Sports'),
+        ('cultural', 'Cultural'),
+        ('adventure', 'Adventure'),
+        ('wellness', 'Wellness'),
+        ('food', 'Food & Dining'),
+        ('photography', 'Photography'),
+        ('fishing', 'Fishing'),
+        ('diving', 'Diving & Snorkeling'),
+        ('sailing', 'Sailing & Cruises'),
+        ('spa', 'Spa & Relaxation'),
+    ]
+    
+    name = models.CharField(max_length=200)
+    description = models.TextField()
+    experience_type = models.CharField(max_length=50, choices=EXPERIENCE_TYPES)
+    duration = models.CharField(max_length=50, help_text="e.g., '2 hours', 'Full day'")
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    currency = models.CharField(max_length=3, default='USD')
+    location = models.ForeignKey(Location, on_delete=models.CASCADE, related_name='experiences')
+    destination = models.ForeignKey(Destination, on_delete=models.CASCADE, related_name='experiences', null=True, blank=True)
+    image = models.ImageField(upload_to='experiences/', null=True, blank=True)
+    is_featured = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    max_participants = models.IntegerField(default=10)
+    min_age = models.IntegerField(default=0)
+    difficulty_level = models.CharField(max_length=20, choices=[
+        ('easy', 'Easy'),
+        ('moderate', 'Moderate'),
+        ('challenging', 'Challenging'),
+        ('expert', 'Expert'),
+    ], default='easy')
+    includes = models.JSONField(default=list, help_text="List of what's included")
+    excludes = models.JSONField(default=list, help_text="List of what's not included")
+    requirements = models.JSONField(default=list, help_text="List of requirements")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-is_featured', 'name']
+    
+    def __str__(self):
+        return self.name
+
 class Property(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField()
@@ -41,6 +131,19 @@ class Property(models.Model):
     
     def __str__(self):
         return self.name
+    
+    def save(self, *args, **kwargs):
+        # Save the property first
+        super().save(*args, **kwargs)
+        
+        # Update destination counts if location changed
+        if self.location and self.location.island:
+            try:
+                destination = Destination.objects.get(island__iexact=self.location.island)
+                destination.update_counts()
+                destination.save(update_fields=['property_count', 'package_count'])
+            except Destination.DoesNotExist:
+                pass
 
 class PropertyImage(models.Model):
     property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='images')
@@ -301,6 +404,7 @@ class Page(models.Model):
     
     # Open Graph fields
     og_title = models.CharField(max_length=200, blank=True)
+    og_description = models.TextField(blank=True)
     og_image = models.ForeignKey('MediaAsset', on_delete=models.SET_NULL, null=True, blank=True, related_name='og_pages')
     
     # Publishing fields
@@ -309,6 +413,7 @@ class Page(models.Model):
     template = models.CharField(max_length=100, blank=True, default='default')
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
     path = models.CharField(max_length=500, blank=True)
+    notes = models.TextField(blank=True, help_text="Internal notes for content management")
     
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='pages_created')
     updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='pages_updated')
@@ -643,6 +748,24 @@ class TransferPricingFactor(models.Model):
     
     def __str__(self):
         return self.factor
+
+class FerrySchedule(models.Model):
+    """Model for storing ferry schedules and timings"""
+    route_name = models.CharField(max_length=200)  # e.g., "Male to Maafushi"
+    departure_time = models.TimeField()
+    arrival_time = models.TimeField()
+    duration = models.CharField(max_length=50)  # e.g., "90 minutes"
+    price = models.DecimalField(max_digits=8, decimal_places=2)
+    days_of_week = models.JSONField(default=list)  # ['Monday', 'Tuesday', etc.]
+    is_active = models.BooleanField(default=True)
+    notes = models.TextField(blank=True)
+    order = models.PositiveIntegerField(default=0)
+    
+    class Meta:
+        ordering = ['route_name', 'departure_time']
+    
+    def __str__(self):
+        return f"{self.route_name} - {self.departure_time}"
 
 class TransferContent(models.Model):
     """Main content model for transportation page sections"""
