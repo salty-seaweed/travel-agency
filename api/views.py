@@ -1,8 +1,9 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.db import models
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from django.db import connection
 from rest_framework import viewsets, status
 from rest_framework.generics import ListAPIView, CreateAPIView, UpdateAPIView
 from django_filters.rest_framework import DjangoFilterBackend
@@ -2567,3 +2568,33 @@ def featured_destinations(request):
         return Response(serializer.data)
     except Exception as e:
         return Response({'error': str(e)}, status=500)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def health_check(request):
+    """
+    Health check endpoint for Railway deployment
+    """
+    try:
+        # Check database connection
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+        
+        # Check some basic data
+        from .models import TransferType
+        transfer_count = TransferType.objects.count()
+        
+        return JsonResponse({
+            'status': 'healthy',
+            'database': 'connected',
+            'transportation_data': f'{transfer_count} transfer types loaded',
+            'timestamp': timezone.now().isoformat(),
+            'service': 'threadtravels-backend'
+        })
+    except Exception as e:
+        return JsonResponse({
+            'status': 'unhealthy',
+            'error': str(e),
+            'timestamp': timezone.now().isoformat()
+        }, status=500)

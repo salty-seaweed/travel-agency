@@ -91,6 +91,7 @@ urlpatterns = [
     path('featured-destinations/public/', views.featured_destinations, name='featured_destinations_public'),
     path('pages/', include(router.urls)),
     path('pages/by-slug/<str:slug>/', views.page_by_slug, name='page_by_slug'),
+    path('health/', views.health_check, name='health_check'),
 ]
 
 # Internationalization URL patterns
