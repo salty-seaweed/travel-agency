@@ -20,6 +20,7 @@ import {
 import { AdminAmenities } from './settings/AdminAmenities';
 import { AdminPropertyTypes } from './settings/AdminPropertyTypes';
 import { AdminLocations } from './settings/AdminLocations';
+import { AdminContactSettings } from './settings/AdminContactSettings';
 import {
   WrenchScrewdriverIcon,
   SparklesIcon,
@@ -28,7 +29,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 export function AdminSettings() {
-  const [activeTab, setActiveTab] = useState<'amenities' | 'types' | 'locations'>('amenities');
+  const [activeTab, setActiveTab] = useState<'amenities' | 'types' | 'locations' | 'contact'>('amenities');
 
   // Color mode values
   const bg = useColorModeValue('white', 'gray.800');
@@ -41,6 +42,7 @@ export function AdminSettings() {
     { id: 'amenities', name: 'Amenities', icon: SparklesIcon, color: 'purple' },
     { id: 'types', name: 'Property Types', icon: HomeIcon, color: 'blue' },
     { id: 'locations', name: 'Locations', icon: MapPinIcon, color: 'emerald' },
+    { id: 'contact', name: 'Contact', icon: WrenchScrewdriverIcon, color: 'pink' },
   ];
 
   return (
@@ -75,7 +77,7 @@ export function AdminSettings() {
       <Container maxW="7xl">
         <Card bg={cardBg} borderColor={borderColor} borderWidth="1px">
           <Tabs variant="enclosed" onChange={(index) => {
-            const tabIds = ['amenities', 'types', 'locations'];
+            const tabIds = ['amenities', 'types', 'locations', 'contact'];
             setActiveTab(tabIds[index] as any);
           }} defaultIndex={0}>
             <TabList borderBottom="1px solid" borderColor={borderColor}>
@@ -108,6 +110,9 @@ export function AdminSettings() {
               </TabPanel>
               <TabPanel p={6}>
                 <AdminLocations />
+              </TabPanel>
+              <TabPanel p={6}>
+                <AdminContactSettings />
               </TabPanel>
             </TabPanels>
           </Tabs>

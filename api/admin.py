@@ -1,9 +1,10 @@
 from django.contrib import admin
 from .models import (
-    PropertyType, Amenity, Location, Destination, Experience, Property, PropertyImage, Package, Review,
+    PropertyType, Amenity, Location, Destination, Experience, Property, PropertyImage, Package, PackageDestination, Review,
     Page, PageBlock, MediaAsset, Menu, MenuItem, Redirect, PageVersion, PageReview, CommentThread, Comment,
     TransferType, AtollTransfer, ResortTransfer, TransferFAQ, TransferContactMethod, 
-    TransferBookingStep, TransferBenefit, TransferPricingFactor, TransferContent
+    TransferBookingStep, TransferBenefit, TransferPricingFactor, TransferContent,
+    PageHero
 )
 
 @admin.register(PropertyType)
@@ -50,17 +51,17 @@ class DestinationAdmin(admin.ModelAdmin):
 
 @admin.register(Experience)
 class ExperienceAdmin(admin.ModelAdmin):
-    list_display = ['name', 'experience_type', 'duration', 'price', 'location', 'is_featured', 'is_active']
-    list_filter = ['experience_type', 'is_featured', 'is_active', 'difficulty_level', 'location']
-    search_fields = ['name', 'description', 'location__island', 'location__atoll']
+    list_display = ['name', 'experience_type', 'duration', 'price', 'destination', 'is_featured', 'is_active']
+    list_filter = ['experience_type', 'is_featured', 'is_active', 'difficulty_level', 'destination']
+    search_fields = ['name', 'description', 'destination__name', 'destination__island', 'destination__atoll']
     list_editable = ['is_featured', 'is_active', 'price']
     readonly_fields = ['created_at', 'updated_at']
     fieldsets = (
         ('Basic Information', {
             'fields': ('name', 'description', 'experience_type', 'duration', 'price', 'currency')
         }),
-        ('Location', {
-            'fields': ('location', 'destination')
+        ('Destination', {
+            'fields': ('destination',)
         }),
         ('Details', {
             'fields': ('max_participants', 'min_age', 'difficulty_level')
@@ -91,10 +92,68 @@ class PropertyAdmin(admin.ModelAdmin):
     search_fields = ('name', 'description', 'address')
     inlines = [PropertyImageInline]
 
+class PackageDestinationInline(admin.TabularInline):
+    model = PackageDestination
+    extra = 1
+    fields = ('location', 'duration', 'description', 'highlights', 'activities')
+
 @admin.register(Package)
 class PackageAdmin(admin.ModelAdmin):
     list_display = ('name', 'price', 'is_featured', 'start_date', 'end_date')
-    filter_horizontal = ('properties',)
+    list_filter = ('is_featured', 'category', 'difficulty_level')
+    search_fields = ('name', 'description', 'highlights')
+    inlines = [PackageDestinationInline]
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('name', 'description', 'detailed_description', 'highlights', 'category', 'difficulty_level')
+        }),
+        ('Pricing & Duration', {
+            'fields': ('price', 'original_price', 'discount_percentage', 'duration')
+        }),
+        ('Group Size', {
+            'fields': ('group_size_min', 'group_size_max', 'group_size_recommended')
+        }),
+        ('Dates & Status', {
+            'fields': ('start_date', 'end_date', 'is_featured')
+        }),
+        ('Accommodation & Transportation', {
+            'fields': ('accommodation_type', 'room_type', 'meal_plan', 'transportation_details', 'airport_transfers')
+        }),
+        ('Additional Information', {
+            'fields': ('best_time_to_visit', 'weather_info', 'what_to_bring', 'important_notes')
+        }),
+        ('Pricing & Availability', {
+            'fields': ('seasonal_pricing_peak', 'seasonal_pricing_off_peak', 'seasonal_pricing_shoulder', 'availability_calendar')
+        }),
+        ('Booking Information', {
+            'fields': ('booking_terms', 'cancellation_policy', 'payment_terms')
+        }),
+    )
+
+@admin.register(PackageDestination)
+class PackageDestinationAdmin(admin.ModelAdmin):
+    list_display = ('package', 'location', 'duration', 'get_highlights_count', 'get_activities_count')
+    list_filter = ('package', 'location__atoll', 'duration')
+    search_fields = ('package__name', 'location__island', 'location__atoll', 'description')
+    fieldsets = (
+        ('Package & Location', {
+            'fields': ('package', 'location')
+        }),
+        ('Duration & Description', {
+            'fields': ('duration', 'description')
+        }),
+        ('Highlights & Activities', {
+            'fields': ('highlights', 'activities')
+        }),
+    )
+    
+    def get_highlights_count(self, obj):
+        return len(obj.highlights) if obj.highlights else 0
+    get_highlights_count.short_description = 'Highlights'
+    
+    def get_activities_count(self, obj):
+        return len(obj.activities) if obj.activities else 0
+    get_activities_count.short_description = 'Activities'
 
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
@@ -239,3 +298,17 @@ class TransferContentAdmin(admin.ModelAdmin):
     list_filter = ('section', 'is_active')
     search_fields = ('title', 'description')
     ordering = ('order',)
+
+
+@admin.register(PageHero)
+class PageHeroAdmin(admin.ModelAdmin):
+    list_display = ('page_key', 'title', 'is_active', 'updated_at')
+    list_filter = ('page_key', 'is_active')
+    search_fields = ('page_key', 'title', 'subtitle')
+    readonly_fields = ('created_at', 'updated_at')
+    fieldsets = (
+        ('Page', {'fields': ('page_key', 'is_active')}),
+        ('Content', {'fields': ('title', 'subtitle')}),
+        ('Background', {'fields': ('background_image', 'background_image_url', 'overlay_opacity')}),
+        ('Timestamps', {'fields': ('created_at', 'updated_at'), 'classes': ('collapse',)}),
+    )

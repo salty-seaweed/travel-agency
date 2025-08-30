@@ -29,7 +29,7 @@ import {
   HomeIcon,
   StarIcon,
   BuildingOfficeIcon,
-  MapIcon,
+
   InformationCircleIcon,
   ChatBubbleLeftRightIcon,
   // MagnifyingGlassIcon, // TEMPORARILY DISABLED
@@ -45,7 +45,10 @@ import {
 } from '@heroicons/react/24/outline';
 import { useCustomerAuth } from '../hooks/useCustomerAuth';
 import { useSmartTranslation } from '../hooks/useSmartTranslation';
+import { useTranslation } from '../i18n';
 import logo from '../assets/logo.svg';
+import { LanguageSwitcher } from './LanguageSwitcher';
+import { CurrencySelector } from './CurrencySelector';
 
 interface NavigationItem {
   name: string;
@@ -59,16 +62,16 @@ export const Navigation = React.memo(() => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isScrolled, setIsScrolled] = useState(false);
   const { isAuthenticated, customerData, logout } = useCustomerAuth();
+  const { t } = useTranslation();
   // const { translateNav, translateButton } = useSmartTranslation(); // TEMPORARILY DISABLED
 
   const navigation: NavigationItem[] = [
-    { name: 'Home', href: '/', icon: HomeIcon },
-    { name: 'Packages', href: '/packages', icon: StarIcon, featured: true },
-    { name: 'Properties', href: '/properties', icon: BuildingOfficeIcon },
-    { name: 'Transportation', href: '/transportation', icon: SparklesIcon },
-    { name: 'Map', href: '/map', icon: MapIcon },
-    { name: 'About', href: '/about', icon: InformationCircleIcon },
-    { name: 'Contact', href: '/contact', icon: ChatBubbleLeftRightIcon },
+    { name: t('navigation.home'), href: '/', icon: HomeIcon },
+    { name: t('navigation.packages'), href: '/packages', icon: StarIcon, featured: true },
+    { name: t('navigation.transportation'), href: '/transportation', icon: SparklesIcon },
+  
+    { name: t('navigation.about'), href: '/about', icon: InformationCircleIcon },
+    { name: t('navigation.contact'), href: '/contact', icon: ChatBubbleLeftRightIcon },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -105,7 +108,6 @@ export const Navigation = React.memo(() => {
         boxShadow={isScrolled ? '2xl' : 'lg'}
         transition="all 0.3s ease"
         bgGradient={isScrolled ? 'linear(to-r, white, gray.50)' : 'linear(to-r, white, blue.50)'}
-        className="notranslate"
         style={{ paddingLeft: '0', paddingRight: '45px' }}
       >
         <Container maxW="7xl" px={{ base: 4, sm: 6, lg: 8 }}>
@@ -152,7 +154,7 @@ export const Navigation = React.memo(() => {
                       animation="pulse 2s infinite"
                     />
                   </Box>
-                  <VStack align="start" ml={1} spacing={0} className="notranslate">
+                  <VStack align="start" ml={1} spacing={0}>
                     <Text
                       fontSize={{ base: "lg", md: "2xl", lg: "3xl" }}
                       fontWeight="extrabold"
@@ -160,7 +162,6 @@ export const Navigation = React.memo(() => {
                       bgClip="text"
                       lineHeight="0.9"
                       letterSpacing="tight"
-                      className="notranslate"
                     >
                       Thread Travels
                     </Text>
@@ -171,7 +172,6 @@ export const Navigation = React.memo(() => {
                       lineHeight="1"
                       letterSpacing="wide"
                       textTransform="uppercase"
-                      className="notranslate"
                     >
                       & Tours
                     </Text>
@@ -341,33 +341,32 @@ export const Navigation = React.memo(() => {
                       </MenuItem>
                     </MenuList>
                   </Menu>
+
+                  {/* Currency Selector */}
+                  <CurrencySelector size="sm" variant="outline" showLabel={false} />
+
+                  {/* Language Switcher */}
+                  <LanguageSwitcher 
+                    variant="dropdown" 
+                    showLabels={true}
+                    className="hidden md:flex"
+                  />
                 </HStack>
               ) : (
                 <HStack spacing={3} ml={4} display={{ base: 'none', md: 'flex' }}>
-                  {/* Login button temporarily hidden */}
-                  {/* <Button
-                    variant="ghost"
-                    size="md"
-                    px={6}
-                    py={3}
-                    borderRadius="2xl"
-                    fontWeight="semibold"
-                    fontSize="sm"
-                    as={Link}
-                    to="/login"
-                    _hover={{
-                      transform: 'scale(1.05)',
-                      boxShadow: 'md',
-                    }}
-                    transition="all 0.3s ease"
-                  >
-                    Login
-                  </Button> */}
+                  {/* Currency Selector */}
+                  <CurrencySelector size="sm" variant="outline" showLabel={false} />
+
+                  {/* Language Switcher */}
+                  <LanguageSwitcher 
+                    variant="dropdown" 
+                    showLabels={true}
+                    className="hidden md:flex"
+                  />
+
+                  {/* Book Now Button */}
                   <Button
                     bgGradient="linear(to-r, blue.600, indigo.600)"
-                    _hover={{
-                      bgGradient: 'linear(to-r, blue.700, indigo.700)',
-                    }}
                     color="white"
                     size="md"
                     px={8}
@@ -376,17 +375,20 @@ export const Navigation = React.memo(() => {
                     fontWeight="semibold"
                     fontSize="sm"
                     as={Link}
-                    to="/properties"
+                    to="/packages"
                     _hover={{
+                      bgGradient: 'linear(to-r, blue.700, indigo.700)',
                       transform: 'scale(1.05)',
                       boxShadow: 'xl',
                     }}
                     transition="all 0.3s ease"
                   >
-                    Book Now
+                    {t('ui.buttons.bookNow')}
                   </Button>
                 </HStack>
               )}
+              
+              {/* Mobile language switcher removed as requested */}
 
               {/* Mobile menu button */}
               <IconButton
@@ -401,7 +403,6 @@ export const Navigation = React.memo(() => {
                   transform: 'scale(1.05)',
                   boxShadow: 'md',
                 }}
-                transition="all 0.3s ease"
               />
             </HStack>
           </Flex>
@@ -500,6 +501,29 @@ export const Navigation = React.memo(() => {
 
               <Divider my={6} />
 
+              {/* Mobile Language Switcher */}
+              <VStack spacing={4} align="stretch">
+                <Text fontSize="lg" fontWeight="semibold" color="gray.700" px={2}>
+                  Currency
+                </Text>
+                <Box px={2}>
+                  <CurrencySelector size="md" variant="outline" showLabel={true} />
+                </Box>
+
+                <Text fontSize="lg" fontWeight="semibold" color="gray.700" px={2}>
+                  Language
+                </Text>
+                <Box px={2}>
+                  <LanguageSwitcher 
+                    variant="buttons" 
+                    showLabels={true}
+                    className="w-full"
+                  />
+                </Box>
+              </VStack>
+
+              <Divider my={6} />
+
               {/* Mobile User Actions */}
               {isAuthenticated ? (
                 <VStack spacing={4} align="stretch">
@@ -573,7 +597,7 @@ export const Navigation = React.memo(() => {
                     borderRadius="xl"
                     fontWeight="semibold"
                     as={Link}
-                    to="/properties"
+                    to="/packages"
                     onClick={onClose}
                   >
                     Book Now

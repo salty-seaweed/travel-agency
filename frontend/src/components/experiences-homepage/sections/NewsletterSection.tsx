@@ -30,7 +30,7 @@ export const ExperiencesNewsletterSection: React.FC = () => {
 
   const handleSubscribe = () => {
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      toast({ title: 'Valid email required', status: 'warning', duration: 3000, isClosable: true });
+      toast({ title: t('newsletter.valid', 'Valid email required'), status: 'warning', duration: 3000, isClosable: true });
       return;
     }
 
@@ -39,7 +39,7 @@ export const ExperiencesNewsletterSection: React.FC = () => {
     if (!subscribers.includes(email)) subscribers.push(email);
     localStorage.setItem('newsletter_subscribers', JSON.stringify(subscribers));
 
-    toast({ title: 'Subscribed!', description: 'We\'ll keep you posted with Maldives deals.', status: 'success', duration: 3000, isClosable: true });
+    toast({ title: t('newsletter.subscribed', 'Subscribed!'), description: t('newsletter.desc', "We'll keep you posted with Maldives deals."), status: 'success', duration: 3000, isClosable: true });
     setEmail('');
   };
 
@@ -50,22 +50,22 @@ export const ExperiencesNewsletterSection: React.FC = () => {
           <VStack spacing={4}>
             <Icon as={GiftIcon} className="w-12 h-12 text-white" />
             <Heading size="xl" color={textColor} fontWeight="bold" fontSize={{ base: '2xl', md: '3xl' }}>
-              Maldives Deals & Insider Tips
+              {t('newsletter.title', 'Maldives Deals & Insider Tips')}
             </Heading>
             <Text fontSize="lg" color={mutedTextColor} maxW="2xl" lineHeight="1.6">
-              Get exclusive offers on Maldives stays and experiences—straight to your inbox.
+              {t('newsletter.subtitle', 'Get exclusive offers on Maldives stays and experiences—straight to your inbox.')}
             </Text>
           </VStack>
 
           <HStack spacing={4} w="full" maxW="md">
-            <Input placeholder="Enter your email address" value={email} onChange={(e) => setEmail(e.target.value)} size="lg" borderRadius="lg" bg="white" color="gray.800" _placeholder={{ color: 'gray.500' }} />
+            <Input placeholder={t('newsletter.placeholder', 'Enter your email address')} value={email} onChange={(e) => setEmail(e.target.value)} size="lg" borderRadius="lg" bg="white" color="gray.800" _placeholder={{ color: 'gray.500' }} />
             <Button onClick={handleSubscribe} size="lg" colorScheme="white" variant="solid" px={8} borderRadius="lg" rightIcon={<Icon as={ArrowRightIcon} className="w-5 h-5" />}>
-              Subscribe
+              {t('newsletter.subscribe', 'Subscribe')}
             </Button>
           </HStack>
 
           <Text fontSize="sm" color={mutedTextColor}>
-            We respect your privacy. Unsubscribe anytime.
+            {t('newsletter.privacy', 'We respect your privacy. Unsubscribe anytime.')}
           </Text>
         </VStack>
       </Container>

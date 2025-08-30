@@ -1,4 +1,6 @@
 // WhatsApp Booking Service
+import { config } from '../config';
+
 export interface WhatsAppBookingData {
   propertyName: string;
   propertyId: number;
@@ -12,6 +14,32 @@ export interface WhatsAppBookingData {
   pricePerNight: number;
   totalPrice?: number;
 }
+
+// WhatsApp number validation and formatting
+const validateAndFormatWhatsAppNumber = (phoneNumber: string): string => {
+  // Remove all non-digit characters
+  const cleanNumber = phoneNumber.replace(/\D/g, '');
+  
+  // Check if it's a valid Maldives number (960 + 7 digits)
+  if (cleanNumber.startsWith('960') && cleanNumber.length === 10) {
+    return cleanNumber;
+  }
+  
+  // Check if it's a valid international number (country code + number)
+  if (cleanNumber.length >= 10 && cleanNumber.length <= 15) {
+    return cleanNumber;
+  }
+  
+  // If invalid, return the default number
+  console.warn(`Invalid WhatsApp number format: ${phoneNumber}. Using default number.`);
+  return '9607441097'; // Default Maldives number
+};
+
+// Get the configured WhatsApp number
+const getWhatsAppNumber = (): string => {
+  const configuredNumber = config.whatsappNumber;
+  return validateAndFormatWhatsAppNumber(configuredNumber);
+};
 
 export const whatsappBooking = {
   // Generate WhatsApp message for property booking
@@ -59,11 +87,21 @@ Please let me know if this package is available and help me with the booking pro
   },
 
   // Open WhatsApp with pre-filled message
-  openWhatsApp: (message: string, phoneNumber: string = '+9601234567'): void => {
-    const cleanPhone = phoneNumber.replace(/\D/g, '');
-    const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodedMessage}`;
-    window.open(whatsappUrl, '_blank');
+  openWhatsApp: (message: string, phoneNumber?: string): void => {
+    try {
+      const number = phoneNumber ? validateAndFormatWhatsAppNumber(phoneNumber) : getWhatsAppNumber();
+      const encodedMessage = encodeURIComponent(message);
+      const whatsappUrl = `https://wa.me/${number}?text=${encodedMessage}`;
+      
+      // Log the URL for debugging (remove in production)
+      console.log('Opening WhatsApp URL:', whatsappUrl);
+      
+      window.open(whatsappUrl, '_blank');
+    } catch (error) {
+      console.error('Error opening WhatsApp:', error);
+      // Fallback: show error message to user
+      alert('Unable to open WhatsApp. Please contact us directly at +960 744 1097');
+    }
   },
 
   // Direct WhatsApp booking for property
@@ -92,5 +130,31 @@ Please help me with availability and booking process. Thank you!`;
 Please help me with availability and booking process. Thank you!`;
     
     whatsappBooking.openWhatsApp(message, phoneNumber);
+  },
+
+  // Get WhatsApp URL for direct use
+  getWhatsAppUrl: (message: string, phoneNumber?: string): string => {
+    const number = phoneNumber ? validateAndFormatWhatsAppNumber(phoneNumber) : getWhatsAppNumber();
+    const encodedMessage = encodeURIComponent(message);
+    return `https://wa.me/${number}?text=${encodedMessage}`;
+  },
+
+  // Get the current WhatsApp number
+  getWhatsAppNumber: (): string => {
+    return getWhatsAppNumber();
+  },
+
+  // Test WhatsApp number validity
+  testWhatsAppNumber: async (phoneNumber?: string): Promise<boolean> => {
+    const number = phoneNumber ? validateAndFormatWhatsAppNumber(phoneNumber) : getWhatsAppNumber();
+    const testUrl = `https://wa.me/${number}`;
+    
+    try {
+      const response = await fetch(testUrl, { method: 'HEAD' });
+      return response.ok;
+    } catch (error) {
+      console.error('Error testing WhatsApp number:', error);
+      return false;
+    }
   }
 }; 

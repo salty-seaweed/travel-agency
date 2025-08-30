@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.http import HttpResponse
 from django.db import models
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -17,11 +18,13 @@ from .models import (
     PackageActivity, PackageDestination, TransferType, AtollTransfer, ResortTransfer, TransferFAQ,
     TransferContactMethod, TransferBookingStep, TransferBenefit, TransferPricingFactor, TransferContent, FerrySchedule,
     HomepageHero, HomepageFeature, HomepageTestimonial, HomepageStatistic, 
-    HomepageCTASection, HomepageSettings, HomepageContent, HomepageImage
+    HomepageCTASection, HomepageSettings, HomepageContent, HomepageImage, PageHero,
+    Language, Translation, TranslationKey, CulturalContent, RegionalSettings, LocalizedPage, LocalizedFAQ,
+    AboutPageContent, AboutPageValue, AboutPageStatistic, FeaturedDestination
 )
 from .serializers import (
     PropertyTypeSerializer, AmenitySerializer, LocationSerializer, DestinationSerializer, ExperienceSerializer,
-    PropertyImageSerializer, PackageImageSerializer, PropertySerializer, PackageSerializer, 
+    PropertyImageSerializer, PackageImageSerializer, PropertySerializer, PackageSerializer, PackageSerializerI18n,
     ReviewSerializer, BookingSerializer, BookingCreateSerializer, 
     BookingStatusUpdateSerializer, AvailabilitySerializer, CustomerSerializer,
     PageSerializer, PageBlockSerializer, MediaAssetSerializer, MenuSerializer, MenuItemSerializer,
@@ -29,15 +32,20 @@ from .serializers import (
     PackageItinerarySerializer, PackageInclusionSerializer, PackageActivitySerializer, PackageDestinationSerializer,
     TransferTypeSerializer, AtollTransferSerializer, ResortTransferSerializer, TransferFAQSerializer,
     TransferContactMethodSerializer, TransferBookingStepSerializer, TransferBenefitSerializer,
-    TransferPricingFactorSerializer, TransferContentSerializer, FerryScheduleSerializer,
+    TransferPricingFactorSerializer, TransferContentSerializer, FerryScheduleSerializer, PageHeroSerializer,
     HomepageHeroSerializer, HomepageFeatureSerializer, HomepageTestimonialSerializer,
     HomepageStatisticSerializer, HomepageCTASectionSerializer, HomepageSettingsSerializer,
-    HomepageContentSerializer, HomepageDataSerializer, HomepageImageSerializer
+    HomepageContentSerializer, HomepageDataSerializer, HomepageImageSerializer,
+    LanguageSerializer, TranslationSerializer, TranslationKeySerializer, CulturalContentSerializer,
+    RegionalSettingsSerializer, LocalizedPageSerializer, LocalizedFAQSerializer,
+    TranslationBulkSerializer, TranslationExportSerializer, TranslationImportSerializer,
+    LanguageDetectionSerializer, AboutPageContentSerializer, AboutPageValueSerializer, 
+    AboutPageStatisticSerializer, AboutPageDataSerializer, FeaturedDestinationSerializer
 )
 from rest_framework.decorators import permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.db.models import Count, Avg
+from django.db.models import Count, Avg, Sum
 from .models import Property, Package, Review, PropertyType, Amenity, Location, Customer
 from .serializers import (
     PropertyTypeSerializer, 
@@ -68,7 +76,6 @@ def analytics(request):
     """Get analytics data for the admin dashboard"""
     try:
         # Basic counts
-        total_properties = Property.objects.count()
         total_packages = Package.objects.count()
         total_reviews = Review.objects.count()
         total_customers = Customer.objects.count()
@@ -80,21 +87,50 @@ def analytics(request):
         recent_reviews = Review.objects.select_related('property').order_by('-created_at')[:5]
         reviews_data = ReviewSerializer(recent_reviews, many=True).data
         
-        # Property types distribution
-        property_types = PropertyType.objects.annotate(count=Count('properties'))
-        property_types_data = [
-            {'name': pt.name, 'count': pt.count} 
-            for pt in property_types
+        # Package categories distribution
+        package_categories = Package.objects.values('category').annotate(count=Count('id'))
+        package_categories_data = [
+            {'category': pc['category'], 'count': pc['count']} 
+            for pc in package_categories
+        ]
+        
+        # Top packages by bookings (mock data for now)
+        top_packages = Package.objects.all()[:5]
+        top_packages_data = [
+            {
+                'id': pkg.id,
+                'name': pkg.name,
+                'bookings': 0,  # Mock data
+                'revenue': 0,   # Mock data
+                'rating': pkg.rating or 4.5
+            }
+            for pkg in top_packages
         ]
         
         analytics_data = {
-            'total_properties': total_properties,
-            'total_packages': total_packages,
-            'total_reviews': total_reviews,
-            'total_customers': total_customers,
-            'average_rating': round(avg_rating, 1),
-            'recent_reviews': reviews_data,
-            'property_types': property_types_data,
+            'totalPackages': total_packages,
+            'totalBookings': 0,  # Mock data for now
+            'totalRevenue': 0,   # Mock data for now
+            'totalCustomers': total_customers,
+            'averageRating': round(avg_rating, 1),
+            'totalReviews': total_reviews,
+            'recentReviews': reviews_data,
+            'packageCategories': package_categories_data,
+            'topPackages': top_packages_data,
+            'bookingStatuses': {
+                'pending': 0,
+                'confirmed': 0,
+                'completed': 0,
+                'cancelled': 0
+            },
+            'monthlyBookings': [
+                {'month': 'Jan', 'bookings': 0, 'revenue': 0},
+                {'month': 'Feb', 'bookings': 0, 'revenue': 0},
+                {'month': 'Mar', 'bookings': 0, 'revenue': 0},
+                {'month': 'Apr', 'bookings': 0, 'revenue': 0},
+                {'month': 'May', 'bookings': 0, 'revenue': 0},
+                {'month': 'Jun', 'bookings': 0, 'revenue': 0},
+            ]
         }
         
         return Response(analytics_data)
@@ -210,11 +246,63 @@ class PropertyViewSet(viewsets.ModelViewSet):
 
 class PackageViewSet(viewsets.ModelViewSet):
     queryset = Package.objects.all()
-    serializer_class = PackageSerializer
+    serializer_class = PackageSerializerI18n
+
+    def list(self, request, *args, **kwargs):
+        """Override list to ensure nested data is returned with proper context"""
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True, context={'request': request})
+        return Response(serializer.data)
+
+    def _normalize_package_payload(self, data):
+        # Normalize destinations: map frontend 'destinations' with nested location to destination_data with location_id
+        try:
+            destinations = data.get('destinations') or data.get('destination_data') or []
+            normalized = []
+            from .models import Location
+            for dest in destinations:
+                loc_obj = dest.get('location') or dest.get('destination') or dest.get('location_obj')
+                location_id = dest.get('location_id')
+                if not location_id and isinstance(loc_obj, dict):
+                    island = loc_obj.get('island')
+                    atoll = loc_obj.get('atoll', '')
+                    latitude = loc_obj.get('latitude') or loc_obj.get('lat')
+                    longitude = loc_obj.get('longitude') or loc_obj.get('lng')
+                    if island and latitude is not None and longitude is not None:
+                        location, _ = Location.objects.get_or_create(
+                            island=island,
+                            atoll=atoll,
+                            defaults={'latitude': latitude, 'longitude': longitude}
+                        )
+                    elif island:
+                        location, _ = Location.objects.get_or_create(
+                            island=island,
+                            atoll=atoll,
+                            defaults={'latitude': 0.0, 'longitude': 0.0}
+                        )
+                    else:
+                        location = None
+                    if location:
+                        location_id = location.id
+                if location_id:
+                    normalized.append({
+                        'location_id': location_id,
+                        'duration': dest.get('duration', 1),
+                        'description': dest.get('description', ''),
+                        'highlights': dest.get('highlights', []) or [],
+                        'activities': dest.get('activities', []) or [],
+                    })
+            if normalized:
+                data['destination_data'] = normalized
+        except Exception:
+            pass
+        return data
 
     def create(self, request, *args, **kwargs):
-        images_data = request.data.pop('images', [])
-        serializer = self.get_serializer(data=request.data)
+        data = request.data.copy()
+        data = self._normalize_package_payload(data)
+        images_data = data.pop('images', [])
+        serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         package_obj = serializer.save()
         
@@ -234,10 +322,12 @@ class PackageViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def update(self, request, *args, **kwargs):
-        images_data = request.data.pop('images', [])
+        data = request.data.copy()
+        data = self._normalize_package_payload(data)
+        images_data = data.pop('images', [])
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer = self.get_serializer(instance, data=data, partial=partial)
         serializer.is_valid(raise_exception=True)
         package_obj = serializer.save()
         
@@ -1397,6 +1487,7 @@ class HomepageManagementViewSet(viewsets.ViewSet):
             statistics = HomepageStatistic.objects.filter(is_active=True).order_by('order')
             cta_section = HomepageCTASection.objects.filter(is_active=True).first()
             settings = HomepageSettings.get_settings()
+            page_heroes = {h.page_key: h for h in PageHero.objects.filter(is_active=True)}
             
             data = {
                 'hero': HomepageHeroSerializer(hero, context={'request': request}).data if hero else None,
@@ -1405,6 +1496,7 @@ class HomepageManagementViewSet(viewsets.ViewSet):
                 'statistics': HomepageStatisticSerializer(statistics, many=True).data,
                 'cta_section': HomepageCTASectionSerializer(cta_section, context={'request': request}).data if cta_section else None,
                 'settings': HomepageSettingsSerializer(settings).data,
+                'page_heroes': {k: PageHeroSerializer(v, context={'request': request}).data for k, v in page_heroes.items()}
             }
             
             return Response(data)
@@ -1421,6 +1513,7 @@ class HomepageManagementViewSet(viewsets.ViewSet):
             statistics = HomepageStatistic.objects.filter(is_active=True).order_by('order')
             cta_section = HomepageCTASection.objects.filter(is_active=True).first()
             settings = HomepageSettings.get_settings()
+            page_heroes = {h.page_key: h for h in PageHero.objects.filter(is_active=True)}
             
             data = {
                 'hero': HomepageHeroSerializer(hero, context={'request': request}).data if hero else None,
@@ -1429,6 +1522,7 @@ class HomepageManagementViewSet(viewsets.ViewSet):
                 'statistics': HomepageStatisticSerializer(statistics, many=True).data,
                 'cta_section': HomepageCTASectionSerializer(cta_section, context={'request': request}).data if cta_section else None,
                 'settings': HomepageSettingsSerializer(settings).data,
+                'page_heroes': {k: PageHeroSerializer(v, context={'request': request}).data for k, v in page_heroes.items()}
             }
             
             response = Response(data)
@@ -1440,6 +1534,26 @@ class HomepageManagementViewSet(viewsets.ViewSet):
             return Response({'error': str(e)}, status=500)
     
 
+
+class PageHeroViewSet(viewsets.ModelViewSet):
+    queryset = PageHero.objects.all()
+    serializer_class = PageHeroSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:  # public read
+            return [AllowAny()]
+        return super().get_permissions()
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        page_key = self.request.query_params.get('page_key')
+        if page_key:
+            qs = qs.filter(page_key=page_key)
+        is_active = self.request.query_params.get('active')
+        if is_active == 'true':
+            qs = qs.filter(is_active=True)
+        return qs
     
     @action(detail=False, methods=['post'])
     def bulk_update(self, request):
@@ -1611,3 +1725,845 @@ def page_by_slug(request, slug):
         return Response(serializer.data)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# Internationalization Views
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def languages(request):
+    """Get all supported languages"""
+    languages = Language.objects.filter(is_active=True)
+    serializer = LanguageSerializer(languages, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def language_detail(request, code):
+    """Get specific language details"""
+    try:
+        language = Language.objects.get(code=code, is_active=True)
+        serializer = LanguageSerializer(language)
+        return Response(serializer.data)
+    except Language.DoesNotExist:
+        return Response({'error': 'Language not found'}, status=404)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def translations(request):
+    """Get translations for a specific language"""
+    language_code = request.GET.get('lang', 'en')
+    context = request.GET.get('context', '')
+    
+    try:
+        language = Language.objects.get(code=language_code, is_active=True)
+    except Language.DoesNotExist:
+        language = Language.objects.filter(is_default=True).first()
+    
+    if not language:
+        return Response({'error': 'No default language found'}, status=404)
+    
+    # Get translations
+    translations = Translation.objects.filter(
+        language=language,
+        is_approved=True
+    ).select_related('key')
+    
+    if context:
+        translations = translations.filter(key__context=context)
+    
+    # Format as nested dictionary
+    translation_dict = {}
+    for translation in translations:
+        keys = translation.key.key.split('.')
+        current = translation_dict
+        for key in keys[:-1]:
+            if key not in current:
+                current[key] = {}
+            current = current[key]
+        current[keys[-1]] = translation.value
+    
+    return Response(translation_dict)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def translation_keys(request):
+    """Get all translation keys"""
+    keys = TranslationKey.objects.filter(is_active=True)
+    serializer = TranslationKeySerializer(keys, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['POST'])
+def create_translation(request):
+    """Create a new translation"""
+    serializer = TranslationSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save(created_by=request.user)
+        return Response(serializer.data, status=201)
+    return Response(serializer.errors, status=400)
+
+
+@api_view(['PUT'])
+def update_translation(request, pk):
+    """Update a translation"""
+    try:
+        translation = Translation.objects.get(pk=pk)
+        serializer = TranslationSerializer(translation, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)
+    except Translation.DoesNotExist:
+        return Response({'error': 'Translation not found'}, status=404)
+
+
+@api_view(['POST'])
+def bulk_translations(request):
+    """Bulk create/update translations"""
+    serializer = TranslationBulkSerializer(data=request.data)
+    if serializer.is_valid():
+        language_code = serializer.validated_data['language_code']
+        translations_data = serializer.validated_data['translations']
+        
+        try:
+            language = Language.objects.get(code=language_code)
+        except Language.DoesNotExist:
+            return Response({'error': 'Language not found'}, status=404)
+        
+        created_translations = []
+        for key, value in translations_data.items():
+            translation_key, created = TranslationKey.objects.get_or_create(
+                key=key,
+                defaults={'description': f'Auto-generated key: {key}'}
+            )
+            
+            translation, created = Translation.objects.get_or_create(
+                key=translation_key,
+                language=language,
+                defaults={'value': value, 'created_by': request.user}
+            )
+            
+            if not created:
+                translation.value = value
+                translation.save()
+            
+            created_translations.append(translation)
+        
+        serializer = TranslationSerializer(created_translations, many=True)
+        return Response(serializer.data, status=201)
+    
+    return Response(serializer.errors, status=400)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def cultural_content(request):
+    """Get cultural content for a specific language"""
+    language_code = request.GET.get('lang', 'en')
+    content_type = request.GET.get('type', '')
+    
+    try:
+        language = Language.objects.get(code=language_code, is_active=True)
+    except Language.DoesNotExist:
+        language = Language.objects.filter(is_default=True).first()
+    
+    if not language:
+        return Response({'error': 'No default language found'}, status=404)
+    
+    content = CulturalContent.objects.filter(
+        language=language,
+        is_active=True
+    )
+    
+    if content_type:
+        content = content.filter(content_type=content_type)
+    
+    serializer = CulturalContentSerializer(content, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def regional_settings(request, language_code):
+    """Get regional settings for a specific language"""
+    try:
+        settings = RegionalSettings.objects.get(
+            language__code=language_code,
+            is_active=True
+        )
+        serializer = RegionalSettingsSerializer(settings)
+        return Response(serializer.data)
+    except RegionalSettings.DoesNotExist:
+        # Return default settings
+        default_settings = {
+            'currency_code': 'USD',
+            'currency_symbol': '$',
+            'date_format': 'MM/DD/YYYY',
+            'time_format': '12',
+            'timezone': 'UTC'
+        }
+        return Response(default_settings)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def localized_page(request, page_type, language_code):
+    """Get localized page content"""
+    try:
+        page = LocalizedPage.objects.get(
+            page_type=page_type,
+            language__code=language_code,
+            is_active=True
+        )
+        serializer = LocalizedPageSerializer(page)
+        return Response(serializer.data)
+    except LocalizedPage.DoesNotExist:
+        # Try to get default language version
+        try:
+            default_language = Language.objects.filter(is_default=True).first()
+            if default_language:
+                page = LocalizedPage.objects.get(
+                    page_type=page_type,
+                    language=default_language,
+                    is_active=True
+                )
+                serializer = LocalizedPageSerializer(page)
+                return Response(serializer.data)
+        except LocalizedPage.DoesNotExist:
+            pass
+        
+        return Response({'error': 'Page not found'}, status=404)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def localized_faqs(request):
+    """Get localized FAQs"""
+    language_code = request.GET.get('lang', 'en')
+    category = request.GET.get('category', '')
+    
+    try:
+        language = Language.objects.get(code=language_code, is_active=True)
+    except Language.DoesNotExist:
+        language = Language.objects.filter(is_default=True).first()
+    
+    if not language:
+        return Response({'error': 'No default language found'}, status=404)
+    
+    faqs = LocalizedFAQ.objects.filter(
+        language=language,
+        is_active=True
+    )
+    
+    if category:
+        faqs = faqs.filter(category=category)
+    
+    serializer = LocalizedFAQSerializer(faqs, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def translation_stats(request):
+    """Get translation statistics"""
+    language_code = request.GET.get('lang', 'en')
+    
+    try:
+        language = Language.objects.get(code=language_code)
+    except Language.DoesNotExist:
+        return Response({'error': 'Language not found'}, status=404)
+    
+    total_keys = TranslationKey.objects.filter(is_active=True).count()
+    translated_keys = Translation.objects.filter(language=language).count()
+    approved_keys = Translation.objects.filter(language=language, is_approved=True).count()
+    pending_keys = translated_keys - approved_keys
+    completion_percentage = (translated_keys / total_keys * 100) if total_keys > 0 else 0
+    
+    stats = {
+        'language_code': language_code,
+        'total_keys': total_keys,
+        'translated_keys': translated_keys,
+        'approved_keys': approved_keys,
+        'pending_keys': pending_keys,
+        'completion_percentage': round(completion_percentage, 2),
+        'last_updated': Translation.objects.filter(language=language).aggregate(
+            last_updated=models.Max('updated_at')
+        )['last_updated']
+    }
+    
+    return Response(stats)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def detect_language(request):
+    """Detect language from text"""
+    serializer = LanguageDetectionSerializer(data=request.data)
+    if serializer.is_valid():
+        text = serializer.validated_data['text']
+        confidence_threshold = serializer.validated_data['confidence_threshold']
+        
+        # Simple language detection (you can integrate with a proper service)
+        # This is a basic implementation - consider using langdetect or similar
+        detected_language = 'en'  # Default fallback
+        
+        # Simple heuristics for common languages
+        if any(char in text for char in 'аеёиоуыэюя'):
+            detected_language = 'ru'
+        elif any(char in text for char in '的是一在有人我他她它'):
+            detected_language = 'zh'
+        
+        return Response({
+            'detected_language': detected_language,
+            'confidence': 0.8,
+            'text_length': len(text)
+        })
+    
+    return Response(serializer.errors, status=400)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def export_translations(request):
+    """Export translations for a language"""
+    serializer = TranslationExportSerializer(data=request.GET)
+    if serializer.is_valid():
+        language_code = serializer.validated_data['language_code']
+        export_format = serializer.validated_data['format']
+        
+        try:
+            language = Language.objects.get(code=language_code)
+        except Language.DoesNotExist:
+            return Response({'error': 'Language not found'}, status=404)
+        
+        translations = Translation.objects.filter(
+            language=language,
+            is_approved=True
+        ).select_related('key')
+        
+        # Format translations for export
+        export_data = {}
+        for translation in translations:
+            export_data[translation.key.key] = translation.value
+        
+        if export_format == 'json':
+            return Response(export_data)
+        else:
+            # For CSV/XLSX, you would need to implement file generation
+            return Response({'error': 'Format not yet implemented'}, status=501)
+    
+    return Response(serializer.errors, status=400)
+
+
+@api_view(['POST'])
+def import_translations(request):
+    """Import translations from file"""
+    serializer = TranslationImportSerializer(data=request.data)
+    if serializer.is_valid():
+        language_code = serializer.validated_data['language_code']
+        file = serializer.validated_data['file']
+        import_format = serializer.validated_data['format']
+        overwrite = serializer.validated_data['overwrite']
+        
+        try:
+            language = Language.objects.get(code=language_code)
+        except Language.DoesNotExist:
+            return Response({'error': 'Language not found'}, status=404)
+        
+        # Parse file based on format
+        if import_format == 'json':
+            import json
+            try:
+                translations_data = json.load(file)
+            except json.JSONDecodeError:
+                return Response({'error': 'Invalid JSON file'}, status=400)
+        else:
+            return Response({'error': 'Format not yet implemented'}, status=501)
+        
+        # Process translations
+        imported_count = 0
+        for key, value in translations_data.items():
+            translation_key, created = TranslationKey.objects.get_or_create(
+                key=key,
+                defaults={'description': f'Imported key: {key}'}
+            )
+            
+            if overwrite:
+                translation, created = Translation.objects.get_or_create(
+                    key=translation_key,
+                    language=language,
+                    defaults={'value': value, 'created_by': request.user}
+                )
+                if not created:
+                    translation.value = value
+                    translation.save()
+            else:
+                translation, created = Translation.objects.get_or_create(
+                    key=translation_key,
+                    language=language,
+                    defaults={'value': value, 'created_by': request.user}
+                )
+            
+            if created:
+                imported_count += 1
+        
+        return Response({
+            'message': f'Successfully imported {imported_count} translations',
+            'imported_count': imported_count
+        })
+    
+    return Response(serializer.errors, status=400)
+
+
+# Enhanced existing views with internationalization support
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def destinations(request):
+    """Get destinations with language support"""
+    language_code = request.GET.get('lang', 'en')
+    
+    try:
+        language = Language.objects.get(code=language_code, is_active=True)
+    except Language.DoesNotExist:
+        language = Language.objects.filter(is_default=True).first()
+    
+    destinations = Destination.objects.filter(is_active=True)
+    
+    # If language is specified, filter by language or show base content
+    if language:
+        # Get destinations with this language or base destinations
+        destinations = destinations.filter(
+            models.Q(language=language) | models.Q(language__isnull=True)
+        )
+    
+    serializer = DestinationSerializer(destinations, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['GET', 'POST'])
+@permission_classes([AllowAny])
+def packages(request):
+    """Get packages with language support, and accept POST for create to match frontend."""
+    if request.method == 'GET':
+        language_code = request.GET.get('lang', 'en')
+        try:
+            language = Language.objects.get(code=language_code, is_active=True)
+        except Language.DoesNotExist:
+            language = Language.objects.filter(is_default=True).first()
+        packages_qs = Package.objects.filter(is_active=True)
+        if language:
+            packages_qs = packages_qs.filter(
+                models.Q(language=language) | models.Q(language__isnull=True)
+            )
+        serializer = PackageSerializerI18n(packages_qs, many=True, context={'request': request})
+        return Response(serializer.data)
+
+    # POST: normalize and create package with nested data and images
+    data = request.data.copy()
+    viewset = PackageViewSet()
+    viewset.request = request
+    data = viewset._normalize_package_payload(data)
+    images_data = data.pop('images', [])
+    serializer = PackageSerializerI18n(data=data)
+    serializer.is_valid(raise_exception=True)
+    package_obj = serializer.save()
+
+    for image_data in images_data:
+        image_path = image_data.get('image')
+        if isinstance(image_path, str) and image_path.startswith(settings.MEDIA_URL):
+            image_path = image_path[len(settings.MEDIA_URL):]
+        PackageImage.objects.create(
+            package=package_obj,
+            image=image_path,
+            caption=image_data.get('caption', ''),
+            order=image_data.get('order', 0),
+            is_featured=image_data.get('is_featured', False)
+        )
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def properties(request):
+    """Get properties with language support"""
+    language_code = request.GET.get('lang', 'en')
+    
+    try:
+        language = Language.objects.get(code=language_code, is_active=True)
+    except Language.DoesNotExist:
+        language = Language.objects.filter(is_default=True).first()
+    
+    properties = Property.objects.filter(is_active=True)
+    
+    # If language is specified, filter by language or show base content
+    if language:
+        properties = properties.filter(
+            models.Q(language=language) | models.Q(language__isnull=True)
+        )
+    
+    serializer = PropertySerializer(properties, many=True)
+    return Response(serializer.data)
+
+class PackageImageViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing package images separately"""
+    queryset = PackageImage.objects.all()
+    serializer_class = PackageImageSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        """Filter by package if package_id is provided"""
+        queryset = PackageImage.objects.all()
+        package_id = self.request.query_params.get('package_id', None)
+        if package_id is not None:
+            queryset = queryset.filter(package_id=package_id)
+        return queryset.order_by('order', 'id')
+    
+    def create(self, request, *args, **kwargs):
+        """Override create to add debugging and ensure proper context"""
+        try:
+            print(f"PackageImageViewSet.create called with data: {request.data}")
+            print(f"Files: {request.FILES}")
+            
+            # Ensure serializer has request context for image_url generation
+            serializer = self.get_serializer(data=request.data, context={'request': request})
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        except Exception as e:
+            print(f"Error in PackageImageViewSet.create: {str(e)}")
+            raise
+    
+    def perform_create(self, serializer):
+        """Create image with proper file handling"""
+        try:
+            image_data = self.request.data
+            package_id = image_data.get('package_id')
+            
+            if not package_id:
+                raise serializers.ValidationError("package_id is required")
+            
+            # Check if image file is provided
+            image_file = self.request.FILES.get('image')
+            if not image_file:
+                raise serializers.ValidationError("image file is required")
+            
+            try:
+                package = Package.objects.get(id=package_id)
+            except Package.DoesNotExist:
+                raise serializers.ValidationError("Package not found")
+            
+            # Save to package_images directory
+            file_extension = os.path.splitext(image_file.name)[1]
+            unique_filename = f"{uuid.uuid4()}{file_extension}"
+            
+            upload_dir = os.path.join(settings.MEDIA_ROOT, 'package_images')
+            os.makedirs(upload_dir, exist_ok=True)
+            
+            file_path = os.path.join(upload_dir, unique_filename)
+            with open(file_path, 'wb+') as destination:
+                for chunk in image_file.chunks():
+                    destination.write(chunk)
+            
+            image_path = f"package_images/{unique_filename}"
+            
+            # Convert string boolean values to actual booleans
+            is_featured = image_data.get('is_featured', False)
+            if isinstance(is_featured, str):
+                is_featured = is_featured.lower() == 'true'
+            
+            serializer.save(
+                package=package,
+                image=image_path,
+                caption=image_data.get('caption', ''),
+                order=int(image_data.get('order', 0)),
+                is_featured=is_featured
+            )
+        except Exception as e:
+            print(f"Error in PackageImageViewSet.perform_create: {str(e)}")
+            raise
+    
+    def perform_update(self, serializer):
+        """Update image with file handling"""
+        image_data = self.request.data
+        instance = self.get_object()
+        
+        # Handle new image file upload
+        image_file = self.request.FILES.get('image')
+        if image_file:
+            # Delete old file if it exists
+            if instance.image:
+                old_file_path = os.path.join(settings.MEDIA_ROOT, str(instance.image))
+                if os.path.exists(old_file_path):
+                    os.remove(old_file_path)
+            
+            # Save new file
+            file_extension = os.path.splitext(image_file.name)[1]
+            unique_filename = f"{uuid.uuid4()}{file_extension}"
+            
+            upload_dir = os.path.join(settings.MEDIA_ROOT, 'package_images')
+            os.makedirs(upload_dir, exist_ok=True)
+            
+            file_path = os.path.join(upload_dir, unique_filename)
+            with open(file_path, 'wb+') as destination:
+                for chunk in image_file.chunks():
+                    destination.write(chunk)
+            
+            image_path = f"package_images/{unique_filename}"
+            serializer.save(image=image_path)
+        else:
+            serializer.save()
+    
+    def perform_destroy(self, instance):
+        """Delete image file when deleting record"""
+        if instance.image:
+            file_path = os.path.join(settings.MEDIA_ROOT, str(instance.image))
+            if os.path.exists(file_path):
+                os.remove(file_path)
+        instance.delete()
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def transportation_export(request):
+    """Export all transportation data as JSON"""
+    try:
+        import json
+        from django.core.serializers.json import DjangoJSONEncoder
+        
+        # Start with a simple test
+        data = {
+            'message': 'Transportation export endpoint is working',
+            'timestamp': timezone.now().isoformat(),
+            'user': str(request.user)
+        }
+        
+        # Try to add transportation data
+        try:
+            # Only add data that exists
+            if TransferType.objects.exists():
+                data['transfer_types'] = list(TransferType.objects.all().values())
+            else:
+                data['transfer_types'] = []
+                
+            if AtollTransfer.objects.exists():
+                data['atoll_transfers'] = list(AtollTransfer.objects.all().values())
+            else:
+                data['atoll_transfers'] = []
+                
+            if ResortTransfer.objects.exists():
+                data['resort_transfers'] = list(ResortTransfer.objects.all().values())
+            else:
+                data['resort_transfers'] = []
+                
+            if TransferFAQ.objects.exists():
+                data['transfer_faqs'] = list(TransferFAQ.objects.all().values())
+            else:
+                data['transfer_faqs'] = []
+                
+            if TransferContactMethod.objects.exists():
+                data['transfer_contact_methods'] = list(TransferContactMethod.objects.all().values())
+            else:
+                data['transfer_contact_methods'] = []
+                
+            if TransferBookingStep.objects.exists():
+                data['transfer_booking_steps'] = list(TransferBookingStep.objects.all().values())
+            else:
+                data['transfer_booking_steps'] = []
+                
+            if TransferBenefit.objects.exists():
+                data['transfer_benefits'] = list(TransferBenefit.objects.all().values())
+            else:
+                data['transfer_benefits'] = []
+                
+            if TransferPricingFactor.objects.exists():
+                data['transfer_pricing_factors'] = list(TransferPricingFactor.objects.all().values())
+            else:
+                data['transfer_pricing_factors'] = []
+                
+            if TransferContent.objects.exists():
+                data['transfer_content'] = list(TransferContent.objects.all().values())
+            else:
+                data['transfer_content'] = []
+                
+            if FerrySchedule.objects.exists():
+                data['ferry_schedules'] = list(FerrySchedule.objects.all().values())
+            else:
+                data['ferry_schedules'] = []
+                
+        except Exception as model_error:
+            data['model_error'] = str(model_error)
+            print(f"Model access error: {model_error}")
+        
+        response = HttpResponse(
+            json.dumps(data, cls=DjangoJSONEncoder, indent=2),
+            content_type='application/json'
+        )
+        response['Content-Disposition'] = f'attachment; filename="transportation-data-{timezone.now().strftime("%Y%m%d")}.json"'
+        
+        return response
+        
+    except Exception as e:
+        print(f"Transportation export error: {e}")
+        import traceback
+        traceback.print_exc()
+        return Response({'error': str(e), 'details': traceback.format_exc()}, status=500)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def transportation_import(request):
+    """Import transportation data from JSON file"""
+    try:
+        if 'file' not in request.FILES:
+            return Response({'error': 'No file provided'}, status=400)
+        
+        file = request.FILES['file']
+        
+        if not file.name.endswith('.json'):
+            return Response({'error': 'File must be a JSON file'}, status=400)
+        
+        # Read and parse JSON data
+        try:
+            import json
+            data = json.loads(file.read().decode('utf-8'))
+        except json.JSONDecodeError:
+            return Response({'error': 'Invalid JSON file'}, status=400)
+        
+        imported_count = 0
+        
+        # Import each data type
+        model_mapping = {
+            'transfer_types': TransferType,
+            'atoll_transfers': AtollTransfer,
+            'resort_transfers': ResortTransfer,
+            'transfer_faqs': TransferFAQ,
+            'transfer_contact_methods': TransferContactMethod,
+            'transfer_booking_steps': TransferBookingStep,
+            'transfer_benefits': TransferBenefit,
+            'transfer_pricing_factors': TransferPricingFactor,
+            'transfer_content': TransferContent,
+            'ferry_schedules': FerrySchedule,
+        }
+        
+        # Use transaction to ensure data integrity
+        from django.db import transaction
+        
+        with transaction.atomic():
+            for data_type, model_class in model_mapping.items():
+                if data_type in data:
+                    # Clear existing data
+                    model_class.objects.all().delete()
+                    
+                    # Import new data
+                    for item_data in data[data_type]:
+                        # Remove id to let Django auto-assign
+                        item_data.pop('id', None)
+                        
+                        # Convert datetime strings back to datetime objects
+                        for field in ['created_at', 'updated_at']:
+                            if field in item_data and item_data[field]:
+                                from django.utils.dateparse import parse_datetime
+                                item_data[field] = parse_datetime(item_data[field])
+                        
+                        model_class.objects.create(**item_data)
+                        imported_count += 1
+        
+        return Response({
+            'message': 'Transportation data imported successfully',
+            'imported_count': imported_count
+        })
+        
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+
+
+# About Page Views
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def about_page_data(request):
+    """Get all About page data"""
+    try:
+        content_sections = AboutPageContent.objects.filter(is_active=True).order_by('order')
+        values = AboutPageValue.objects.filter(is_active=True).order_by('order')
+        statistics = AboutPageStatistic.objects.filter(is_active=True).order_by('order')
+        
+        data = {
+            'content_sections': AboutPageContentSerializer(content_sections, many=True, context={'request': request}).data,
+            'values': AboutPageValueSerializer(values, many=True).data,
+            'statistics': AboutPageStatisticSerializer(statistics, many=True).data,
+        }
+        
+        return Response(data)
+        
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+
+
+class AboutPageContentViewSet(viewsets.ModelViewSet):
+    """ViewSet for About page content sections"""
+    queryset = AboutPageContent.objects.all()
+    serializer_class = AboutPageContentSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        if self.action == 'list':
+            queryset = queryset.filter(is_active=True).order_by('order')
+        return queryset
+
+
+class AboutPageValueViewSet(viewsets.ModelViewSet):
+    """ViewSet for About page values"""
+    queryset = AboutPageValue.objects.all()
+    serializer_class = AboutPageValueSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        if self.action == 'list':
+            queryset = queryset.filter(is_active=True).order_by('order')
+        return queryset
+
+
+class AboutPageStatisticViewSet(viewsets.ModelViewSet):
+    """ViewSet for About page statistics"""
+    queryset = AboutPageStatistic.objects.all()
+    serializer_class = AboutPageStatisticSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        if self.action == 'list':
+            queryset = queryset.filter(is_active=True).order_by('order')
+        return queryset
+
+
+class FeaturedDestinationViewSet(viewsets.ModelViewSet):
+    """ViewSet for featured destinations"""
+    queryset = FeaturedDestination.objects.all()
+    serializer_class = FeaturedDestinationSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        if self.action == 'list':
+            queryset = queryset.filter(is_active=True).order_by('order')
+        return queryset
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def featured_destinations(request):
+    """Get featured destinations for homepage"""
+    try:
+        destinations = FeaturedDestination.objects.filter(is_active=True).order_by('order')[:4]
+        serializer = FeaturedDestinationSerializer(destinations, many=True, context={'request': request})
+        return Response(serializer.data)
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)

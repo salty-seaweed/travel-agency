@@ -69,6 +69,40 @@ async function refreshAccessToken(): Promise<boolean> {
   }
 }
 
+// Public (non-authenticated) request wrapper
+export async function apiPublicGet(path: string) {
+  const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+  const response = await fetch(`${API_BASE}/${cleanPath}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest',
+      'Accept': 'application/json',
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`Request failed: ${response.status} ${response.statusText}`);
+  }
+  return response.json();
+}
+
+export async function apiPublicPost(path: string, data: any) {
+  const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+  const response = await fetch(`${API_BASE}/${cleanPath}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest',
+      'Accept': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    throw new Error(`Request failed: ${response.status} ${response.statusText}`);
+  }
+  return response.json();
+}
+
 // Secure request wrapper
 async function secureRequest(
   url: string, 
@@ -118,12 +152,38 @@ async function secureRequest(
 
     // Handle other errors
     if (!response.ok) {
+      let errorMessage = `Request failed: ${response.status} ${response.statusText}`;
+      
+      // Try to get detailed error information from response body
+      try {
+        const errorData = await response.clone().json();
+        if (errorData && typeof errorData === 'object') {
+          if (errorData.detail) {
+            errorMessage = errorData.detail;
+          } else if (errorData.message) {
+            errorMessage = errorData.message;
+          } else if (errorData.error) {
+            errorMessage = errorData.error;
+          } else if (typeof errorData === 'object') {
+            // Handle validation errors
+            const validationErrors = Object.entries(errorData)
+              .map(([field, errors]) => `${field}: ${Array.isArray(errors) ? errors.join(', ') : errors}`)
+              .join('; ');
+            if (validationErrors) {
+              errorMessage = `Validation errors: ${validationErrors}`;
+            }
+          }
+        }
+      } catch (e) {
+        // If we can't parse the error response, use the default message
+      }
+      
       if (response.status === 403) {
         throw new Error('Access denied. You do not have permission to perform this action.');
       } else if (response.status >= 500) {
         throw new Error('Server error. Please try again later.');
       } else {
-        throw new Error(`Request failed: ${response.status} ${response.statusText}`);
+        throw new Error(errorMessage);
       }
     }
 

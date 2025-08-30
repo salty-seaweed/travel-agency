@@ -33,6 +33,7 @@ import {
   ChatBubbleLeftRightIcon,
 } from '@heroicons/react/24/outline';
 import { useTranslation } from '../../../i18n';
+import { useWhatsApp } from '../../../hooks/useQueries';
 import { getWhatsAppUrl } from '../../../config';
 
 export const ExperiencesSearchSection: React.FC = () => {
@@ -68,8 +69,8 @@ export const ExperiencesSearchSection: React.FC = () => {
   const handleCustomTripSubmit = () => {
     if (!customTripData.dreamTrip.trim() || !customTripData.email.trim()) {
       toast({
-        title: "Please fill in all required fields",
-        description: "Dream trip details and email are required",
+        title: t('homepage.search.required', 'Please fill in all required fields'),
+        description: t('homepage.search.requiredDesc', 'Dream trip details and email are required'),
         status: "warning",
         duration: 3000,
         isClosable: true,
@@ -91,8 +92,8 @@ Please help me plan this perfect trip!`;
     window.open(whatsappUrl, '_blank');
     
     toast({
-      title: "Custom trip request sent!",
-      description: "We'll contact you on WhatsApp to discuss your dream trip",
+      title: t('homepage.search.customSent', 'Custom trip request sent!'),
+      description: t('homepage.search.customSentDesc', "We'll contact you on WhatsApp to discuss your dream trip"),
       status: "success",
       duration: 5000,
       isClosable: true,
@@ -113,8 +114,8 @@ Please help me plan this perfect trip!`;
       <Container maxW="7xl">
         <VStack spacing={8}>
           <VStack spacing={4} textAlign="center">
-            <Text fontSize="2xl" fontWeight="semibold" color={textColor}>Find Maldives Packages</Text>
-            <Text fontSize="lg" color={mutedTextColor}>Search, compare and book amazing curated packages</Text>
+            <Text fontSize="2xl" fontWeight="semibold" color={textColor}>{t('homepage.search.findTitle', 'Find Maldives Packages')}</Text>
+            <Text fontSize="lg" color={mutedTextColor}>{t('homepage.search.findSubtitle', 'Search, compare and book amazing curated packages')}</Text>
           </VStack>
 
           <Card bg={cardBg} border="1px solid" borderColor={borderColor} shadow="xl" borderRadius="xl" overflow="hidden" w="full" maxW="4xl">
@@ -122,8 +123,8 @@ Please help me plan this perfect trip!`;
               <Tabs variant="soft-rounded" colorScheme="blue">
                 <Box textAlign="center" mb={6}>
                   <TabList>
-                    <Tab>Packages</Tab>
-                    <Tab>Custom Trip</Tab>
+                    <Tab>{t('homepage.search.tabPackages', 'Packages')}</Tab>
+                    <Tab>{t('homepage.search.tabCustom', 'Custom Trip')}</Tab>
                   </TabList>
                 </Box>
 
@@ -133,27 +134,27 @@ Please help me plan this perfect trip!`;
                       <VStack spacing={4} w="full">
                         <InputGroup>
                           <InputLeftElement><Icon as={MapPinIcon} color="gray.400" /></InputLeftElement>
-                          <Input placeholder="Which island or atoll?" value={searchData.destination} onChange={(e) => setSearchData(prev => ({ ...prev, destination: e.target.value }))} size="lg" borderRadius="lg" />
+                          <Input placeholder={t('homepage.search.destinationPlaceholder', 'Which island or atoll?')} value={searchData.destination} onChange={(e) => setSearchData(prev => ({ ...prev, destination: e.target.value }))} size="lg" borderRadius="lg" />
                         </InputGroup>
                         <InputGroup>
                           <InputLeftElement><Icon as={CalendarIcon} color="gray.400" /></InputLeftElement>
-                          <Input placeholder="When are you going?" value={searchData.dates} onChange={(e) => setSearchData(prev => ({ ...prev, dates: e.target.value }))} size="lg" borderRadius="lg" />
+                          <Input placeholder={t('homepage.search.datePlaceholder', 'When are you going?')} value={searchData.dates} onChange={(e) => setSearchData(prev => ({ ...prev, dates: e.target.value }))} size="lg" borderRadius="lg" />
                         </InputGroup>
                         <InputGroup>
                           <InputLeftElement pl={3}><Icon as={UserGroupIcon} color="gray.400" /></InputLeftElement>
-                          <Select placeholder="Travelers" value={searchData.travelers} onChange={(e) => setSearchData(prev => ({ ...prev, travelers: e.target.value }))} size="lg" borderRadius="lg" pl={12}>
-                            <option value="1">1 Traveler</option>
-                            <option value="2">2 Travelers</option>
-                            <option value="3">3 Travelers</option>
-                            <option value="4">4 Travelers</option>
-                            <option value="5+">5+ Travelers</option>
+                          <Select placeholder={t('homepage.search.travelers', 'Travelers')} value={searchData.travelers} onChange={(e) => setSearchData(prev => ({ ...prev, travelers: e.target.value }))} size="lg" borderRadius="lg" pl={12}>
+                            <option value="1">{t('homepage.search.travelers_one', '1 Traveler')}</option>
+                            <option value="2">{t('homepage.search.travelers_two', '2 Travelers')}</option>
+                            <option value="3">{t('homepage.search.travelers_three', '3 Travelers')}</option>
+                            <option value="4">{t('homepage.search.travelers_four', '4 Travelers')}</option>
+                            <option value="5+">{t('homepage.search.travelers_five_plus', '5+ Travelers')}</option>
                           </Select>
                         </InputGroup>
-                        <Button onClick={handleSearch} colorScheme="blue" size="lg" w="full" borderRadius="lg" leftIcon={<Icon as={MagnifyingGlassIcon} className="w-5 h-5" />}>Search Packages</Button>
+                        <Button onClick={handleSearch} colorScheme="blue" size="lg" w="full" borderRadius="lg" leftIcon={<Icon as={MagnifyingGlassIcon} className="w-5 h-5" />}>{t('homepage.search.searchPackages', 'Search Packages')}</Button>
                       </VStack>
 
                       <VStack spacing={3} w="full">
-                        <Text fontSize="sm" color={mutedTextColor} fontWeight="medium">Popular Destinations:</Text>
+                        <Text fontSize="sm" color={mutedTextColor} fontWeight="medium">{t('homepage.destinations.popular', 'Popular Destinations:')}</Text>
                         <HStack spacing={2} flexWrap="wrap" justify="center">
                           {popularDestinations.map((destination) => (
                             <Button key={destination} size="sm" variant="outline" colorScheme="blue" borderRadius="full" fontSize="xs" onClick={() => setSearchData(prev => ({ ...prev, destination }))}>{destination}</Button>
@@ -166,15 +167,15 @@ Please help me plan this perfect trip!`;
                   <TabPanel>
                     <VStack spacing={6}>
                       <VStack spacing={2} textAlign="center">
-                        <Text fontSize="lg" color={textColor} fontWeight="semibold">Design Your Dream Trip</Text>
-                        <Text fontSize="sm" color={mutedTextColor}>Tell us about your perfect Maldives experience and we'll create it for you</Text>
+                        <Text fontSize="lg" color={textColor} fontWeight="semibold">{t('homepage.custom.title', 'Design Your Dream Trip')}</Text>
+                        <Text fontSize="sm" color={mutedTextColor}>{t('homepage.custom.subtitle', "Tell us about your perfect Maldives experience and we'll create it for you")}</Text>
                       </VStack>
                       
                       <VStack spacing={4} w="full">
                         <VStack align="start" spacing={2} w="full">
-                          <Text fontSize="sm" fontWeight="semibold" color={textColor}>Describe Your Dream Trip *</Text>
+                          <Text fontSize="sm" fontWeight="semibold" color={textColor}>{t('homepage.custom.describe', 'Describe Your Dream Trip *')}</Text>
                           <Textarea 
-                            placeholder="Tell us about your dream Maldives trip... What activities do you want? Any specific islands or experiences? What's most important to you?" 
+                            placeholder={t('homepage.custom.placeholder', "Tell us about your dream Maldives trip... What activities do you want? Any specific islands or experiences? What's most important to you?")} 
                             value={customTripData.dreamTrip}
                             onChange={(e) => setCustomTripData(prev => ({ ...prev, dreamTrip: e.target.value }))}
                             size="lg" 
@@ -186,11 +187,11 @@ Please help me plan this perfect trip!`;
                         </VStack>
 
                         <VStack align="start" spacing={2} w="full">
-                          <Text fontSize="sm" fontWeight="semibold" color={textColor}>Your Email *</Text>
+                          <Text fontSize="sm" fontWeight="semibold" color={textColor}>{t('homepage.custom.email', 'Your Email *')}</Text>
                           <InputGroup>
                             <InputLeftElement><Icon as={EnvelopeIcon} color="gray.400" /></InputLeftElement>
                             <Input 
-                              placeholder="your.email@example.com" 
+                              placeholder={t('homepage.custom.emailPlaceholder', 'your.email@example.com')} 
                               value={customTripData.email}
                               onChange={(e) => setCustomTripData(prev => ({ ...prev, email: e.target.value }))}
                               size="lg" 
@@ -203,7 +204,7 @@ Please help me plan this perfect trip!`;
 
                         <HStack spacing={4} w="full">
                           <VStack align="start" spacing={2} flex={1}>
-                            <Text fontSize="sm" fontWeight="semibold" color={textColor}>Travelers</Text>
+                            <Text fontSize="sm" fontWeight="semibold" color={textColor}>{t('homepage.search.travelers', 'Travelers')}</Text>
                             <Select 
                               value={customTripData.travelers} 
                               onChange={(e) => setCustomTripData(prev => ({ ...prev, travelers: e.target.value }))}
@@ -219,34 +220,35 @@ Please help me plan this perfect trip!`;
                           </VStack>
 
                           <VStack align="start" spacing={2} flex={1}>
-                            <Text fontSize="sm" fontWeight="semibold" color={textColor}>Duration</Text>
+                            <Text fontSize="sm" fontWeight="semibold" color={textColor}>{t('homepage.custom.duration', 'Duration')}</Text>
                             <Select 
                               value={customTripData.duration} 
                               onChange={(e) => setCustomTripData(prev => ({ ...prev, duration: e.target.value }))}
                               size="lg" 
                               borderRadius="lg"
                             >
-                              <option value="3">3 Days</option>
-                              <option value="5">5 Days</option>
-                              <option value="7">7 Days</option>
-                              <option value="10">10 Days</option>
-                              <option value="14">14 Days</option>
+                              <option value="3">{t('homepage.custom.days3', '3 Days')}</option>
+                              <option value="5">{t('homepage.custom.days5', '5 Days')}</option>
+                              <option value="7">{t('homepage.custom.days7', '7 Days')}</option>
+                              <option value="10">{t('homepage.custom.days10', '10 Days')}</option>
+                              <option value="14">{t('homepage.custom.days14', '14 Days')}</option>
                             </Select>
                           </VStack>
                         </HStack>
 
                         <VStack align="start" spacing={2} w="full">
-                          <Text fontSize="sm" fontWeight="semibold" color={textColor}>Budget Range</Text>
+                          <Text fontSize="sm" fontWeight="semibold" color={textColor}>{t('homepage.custom.budget', 'Budget Range')}</Text>
                           <Select 
                             value={customTripData.budget} 
                             onChange={(e) => setCustomTripData(prev => ({ ...prev, budget: e.target.value }))}
                             size="lg" 
                             borderRadius="lg"
                           >
-                            <option value="1000-2000">$1,000 - $2,000</option>
-                            <option value="2000-5000">$2,000 - $5,000</option>
-                            <option value="5000-10000">$5,000 - $10,000</option>
-                            <option value="10000+">$10,000+</option>
+                            <option value="up-to-1000">{t('homepage.custom.b0', 'Up to $1,000')}</option>
+                            <option value="1000-2000">{t('homepage.custom.b1', '$1,000 - $2,000')}</option>
+                            <option value="2000-5000">{t('homepage.custom.b2', '$2,000 - $5,000')}</option>
+                            <option value="5000-10000">{t('homepage.custom.b3', '$5,000 - $10,000')}</option>
+                            <option value="10000+">{t('homepage.custom.b4', '$10,000+')}</option>
                           </Select>
                         </VStack>
 
@@ -258,7 +260,7 @@ Please help me plan this perfect trip!`;
                           borderRadius="lg"
                           leftIcon={<Icon as={ChatBubbleLeftRightIcon} className="w-5 h-5" />}
                         >
-                          Send Custom Trip Request via WhatsApp
+                          {t('homepage.custom.send', 'Send Custom Trip Request via WhatsApp')}
                         </Button>
                       </VStack>
                     </VStack>
@@ -268,20 +270,7 @@ Please help me plan this perfect trip!`;
             </CardBody>
           </Card>
 
-          <SimpleGrid columns={{ base: 1, md: 3 }} spacing={8} w="full" maxW="2xl">
-            <VStack spacing={2} textAlign="center">
-              <Text fontSize="2xl" fontWeight="bold" color="blue.600">150+</Text>
-              <Text fontSize="sm" color={mutedTextColor}>Properties Available</Text>
-            </VStack>
-            <VStack spacing={2} textAlign="center">
-              <Text fontSize="2xl" fontWeight="bold" color="blue.600">75+</Text>
-              <Text fontSize="sm" color={mutedTextColor}>Curated Packages</Text>
-            </VStack>
-            <VStack spacing={2} textAlign="center">
-              <Text fontSize="2xl" fontWeight="bold" color="blue.600">4.8</Text>
-              <Text fontSize="sm" color={mutedTextColor}>Average Rating</Text>
-            </VStack>
-          </SimpleGrid>
+          {/* Remove hardcoded stats - these will be managed through admin panel */}
         </VStack>
       </Container>
     </Box>

@@ -62,7 +62,7 @@ export function PricingForm({ form, updateForm }: PricingFormProps) {
         <Grid templateColumns={{ base: '1fr', lg: '1fr 1fr' }} gap={6}>
           <FormControl isRequired>
             <FormLabel fontWeight="semibold" color="gray.700">
-              Original Price
+              Original Price *
             </FormLabel>
             <InputGroup size="lg">
               <InputLeftElement pointerEvents="none" color="gray.500">
@@ -78,6 +78,7 @@ export function PricingForm({ form, updateForm }: PricingFormProps) {
                 type="number"
                 min="0"
                 step="0.01"
+                isInvalid={!form.original_price || parseFloat(form.original_price) <= 0}
               />
             </InputGroup>
           </FormControl>

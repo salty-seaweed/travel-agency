@@ -21,7 +21,7 @@ import { MapPinIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from '../../../i18n';
 import { useDestinations } from '../../../hooks/useQueries';
 
-interface Props { properties?: any[]; packages?: any[]; }
+interface Props { packages?: any[]; }
 
 export const ExperiencesDestinationsSection: React.FC<Props> = () => {
   const { t } = useTranslation();
@@ -40,7 +40,7 @@ export const ExperiencesDestinationsSection: React.FC<Props> = () => {
   };
 
   const handleDestinationClick = (destination: any) => {
-    navigate(`/properties?destination=${encodeURIComponent(destination.name)}`);
+    navigate(`/packages?destination=${encodeURIComponent(destination.name)}`);
   };
 
   if (isLoading) {
@@ -49,9 +49,9 @@ export const ExperiencesDestinationsSection: React.FC<Props> = () => {
         <Container maxW="7xl">
           <VStack spacing={12}>
             <VStack spacing={4} textAlign="center">
-              <Heading size="2xl" color={textColor} fontWeight="bold">Explore Maldives Destinations</Heading>
+              <Heading size="2xl" color={textColor} fontWeight="bold">{t('homepage.destinations.exploreTitle', 'Explore Maldives Destinations')}</Heading>
               <Text fontSize="lg" color={mutedTextColor} maxW="2xl" lineHeight="1.6">
-                Discover the most popular islands and atolls in the Maldives
+                {t('homepage.destinations.exploreSubtitle', 'Discover the most popular islands and atolls in the Maldives')}
               </Text>
             </VStack>
             <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={6} w="full">
@@ -77,11 +77,11 @@ export const ExperiencesDestinationsSection: React.FC<Props> = () => {
           <VStack spacing={4} textAlign="center">
             <Badge colorScheme="blue" variant="solid" px={4} py={2} borderRadius="full" fontSize="sm" fontWeight="semibold">
               <Icon as={MapPinIcon} className="w-4 h-4 mr-2" />
-              Popular Destinations
+              {t('homepage.destinations.badge', 'Popular Destinations')}
             </Badge>
-            <Heading size="2xl" color={textColor} fontWeight="bold">Explore Maldives Destinations</Heading>
+            <Heading size="2xl" color={textColor} fontWeight="bold">{t('homepage.destinations.exploreTitle', 'Explore Maldives Destinations')}</Heading>
             <Text fontSize="lg" color={mutedTextColor} maxW="2xl" lineHeight="1.6">
-              Discover the most popular islands and atolls in the Maldives with amazing properties and experiences
+              {t('homepage.destinations.exploreSubtitleFull', 'Discover the most popular islands and atolls in the Maldives with amazing packages and experiences')}
             </Text>
           </VStack>
 
@@ -119,7 +119,7 @@ export const ExperiencesDestinationsSection: React.FC<Props> = () => {
                     <VStack position="absolute" top={0} left={0} right={0} bottom={0} justify="center" spacing={2}>
                       <Text color="white" fontWeight="bold" fontSize="lg" textAlign="center">{destination.name}</Text>
                       <Text color="gray.200" fontSize="sm" textAlign="center">
-                        {destination.property_count} properties
+                        {destination.property_count} {t('homepage.destinations.properties', 'properties')}
                       </Text>
                       <Text color="gray.300" fontSize="xs" textAlign="center">
                         {destination.island || destination.name}, {destination.atoll || 'Maldives'}
@@ -131,8 +131,8 @@ export const ExperiencesDestinationsSection: React.FC<Props> = () => {
             </SimpleGrid>
           ) : (
             <VStack spacing={4} textAlign="center">
-              <Text fontSize="lg" color={mutedTextColor}>No destinations available at the moment.</Text>
-              <Text fontSize="sm" color={mutedTextColor}>Please check back later or contact us for more information.</Text>
+              <Text fontSize="lg" color={mutedTextColor}>{t('homepage.destinations.empty', 'No destinations available at the moment.')}</Text>
+              <Text fontSize="sm" color={mutedTextColor}>{t('homepage.destinations.emptyHelp', 'Please check back later or contact us for more information.')}</Text>
             </VStack>
           )}
 
@@ -147,10 +147,10 @@ export const ExperiencesDestinationsSection: React.FC<Props> = () => {
               rightIcon={<Icon as={ArrowRightIcon} className="w-5 h-5" />} 
               onClick={() => navigate('/properties')}
             >
-              View All Destinations
+              {t('homepage.destinations.viewAll', 'View All Destinations')}
             </Button>
             <Text fontSize="sm" color={mutedTextColor} textAlign="center">
-              Click on any destination to explore properties and experiences
+              {t('homepage.destinations.helper', 'Click on any destination to explore properties and experiences')}
             </Text>
           </VStack>
         </VStack>

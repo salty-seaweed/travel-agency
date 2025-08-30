@@ -12,7 +12,8 @@ import {
   ArrowRightIcon,
   InformationCircleIcon
 } from '@heroicons/react/24/outline';
-import { getWhatsAppUrl } from '../config';
+import { useTranslation } from '../i18n';
+import { useWhatsApp, usePageHero } from '../hooks/useQueries';
 import {
   Box,
   Container,
@@ -25,19 +26,20 @@ import {
   useColorModeValue,
   SimpleGrid,
   Heading,
+  Image
 } from '@chakra-ui/react';
 
 export function ContactPage() {
+  const { t } = useTranslation();
+  const { getWhatsAppUrl, whatsappNumber } = useWhatsApp();
+  const { data: hero } = usePageHero('contact');
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    phone: '',
     subject: '',
     message: ''
   });
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({
@@ -48,16 +50,13 @@ export function ContactPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
     
     // Simulate form submission
     setTimeout(() => {
-      setIsSubmitting(false);
       setIsSubmitted(true);
       setFormData({
         name: '',
         email: '',
-        phone: '',
         subject: '',
         message: ''
       });
@@ -69,62 +68,66 @@ export function ContactPage() {
 
   const contactInfo = [
     {
-      icon: PhoneIcon,
-      title: "Phone",
-      details: ["+960 744 1097", "+960 987 6543"],
-      description: "Call us for immediate assistance",
-      action: "Call Now",
-      actionUrl: "tel:+9607441097"
+      icon: EnvelopeIcon,
+      title: t('contact.info.email.title', 'Email'),
+      details: ["info@threadtravels.mv"],
+      description: t('contact.info.email.description', 'Send us an email anytime'),
+      action: t('contact.info.email.action', 'Send Email'),
+      actionUrl: "mailto:info@threadtravels.mv"
     },
     {
-      icon: EnvelopeIcon,
-      title: "Email",
-      details: ["info@maldives-travel.com", "bookings@maldives-travel.com"],
-      description: "Send us an email anytime",
-      action: "Send Email",
-      actionUrl: "mailto:info@maldives-travel.com"
+      icon: PhoneIcon,
+      title: t('contact.info.phone.title', 'Phone'),
+      details: [whatsappNumber],
+      description: t('contact.info.phone.description', 'Call us for immediate assistance'),
+      action: t('contact.info.phone.action', 'Call Now'),
+      actionUrl: `tel:${whatsappNumber}`
     },
     {
       icon: MapPinIcon,
-      title: "Office",
-      details: ["123 Travel Street", "Male, Maldives 20000"],
-      description: "Visit our office in Male",
-      action: "Get Directions",
-      actionUrl: "https://maps.google.com"
-    },
-    {
-      icon: ClockIcon,
-      title: "Business Hours",
-      details: ["Mon-Fri: 9:00 AM - 6:00 PM", "Sat: 10:00 AM - 4:00 PM"],
-      description: "We're here to help you",
-      action: "WhatsApp",
-      actionUrl: "https://wa.me/9607441097"
+      title: t('contact.info.address.title', 'Address'),
+      details: ["Male, Maldives"],
+      description: t('contact.info.address.description', 'Visit our office'),
+      action: t('contact.info.address.action', 'Get Directions'),
+      actionUrl: "https://maps.google.com/?q=Male,Maldives"
     }
   ];
 
   const faqs = [
     {
-      question: "How do I book a property?",
-      answer: "You can book properties through WhatsApp, email, or by calling us directly. We'll guide you through the entire process."
+      question: t('contact.faq.booking.question', 'How do I book a package?'),
+      answer: t('contact.faq.booking.answer', "You can book packages through WhatsApp, email, or by calling us directly. We'll guide you through the entire process.")
     },
     {
-      question: "What's included in the travel packages?",
-      answer: "Our packages typically include accommodation, some meals, transportation, and guided activities. Specific inclusions vary by package."
+      question: t('contact.faq.inclusions.question', "What's included in the travel packages?"),
+      answer: t('contact.faq.inclusions.answer', 'Our packages typically include accommodation, some meals, transportation, and guided activities. Specific inclusions vary by package.')
     },
     {
-      question: "Do you offer airport transfers?",
-      answer: "Yes, we can arrange airport transfers for most properties. This service is often included in our packages."
+      question: t('contact.faq.transfers.question', 'Do you offer airport transfers?'),
+      answer: t('contact.faq.transfers.answer', 'Yes, we can arrange airport transfers for most packages. This service is often included in our packages.')
     },
     {
-      question: "What's the best time to visit the Maldives?",
-      answer: "The Maldives is a year-round destination, but the best weather is typically from November to April during the dry season."
+      question: t('contact.faq.bestTime.question', "What's the best time to visit the Maldives?"),
+      answer: t('contact.faq.bestTime.answer', 'The Maldives is a year-round destination, but the best weather is typically from November to April during the dry season.')
     }
   ];
 
   return (
     <Box bg="gray.50" className="bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
       {/* Hero Section */}
-      <section className="py-24 bg-gradient-to-r from-blue-800 via-indigo-800 to-blue-900 relative overflow-hidden">
+      <section className="py-24 relative overflow-hidden">
+        {/* Background Image (Admin-controlled) */}
+        <Box position="absolute" top={0} left={0} right={0} bottom={0}>
+          <Image
+            src={hero?.image_url || '/src/assets/images/ishan115.jpg'}
+            alt={hero?.title || 'Maldives Contact Background'}
+            w="full"
+            h="full"
+            objectFit="cover"
+          />
+          <Box position="absolute" top={0} left={0} right={0} bottom={0} bg={`blackAlpha.${Math.round((hero?.overlay_opacity ?? 0.6) * 100)}`} />
+        </Box>
+        
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-10 animate-float">
@@ -144,16 +147,15 @@ export function ContactPage() {
               className="bg-white/20 backdrop-blur-md text-white px-6 py-2 rounded-full text-sm font-bold border border-white/30"
             >
               <Icon as={SparklesIcon} className="w-4 h-4 mr-2" />
-              Get in Touch
+              {t('contact.hero.badge', 'Get in Touch')}
             </Badge>
             
             <Heading size="2xl" className="text-5xl md:text-6xl font-bold text-white">
-              Contact Us
+              {hero?.title || t('contact.hero.title', 'Contact Us')}
             </Heading>
             
             <Text className="text-xl text-blue-200 max-w-4xl mx-auto leading-relaxed">
-              Ready to start your Maldives adventure? We're here to help you plan the perfect trip. 
-              Get in touch with us through any of the channels below.
+              {hero?.subtitle || t('contact.hero.subtitle', "Ready to start your Maldives adventure? We're here to help you plan the perfect trip. Get in touch with us through any of the channels below.")}
             </Text>
 
             <HStack spacing={6} flexDir={{ base: "column", sm: "row" }} justify="center" align="center">
@@ -177,7 +179,7 @@ export function ContactPage() {
                   <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                   </svg>
-                  WhatsApp Us
+                  {t('contact.hero.whatsapp', 'WhatsApp Us')}
                   <Icon as={ArrowRightIcon} className="w-5 h-5 ml-2" />
                 </Button>
               </a>
@@ -204,7 +206,7 @@ export function ContactPage() {
                 }}
               >
                 <Icon as={InformationCircleIcon} className="w-6 h-6 mr-3" />
-                Send Message
+                {t('contact.hero.sendMessage', 'Send Message')}
                 <Icon as={ArrowRightIcon} className="w-5 h-5 ml-2" />
               </Button>
             </HStack>
@@ -230,8 +232,8 @@ export function ContactPage() {
           <HStack alignItems="center">
             <Icon as={CheckCircleIcon} className="h-5 w-5 text-green-600 mr-3" />
             <Box>
-              <Text fontSize="sm" fontWeight="medium" color="green.800">Message sent successfully!</Text>
-              <Text fontSize="sm" color="green.700">We'll get back to you within 24 hours.</Text>
+              <Text fontSize="sm" fontWeight="medium" color="green.800">{t('contact.success.title', 'Message sent successfully!')}</Text>
+              <Text fontSize="sm" color="green.700">{t('contact.success.message', "We'll get back to you within 24 hours.")}</Text>
             </Box>
           </HStack>
         </Box>
@@ -241,9 +243,9 @@ export function ContactPage() {
        <Box mt={{ base: 12, sm: 16, lg: 20 }}>
          <Container maxW="7xl" px={4}>
            <VStack alignItems="center" mb={{ base: 8, sm: 12 }}>
-             <Text fontSize={{ base: "2xl", sm: "3xl", lg: "4xl" }} fontWeight="bold" color="gray.900" mb={4}>Frequently Asked Questions</Text>
+             <Text fontSize={{ base: "2xl", sm: "3xl", lg: "4xl" }} fontWeight="bold" color="gray.900" mb={4}>{t('contact.faq.title', 'Frequently Asked Questions')}</Text>
              <Text fontSize={{ base: "base", sm: "lg" }} color="gray.600" maxW="3xl" mx="auto">
-               Find quick answers to common questions about our services and the Maldives.
+               {t('contact.faq.subtitle', 'Find quick answers to common questions about our services and the Maldives.')}
              </Text>
            </VStack>
 

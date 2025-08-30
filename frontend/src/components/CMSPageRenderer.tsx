@@ -28,6 +28,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { apiGet } from '../api';
 import Layout from './Layout';
 import type { Page } from '../types';
+import { useWhatsApp } from '../hooks/useQueries';
 
 interface CMSPageRendererProps {
   slug?: string;
@@ -40,6 +41,7 @@ export const CMSPageRenderer: React.FC<CMSPageRendererProps> = ({ slug, pageId }
   const [error, setError] = useState<string | null>(null);
   const params = useParams();
   const navigate = useNavigate();
+  const { whatsappNumber } = useWhatsApp();
 
   // Color mode values
   const bgColor = useColorModeValue('white', 'gray.900');
@@ -237,7 +239,7 @@ export const CMSPageRenderer: React.FC<CMSPageRendererProps> = ({ slug, pageId }
                             📧 info@threadtravels.mv
                           </Text>
                           <Text fontSize="sm" color="gray.600">
-                            📞 +960 123 4567
+                            📞 {whatsappNumber}
                           </Text>
                           <Text fontSize="sm" color="gray.600">
                             📍 Male, Maldives
@@ -417,7 +419,7 @@ export const CMSPageRenderer: React.FC<CMSPageRendererProps> = ({ slug, pageId }
                               <Text fontWeight="semibold" color={textColor}>
                                 Phone
                               </Text>
-                              <Text color="gray.600">+960 123 4567</Text>
+                              <Text color="gray.600">{whatsappNumber}</Text>
                             </Box>
                           </HStack>
                           <HStack>

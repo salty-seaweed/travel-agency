@@ -5,6 +5,8 @@ import {
   ChevronUpIcon,
   QuestionMarkCircleIcon
 } from '@heroicons/react/24/outline';
+import { whatsappBooking } from '../services/whatsapp-booking';
+import { useTranslation } from '../i18n';
 
 interface FAQItem {
   id: string;
@@ -15,6 +17,7 @@ interface FAQItem {
 }
 
 export function FAQPage() {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
@@ -23,29 +26,29 @@ export function FAQPage() {
     // Booking & Reservations
     {
       id: 'booking-1',
-      question: 'How do I book a property in the Maldives?',
-      answer: 'You can book properties through our website, WhatsApp, email, or by calling us directly. We recommend contacting us via WhatsApp for immediate assistance and personalized recommendations based on your preferences and budget.',
+      question: 'How do I book a package in the Maldives?',
+      answer: 'You can book packages through our website, WhatsApp, email, or by calling us directly. We recommend contacting us via WhatsApp for immediate assistance and personalized recommendations based on your preferences and budget.',
       category: 'Booking & Reservations',
       tags: ['booking', 'reservation', 'how to book']
     },
     {
       id: 'booking-2',
       question: 'What payment methods do you accept?',
-      answer: 'We accept various payment methods including bank transfers, credit cards, PayPal, and local payment options. Payment terms vary by property - some require deposits while others require full payment upfront.',
+      answer: 'We accept various payment methods including bank transfers, credit cards, PayPal, and local payment options. Payment terms vary by package - some require deposits while others require full payment upfront.',
       category: 'Booking & Reservations',
       tags: ['payment', 'credit card', 'bank transfer']
     },
     {
       id: 'booking-3',
       question: 'What is your cancellation policy?',
-      answer: 'Cancellation policies vary by property, but most offer free cancellation up to 24-48 hours before check-in. Some luxury properties may require 72 hours notice. We always recommend purchasing travel insurance for added protection.',
+      answer: 'Cancellation policies vary by package, but most offer free cancellation up to 24-48 hours before departure. Some luxury packages may require 72 hours notice. We always recommend purchasing travel insurance for added protection.',
       category: 'Booking & Reservations',
       tags: ['cancellation', 'refund', 'policy']
     },
     {
       id: 'booking-4',
       question: 'What are the deposit requirements for bookings?',
-      answer: 'Deposit requirements vary by property. Most properties require a 20-30% deposit to confirm booking, while some resorts may require full payment upfront. We\'ll clearly communicate all payment requirements before booking.',
+      answer: 'Deposit requirements vary by package. Most packages require a 20-30% deposit to confirm booking, while some luxury packages may require full payment upfront. We\'ll clearly communicate all payment requirements before booking.',
       category: 'Booking & Reservations',
       tags: ['booking', 'payment', 'deposit']
     },
@@ -61,7 +64,7 @@ export function FAQPage() {
     {
       id: 'travel-2',
       question: 'Do you provide airport transfers?',
-      answer: 'Yes, we can arrange airport transfers for most properties. This service is often included in our packages. Transfers can be by speedboat, seaplane, or domestic flight depending on your destination island.',
+      answer: 'Yes, we can arrange airport transfers for most packages. This service is often included in our packages. Transfers can be by speedboat, seaplane, or domestic flight depending on your destination island.',
       category: 'Travel & Transportation',
       tags: ['airport transfer', 'transport', 'speedboat']
     },
@@ -80,33 +83,33 @@ export function FAQPage() {
       tags: ['visa', 'immigration', 'passport']
     },
 
-    // Accommodation & Properties
+    // Accommodation & Packages
     {
       id: 'accommodation-1',
       question: 'What types of accommodations do you offer?',
-      answer: 'We offer a wide range of accommodations including luxury resorts, boutique hotels, local properties, and private villas. Our properties range from budget-friendly options to high-end luxury experiences.',
-      category: 'Accommodation & Properties',
+      answer: 'We offer a wide range of accommodations including luxury resorts, boutique hotels, local guesthouses, and private villas. Our packages range from budget-friendly options to high-end luxury experiences.',
+      category: 'Accommodation & Packages',
       tags: ['hotels', 'resorts', 'properties', 'types']
     },
     {
       id: 'accommodation-2',
-      question: 'Are the properties safe and clean?',
-      answer: 'Yes, all our properties are personally verified for safety, cleanliness, and quality standards. We regularly inspect properties and maintain relationships with trusted local partners to ensure the best experience.',
-      category: 'Accommodation & Properties',
+      question: 'Are the accommodations safe and clean?',
+      answer: 'Yes, all our accommodations are personally verified for safety, cleanliness, and quality standards. We regularly inspect accommodations and maintain relationships with trusted local partners to ensure the best experience.',
+      category: 'Accommodation & Packages',
       tags: ['safety', 'cleanliness', 'quality']
     },
     {
       id: 'accommodation-3',
-      question: 'Is WiFi available at all properties?',
-      answer: 'WiFi availability varies by property. We list all amenities for each property. Budget properties may have limited WiFi, while luxury resorts typically offer high-speed internet.',
-      category: 'Accommodation & Properties',
+      question: 'Is WiFi available at all accommodations?',
+      answer: 'WiFi availability varies by accommodation. We list all amenities for each package. Budget accommodations may have limited WiFi, while luxury resorts typically offer high-speed internet.',
+      category: 'Accommodation & Packages',
       tags: ['wifi', 'amenities', 'connectivity']
     },
     {
       id: 'accommodation-4',
       question: 'Can I stay on local islands?',
       answer: 'Yes! We offer accommodations on local islands which provide authentic cultural experiences. These are often more affordable than resort islands and allow you to interact with local communities.',
-      category: 'Accommodation & Properties',
+      category: 'Accommodation & Packages',
       tags: ['local islands', 'culture', 'authentic']
     },
 
@@ -121,7 +124,7 @@ export function FAQPage() {
     {
       id: 'activities-2',
       question: 'Do I need to bring my own snorkeling equipment?',
-      answer: 'Most properties provide basic snorkeling equipment for free or rent it at reasonable rates. However, if you have your own equipment and prefer to use it, you\'re welcome to bring it.',
+      answer: 'Most accommodations provide basic snorkeling equipment for free or rent it at reasonable rates. However, if you have your own equipment and prefer to use it, you\'re welcome to bring it.',
       category: 'Activities & Experiences',
       tags: ['snorkeling', 'equipment', 'gear']
     },
@@ -171,7 +174,7 @@ export function FAQPage() {
     }
   ];
 
-  const categories = ['all', 'Booking & Reservations', 'Travel & Transportation', 'Accommodation & Properties', 'Activities & Experiences', 'Practical Information'];
+  const categories = ['all', 'Booking & Reservations', 'Travel & Transportation', 'Accommodation & Packages', 'Activities & Experiences', 'Practical Information'];
 
   const filteredFAQs = faqData.filter(faq => {
     const matchesSearch = faq.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -202,14 +205,24 @@ export function FAQPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="relative overflow-hidden text-white py-16">
+        {/* Background Image */}
+        <div className="absolute inset-0">
+          <img
+            src="/src/assets/images/ishan113.jpg"
+            alt="Maldives FAQ Background"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-black bg-opacity-60"></div>
+        </div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              Frequently Asked Questions
+              {t('faq.page.title', 'Frequently Asked Questions')}
             </h1>
             <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-              Find answers to common questions about traveling to the Maldives, booking properties, and planning your perfect vacation.
+              {t('faq.page.description', 'Find answers to common questions about traveling to the Maldives, booking packages, and planning your perfect vacation.')}
             </p>
           </div>
         </div>
@@ -224,7 +237,7 @@ export function FAQPage() {
                 <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Search questions..."
+                  placeholder={t('faq.search.placeholder', 'Search questions...')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -238,7 +251,7 @@ export function FAQPage() {
             >
               {categories.map((category) => (
                 <option key={category} value={category}>
-                  {category === 'all' ? 'All Categories' : category}
+                  {category === 'all' ? t('faq.categories.all', 'All Categories') : category}
                 </option>
               ))}
             </select>
@@ -246,7 +259,7 @@ export function FAQPage() {
           
           {searchTerm && (
             <p className="text-gray-600">
-              Found {filteredFAQs.length} question{filteredFAQs.length !== 1 ? 's' : ''} matching "{searchTerm}"
+              {t('faq.search.results', 'Found {{count}} question{{count !== 1 ? "s" : ""}} matching "{{term}}"', { count: filteredFAQs.length, term: searchTerm })}
             </p>
           )}
         </div>
@@ -255,8 +268,12 @@ export function FAQPage() {
         {filteredFAQs.length === 0 ? (
           <div className="text-center py-12">
             <QuestionMarkCircleIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No questions found</h3>
-            <p className="text-gray-600">Try adjusting your search terms or browse all categories.</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              {t('faq.noResults.title', 'No questions found')}
+            </h3>
+            <p className="text-gray-600">
+              {t('faq.noResults.description', 'Try adjusting your search terms or browse all categories.')}
+            </p>
           </div>
         ) : (
           <div className="space-y-8">
@@ -302,24 +319,26 @@ export function FAQPage() {
 
         {/* Contact Section */}
         <div className="mt-16 bg-blue-50 rounded-lg p-8 text-center">
-          <h3 className="text-xl font-semibold text-gray-900 mb-4">Still have questions?</h3>
+          <h3 className="text-xl font-semibold text-gray-900 mb-4">
+            {t('faq.contact.title', 'Still have questions?')}
+          </h3>
           <p className="text-gray-600 mb-6">
-            Can't find what you're looking for? Our travel experts are here to help!
+            {t('faq.contact.description', "Can't find what you're looking for? Our travel experts are here to help!")}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
               href="/contact"
               className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
             >
-              Contact Us
+              {t('faq.contact.contactUs', 'Contact Us')}
             </a>
             <a
-                              href="https://wa.me/9607441097"
+              href={whatsappBooking.getWhatsAppUrl(t('faq.contact.whatsappMessage', 'Hi! I have a question about your travel services.'))}
               target="_blank"
               rel="noopener noreferrer"
               className="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors"
             >
-              Chat on WhatsApp
+              {t('faq.contact.chatWhatsApp', 'Chat on WhatsApp')}
             </a>
           </div>
         </div>

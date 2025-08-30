@@ -27,7 +27,11 @@ export function ActivitiesForm({ form, updateForm }: ActivitiesFormProps) {
   const addActivity = () => {
     const newActivity = {
       name: '',
+      name_ru: '',
+      name_zh: '',
       description: '',
+      description_ru: '',
+      description_zh: '',
       duration: '',
       difficulty: 'easy',
       category: '',
@@ -98,7 +102,7 @@ export function ActivitiesForm({ form, updateForm }: ActivitiesFormProps) {
                 <VStack spacing={4} align="stretch">
                   <FormControl isRequired>
                     <FormLabel fontWeight="semibold" color="gray.700">
-                      Activity Name
+                      Activity Name (English)
                     </FormLabel>
                     <Input
                       value={activity.name}
@@ -112,12 +116,72 @@ export function ActivitiesForm({ form, updateForm }: ActivitiesFormProps) {
 
                   <FormControl>
                     <FormLabel fontWeight="semibold" color="gray.700">
-                      Description
+                      Activity Name (Russian)
+                    </FormLabel>
+                    <Input
+                      value={activity.name_ru || ''}
+                      onChange={(e) => updateActivity(index, 'name_ru', e.target.value)}
+                      placeholder="e.g., Приключение сноркелинга"
+                      size="lg"
+                      borderRadius="lg"
+                      focusBorderColor="purple.500"
+                    />
+                  </FormControl>
+
+                  <FormControl>
+                    <FormLabel fontWeight="semibold" color="gray.700">
+                      Activity Name (Chinese)
+                    </FormLabel>
+                    <Input
+                      value={activity.name_zh || ''}
+                      onChange={(e) => updateActivity(index, 'name_zh', e.target.value)}
+                      placeholder="e.g., 浮潜冒险"
+                      size="lg"
+                      borderRadius="lg"
+                      focusBorderColor="purple.500"
+                    />
+                  </FormControl>
+
+                  <FormControl>
+                    <FormLabel fontWeight="semibold" color="gray.700">
+                      Description (English)
                     </FormLabel>
                     <Textarea
                       value={activity.description}
                       onChange={(e) => updateActivity(index, 'description', e.target.value)}
                       placeholder="Describe the activity..."
+                      size="lg"
+                      borderRadius="lg"
+                      focusBorderColor="purple.500"
+                      rows={3}
+                      resize="vertical"
+                    />
+                  </FormControl>
+
+                  <FormControl>
+                    <FormLabel fontWeight="semibold" color="gray.700">
+                      Description (Russian)
+                    </FormLabel>
+                    <Textarea
+                      value={activity.description_ru || ''}
+                      onChange={(e) => updateActivity(index, 'description_ru', e.target.value)}
+                      placeholder="Опишите активность..."
+                      size="lg"
+                      borderRadius="lg"
+                      focusBorderColor="purple.500"
+                      rows={3}
+                      resize="vertical"
+                    />
+                  </FormControl>
+
+                  <FormControl>
+                    <FormLabel fontWeight="semibold" color="gray.700">
+                      Description (Chinese)
+                    </FormLabel>
+                    <Textarea
+                      value={activity.description_zh || ''}
+                      onChange={(e) => updateActivity(index, 'description_zh', e.target.value)}
+                      placeholder="描述活动..."
                       size="lg"
                       borderRadius="lg"
                       focusBorderColor="purple.500"

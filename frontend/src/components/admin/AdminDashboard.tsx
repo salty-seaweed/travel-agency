@@ -49,7 +49,6 @@ import {
 } from '@heroicons/react/24/outline';
 
 interface DashboardStats {
-  properties: number;
   packages: number;
   reviews: number;
 }
@@ -57,7 +56,7 @@ interface DashboardStats {
 export function AdminDashboard() {
   const navigate = useNavigate();
   const { notification, showError } = useNotification();
-  const [stats, setStats] = useState<DashboardStats>({ properties: 0, packages: 0, reviews: 0 });
+  const [stats, setStats] = useState<DashboardStats>({ packages: 0, reviews: 0 });
   const [recentReviews, setRecentReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [analytics, setAnalytics] = useState({
@@ -77,15 +76,13 @@ export function AdminDashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [properties, packages, reviews, analyticsData] = await Promise.all([
-          apiGet('/properties/'),
+        const [packages, reviews, analyticsData] = await Promise.all([
           apiGet('/packages/'),
           apiGet('/reviews/?ordering=-created_at&limit=5'),
           apiGet('/analytics/'),
         ]);
         
         setStats({ 
-          properties: properties.count || properties.length, 
           packages: packages.count || packages.length, 
           reviews: reviews.count || reviews.length 
         });
@@ -232,9 +229,9 @@ export function AdminDashboard() {
       {/* Key Metrics */}
       <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={6} mb={8}>
         <StatCard
-          title="Total Properties"
-          value={stats.properties}
-          icon={BuildingOffice2Icon}
+          title="Total Packages"
+          value={stats.packages}
+          icon={GiftIcon}
           colorScheme="blue"
         />
         <StatCard
@@ -356,7 +353,7 @@ export function AdminDashboard() {
                              {review.name}
                            </Text>
                            <Text fontSize="sm" color={mutedTextColor}>
-                             Property #{review.property}
+                             Package #{review.package}
                            </Text>
                          </VStack>
                        </HStack>
@@ -398,16 +395,7 @@ export function AdminDashboard() {
           </CardHeader>
           <CardBody>
             <VStack spacing={3} align="stretch">
-              <Button
-                leftIcon={<Icon as={BuildingOffice2Icon} h={5} w={5} />}
-                variant="outline"
-                colorScheme="blue"
-                onClick={() => navigate('/dashboard/properties')}
-                size="lg"
-                justifyContent="flex-start"
-              >
-                Manage Properties
-              </Button>
+
               <Button
                 leftIcon={<Icon as={GiftIcon} h={5} w={5} />}
                 variant="outline"

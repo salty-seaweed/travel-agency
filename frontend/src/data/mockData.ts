@@ -73,7 +73,7 @@ export const properties: Property[] = [
     checkIn: "2:00 PM",
     checkOut: "11:00 AM",
     cancellation: "Free cancellation up to 24 hours before check-in",
-    contactPhone: "+960 123 4567",
+    contactPhone: "+960 744 1097",
     contactEmail: "info@paradisebeachresort.com",
     latitude: 3.2028,
     longitude: 73.2207
@@ -121,7 +121,7 @@ export const properties: Property[] = [
     checkIn: "2:00 PM",
     checkOut: "11:00 AM",
     cancellation: "Free cancellation up to 24 hours before check-in",
-    contactPhone: "+960 555 1234",
+    contactPhone: "+960 744 1097",
     contactEmail: "info@sunsetguesthouse.com",
     latitude: 3.1234,
     longitude: 73.5678

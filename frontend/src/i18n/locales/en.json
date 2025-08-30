@@ -62,5 +62,797 @@
       "networkError": "Network error. Please check your connection.",
       "serverError": "Server error. Please try again later."
     }
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "view": "View",
+    "book": "Book",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit",
+    "reset": "Reset",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No",
+    "ok": "OK"
+  },
+  "navigation": {
+    "home": "Home",
+    "properties": "Properties",
+    "packages": "Packages",
+    "transportation": "Transportation",
+    "about": "About",
+    "contact": "Contact",
+    "blog": "Blog",
+    "faq": "FAQ",
+    "dashboard": "Dashboard",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "profile": "Profile",
+    "settings": "Settings"
+  },
+  "transportation": {
+    "hero": {
+      "badge": "Maldives Transportation Guide",
+      "title": "Maldives Transportation & Transfers",
+      "subtitle": "Your complete guide to getting around the Maldives. From speedboat transfers to seaplane flights, we provide comprehensive transportation services to make your island hopping seamless and memorable.",
+      "bookTransfer": "Book Transfer Now",
+      "viewGuide": "View Transfer Guide"
+    },
+    "nav": {
+      "transferTypes": "Transfer Types",
+      "atollTransfers": "Atoll Transfers",
+      "ferryTimetables": "Ferry Timetables",
+      "pricingGuide": "Pricing Guide",
+      "faq": "FAQ"
+    }
+  },
+  "homepage": {
+    "hero": {
+      "title": "Discover Your Maldives Paradise",
+      "subtitle": "Experience the magic of Maldives with our curated selection of luxury resorts and authentic experiences",
+      "explorePackages": "Explore Packages",
+      "viewProperties": "View Properties",
+      "trustedBy": "Trusted by 15,000+ travelers"
+    },
+    "search": {
+      "title": "Find Your Perfect Stay",
+      "subtitle": "Search 500+ hotels and packages with advanced filters",
+      "selectDestination": "Please select a destination",
+      "destinationPlaceholder": "Which island or atoll?",
+      "datePlaceholder": "When are you going? (Optional)",
+      "travelers": "Travelers",
+      "travelers_one": "1 Traveler",
+      "travelers_two": "2 Travelers",
+      "travelers_three": "3 Travelers",
+      "travelers_four": "4 Travelers",
+      "travelers_five_plus": "5+ Travelers",
+      "startPlanning": "Start Planning My Trip"
+    },
+    "cta": {
+      "chatWhatsApp": "Chat on WhatsApp",
+      "callUs": "Contact Us"
+    },
+    "destinations": {
+      "popularTitle": "Popular Maldives Destinations",
+      "popularSubtitle": "Most sought-after islands and atolls for your perfect getaway",
+      "packages": "packages",
+      "empty": "No destinations available at the moment.",
+      "emptyHelp": "Please check back later or contact us for more information.",
+      "exploreTitle": "Explore Maldives Destinations",
+      "exploreSubtitle": "Discover the most popular islands and atolls in the Maldives",
+      "exploreSubtitleFull": "Discover the most popular islands and atolls in the Maldives with amazing packages and experiences",
+      "badge": "Popular Destinations",
+      "properties": "properties",
+      "viewAll": "View All Destinations",
+      "helper": "Click on any destination to explore properties and experiences"
+    },
+    "activities": {
+      "badge": "Custom Experiences",
+      "title": "Build Your Custom Package",
+      "subtitle": "Choose from these experiences to build your own custom Maldives package. Mix and match activities to create your perfect trip.",
+      "perPerson": "per person",
+      "difficulty": "Difficulty",
+      "includes": "Includes:",
+      "more": "more",
+      "viewAll": "View All Custom Experiences",
+      "helper": "Click on any experience to get more details via WhatsApp"
+    },
+    "search": {
+      "title": "Find Your Perfect Stay",
+      "subtitle": "Search 500+ hotels and packages with advanced filters"
+    },
+    "packages": {
+      "title": "Curated Travel Experiences",
+      "subtitle": "Handpicked packages combining luxury accommodation, authentic experiences, and unforgettable adventures",
+      "viewAll": "Explore All Packages",
+      "featured": "Featured"
+    },
+    "properties": {
+      "title": "Featured Properties",
+      "subtitle": "Carefully selected accommodations for your ultimate Maldives experience",
+      "viewAll": "View All Properties"
+    },
+    "whyChoose": {
+      "title": "Why Choose Thread Travels?",
+      "subtitle": "We're not just a travel agency – we're your personal gateway to Maldives paradise",
+      "localExpertise": "Local Expertise",
+      "localExpertiseDesc": "Our team has personally visited and verified every property. We know the hidden gems that tourists rarely discover.",
+      "qualityAssured": "Quality Assured",
+      "qualityAssuredDesc": "Every property meets our strict standards for cleanliness, service, and authentic local experiences.",
+      "personalSupport": "Personal Support",
+      "personalSupportDesc": "From planning to checkout, we're with you 24/7. Your perfect vacation is our priority."
+    },
+    "cta": {
+      "title": "Ready to Start Your Maldives Adventure?",
+      "subtitle": "Let us help you find the perfect property and create unforgettable memories in paradise",
+      "chatWhatsApp": "Chat on WhatsApp",
+      "callUs": "Call Us Now"
+    },
+    "error": {
+      "title": "Failed to Load Homepage",
+      "message": "Something went wrong. Please try again.",
+      "reload": "Reload Page"
+    }
+  },
+  "property": {
+    "details": "View Details",
+    "bookNow": "Book Now",
+    "perNight": "per night",
+    "reviews": "reviews",
+    "amenities": "Amenities",
+    "location": "Location",
+    "price": "Price",
+    "rating": "Rating",
+    "description": "Description",
+    "features": "Features",
+    "gallery": "Gallery",
+    "availability": "Availability",
+    "contactHost": "Contact Host"
+  },
+  "package": {
+    "details": "View Details",
+    "bookNow": "Book Now",
+    "duration": "days",
+    "maxTravelers": "Max travelers",
+    "destinations": "destinations",
+    "highlights": "Highlights",
+    "included": "What's Included",
+    "itinerary": "Itinerary",
+    "pricing": "Pricing",
+    "reviews": "Reviews"
+  },
+  "packageBooking": {
+    "error": {
+      "loadFailed": "Failed to load package details"
+    },
+    "notFound": {
+      "title": "Package Not Found",
+      "description": "The package you're looking for doesn't exist.",
+      "browsePackages": "Browse Packages"
+    },
+    "header": {
+      "backToPackage": "Back to Package",
+      "title": "Book Your Package"
+    },
+    "defaultDestination": "Maldives Paradise",
+    "duration": "{{count}} days",
+    "reviews": "({{count}} reviews)",
+    "perPerson": "per person",
+    "bookingMethod": {
+      "title": "Choose Your Booking Method",
+      "form": {
+        "title": "Book via Form",
+        "description": "Fill out our detailed booking form with your preferences and special requests.",
+        "features": {
+          "detailedForm": "Detailed booking form",
+          "availability": "Availability checking",
+          "specialRequests": "Special requests",
+          "instantConfirmation": "Instant confirmation"
+        },
+        "button": "Book via Form"
+      },
+      "whatsapp": {
+        "title": "Book via WhatsApp",
+        "description": "Get instant assistance and personalized booking support through WhatsApp.",
+        "features": {
+          "instantCommunication": "Instant communication",
+          "personalizedAssistance": "Personalized assistance",
+          "quickResponses": "Quick responses",
+          "flexibleArrangements": "Flexible arrangements"
+        },
+        "button": "Book via WhatsApp"
+      }
+    },
+    "sidebar": {
+      "packageDetails": {
+        "title": "Package Details",
+        "duration": "Duration",
+        "durationValue": "{{count}} days",
+        "maxTravelers": "Max Travelers",
+        "maxTravelersValue": "Up to {{count}} people",
+        "destinations": "Destinations",
+        "destinationsValue": "{{count}} islands"
+      },
+      "highlights": {
+        "title": "Highlights"
+      },
+      "contactInfo": {
+        "title": "Contact Information"
+      }
+    }
+  },
+  "about": {
+    "hero": {
+      "badge": "About Thread Travels",
+      "title": "About Maldives Travel",
+      "subtitle": "Your trusted partner in discovering the magic of the Maldives. We specialize in creating unforgettable travel experiences that connect you with the beauty and culture of this paradise destination.",
+      "getInTouch": "Get in Touch",
+      "learnMore": "Learn More"
+    },
+    "stats": {
+      "happyTravelers": {
+        "label": "Happy Travelers",
+        "description": "Satisfied customers worldwide"
+      },
+      "destinations": {
+        "label": "Destinations",
+        "description": "Beautiful locations across Maldives"
+      },
+      "yearsExperience": {
+        "label": "Years Experience",
+        "description": "Professional travel expertise"
+      },
+      "averageRating": {
+        "label": "Average Rating",
+        "description": "Customer satisfaction score"
+      }
+    },
+    "story": {
+      "title": "Our Story",
+      "paragraph1": "Founded with a passion for showcasing the authentic beauty of the Maldives, we've been connecting travelers with extraordinary experiences since our inception. Our journey began with a simple mission: to make the magic of the Maldives accessible to everyone.",
+      "paragraph2": "We believe that every traveler deserves to experience the pristine beaches, crystal-clear waters, and warm hospitality that make the Maldives truly special. That's why we've built relationships with the best local properties and created packages that offer genuine value.",
+      "paragraph3": "Today, we're proud to be your trusted partner in discovering the hidden gems and popular destinations of the Maldives, ensuring every trip is memorable and meaningful."
+    },
+    "values": {
+      "title": "Our Values",
+      "subtitle": "The principles that guide everything we do and every experience we create.",
+      "authenticExperiences": {
+        "title": "Authentic Experiences",
+        "description": "We believe in providing genuine, local experiences that connect travelers with the true essence of the Maldives."
+      },
+      "qualityAssurance": {
+        "title": "Quality Assurance",
+        "description": "Every package is personally verified to ensure the highest standards of quality and service."
+      },
+      "sustainableTourism": {
+        "title": "Sustainable Tourism",
+        "description": "We're committed to promoting responsible tourism that preserves the natural beauty of the Maldives."
+      },
+      "customerFirst": {
+        "title": "Customer First",
+        "description": "Your satisfaction is our priority. We go above and beyond to create memorable experiences."
+      }
+    },
+    "whyChoose": {
+      "title": "Why Choose Maldives Travel?",
+      "subtitle": "We're not just another travel agency. Here's what makes us special.",
+      "localExpertise": {
+        "title": "Local Expertise",
+        "description": "Our team has deep local knowledge and connections throughout the Maldives."
+      },
+      "verifiedPackages": {
+        "title": "Verified Packages",
+        "description": "Every package is personally visited and verified for quality and safety."
+      },
+      "support": {
+        "title": "24/7 Support",
+        "description": "Round-the-clock support to ensure your trip goes smoothly."
+      },
+      "personalizedService": {
+        "title": "Personalized Service",
+        "description": "Customized itineraries tailored to your preferences and budget."
+      },
+      "sustainableTourism": {
+        "title": "Sustainable Tourism",
+        "description": "We promote responsible tourism that benefits local communities."
+      },
+      "transparentPricing": {
+        "title": "Transparent Pricing",
+        "description": "No hidden fees or surprises. Clear, upfront pricing for all services."
+      }
+    },
+    "cta": {
+      "title": "Ready to Start Your Maldives Adventure?",
+      "subtitle": "Let us help you create memories that will last a lifetime in paradise.",
+      "browsePackages": "Browse Packages",
+      "contactUs": "Contact Us"
+    }
+  },
+  "blog": {
+    "hero": {
+      "title": "Maldives Travel Blog",
+      "subtitle": "Discover travel tips, destination guides, and insider knowledge to help you plan the perfect Maldives adventure."
+    },
+    "search": {
+      "placeholder": "Search articles...",
+      "results": "Found {{count}} article{{count !== 1 ? 's' : ''}} matching \"{{term}}\""
+    },
+    "categories": {
+      "all": "All Categories"
+    },
+    "featured": {
+      "title": "Featured Articles"
+    },
+    "latest": {
+      "title": "Latest Articles"
+    },
+    "readMore": "Read More",
+    "noResults": {
+      "title": "No articles found",
+      "description": "Try adjusting your search terms or browse all categories."
+    },
+    "newsletter": {
+      "title": "Stay Updated",
+      "description": "Subscribe to our newsletter for the latest travel tips, destination guides, and exclusive offers.",
+      "emailPlaceholder": "Enter your email",
+      "subscribe": "Subscribe"
+    }
+  },
+  "footer": {
+    "translatePage": "Translate Page",
+    "translatePageHeader": "Translate Page",
+    "translatePageSubheader": "Choose your language",
+    "poweredByGoogleTranslate": "Powered by Google Translate",
+    "usingFallbackTranslation": "Using fallback translation (Google Translate blocked)"
+  },
+  "packageCard": {
+    "defaultDestination": "Maldives Paradise",
+    "defaultHighlights": {
+      "allInclusive": "All-inclusive",
+      "waterActivities": "Water activities",
+      "localTours": "Local tours"
+    },
+    "imageUnavailable": "Image unavailable",
+    "perPerson": "per person",
+    "featured": "Featured",
+    "duration": "{{count}} days",
+    "maxTravelers": "Up to {{count}}",
+    "islands": "{{count}} islands",
+    "moreHighlights": "+{{count}} more",
+    "viewDetails": "View Details",
+    "bookNow": "Book Now"
+  },
+  "bookingModal": {
+    "title": "Book Your Maldives Adventure",
+    "subtitle": "Choose how you'd like to proceed with your booking",
+    "whatsappOpened": {
+      "title": "WhatsApp opened!",
+      "description": "You can now chat with us directly about your booking."
+    },
+    "whatsappFormBooking": {
+      "description": "We've prepared a detailed message with all the information needed for your booking."
+    },
+    "packageSummary": {
+      "maxTravelers": "Up to {{count}} travelers",
+      "available": "Available"
+    },
+    "directWhatsApp": {
+      "title": "Direct WhatsApp Booking",
+      "description": "Chat with us instantly for immediate assistance",
+      "features": {
+        "instant": "Instant",
+        "secure": "Secure",
+        "personal": "Personal"
+      }
+    },
+    "or": "OR",
+    "bookingForm": {
+      "title": "Fill Booking Form",
+      "description": "Complete a detailed form for comprehensive booking",
+      "features": {
+        "detailed": "Detailed",
+        "secure": "Secure",
+        "structured": "Structured"
+      }
+    },
+    "importantInfo": {
+      "title": "Important Booking Information",
+      "availability": "• All bookings are subject to availability confirmation",
+      "response": "• We'll check availability and get back to you within 24 hours",
+      "payment": "• Payment is required to confirm your booking",
+      "cancellation": "• Cancellation policies apply based on your selected package"
+    },
+    "contactInfo": {
+      "title": "Need immediate assistance?",
+              "description": "Call us or WhatsApp us anytime"
+    }
+  },
+  "packageActivities": {
+    "title": "Activities & Experiences",
+    "included": "Included",
+    "optional": "Optional"
+  },
+  "packages": {
+    "hero": {
+      "badge": "Curated Packages & Custom Experiences",
+      "title": "Travel Packages & Experiences",
+      "subtitle": "Choose from our curated packages or create your own custom experience. From luxury getaways to adventure packages, find your perfect journey or design it yourself.",
+      "stats": {
+        "curatedPackages": "Curated Packages",
+        "customExperiences": "Custom Experiences",
+        "destinations": "Destinations",
+        "averageRating": "Average Rating"
+      }
+    },
+    "curated": {
+      "badge": "Curated Packages",
+      "title": "Curated Maldives Packages",
+      "subtitle": "Handpicked packages combining the best accommodations, activities, and experiences for the perfect Maldives getaway"
+    },
+    "search": {
+      "placeholder": "Search packages, custom experiences, or destinations..."
+    },
+    "filters": {
+      "allDestinations": "All Destinations",
+      "allCategories": "All Categories",
+      "advanced": "Advanced Filters",
+      "clearAll": "Clear All",
+      "duration": "Duration",
+      "anyDuration": "Any Duration",
+      "days": "{{count}} Days",
+      "sortBy": "Sort By",
+      "featured": "Featured",
+      "priceLowToHigh": "Price: Low to High",
+      "priceHighToLow": "Price: High to Low",
+      "rating": "Rating",
+      "priceRange": "Price Range",
+      "min": "Min",
+      "max": "Max",
+      "hide": "Hide",
+      "show": "Show",
+      "filters": "Filters"
+    },
+    "results": {
+      "found": "{{count}} Curated Packages Found",
+      "showingFor": "Showing results for \"{{term}}\"",
+      "getHelp": "Get Help"
+    },
+    "card": {
+      "featured": "Featured",
+      "discount": "{{percentage}}% OFF",
+      "days": "{{count}} days",
+      "upTo": "Up to {{count}}",
+      "destinations": "Destinations:",
+      "more": "+{{count}} more",
+      "highlights": "Highlights:",
+      "moreActivities": "+{{count}} more activities",
+      "whatsIncluded": "What's Included:",
+      "moreInclusions": "+{{count}} more inclusions",
+      "save": "Save ${{amount}} ({{percentage}}% off)",
+      "totalFor": "Total for {{count}}"
+    },
+    "error": {
+      "title": "Error loading packages",
+      "unknown": "Unknown error"
+    },
+    "noResults": {
+      "title": "No packages found",
+      "message": "Try adjusting your search criteria or filters to find more packages.",
+      "clearFilters": "Clear All Filters"
+    },
+    "builder": {
+      "badge": "Custom Package Builder",
+      "title": "Create Your Own Package",
+      "subtitle": "Don't see a package that fits your needs? Design your own custom Maldives experience by combining destinations, experiences, and accommodations exactly how you want them.",
+      "progress": {
+        "title": "Package Progress",
+        "steps": "{{completed}}/4 steps completed"
+      }
+    }
+  },
+  "booking": {
+    "title": "Book Your Stay",
+    "checkIn": "Check-in",
+    "checkOut": "Check-out",
+    "guests": "Guests",
+    "total": "Total",
+    "specialRequests": "Special Requests",
+    "contactInfo": "Contact Information",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "confirmBooking": "Confirm Booking",
+    "bookingSummary": "Booking Summary"
+  },
+  "contact": {
+    "title": "Contact Us",
+    "subtitle": "Get in touch with our travel experts",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "message": "Message",
+    "sendMessage": "Send Message",
+    "address": "Address",
+    "hours": "Business Hours",
+    "hero": {
+      "badge": "Get in Touch",
+      "title": "Contact Us",
+      "subtitle": "Ready to start your Maldives adventure? We're here to help you plan the perfect trip. Get in touch with us through any of the channels below.",
+      "whatsapp": "WhatsApp Us",
+      "sendMessage": "Send Message"
+    },
+    "info": {
+      "email": {
+        "title": "Email",
+        "description": "Send us an email anytime",
+        "action": "Send Email"
+      },
+      "phone": {
+        "title": "Phone",
+        "description": "Call us for immediate assistance",
+        "action": "Call Now"
+      },
+      "address": {
+        "title": "Address",
+        "description": "Visit our office",
+        "action": "Get Directions"
+      }
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "subtitle": "Find quick answers to common questions about our services and the Maldives.",
+      "booking": {
+        "question": "How do I book a package?",
+        "answer": "You can book packages through WhatsApp, email, or by calling us directly. We'll guide you through the entire process."
+      },
+      "inclusions": {
+        "question": "What's included in the travel packages?",
+        "answer": "Our packages typically include accommodation, some meals, transportation, and guided activities. Specific inclusions vary by package."
+      },
+      "transfers": {
+        "question": "Do you offer airport transfers?",
+        "answer": "Yes, we can arrange airport transfers for most packages. This service is often included in our packages."
+      },
+      "bestTime": {
+        "question": "What's the best time to visit the Maldives?",
+        "answer": "The Maldives is a year-round destination, but the best weather is typically from November to April during the dry season."
+      }
+    },
+    "success": {
+      "title": "Message sent successfully!",
+      "message": "We'll get back to you within 24 hours."
+    }
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "forgotPassword": "Forgot Password?",
+    "rememberMe": "Remember Me",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "alreadyHaveAccount": "Already have an account?",
+    "dontHaveAccount": "Don't have an account?"
+  },
+  "errors": {
+    "networkError": "Network error. Please check your connection and try again.",
+    "serverError": "Server error. Please try again later.",
+    "notFound": "The requested resource was not found.",
+    "unauthorized": "You are not authorized to perform this action.",
+    "validationError": "Please check your input and try again.",
+    "unknownError": "An unexpected error occurred. Please try again."
+  },
+  "success": {
+    "bookingSent": "Booking request sent successfully!",
+    "messageSent": "Message sent successfully!",
+    "profileUpdated": "Profile updated successfully!",
+    "loginSuccess": "Login successful!",
+    "logoutSuccess": "Logout successful!"
+  },
+  "faq": {
+    "page": {
+      "title": "Frequently Asked Questions",
+      "description": "Find answers to common questions about traveling to the Maldives, booking packages, and planning your perfect vacation."
+    },
+    "search": {
+      "placeholder": "Search questions...",
+      "results": "Found {{count}} question{{count !== 1 ? 's' : ''}} matching \"{{term}}\""
+    },
+    "categories": {
+      "all": "All Categories",
+      "booking": "Booking & Reservations",
+      "travel": "Travel & Transportation",
+      "accommodation": "Accommodation & Packages",
+      "practical": "Practical Information",
+      "cultural": "Cultural & Local Tips"
+    },
+    "noResults": {
+      "title": "No questions found",
+      "description": "Try adjusting your search terms or browse all categories."
+    },
+    "contact": {
+      "title": "Still have questions?",
+      "description": "Can't find what you're looking for? Our travel experts are here to help!",
+      "contactUs": "Contact Us",
+      "chatWhatsApp": "Chat on WhatsApp",
+      "whatsappMessage": "Hi! I have a question about your travel services."
+    },
+    "booking": {
+      "howToBook": {
+        "question": "How do I book a package in the Maldives?",
+        "answer": "You can book packages through our website, WhatsApp, email, or by calling us directly. We recommend contacting us via WhatsApp for immediate assistance and personalized recommendations based on your preferences and budget."
+      },
+      "paymentMethods": {
+        "question": "What payment methods do you accept?",
+        "answer": "We accept various payment methods including bank transfers, credit cards, PayPal, and local payment options. Payment terms vary by package - some require deposits while others require full payment upfront."
+      },
+      "cancellationPolicy": {
+        "question": "What is your cancellation policy?",
+        "answer": "Cancellation policies vary by package, but most offer free cancellation up to 24-48 hours before departure. Some luxury packages may require 72 hours notice. We always recommend purchasing travel insurance for added protection."
+      }
+    },
+    "travel": {
+      "gettingThere": {
+        "question": "How do I get to the Maldives?",
+        "answer": "The Maldives is accessible by international flights to Velana International Airport (MLE) in Male. Major airlines from Europe, Asia, and the Middle East operate regular flights. From Male, you can reach other islands by domestic flights, speedboats, or seaplanes."
+      },
+      "airportTransfers": {
+        "question": "Do you provide airport transfers?",
+        "answer": "Yes, we can arrange airport transfers for most packages. This service is often included in our packages. Transfers can be by speedboat, seaplane, or domestic flight depending on your destination island."
+      },
+      "bestTime": {
+        "question": "What is the best time to visit the Maldives?",
+        "answer": "The Maldives is a year-round destination, but the best weather is typically from November to April during the dry season. The monsoon season (May to October) brings more rain but also lower prices and fewer crowds."
+      }
+    },
+    "cultural": {
+      "localCustoms": {
+        "question": "What local customs should I be aware of?",
+        "answer": "The Maldives is a Muslim country, so dress modestly when visiting local islands. Remove shoes before entering homes or mosques. Public displays of affection should be avoided. Alcohol is only available in resorts, not on local islands."
+      },
+      "language": {
+        "question": "Do I need to speak Dhivehi?",
+        "answer": "No, English is widely spoken in tourist areas and resorts. However, learning a few basic Dhivehi phrases like 'hello' (assalaamu alaikum) and 'thank you' (shukuriyaa) is appreciated by locals."
+      },
+      "tipping": {
+        "question": "What is the tipping culture in the Maldives?",
+        "answer": "Tipping is appreciated but not mandatory. In resorts, a 10% service charge is usually included. Additional tipping of $5-10 per day for good service is common. For local island stays, smaller amounts are appropriate."
+      }
+    }
+  },
+  "trust": {
+    "certifications": {
+      "title": "Our Certifications",
+      "description": "We are proud to be certified by leading travel industry organizations",
+      "items": [
+        {
+          "name": "Maldives Tourism Authority",
+          "description": "Official licensed travel agency"
+        },
+        {
+          "name": "IATA Member",
+          "description": "International Air Transport Association"
+        },
+        {
+          "name": "PATA Member",
+          "description": "Pacific Asia Travel Association"
+        }
+      ]
+    },
+    "guarantees": {
+      "title": "Our Guarantees",
+      "description": "Your satisfaction and safety are our top priorities",
+      "items": [
+        {
+          "name": "Quality Guarantee",
+          "description": "All properties personally verified by our team"
+        },
+        {
+          "name": "Price Match",
+          "description": "We'll match any lower price you find"
+        },
+        {
+          "name": "24/7 Support",
+          "description": "Round-the-clock assistance during your trip"
+        }
+      ]
+    }
+  },
+  "personalization": {
+    "preferences": {
+      "title": "Your Preferences",
+      "description": "Help us personalize your experience",
+      "budget": "Budget Range",
+      "travelStyle": "Travel Style",
+      "activities": "Preferred Activities",
+      "accommodation": "Accommodation Type",
+      "destinations": "Preferred Destinations"
+    },
+    "recommendations": {
+      "title": "Recommended for You",
+      "description": "Based on your preferences and previous searches",
+      "viewAll": "View All Recommendations"
+    },
+    "favorites": {
+      "title": "Your Favorites",
+      "description": "Save properties and packages you love",
+      "addToFavorites": "Add to Favorites",
+      "removeFromFavorites": "Remove from Favorites",
+      "noFavorites": "You haven't added any favorites yet"
+    }
+  },
+  "mobile": {
+    "navigation": {
+      "menu": "Menu",
+      "search": "Search",
+      "favorites": "Favorites",
+      "bookings": "My Bookings",
+      "profile": "Profile"
+    },
+    "features": {
+      "offlineMode": "Offline Mode",
+      "offlineModeDesc": "View saved content without internet",
+      "quickBook": "Quick Book",
+      "quickBookDesc": "Book with just a few taps",
+      "locationServices": "Location Services",
+      "locationServicesDesc": "Find nearby attractions and services"
+    }
+  },
+  "newsletter": {
+    "valid": "Valid email required",
+    "subscribed": "Subscribed!",
+    "desc": "We'll keep you posted with Maldives deals.",
+    "title": "Maldives Deals & Insider Tips",
+    "subtitle": "Get exclusive offers on Maldives stays and experiences—straight to your inbox.",
+    "placeholder": "Enter your email address",
+    "subscribe": "Subscribe",
+    "privacy": "We respect your privacy. Unsubscribe anytime."
+  },
+  "trust": {
+    "badge": "Travel Confidently",
+    "title": "Travel Confidently, Book Seamlessly",
+    "subtitle": "Booking curated Maldives experiences is easy, safe, and transparent—so you can focus on the trip, not the logistics.",
+    "features": {
+      "secure": "Secure Payments",
+      "secureDesc": "Your bookings are protected with secure payment processing.",
+      "local": "Local Expertise",
+      "localDesc": "Curated Maldives experiences with verified local partners.",
+      "support": "Personal Support",
+      "supportDesc": "Friendly help from real humans—before, during, and after your trip.",
+      "reviews": "Great Reviews",
+      "reviewsDesc": "We strive for excellence on every trip we organize."
+    },
+    "trustedTitle": "Trusted by Travelers",
+    "trustedSubtitle": "We're committed to excellent service",
+    "aim": "We aim to delight every traveler",
+    "why": {
+      "title": "Why Choose Us?",
+      "subtitle": "We make Maldives trip planning simple and stress-free.",
+      "verified": "Verified Partners",
+      "verifiedDesc": "We carefully vet our local partners for quality and reliability.",
+      "flexible": "Flexible Payments",
+      "flexibleDesc": "Multiple payment options with industry-grade security.",
+      "assistance": "24/7 Assistance",
+      "assistanceDesc": "Round-the-clock support for your peace of mind.",
+      "instant": "Instant Confirmations",
+      "instantDesc": "Fast responses and quick confirmations.",
+      "value": "Best Value",
+      "valueDesc": "Transparent pricing and the right package for your budget."
+    }
   }
 } 

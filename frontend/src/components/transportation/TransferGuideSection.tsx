@@ -34,8 +34,10 @@ import {
   ShieldCheckIcon,
   UserGroupIcon,
 } from '@heroicons/react/24/outline';
+import { useWhatsApp } from '../../hooks/useQueries';
 
 export const TransferGuideSection = React.memo(() => {
+  const { whatsappNumber } = useWhatsApp();
   const guideSteps = [
     {
       step: 1,
@@ -255,7 +257,7 @@ export const TransferGuideSection = React.memo(() => {
                   <Icon as={PhoneIcon} className="w-5 h-5 text-blue-600" />
                   <Text className="font-semibold text-gray-800">Emergency Hotline</Text>
                 </HStack>
-                <Text className="text-gray-700">+960 744-1097 (24/7)</Text>
+                <Text className="text-gray-700">{whatsappNumber} (24/7)</Text>
               </Box>
               
               <Box>

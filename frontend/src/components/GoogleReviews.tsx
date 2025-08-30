@@ -19,12 +19,16 @@ interface GoogleReviewsProps {
   placeId?: string;
   maxReviews?: number;
   showHeader?: boolean;
+  className?: string;
+  compact?: boolean;
 }
 
 export function GoogleReviews({ 
   placeId = 'YOUR_GOOGLE_PLACE_ID', 
   maxReviews = 6, 
-  showHeader = true 
+  showHeader = true,
+  className = '',
+  compact = false
 }: GoogleReviewsProps) {
   const [reviews, setReviews] = useState<GoogleReview[]>([]);
   const [loading, setLoading] = useState(true);
@@ -159,7 +163,7 @@ export function GoogleReviews({
   }
 
   return (
-    <div className="space-y-6">
+    <div className={`space-y-6 ${className}`}>
       {showHeader && (
         <div className="text-center">
           <div className="flex items-center justify-center space-x-2 mb-2">
@@ -169,7 +173,7 @@ export function GoogleReviews({
             </span>
             <span className="text-gray-500">({totalReviews} reviews)</span>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          <h2 className={`font-bold text-gray-900 mb-2 ${compact ? 'text-xl' : 'text-2xl'}`}>
             What Our Customers Say
           </h2>
           <p className="text-gray-600">
@@ -178,43 +182,45 @@ export function GoogleReviews({
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className={`grid gap-6 ${compact ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
         {reviews.map((review) => (
-          <Card key={review.id} className="p-6">
+          <Card key={review.id} className={compact ? "p-4" : "p-6"}>
             <div className="flex items-start space-x-3 mb-4">
               <img
                 src={review.profile_photo_url}
                 alt={review.author_name}
-                className="w-10 h-10 rounded-full"
+                className={compact ? "w-8 h-8 rounded-full" : "w-10 h-10 rounded-full"}
               />
               <div className="flex-1">
-                <h4 className="font-semibold text-gray-900">{review.author_name}</h4>
+                <h4 className={`font-semibold text-gray-900 ${compact ? 'text-sm' : ''}`}>{review.author_name}</h4>
                 <div className="flex items-center space-x-1">
                   {renderStars(review.rating)}
-                  <span className="text-sm text-gray-500 ml-2">
+                  <span className="text-xs text-gray-500 ml-2">
                     {review.relative_time_description}
                   </span>
                 </div>
               </div>
             </div>
             
-            <p className="text-gray-700 text-sm leading-relaxed">
-              "{review.text}"
+            <p className={`text-gray-700 leading-relaxed ${compact ? 'text-xs' : 'text-sm'}`}>
+              "{compact && review.text.length > 120 ? review.text.substring(0, 120) + '...' : review.text}"
             </p>
           </Card>
         ))}
       </div>
 
-      <div className="text-center">
-        <a
-          href="https://g.page/thread-travels-maldives/review"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-        >
-          Leave a Review
-        </a>
-      </div>
+      {!compact && (
+        <div className="text-center">
+          <a
+            href="https://g.page/thread-travels-maldives/review"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+          >
+            Leave a Review
+          </a>
+        </div>
+      )}
     </div>
   );
 }

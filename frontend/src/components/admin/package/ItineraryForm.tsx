@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   VStack,
   HStack,
@@ -14,6 +14,14 @@ import {
   Divider,
   Badge,
   Flex,
+  Tag,
+  TagLabel,
+  TagCloseButton,
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  PopoverBody,
+  PopoverArrow,
 } from '@chakra-ui/react';
 import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 
@@ -23,6 +31,10 @@ interface ItineraryFormProps {
 }
 
 export function ItineraryForm({ form, updateForm }: ItineraryFormProps) {
+  const [search, setSearch] = useState<string>('');
+  const allActivities = useMemo(() => (form.activities || []).map((a: any, i: number) => ({ id: a.id || i + 1, name: a.name })), [form.activities]);
+  const getAllActivities = () => allActivities;
+
   const addDay = () => {
     const newDay = {
       day: form.itinerary.length + 1,
@@ -179,7 +191,7 @@ export function ItineraryForm({ form, updateForm }: ItineraryFormProps) {
                 </VStack>
 
                 <VStack spacing={4} align="stretch">
-                  {/* Activities */}
+                  {/* Activities (free text) */}
                   <Box>
                     <Flex justify="space-between" align="center" mb={2}>
                       <FormLabel fontWeight="semibold" color="gray.700" mb={0}>
@@ -217,6 +229,68 @@ export function ItineraryForm({ form, updateForm }: ItineraryFormProps) {
                         </Flex>
                       ))}
                     </VStack>
+                  </Box>
+
+                  {/* Linked Activities (picker) */}
+                  <Box>
+                    <FormLabel fontWeight="semibold" color="gray.700" mb={1}>
+                      Link Existing Activities (optional)
+                    </FormLabel>
+                    <Popover placement="bottom-start">
+                      <PopoverTrigger>
+                        <Button size="sm" variant="outline" colorScheme="purple">
+                          Add from existing
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent w="sm">
+                        <PopoverArrow />
+                        <PopoverBody>
+                          <Input
+                            placeholder="Search activities..."
+                            size="sm"
+                            borderRadius="md"
+                            mb={2}
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            focusBorderColor="purple.500"
+                          />
+                          <VStack align="stretch" spacing={1} maxH="240px" overflowY="auto">
+                            {getAllActivities()
+                              .filter((opt: any) => !search || (opt.name || '').toLowerCase().includes(search.toLowerCase()))
+                              .map((opt: any) => (
+                              <Button
+                                key={opt.id}
+                                size="sm"
+                                justifyContent="flex-start"
+                                onClick={() => {
+                                  const current = day.activity_ids || [];
+                                  if (!current.includes(opt.id)) {
+                                    updateDay(dayIndex, 'activity_ids', [...current, opt.id]);
+                                  }
+                                }}
+                                variant="ghost"
+                              >
+                                {opt.name}
+                              </Button>
+                              ))}
+                          </VStack>
+                        </PopoverBody>
+                      </PopoverContent>
+                    </Popover>
+
+                    {/* Selected tags */}
+                    <HStack spacing={2} mt={2} wrap="wrap">
+                      {(day.activity_ids || []).map((id: number) => {
+                        const match = getAllActivities().find((a: any) => a.id === id);
+                        const label = match ? match.name : `#${id}`;
+                        return (
+                          <Tag key={id} colorScheme="purple" variant="subtle" borderRadius="full">
+                            <TagLabel>{label}</TagLabel>
+                            <TagCloseButton onClick={() => updateDay(dayIndex, 'activity_ids', (day.activity_ids || []).filter((x: number) => x !== id))} />
+                          </Tag>
+                        );
+                      })}
+                    </HStack>
                   </Box>
 
                   {/* Meals */}

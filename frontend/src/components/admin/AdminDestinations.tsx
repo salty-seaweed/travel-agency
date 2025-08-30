@@ -34,6 +34,11 @@ import {
   AlertTitle,
   AlertDescription,
   useColorModeValue,
+  Tabs,
+  TabList,
+  TabPanels,
+  Tab,
+  TabPanel,
 } from '@chakra-ui/react';
 import {
   PlusIcon,
@@ -42,10 +47,12 @@ import {
   EyeIcon,
   EyeSlashIcon,
   StarIcon,
+  MapIcon,
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
 import { useDestinations } from '../../hooks/useQueries';
 import { LoadingSpinner } from '../LoadingSpinner';
+import { LocationMapPicker } from './LocationMapPicker';
 import type { Destination } from '../../types';
 
 interface DestinationFormData {
@@ -72,7 +79,16 @@ export function AdminDestinations() {
     is_featured: false,
     is_active: true,
   });
+  const [activeTab, setActiveTab] = useState(0);
   const toast = useToast();
+
+  const handleLocationSelect = (lat: number, lng: number) => {
+    setFormData(prev => ({
+      ...prev,
+      latitude: lat,
+      longitude: lng
+    }));
+  };
   
   const { data: destinations, isLoading, error, refetch } = useDestinations();
   
@@ -92,6 +108,7 @@ export function AdminDestinations() {
       is_featured: destination.is_featured,
       is_active: destination.is_active,
     });
+    setActiveTab(0);
     onOpen();
   };
 
@@ -107,6 +124,7 @@ export function AdminDestinations() {
       is_featured: false,
       is_active: true,
     });
+    setActiveTab(0);
     onOpen();
   };
 
@@ -296,105 +314,124 @@ export function AdminDestinations() {
         </Box>
 
         {/* Create/Edit Modal */}
-        <Modal isOpen={isOpen} onClose={onClose} size="xl">
+        <Modal isOpen={isOpen} onClose={onClose} size="4xl">
           <ModalOverlay />
-          <ModalContent>
+          <ModalContent maxH="90vh">
             <ModalHeader>
               {editingDestination ? 'Edit Destination' : 'Create Destination'}
             </ModalHeader>
             <ModalCloseButton />
-            <ModalBody pb={6}>
-              <VStack spacing={4}>
-                <FormControl>
-                  <FormLabel>Name</FormLabel>
-                  <Input
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="Destination name"
-                  />
-                </FormControl>
+            <ModalBody pb={6} overflowY="auto">
+              <Tabs index={activeTab} onChange={setActiveTab}>
+                <TabList>
+                  <Tab>Basic Information</Tab>
+                  <Tab>
+                    <HStack spacing={2}>
+                      <MapIcon className="w-4 h-4" />
+                      <Text>Location</Text>
+                    </HStack>
+                  </Tab>
+                </TabList>
 
-                <FormControl>
-                  <FormLabel>Description</FormLabel>
-                  <Textarea
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Destination description"
-                    rows={3}
-                  />
-                </FormControl>
+                <TabPanels>
+                  {/* Basic Information Tab */}
+                  <TabPanel>
+                    <VStack spacing={4}>
+                      <FormControl>
+                        <FormLabel>Name</FormLabel>
+                        <Input
+                          value={formData.name}
+                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                          placeholder="Destination name"
+                        />
+                      </FormControl>
 
-                <HStack spacing={4} w="full">
-                  <FormControl>
-                    <FormLabel>Island</FormLabel>
-                    <Input
-                      value={formData.island}
-                      onChange={(e) => setFormData({ ...formData, island: e.target.value })}
-                      placeholder="Island name"
-                    />
-                  </FormControl>
+                      <FormControl>
+                        <FormLabel>Description</FormLabel>
+                        <Textarea
+                          value={formData.description}
+                          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                          placeholder="Destination description"
+                          rows={3}
+                        />
+                      </FormControl>
 
-                  <FormControl>
-                    <FormLabel>Atoll</FormLabel>
-                    <Input
-                      value={formData.atoll}
-                      onChange={(e) => setFormData({ ...formData, atoll: e.target.value })}
-                      placeholder="Atoll name"
-                    />
-                  </FormControl>
-                </HStack>
+                      <HStack spacing={4} w="full">
+                        <FormControl>
+                          <FormLabel>Island</FormLabel>
+                          <Input
+                            value={formData.island}
+                            onChange={(e) => setFormData({ ...formData, island: e.target.value })}
+                            placeholder="Island name"
+                          />
+                        </FormControl>
 
-                <HStack spacing={4} w="full">
-                  <FormControl>
-                    <FormLabel>Latitude</FormLabel>
-                    <Input
-                      type="number"
-                      step="any"
-                      value={formData.latitude || ''}
-                      onChange={(e) => setFormData({ ...formData, latitude: parseFloat(e.target.value) || undefined })}
-                      placeholder="Latitude"
-                    />
-                  </FormControl>
+                        <FormControl>
+                          <FormLabel>Atoll</FormLabel>
+                          <Input
+                            value={formData.atoll}
+                            onChange={(e) => setFormData({ ...formData, atoll: e.target.value })}
+                            placeholder="Atoll name"
+                          />
+                        </FormControl>
+                      </HStack>
 
-                  <FormControl>
-                    <FormLabel>Longitude</FormLabel>
-                    <Input
-                      type="number"
-                      step="any"
-                      value={formData.longitude || ''}
-                      onChange={(e) => setFormData({ ...formData, longitude: parseFloat(e.target.value) || undefined })}
-                      placeholder="Longitude"
-                    />
-                  </FormControl>
-                </HStack>
+                      <HStack spacing={6} w="full">
+                        <FormControl display="flex" alignItems="center">
+                          <FormLabel mb="0">Featured</FormLabel>
+                          <Switch
+                            isChecked={formData.is_featured}
+                            onChange={(e) => setFormData({ ...formData, is_featured: e.target.checked })}
+                          />
+                        </FormControl>
 
-                <HStack spacing={6} w="full">
-                  <FormControl display="flex" alignItems="center">
-                    <FormLabel mb="0">Featured</FormLabel>
-                    <Switch
-                      isChecked={formData.is_featured}
-                      onChange={(e) => setFormData({ ...formData, is_featured: e.target.checked })}
-                    />
-                  </FormControl>
+                        <FormControl display="flex" alignItems="center">
+                          <FormLabel mb="0">Active</FormLabel>
+                          <Switch
+                            isChecked={formData.is_active}
+                            onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+                          />
+                        </FormControl>
+                      </HStack>
 
-                  <FormControl display="flex" alignItems="center">
-                    <FormLabel mb="0">Active</FormLabel>
-                    <Switch
-                      isChecked={formData.is_active}
-                      onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                    />
-                  </FormControl>
-                </HStack>
+                      <HStack spacing={4} w="full" pt={4}>
+                        <Button onClick={onClose} flex={1}>
+                          Cancel
+                        </Button>
+                        <Button colorScheme="blue" onClick={handleSubmit} flex={1}>
+                          {editingDestination ? 'Update' : 'Create'}
+                        </Button>
+                      </HStack>
+                    </VStack>
+                  </TabPanel>
 
-                <HStack spacing={4} w="full" pt={4}>
-                  <Button onClick={onClose} flex={1}>
-                    Cancel
-                  </Button>
-                  <Button colorScheme="blue" onClick={handleSubmit} flex={1}>
-                    {editingDestination ? 'Update' : 'Create'}
-                  </Button>
-                </HStack>
-              </VStack>
+                  {/* Location Tab */}
+                  <TabPanel>
+                    <VStack spacing={6}>
+                      <Box w="full">
+                        <Text fontSize="lg" fontWeight="medium" mb={4}>
+                          Select Location on Map
+                        </Text>
+                        <LocationMapPicker
+                          latitude={formData.latitude}
+                          longitude={formData.longitude}
+                          onLocationSelect={handleLocationSelect}
+                          height={400}
+                        />
+                      </Box>
+
+                      <HStack spacing={4} w="full" pt={4}>
+                        <Button onClick={onClose} flex={1}>
+                          Cancel
+                        </Button>
+                        <Button colorScheme="blue" onClick={handleSubmit} flex={1}>
+                          {editingDestination ? 'Update' : 'Create'}
+                        </Button>
+                      </HStack>
+                    </VStack>
+                  </TabPanel>
+                </TabPanels>
+              </Tabs>
             </ModalBody>
           </ModalContent>
         </Modal>

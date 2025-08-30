@@ -169,8 +169,10 @@ export const validation = {
 export const externalServices = {
   whatsapp: {
     baseUrl: 'https://wa.me',
-    getUrl: (message: string) => 
-      `${externalServices.whatsapp.baseUrl}/${config.whatsappNumber.replace('+', '')}?text=${encodeURIComponent(message)}`,
+    getUrl: (message: string, phoneNumber?: string) => {
+      const number = phoneNumber || config.whatsappNumber;
+      return `${externalServices.whatsapp.baseUrl}/${number.replace('+', '')}?text=${encodeURIComponent(message)}`;
+    },
   },
   
   maps: {
@@ -294,8 +296,8 @@ export const getApiUrl = (endpoint: string): string => {
   return `${baseUrl}/${cleanEndpoint}`;
 };
 
-export const getWhatsAppUrl = (message: string): string => {
-  return externalServices.whatsapp.getUrl(message);
+export const getWhatsAppUrl = (message: string, phoneNumber?: string): string => {
+  return externalServices.whatsapp.getUrl(message, phoneNumber);
 };
 
 export const validateConfig = (): boolean => {

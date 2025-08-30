@@ -2,6 +2,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys, invalidateQueries } from '../lib/query-client';
 import { unifiedApi } from '../services/unified-api';
+import { whatsappBooking } from '../services/whatsapp-booking';
 import type { 
   Property, 
   Package, 
@@ -565,5 +566,67 @@ export const useHomepageContent = () => {
     placeholderData: (previousData) => previousData,
   });
 };
+
+// Centralized WhatsApp number hook
+export const useWhatsAppNumber = () => {
+  const { data: homepageContent } = useHomepageContent();
+  
+  // Get WhatsApp number from homepage settings, fallback to config
+  const whatsappNumber = homepageContent?.settings?.whatsapp_number || '+9607441097';
+  
+  return {
+    whatsappNumber,
+    isLoading: !homepageContent,
+  };
+};
+
+// Enhanced WhatsApp hook with URL generation
+export const useWhatsApp = () => {
+  const { whatsappNumber, isLoading } = useWhatsAppNumber();
+  
+  const getWhatsAppUrl = (message: string) => {
+    // Use the improved WhatsApp service for consistent formatting
+    return whatsappBooking.getWhatsAppUrl(message, whatsappNumber);
+  };
+  
+  return {
+    whatsappNumber,
+    getWhatsAppUrl,
+    isLoading,
+  };
+};
+
+// Page hero settings (TTM admin controlled)
+export const usePageHero = (pageKey: string) => {
+  return useQuery({
+    queryKey: ['page-hero', pageKey],
+    queryFn: async () => {
+      const res = await fetch(`/api/page-heroes/?page_key=${encodeURIComponent(pageKey)}&active=true`);
+      if (!res.ok) throw new Error('Failed to fetch page hero');
+      const data = await res.json();
+      return Array.isArray(data) ? data[0] : null;
+    },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
+};
+
+// About page data (TTM admin controlled)
+export const useAboutPageData = () => {
+  return useQuery({
+    queryKey: ['about-page-data'],
+    queryFn: async () => {
+      const res = await fetch('/api/about/data/');
+      if (!res.ok) throw new Error('Failed to fetch about page data');
+      return res.json();
+    },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
+};
+
+
 
 // All hooks are already exported individually above 

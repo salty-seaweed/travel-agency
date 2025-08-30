@@ -6,6 +6,7 @@ import { HelmetProvider } from 'react-helmet-async'
 import { ChakraProvider, extendTheme } from '@chakra-ui/react'
 import App from './App.tsx'
 import AppErrorBoundary from './components/ErrorBoundary.tsx'
+import { CurrencyProvider } from './contexts/CurrencyContext.tsx'
 import { queryClient } from './lib/query-client'
 import './i18n'
 import './main.css'
@@ -131,11 +132,13 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <ChakraProvider theme={theme}>
       <HelmetProvider>
         <QueryClientProvider client={queryClient}>
-          <Router>
-            <AppErrorBoundary level="app" name="AppRoot">
-              <App />
-            </AppErrorBoundary>
-          </Router>
+          <CurrencyProvider>
+            <Router>
+              <AppErrorBoundary level="app" name="AppRoot">
+                <App />
+              </AppErrorBoundary>
+            </Router>
+          </CurrencyProvider>
         </QueryClientProvider>
       </HelmetProvider>
     </ChakraProvider>

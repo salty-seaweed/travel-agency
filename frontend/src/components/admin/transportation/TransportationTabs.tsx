@@ -5,7 +5,7 @@ import {
   Accordion, AccordionItem, AccordionButton, AccordionPanel, AccordionIcon,
   Box, SimpleGrid, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton, ModalFooter,
   FormControl, FormLabel, Input, Textarea, Select, Switch, NumberInput, NumberInputField,
-  NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper,
+  NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper, IconButton,
 } from '@chakra-ui/react';
 import {
   PencilIcon, TrashIcon, PlusIcon, InformationCircleIcon, ChatBubbleLeftRightIcon,
@@ -121,29 +121,36 @@ export const FAQsTab: React.FC<{ data: TransferFAQ[] }> = ({ data }) => {
                     </HStack>
                   </Box>
                   <HStack spacing={1} mr={2}>
-                    <Button 
-                      size="xs" 
-                      variant="ghost"
+                    <Box
+                      as="div"
+                      p={1}
+                      borderRadius="md"
+                      cursor="pointer"
+                      _hover={{ bg: 'gray.100' }}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleEdit(faq);
                       }}
-                      isDisabled={isLoading}
+                      opacity={isLoading ? 0.5 : 1}
+                      pointerEvents={isLoading ? 'none' : 'auto'}
                     >
-                      <Icon as={PencilIcon} className="w-3 h-3" />
-                    </Button>
-                    <Button 
-                      size="xs" 
-                      variant="ghost" 
-                      colorScheme="red"
+                      <Icon as={PencilIcon} className="w-3 h-3" color="gray.600" />
+                    </Box>
+                    <Box
+                      as="div"
+                      p={1}
+                      borderRadius="md"
+                      cursor="pointer"
+                      _hover={{ bg: 'red.50' }}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDelete(faq.id);
                       }}
-                      isDisabled={isLoading}
+                      opacity={isLoading ? 0.5 : 1}
+                      pointerEvents={isLoading ? 'none' : 'auto'}
                     >
-                      <Icon as={TrashIcon} className="w-3 h-3" />
-                    </Button>
+                      <Icon as={TrashIcon} className="w-3 h-3" color="red.500" />
+                    </Box>
                   </HStack>
                   <AccordionIcon />
                 </AccordionButton>

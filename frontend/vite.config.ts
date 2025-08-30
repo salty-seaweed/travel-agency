@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import tailwindcss from '@tailwindcss/vite'
+import autoprefixer from 'autoprefixer'
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -145,7 +146,7 @@ export default defineConfig(({ mode }) => ({
     postcss: {
       plugins: [
         // Add autoprefixer for better browser compatibility
-        require('autoprefixer'),
+        autoprefixer(),
       ],
     },
   },

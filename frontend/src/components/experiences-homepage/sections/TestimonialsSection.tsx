@@ -74,7 +74,7 @@ export const ExperiencesTestimonialsSection: React.FC<TestimonialsSectionProps> 
               fontWeight="bold"
               fontSize={{ base: '2xl', md: '3xl', lg: '4xl' }}
             >
-              What Our Travelers Say
+              {t('homepage.testimonials.title', 'What Our Travelers Say')}
             </Heading>
             <Text
               fontSize="lg"
@@ -82,7 +82,7 @@ export const ExperiencesTestimonialsSection: React.FC<TestimonialsSectionProps> 
               maxW="2xl"
               lineHeight="1.6"
             >
-              Read reviews from thousands of happy customers worldwide
+              {t('homepage.testimonials.subtitle', 'Read reviews from thousands of happy customers worldwide')}
             </Text>
           </VStack>
 

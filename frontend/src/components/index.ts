@@ -7,11 +7,14 @@ export { SearchFilters } from './ui/SearchFilters';
 export { LoadingSpinner } from './LoadingSpinner';
 export { Notification } from './Notification';
 export { LazyImage } from './LazyImage';
-export { InteractiveMap } from './InteractiveMap';
+
 export { GlobalSearch } from './GlobalSearch';
 export { ReviewSystem } from './ReviewSystem';
 export { BookingManagement } from './BookingManagement';
 export { PackageDetailPage } from './PackageDetailPage';
+
+// Package Detail Components
+export * from './package';
 export { GoogleReviews } from './GoogleReviews';
 
 // Layout Components
@@ -28,7 +31,7 @@ export { AboutPage } from './AboutPage';
 export { FAQPage } from './FAQPage';
 export { BlogPage } from './BlogPage';
 export { CustomerDashboard } from './CustomerDashboard';
-export { MapPage } from './MapPage';
+
 export { TransportationPage } from './TransportationPage';
 
 // SEO Components

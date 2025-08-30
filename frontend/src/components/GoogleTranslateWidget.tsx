@@ -1,4 +1,11 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, memo } from 'react';
+import { useTranslation } from '../i18n';
+
+interface Language {
+  code: string;
+  name: string;
+  flag: string;
+}
 
 interface GoogleTranslateWidgetProps {
   className?: string;
@@ -20,10 +27,11 @@ const supportedLanguages = [
   { code: 'it', name: 'Italiano', flag: '🇮🇹' },
 ];
 
-export const GoogleTranslateWidget = React.memo(({ 
+export const GoogleTranslateWidget = memo<GoogleTranslateWidgetProps>(({ 
   className = '', 
   position = 'bottom-right' 
-}: GoogleTranslateWidgetProps) => {
+}) => {
+  const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState('en');
   const [isTranslating, setIsTranslating] = useState(false);
@@ -198,7 +206,7 @@ export const GoogleTranslateWidget = React.memo(({
           
           {/* Tooltip */}
           <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
-            Translate Page
+                         {t('footer.translatePage', 'Translate Page')}
             <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
           </div>
         </button>
@@ -213,8 +221,8 @@ export const GoogleTranslateWidget = React.memo(({
               <div className="flex items-center gap-3">
                 <div className="text-white text-xl">🌐</div>
                 <div>
-                  <h3 className="font-semibold text-lg">Translate Page</h3>
-                  <p className="text-blue-100 text-sm">Choose your language</p>
+                                     <h3 className="font-semibold text-lg">{t('footer.translatePageHeader', 'Translate Page')}</h3>
+                   <p className="text-blue-100 text-sm">{t('footer.translatePageSubheader', 'Choose your language')}</p>
                 </div>
               </div>
               <button
@@ -253,10 +261,10 @@ export const GoogleTranslateWidget = React.memo(({
             {/* Footer */}
             <div className="mt-4 pt-4 border-t border-gray-200">
               <p className="text-xs text-gray-500 text-center">
-                {isGoogleTranslateLoaded 
-                  ? "Powered by Google Translate" 
-                  : "Using fallback translation (Google Translate blocked)"
-                }
+                                  {isGoogleTranslateLoaded 
+                    ? t('footer.poweredByGoogleTranslate', 'Powered by Google Translate') 
+                    : t('footer.usingFallbackTranslation', 'Using fallback translation (Google Translate blocked)')
+                  }
               </p>
             </div>
           </div>

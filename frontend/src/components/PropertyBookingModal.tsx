@@ -29,6 +29,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { whatsappBooking } from '../services/whatsapp-booking';
 import type { Property } from '../types';
+import { useWhatsApp } from '../hooks/useQueries';
 
 interface PropertyBookingModalProps {
   isOpen: boolean;
@@ -38,6 +39,7 @@ interface PropertyBookingModalProps {
 
 export function PropertyBookingModal({ isOpen, onClose, property }: PropertyBookingModalProps) {
   const toast = useToast();
+  const { whatsappNumber } = useWhatsApp();
 
   const handleDirectWhatsApp = () => {
     whatsappBooking.bookPropertyDirect(property);
@@ -71,10 +73,7 @@ export function PropertyBookingModal({ isOpen, onClose, property }: PropertyBook
 
 I'd like to check availability for these dates. Thank you!`;
 
-    const cleanPhone = '9607441097';
-    const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodedMessage}`;
-    window.open(whatsappUrl, '_blank');
+    whatsappBooking.openWhatsApp(message, whatsappNumber);
     
     onClose();
     toast({
@@ -257,7 +256,7 @@ I'd like to check availability for these dates. Thank you!`;
                   Need immediate assistance?
                 </Text>
                 <Text className="text-sm text-blue-700">
-                  Call us at +960 744 1097 or WhatsApp us anytime
+                  Call us at {whatsappNumber} or WhatsApp us anytime
                 </Text>
               </div>
             </div>

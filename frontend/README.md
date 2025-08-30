@@ -288,7 +288,7 @@ This project is licensed under the MIT License.
 
 For support and questions:
 - Email: info@maldives-travel.com
-- WhatsApp: +960 123 4567
+- WhatsApp: +960 744 1097
 - Website: https://maldives-travel.com
 
 ---

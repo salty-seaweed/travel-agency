@@ -19,10 +19,9 @@ import type { Property } from '../../../types';
 interface BasicInfoFormProps {
   form: any;
   updateForm: (updates: any) => void;
-  properties: Property[];
 }
 
-export function BasicInfoForm({ form, updateForm, properties }: BasicInfoFormProps) {
+export function BasicInfoForm({ form, updateForm }: BasicInfoFormProps) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
@@ -32,13 +31,7 @@ export function BasicInfoForm({ form, updateForm, properties }: BasicInfoFormPro
     });
   };
 
-  const handlePropertyChange = (propertyId: number) => {
-    const newProperties = form.properties.includes(propertyId)
-      ? form.properties.filter((id: number) => id !== propertyId)
-      : [...form.properties, propertyId];
-    
-    updateForm({ properties: newProperties });
-  };
+
 
   const handleGroupSizeChange = (field: 'min' | 'max' | 'recommended', value: number) => {
     updateForm({
@@ -56,7 +49,7 @@ export function BasicInfoForm({ form, updateForm, properties }: BasicInfoFormPro
         <VStack spacing={6} align="stretch">
           <FormControl isRequired>
             <FormLabel fontWeight="semibold" color="gray.700">
-              Package Name
+              Package Name (English) *
             </FormLabel>
             <Input
               name="name"
@@ -66,12 +59,43 @@ export function BasicInfoForm({ form, updateForm, properties }: BasicInfoFormPro
               size="lg"
               borderRadius="lg"
               focusBorderColor="purple.500"
+              isInvalid={!form.name.trim()}
+            />
+          </FormControl>
+
+          <FormControl>
+            <FormLabel fontWeight="semibold" color="gray.700">
+              Package Name (Russian)
+            </FormLabel>
+            <Input
+              name="name_ru"
+              value={form.name_ru || ''}
+              onChange={handleChange}
+              placeholder="Введите название пакета"
+              size="lg"
+              borderRadius="lg"
+              focusBorderColor="purple.500"
+            />
+          </FormControl>
+
+          <FormControl>
+            <FormLabel fontWeight="semibold" color="gray.700">
+              Package Name (Chinese)
+            </FormLabel>
+            <Input
+              name="name_zh"
+              value={form.name_zh || ''}
+              onChange={handleChange}
+              placeholder="输入套餐名称"
+              size="lg"
+              borderRadius="lg"
+              focusBorderColor="purple.500"
             />
           </FormControl>
 
           <FormControl isRequired>
             <FormLabel fontWeight="semibold" color="gray.700">
-              Short Description
+              Short Description (English) *
             </FormLabel>
             <Textarea
               name="description"
@@ -83,18 +107,87 @@ export function BasicInfoForm({ form, updateForm, properties }: BasicInfoFormPro
               focusBorderColor="purple.500"
               rows={3}
               resize="vertical"
+              isInvalid={!form.description.trim()}
             />
           </FormControl>
 
           <FormControl>
             <FormLabel fontWeight="semibold" color="gray.700">
-              Detailed Description
+              Short Description (Russian)
+            </FormLabel>
+            <Textarea
+              name="description_ru"
+              value={form.description_ru || ''}
+              onChange={handleChange}
+              placeholder="Краткое описание пакета"
+              size="lg"
+              borderRadius="lg"
+              focusBorderColor="purple.500"
+              rows={3}
+              resize="vertical"
+            />
+          </FormControl>
+
+          <FormControl>
+            <FormLabel fontWeight="semibold" color="gray.700">
+              Short Description (Chinese)
+            </FormLabel>
+            <Textarea
+              name="description_zh"
+              value={form.description_zh || ''}
+              onChange={handleChange}
+              placeholder="套餐简介"
+              size="lg"
+              borderRadius="lg"
+              focusBorderColor="purple.500"
+              rows={3}
+              resize="vertical"
+            />
+          </FormControl>
+
+          <FormControl>
+            <FormLabel fontWeight="semibold" color="gray.700">
+              Detailed Description (English)
             </FormLabel>
             <Textarea
               name="detailed_description"
               value={form.detailed_description}
               onChange={handleChange}
               placeholder="Comprehensive description of the package experience"
+              size="lg"
+              borderRadius="lg"
+              focusBorderColor="purple.500"
+              rows={6}
+              resize="vertical"
+            />
+          </FormControl>
+
+          <FormControl>
+            <FormLabel fontWeight="semibold" color="gray.700">
+              Detailed Description (Russian)
+            </FormLabel>
+            <Textarea
+              name="detailed_description_ru"
+              value={form.detailed_description_ru || ''}
+              onChange={handleChange}
+              placeholder="Подробное описание опыта пакета"
+              size="lg"
+              borderRadius="lg"
+              focusBorderColor="purple.500"
+              rows={6}
+              resize="vertical"
+            />
+          </FormControl>
+
+          <FormControl>
+            <FormLabel fontWeight="semibold" color="gray.700">
+              Detailed Description (Chinese)
+            </FormLabel>
+            <Textarea
+              name="detailed_description_zh"
+              value={form.detailed_description_zh || ''}
+              onChange={handleChange}
+              placeholder="套餐体验的详细描述"
               size="lg"
               borderRadius="lg"
               focusBorderColor="purple.500"
@@ -181,9 +274,29 @@ export function BasicInfoForm({ form, updateForm, properties }: BasicInfoFormPro
               <Text fontSize="sm">Mark as featured package</Text>
             </Checkbox>
           </FormControl>
+
+          <FormControl>
+            <FormLabel fontWeight="semibold" color="gray.700">
+              Package Highlights
+            </FormLabel>
+            <Textarea
+              name="highlights"
+              value={form.highlights || ''}
+              onChange={handleChange}
+              placeholder="Enter package highlights, one per line or separated by commas"
+              size="lg"
+              borderRadius="lg"
+              focusBorderColor="purple.500"
+              rows={4}
+              resize="vertical"
+            />
+            <Text fontSize="xs" color="gray.500" mt={1}>
+              Add key highlights that make this package special (e.g., "Private beach access", "All-inclusive meals", "Sunset cruise")
+            </Text>
+          </FormControl>
         </VStack>
 
-        {/* Right Column - Group Size & Properties */}
+        {/* Right Column - Group Size & Dates */}
         <VStack spacing={6} align="stretch">
           <FormControl>
             <FormLabel fontWeight="semibold" color="gray.700">
@@ -225,68 +338,6 @@ export function BasicInfoForm({ form, updateForm, properties }: BasicInfoFormPro
               </Box>
             </Grid>
           </FormControl>
-
-          <FormControl>
-            <FormLabel fontWeight="semibold" color="gray.700">
-              Select Properties (Optional)
-            </FormLabel>
-            <Box
-              border="1px solid"
-              borderColor="gray.200"
-              borderRadius="lg"
-              p={4}
-              maxH="300px"
-              overflowY="auto"
-            >
-              {properties.length > 0 ? (
-                <VStack spacing={3} align="stretch">
-                  {properties.map((property: any) => (
-                    <Checkbox
-                      key={property.id}
-                      isChecked={form.properties.includes(property.id)}
-                      onChange={() => handlePropertyChange(property.id)}
-                      colorScheme="purple"
-                      size="lg"
-                    >
-                      <Flex direction="column" align="start">
-                        <Text fontSize="sm" fontWeight="medium">
-                          {property.name}
-                        </Text>
-                        <Text fontSize="xs" color="gray.500">
-                          ${property.price_per_night}/night • {property.location?.island}, {property.location?.atoll}
-                        </Text>
-                      </Flex>
-                    </Checkbox>
-                  ))}
-                </VStack>
-              ) : (
-                <Text fontSize="sm" color="gray.500" textAlign="center" py={4}>
-                  No properties available. You can still create a package without properties.
-                </Text>
-              )}
-            </Box>
-            <Text fontSize="xs" color="gray.500" mt={2}>
-              Select properties to include in this package, or leave empty for a standalone package
-            </Text>
-          </FormControl>
-
-          {form.properties.length > 0 && (
-            <Box>
-              <Text fontSize="sm" fontWeight="medium" color="gray.700" mb={2}>
-                Selected Properties ({form.properties.length})
-              </Text>
-              <Flex wrap="wrap" gap={2}>
-                {form.properties.map((propertyId: number) => {
-                  const property = properties.find((p: any) => p.id === propertyId);
-                  return property ? (
-                    <Badge key={propertyId} colorScheme="purple" variant="subtle">
-                      {property.name}
-                    </Badge>
-                  ) : null;
-                })}
-              </Flex>
-            </Box>
-          )}
 
           <Grid templateColumns="1fr 1fr" gap={4}>
             <FormControl>

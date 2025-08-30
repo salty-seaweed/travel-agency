@@ -17,6 +17,7 @@ const ExperiencesTrustSection = React.lazy(() => import('./sections/TrustSection
 const ExperiencesDestinationsSection = React.lazy(() => import('./sections/DestinationsSection').then(module => ({ default: module.ExperiencesDestinationsSection })));
 const ExperiencesActivitiesSection = React.lazy(() => import('./sections/ActivitiesSection').then(module => ({ default: module.ExperiencesActivitiesSection })));
 const ExperiencesTestimonialsSection = React.lazy(() => import('./sections/TestimonialsSection').then(module => ({ default: module.ExperiencesTestimonialsSection })));
+const ExperiencesReviewsSection = React.lazy(() => import('./sections/ReviewsSection').then(module => ({ default: module.ExperiencesReviewsSection })));
 const ExperiencesNewsletterSection = React.lazy(() => import('./sections/NewsletterSection').then(module => ({ default: module.ExperiencesNewsletterSection })));
 
 // Section loading fallbacks
@@ -31,32 +32,79 @@ const SectionSkeleton = ({ height = "400px" }: { height?: string }) => (
 );
 
 export const ExperiencesHomePage = React.memo(() => {
-  const { properties, packages, isLoading, isError, error } = useHomepageData();
+  const { packages, isLoading, isError, error } = useHomepageData();
   const { data: homepageContent } = useHomepageContent();
   const { measure } = usePerformanceMonitor('ExperiencesHomePage');
   const { t } = useTranslation();
   const toast = useToast();
 
-  // Progressive loading state
+  // Progressive loading state with intersection observer for better performance
   const [loadedSections, setLoadedSections] = useState<Set<string>>(new Set(['hero']));
+  const [isIntersecting, setIsIntersecting] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !isError) {
       measure('render-complete');
       
-      // Progressively load sections
-      const loadSections = async () => {
-        const sections = ['search', 'trending', 'trust', 'destinations', 'activities', 'testimonials', 'newsletter'];
+      // Use intersection observer for performance
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting) {
+            setIsIntersecting(true);
+          }
+        },
+        { threshold: 0.1 }
+      );
+
+      const heroElement = document.querySelector('[data-section="hero"]');
+      if (heroElement) {
+        observer.observe(heroElement);
+      }
+
+      return () => observer.disconnect();
+    }
+  }, [isLoading, isError, measure]);
+
+  useEffect(() => {
+    if (isIntersecting) {
+      // Load sections more efficiently
+      const loadSections = () => {
+        const sections = ['search', 'trending', 'trust', 'destinations', 'activities', 'testimonials', 'reviews', 'newsletter'];
         
-        for (const section of sections) {
-          await new Promise(resolve => setTimeout(resolve, 100)); // Small delay for smooth loading
+        // Load critical sections immediately
+        const criticalSections = ['search', 'trending'];
+        criticalSections.forEach(section => {
           setLoadedSections(prev => new Set([...prev, section]));
-        }
+        });
+
+        // Load remaining sections with requestIdleCallback for better performance
+        const loadRemainingSection = (index: number) => {
+          if (index >= sections.length) return;
+          
+          const section = sections[index];
+          if (!criticalSections.includes(section)) {
+            if ('requestIdleCallback' in window) {
+              requestIdleCallback(() => {
+                setLoadedSections(prev => new Set([...prev, section]));
+                loadRemainingSection(index + 1);
+              });
+            } else {
+              setTimeout(() => {
+                setLoadedSections(prev => new Set([...prev, section]));
+                loadRemainingSection(index + 1);
+              }, 50);
+            }
+          } else {
+            loadRemainingSection(index + 1);
+          }
+        };
+
+        loadRemainingSection(0);
       };
       
       loadSections();
     }
-  }, [isLoading, isError, measure]);
+  }, [isIntersecting]);
 
   // Show skeleton loading for better perceived performance
   if (isLoading) {
@@ -73,10 +121,10 @@ export const ExperiencesHomePage = React.memo(() => {
         <div className="min-h-screen flex items-center justify-center bg-red-50">
           <VStack textAlign="center" spacing={6} maxW="md">
             <Icon as={ExclamationTriangleIcon} className="w-16 h-16 text-red-500" />
-            <Heading size="2xl" color="gray.900">Failed to Load Homepage</Heading>
-            <Text color="gray.600">{error?.message || 'Something went wrong. Please try again.'}</Text>
+            <Heading size="2xl" color="gray.900">{t('homepage.error.title', 'Failed to Load Homepage')}</Heading>
+            <Text color="gray.600">{error?.message || t('homepage.error.message', 'Something went wrong. Please try again.')}</Text>
             <Button onClick={() => window.location.reload()} colorScheme="blue" size="lg" className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700">
-              <Icon as={ArrowPathIcon} className="w-5 h-5 mr-2" /> Reload Page
+              <Icon as={ArrowPathIcon} className="w-5 h-5 mr-2" /> {t('homepage.error.reload', 'Reload Page')}
             </Button>
           </VStack>
         </div>
@@ -90,9 +138,11 @@ export const ExperiencesHomePage = React.memo(() => {
       
       <Box className="relative">
         {/* Hero Section - Always loaded first */}
-        <Suspense fallback={<SectionSkeleton height="600px" />}>
-          <ExperiencesHeroSection homepageContent={homepageContent} />
-        </Suspense>
+        <div data-section="hero">
+          <Suspense fallback={<SectionSkeleton height="600px" />}>
+            <ExperiencesHeroSection homepageContent={homepageContent} />
+          </Suspense>
+        </div>
 
         {/* Search Section */}
         {loadedSections.has('search') && (
@@ -118,7 +168,7 @@ export const ExperiencesHomePage = React.memo(() => {
         {/* Destinations Section */}
         {loadedSections.has('destinations') && (
           <Suspense fallback={<SectionSkeleton height="500px" />}>
-            <ExperiencesDestinationsSection properties={properties} packages={packages} />
+            <ExperiencesDestinationsSection packages={packages} />
           </Suspense>
         )}
 
@@ -133,6 +183,13 @@ export const ExperiencesHomePage = React.memo(() => {
         {loadedSections.has('testimonials') && (
           <Suspense fallback={<SectionSkeleton height="300px" />}>
             <ExperiencesTestimonialsSection testimonials={homepageContent?.testimonials} />
+          </Suspense>
+        )}
+
+        {/* Reviews Section */}
+        {loadedSections.has('reviews') && (
+          <Suspense fallback={<SectionSkeleton height="400px" />}>
+            <ExperiencesReviewsSection />
           </Suspense>
         )}
 

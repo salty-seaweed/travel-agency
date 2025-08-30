@@ -117,7 +117,7 @@ DB_ENGINE=django.db.backends.sqlite3
 ### Frontend Configuration
 ```env
 VITE_API_BASE_URL=http://localhost:8001/api
-VITE_WHATSAPP_NUMBER=+9601234567
+VITE_WHATSAPP_NUMBER=+9607441097
 VITE_SUPPORT_EMAIL=support@threadtravels.com
 VITE_COMPANY_NAME=Thread Travels & Tours
 ```

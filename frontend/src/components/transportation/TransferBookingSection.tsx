@@ -21,6 +21,7 @@ import {
   List,
   ListItem,
   ListIcon,
+  Image,
 } from '@chakra-ui/react';
 import {
   ChatBubbleLeftRightIcon,
@@ -36,8 +37,55 @@ import {
   ArrowRightIcon,
 } from '@heroicons/react/24/outline';
 import { config, getWhatsAppUrl } from '../../config';
+import { useTranslation } from '../../i18n';
+import { useWhatsApp } from '../../hooks/useQueries';
 
 export const TransferBookingSection = React.memo(() => {
+  const { t } = useTranslation();
+  const { getWhatsAppUrl, whatsappNumber } = useWhatsApp();
+  
+  const contactMethods = [
+    {
+      method: 'WhatsApp',
+      icon: ChatBubbleLeftRightIcon,
+      color: 'green',
+      description: 'Quick and convenient messaging',
+      details: [
+        `WhatsApp: ${whatsappNumber}`,
+        'Available 24/7',
+        'Instant responses'
+      ],
+      action: 'Send Message',
+      actionUrl: getWhatsAppUrl('Hi! I need help with Maldives transportation and transfers')
+    },
+    {
+      method: 'Phone',
+      icon: PhoneIcon,
+      color: 'blue',
+      description: 'Direct phone support',
+      details: [
+        `Phone: ${whatsappNumber}`,
+        'Mon-Fri: 9AM-6PM',
+        'Sat: 10AM-4PM'
+      ],
+      action: 'Call Now',
+      actionUrl: `tel:${whatsappNumber}`
+    },
+    {
+      method: 'Email',
+      icon: EnvelopeIcon,
+      color: 'purple',
+      description: 'Detailed inquiries and quotes',
+      details: [
+        'Email: info@threadtravels.mv',
+        'Response within 24 hours',
+        'Detailed quotes provided'
+      ],
+      action: 'Send Email',
+      actionUrl: 'mailto:info@threadtravels.mv'
+    }
+  ];
+
   const bookingSteps = [
     {
       step: 1,
@@ -45,9 +93,9 @@ export const TransferBookingSection = React.memo(() => {
       description: 'Reach out through your preferred method',
       icon: ChatBubbleLeftRightIcon,
       details: [
-        'WhatsApp: +960 744-1097',
+        `WhatsApp: ${whatsappNumber}`,
         'Email: transfers@threadtravels.com',
-        'Phone: +960 744-1097',
+        `Phone: ${whatsappNumber}`,
         'Online form available'
       ]
     },
@@ -92,33 +140,6 @@ export const TransferBookingSection = React.memo(() => {
     }
   ];
 
-  const contactMethods = [
-    {
-      method: 'WhatsApp',
-      icon: ChatBubbleLeftRightIcon,
-      color: 'green',
-      contact: '+960 744-1097',
-      description: 'Fastest response time, available 24/7',
-      response: 'Within 5 minutes'
-    },
-    {
-      method: 'Phone',
-      icon: PhoneIcon,
-      color: 'blue',
-      contact: '+960 744-1097',
-      description: 'Direct conversation with our team',
-      response: 'Immediate'
-    },
-    {
-      method: 'Email',
-      icon: EnvelopeIcon,
-      color: 'purple',
-      contact: 'transfers@threadtravels.com',
-      description: 'Detailed inquiries and documentation',
-      response: 'Within 2 hours'
-    }
-  ];
-
   const bookingBenefits = [
     {
       benefit: '24/7 Support',
@@ -147,7 +168,19 @@ export const TransferBookingSection = React.memo(() => {
   ];
 
   return (
-    <section className="py-24 bg-gradient-to-r from-blue-800 via-indigo-800 to-blue-900 relative overflow-hidden">
+    <section className="py-24 relative overflow-hidden">
+      {/* Background Image */}
+      <Box position="absolute" top={0} left={0} right={0} bottom={0}>
+        <Image
+          src="/src/assets/images/ishan53.jpg"
+          alt="Maldives Transfer Booking Background"
+          w="full"
+          h="full"
+          objectFit="cover"
+        />
+        <Box position="absolute" top={0} left={0} right={0} bottom={0} bg="blackAlpha.600" />
+      </Box>
+      
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-10 left-10 animate-float">
@@ -244,15 +277,21 @@ export const TransferBookingSection = React.memo(() => {
                   <Heading size="md" className="text-gray-800 mb-2">
                     {method.method}
                   </Heading>
-                  <Text className="text-gray-800 font-bold text-lg mb-2">
-                    {method.contact}
-                  </Text>
+                  {method.details && (
+                    <VStack spacing={1} className="mb-2">
+                      {method.details.map((d, i) => (
+                        <Text key={i} className="text-gray-800 font-semibold text-sm">{d}</Text>
+                      ))}
+                    </VStack>
+                  )}
                   <Text className="text-gray-600 text-sm mb-3">
                     {method.description}
                   </Text>
-                  <Badge colorScheme={method.color as any} className="text-xs">
-                    {method.response}
-                  </Badge>
+                  {method.actionUrl && (
+                    <a href={method.actionUrl} target="_blank" rel="noopener noreferrer">
+                      <Button size="sm" colorScheme={method.color as any}> {method.action} </Button>
+                    </a>
+                  )}
                 </CardBody>
               </Card>
             ))}

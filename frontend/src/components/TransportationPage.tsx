@@ -11,6 +11,7 @@ import {
   Button,
   HStack,
   useToast,
+  Image,
 } from '@chakra-ui/react';
 import {
   CurrencyDollarIcon,
@@ -24,8 +25,8 @@ import {
 } from '@heroicons/react/24/outline';
 import { SEO } from './SEO';
 import { PageErrorBoundary } from './SimpleErrorBoundary';
-import { getWhatsAppUrl } from '../config';
 import { useTranslation } from '../i18n';
+import { useWhatsApp, usePageHero } from '../hooks/useQueries';
 
 // Import sub-components
 import { TransferTypesSection } from './transportation/TransferTypesSection';
@@ -37,8 +38,10 @@ import { TransferBookingSection } from './transportation/TransferBookingSection'
 import { FerryTimetablesSection } from './transportation/FerryTimetablesSection';
 
 export const TransportationPage = React.memo(() => {
-  useTranslation();
-  useToast();
+  const { t } = useTranslation();
+  const toast = useToast();
+  const { getWhatsAppUrl } = useWhatsApp();
+  const { data: hero } = usePageHero('transportation');
 
   return (
     <>
@@ -51,7 +54,19 @@ export const TransportationPage = React.memo(() => {
       <PageErrorBoundary pageName="Transportation">
         <Box bg="gray.50" className="bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
           {/* Hero Section */}
-          <section className="py-24 bg-gradient-to-r from-blue-800 via-indigo-800 to-blue-900 relative overflow-hidden">
+          <section className="py-24 relative overflow-hidden">
+            {/* Background Image (Admin-controlled) */}
+            <Box position="absolute" top={0} left={0} right={0} bottom={0}>
+              <Image
+                src={hero?.image_url || '/src/assets/images/ishan114.jpg'}
+                alt={hero?.title || 'Maldives Transportation Background'}
+                w="full"
+                h="full"
+                objectFit="cover"
+              />
+              <Box position="absolute" top={0} left={0} right={0} bottom={0} bg={`blackAlpha.${Math.round((hero?.overlay_opacity ?? 0.6) * 100)}`} />
+            </Box>
+            
             {/* Background Pattern */}
             <div className="absolute inset-0 opacity-10">
               <div className="absolute top-10 left-10 animate-float">
@@ -71,16 +86,15 @@ export const TransportationPage = React.memo(() => {
                   className="bg-white/20 backdrop-blur-md text-white px-6 py-2 rounded-full text-sm font-bold border border-white/30"
                 >
                   <Icon as={SparklesIcon} className="w-4 h-4 mr-2" />
-                  Maldives Transportation Guide
+                  {t('transportation.hero.badge', 'Maldives Transportation Guide')}
                 </Badge>
                 
                 <Heading size="2xl" className="text-5xl md:text-6xl font-bold text-white">
-                  Maldives Transportation & Transfers
+                  {hero?.title || t('transportation.hero.title', 'Maldives Transportation & Transfers')}
                 </Heading>
                 
                 <Text className="text-xl text-blue-200 max-w-4xl mx-auto leading-relaxed">
-                  Your complete guide to getting around the Maldives. From speedboat transfers to seaplane flights, 
-                  we provide comprehensive transportation services to make your island hopping seamless and memorable.
+                  {hero?.subtitle || t('transportation.hero.subtitle', 'Your complete guide to getting around the Maldives. From speedboat transfers to seaplane flights, we provide comprehensive transportation services to make your island hopping seamless and memorable.')}
                 </Text>
 
                 <HStack spacing={6} flexDir={{ base: "column", sm: "row" }} justify="center" align="center">
@@ -90,7 +104,7 @@ export const TransportationPage = React.memo(() => {
                       className="bg-green-500 hover:bg-green-600 text-white px-8 py-4 text-lg font-bold rounded-full shadow-2xl hover:shadow-glow-lg transition-all duration-300 transform hover:scale-105"
                     >
                       <Icon as={ChatBubbleLeftRightIcon} className="w-6 h-6 mr-3" />
-                      Book Transfer Now
+                      {t('transportation.hero.bookTransfer', 'Book Transfer Now')}
                       <Icon as={ArrowRightIcon} className="w-5 h-5 ml-2" />
                     </Button>
                   </a>
@@ -104,7 +118,7 @@ export const TransportationPage = React.memo(() => {
                     }}
                   >
                     <Icon as={InformationCircleIcon} className="w-6 h-6 mr-3" />
-                    View Transfer Guide
+                    {t('transportation.hero.viewGuide', 'View Transfer Guide')}
                     <Icon as={ArrowRightIcon} className="w-5 h-5 ml-2" />
                   </Button>
                 </HStack>
@@ -117,11 +131,11 @@ export const TransportationPage = React.memo(() => {
             <Container maxW="7xl">
               <SimpleGrid columns={{ base: 2, md: 5 }} spacing={4}>
                 {[
-                  { id: 'transfer-types', label: 'Transfer Types', icon: SparklesIcon },
-                  { id: 'atoll-transfers', label: 'Atoll Transfers', icon: MapIcon },
-                  { id: 'ferry-timetables', label: 'Ferry Timetables', icon: CalendarIcon },
-                  { id: 'pricing', label: 'Pricing Guide', icon: CurrencyDollarIcon },
-                  { id: 'faq', label: 'FAQ', icon: InformationCircleIcon },
+                  { id: 'transfer-types', label: t('transportation.nav.transferTypes', 'Transfer Types'), icon: SparklesIcon },
+                  { id: 'atoll-transfers', label: t('transportation.nav.atollTransfers', 'Atoll Transfers'), icon: MapIcon },
+                  { id: 'ferry-timetables', label: t('transportation.nav.ferryTimetables', 'Ferry Timetables'), icon: CalendarIcon },
+                  { id: 'pricing', label: t('transportation.nav.pricingGuide', 'Pricing Guide'), icon: CurrencyDollarIcon },
+                  { id: 'faq', label: t('transportation.nav.faq', 'FAQ'), icon: InformationCircleIcon },
                 ].map((item) => (
                   <Button
                     key={item.id}

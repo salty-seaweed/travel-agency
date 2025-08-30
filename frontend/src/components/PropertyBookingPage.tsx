@@ -21,12 +21,14 @@ import { useNotification } from '../hooks/useNotification';
 import { unifiedApi } from '../services/unified-api';
 import type { Property } from '../types';
 import { useSmartTranslation } from '../hooks/useSmartTranslation';
+import { useWhatsApp } from '../hooks/useQueries';
 
 export function PropertyBookingPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { showSuccess, showError } = useNotification();
   const { translateButton, translateLabel } = useSmartTranslation();
+  const { whatsappNumber } = useWhatsApp();
   
   const [property, setProperty] = useState<Property | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -232,7 +234,7 @@ export function PropertyBookingPage() {
               <div className="space-y-3">
                 <div className="flex items-center">
                   <CurrencyDollarIcon className="h-4 w-4 text-gray-400 mr-2" />
-                  <span className="text-sm text-gray-700">+960 744 1097</span>
+                  <span className="text-sm text-gray-700">{whatsappNumber}</span>
                 </div>
                 <div className="flex items-center">
                   <CurrencyDollarIcon className="h-4 w-4 text-gray-400 mr-2" />

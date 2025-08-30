@@ -32,12 +32,14 @@ import {
   PlusIcon,
   EyeIcon,
   PencilIcon,
+  SparklesIcon,
 } from '@heroicons/react/24/outline';
 import { PageList } from './cms/PageList';
 import { PageEditor } from './cms/PageEditor';
 import { MediaLibrary } from './cms/MediaLibrary';
 import MenuManager from './cms/MenuManager';
 import RedirectManager from './cms/RedirectManager';
+import { PageHeroManager } from './PageHeroManager';
 import type { Page } from '../../types';
 import { AdvancedPageEditor } from './cms/AdvancedPageEditor';
 
@@ -53,6 +55,7 @@ export const AdminContentManager: React.FC = () => {
   const { isOpen: isMediaModalOpen, onOpen: onMediaModalOpen, onClose: onMediaModalClose } = useDisclosure();
   const { isOpen: isMenuModalOpen, onOpen: onMenuModalOpen, onClose: onMenuModalClose } = useDisclosure();
   const { isOpen: isRedirectModalOpen, onOpen: onRedirectModalOpen, onClose: onRedirectModalClose } = useDisclosure();
+  const { isOpen: isPageHeroModalOpen, onOpen: onPageHeroModalOpen, onClose: onPageHeroModalClose } = useDisclosure();
   
   const bgColor = useColorModeValue('white', 'gray.800');
 
@@ -113,7 +116,7 @@ export const AdminContentManager: React.FC = () => {
         <HStack justify="space-between">
           <VStack align="start" spacing={1}>
             <Heading size="lg">Content Management</Heading>
-            <Text color="gray.600">Manage pages, media, menus, and redirects</Text>
+            <Text color="gray.600">Manage pages, media, menus, redirects, and page hero banners</Text>
           </VStack>
           <HStack spacing={3}>
             <Button
@@ -144,6 +147,13 @@ export const AdminContentManager: React.FC = () => {
             >
               Redirects
             </Button>
+            <Button
+              leftIcon={<SparklesIcon className="w-4 h-4" />}
+              variant="outline"
+              onClick={onPageHeroModalOpen}
+            >
+              Page Heroes
+            </Button>
           </HStack>
         </HStack>
 
@@ -172,6 +182,12 @@ export const AdminContentManager: React.FC = () => {
               <HStack spacing={2}>
                 <ArrowPathIcon className="w-4 h-4" />
                 <Text>Redirects</Text>
+              </HStack>
+            </Tab>
+            <Tab>
+              <HStack spacing={2}>
+                <SparklesIcon className="w-4 h-4" />
+                <Text>Page Heroes</Text>
               </HStack>
             </Tab>
           </TabList>
@@ -235,6 +251,24 @@ export const AdminContentManager: React.FC = () => {
                       onClick={onRedirectModalOpen}
                     >
                       Open Redirect Manager
+                    </Button>
+                  </VStack>
+                </CardBody>
+              </Card>
+            </TabPanel>
+
+            {/* Page Heroes Tab */}
+            <TabPanel>
+              <Card>
+                <CardBody>
+                  <VStack spacing={4}>
+                    <Text>Page hero management is available through the Page Heroes button above.</Text>
+                    <Button
+                      leftIcon={<SparklesIcon className="w-4 h-4" />}
+                      colorScheme="blue"
+                      onClick={onPageHeroModalOpen}
+                    >
+                      Open Page Hero Manager
                     </Button>
                   </VStack>
                 </CardBody>
@@ -365,6 +399,12 @@ export const AdminContentManager: React.FC = () => {
           </ModalBody>
         </ModalContent>
       </Modal>
+
+      {/* Page Hero Manager Modal */}
+      <PageHeroManager
+        isOpen={isPageHeroModalOpen}
+        onClose={onPageHeroModalClose}
+      />
     </Box>
   );
 }; 

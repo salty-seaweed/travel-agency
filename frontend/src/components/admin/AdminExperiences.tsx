@@ -80,7 +80,6 @@ interface ExperienceFormData {
   duration: string;
   price: string;
   currency: string;
-  location_id: number | null;
   destination_id: number | null;
   max_participants: number;
   min_age: number;
@@ -95,7 +94,6 @@ interface ExperienceFormData {
 export function AdminExperiences() {
   const { data: experiences, isLoading, error, refetch } = useExperiences();
   const { data: destinations } = useDestinations();
-  const { data: locations } = useLocations();
   const createExperience = useCreateExperience();
   const updateExperience = useUpdateExperience();
   const deleteExperience = useDeleteExperience();
@@ -117,24 +115,23 @@ export function AdminExperiences() {
 
   const difficultyLevels = ['easy', 'moderate', 'challenging', 'expert'];
 
-  const [formData, setFormData] = useState<ExperienceFormData>({
-    name: '',
-    description: '',
-    experience_type: 'water_sports',
-    duration: '',
-    price: '',
-    currency: 'USD',
-    location_id: null,
-    destination_id: null,
-    max_participants: 10,
-    min_age: 0,
-    difficulty_level: 'easy',
-    includes: [],
-    excludes: [],
-    requirements: [],
-    is_featured: false,
-    is_active: true,
-  });
+      const [formData, setFormData] = useState<ExperienceFormData>({
+      name: '',
+      description: '',
+      experience_type: 'water_sports',
+      duration: '',
+      price: '',
+      currency: 'USD',
+      destination_id: null,
+      max_participants: 10,
+      min_age: 0,
+      difficulty_level: 'easy',
+      includes: [],
+      excludes: [],
+      requirements: [],
+      is_featured: false,
+      is_active: true,
+    });
 
   const [newInclude, setNewInclude] = useState('');
   const [newExclude, setNewExclude] = useState('');
@@ -142,24 +139,23 @@ export function AdminExperiences() {
 
   useEffect(() => {
     if (editingExperience) {
-      setFormData({
-        name: editingExperience.name,
-        description: editingExperience.description,
-        experience_type: editingExperience.experience_type,
-        duration: editingExperience.duration,
-        price: editingExperience.price,
-        currency: editingExperience.currency,
-        location_id: editingExperience.location?.id || null,
-        destination_id: editingExperience.destination?.id || null,
-        max_participants: editingExperience.max_participants,
-        min_age: editingExperience.min_age,
-        difficulty_level: editingExperience.difficulty_level,
-        includes: editingExperience.includes || [],
-        excludes: editingExperience.excludes || [],
-        requirements: editingExperience.requirements || [],
-        is_featured: editingExperience.is_featured,
-        is_active: editingExperience.is_active,
-      });
+              setFormData({
+          name: editingExperience.name,
+          description: editingExperience.description,
+          experience_type: editingExperience.experience_type,
+          duration: editingExperience.duration,
+          price: editingExperience.price,
+          currency: editingExperience.currency,
+          destination_id: editingExperience.destination?.id || null,
+          max_participants: editingExperience.max_participants,
+          min_age: editingExperience.min_age,
+          difficulty_level: editingExperience.difficulty_level,
+          includes: editingExperience.includes || [],
+          excludes: editingExperience.excludes || [],
+          requirements: editingExperience.requirements || [],
+          is_featured: editingExperience.is_featured,
+          is_active: editingExperience.is_active,
+        });
     }
   }, [editingExperience]);
 
@@ -177,24 +173,23 @@ export function AdminExperiences() {
   const handleCreate = () => {
     setIsCreating(true);
     setEditingExperience(null);
-    setFormData({
-      name: '',
-      description: '',
-      experience_type: 'water_sports',
-      duration: '',
-      price: '',
-      currency: 'USD',
-      location_id: null,
-      destination_id: null,
-      max_participants: 10,
-      min_age: 0,
-      difficulty_level: 'easy',
-      includes: [],
-      excludes: [],
-      requirements: [],
-      is_featured: false,
-      is_active: true,
-    });
+          setFormData({
+        name: '',
+        description: '',
+        experience_type: 'water_sports',
+        duration: '',
+        price: '',
+        currency: 'USD',
+        destination_id: null,
+        max_participants: 10,
+        min_age: 0,
+        difficulty_level: 'easy',
+        includes: [],
+        excludes: [],
+        requirements: [],
+        is_featured: false,
+        is_active: true,
+      });
     onOpen();
   };
 
@@ -223,7 +218,31 @@ export function AdminExperiences() {
     }
   };
 
+  const isFormValid = () => {
+    return (
+      formData.name.trim() &&
+      formData.description.trim() &&
+      formData.experience_type &&
+      formData.duration.trim() &&
+      formData.price &&
+      parseFloat(formData.price) > 0 &&
+      formData.currency &&
+      formData.destination_id &&
+      formData.difficulty_level
+    );
+  };
+
   const handleSubmit = async () => {
+    if (!isFormValid()) {
+      toast({
+        title: 'Please fill in all required fields',
+        description: 'Required fields are marked with *',
+        status: 'error',
+        duration: 3000,
+      });
+      return;
+    }
+
     try {
       if (isCreating) {
         await createExperience.mutateAsync(formData);
@@ -244,8 +263,9 @@ export function AdminExperiences() {
     } catch (error) {
       toast({
         title: 'Error saving experience',
+        description: error instanceof Error ? error.message : 'Please check all required fields',
         status: 'error',
-        duration: 3000,
+        duration: 5000,
       });
     }
   };
@@ -439,7 +459,7 @@ export function AdminExperiences() {
                       <Th>Type</Th>
                       <Th>Duration</Th>
                       <Th>Price</Th>
-                      <Th>Location</Th>
+                      <Th>Destination</Th>
                       <Th>Status</Th>
                       <Th>Actions</Th>
                     </Tr>
@@ -473,10 +493,10 @@ export function AdminExperiences() {
                           </HStack>
                         </Td>
                         <Td>
-                          <HStack spacing={1}>
-                            <Icon as={MapPinIcon} className="w-4 h-4 text-gray-400" />
-                            <Text fontSize="sm">{experience.location?.island}</Text>
-                          </HStack>
+                          <VStack align="start" spacing={1}>
+                            <Text fontSize="sm" fontWeight="medium">{experience.destination?.name}</Text>
+                            <Text fontSize="xs" color="gray.500">{experience.destination?.island}, {experience.destination?.atoll}</Text>
+                          </VStack>
                         </Td>
                         <Td>
                           <HStack spacing={2}>
@@ -537,33 +557,46 @@ export function AdminExperiences() {
             <ModalCloseButton />
             <ModalBody pb={6}>
               <VStack spacing={6}>
+                {/* Form Header */}
+                <Box w="full" p={4} bg="blue.50" borderRadius="md" border="1px solid" borderColor="blue.200">
+                  <Text fontSize="sm" color="blue.800" fontWeight="medium">
+                    📋 Required Fields: Experience Name, Description, Type, Duration, Price, Currency, Destination, and Difficulty Level
+                  </Text>
+                  <Text fontSize="xs" color="blue.600" mt={1}>
+                    Fields marked with * are required. Destination refers to the specific island/atoll where the experience takes place.
+                  </Text>
+                </Box>
                 {/* Basic Information */}
-                <FormControl>
-                  <FormLabel>Name</FormLabel>
+                <FormControl isRequired>
+                  <FormLabel>Experience Name *</FormLabel>
                   <Input
                     value={formData.name}
                     onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                    placeholder="Custom experience name"
+                    placeholder="Enter experience name"
+                    isInvalid={!formData.name.trim()}
                   />
                 </FormControl>
 
-                <FormControl>
-                  <FormLabel>Description</FormLabel>
+                <FormControl isRequired>
+                  <FormLabel>Description *</FormLabel>
                   <Textarea
                     value={formData.description}
                     onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                    placeholder="Describe this custom experience"
+                    placeholder="Describe this experience in detail"
                     rows={4}
+                    isInvalid={!formData.description.trim()}
                   />
                 </FormControl>
 
                 <HStack spacing={4} w="full">
-                  <FormControl>
-                    <FormLabel>Type</FormLabel>
+                  <FormControl isRequired>
+                    <FormLabel>Experience Type *</FormLabel>
                     <Select
                       value={formData.experience_type}
                       onChange={(e) => setFormData(prev => ({ ...prev, experience_type: e.target.value }))}
+                      isInvalid={!formData.experience_type}
                     >
+                      <option value="">Select Experience Type</option>
                       {experienceTypes.map(type => (
                         <option key={type} value={type}>
                           {type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
@@ -572,12 +605,14 @@ export function AdminExperiences() {
                     </Select>
                   </FormControl>
 
-                  <FormControl>
-                    <FormLabel>Difficulty</FormLabel>
+                  <FormControl isRequired>
+                    <FormLabel>Difficulty Level *</FormLabel>
                     <Select
                       value={formData.difficulty_level}
                       onChange={(e) => setFormData(prev => ({ ...prev, difficulty_level: e.target.value }))}
+                      isInvalid={!formData.difficulty_level}
                     >
+                      <option value="">Select Difficulty</option>
                       {difficultyLevels.map(level => (
                         <option key={level} value={level}>
                           {level.charAt(0).toUpperCase() + level.slice(1)}
@@ -588,30 +623,37 @@ export function AdminExperiences() {
                 </HStack>
 
                 <HStack spacing={4} w="full">
-                  <FormControl>
-                    <FormLabel>Duration</FormLabel>
+                  <FormControl isRequired>
+                    <FormLabel>Duration *</FormLabel>
                     <Input
                       value={formData.duration}
                       onChange={(e) => setFormData(prev => ({ ...prev, duration: e.target.value }))}
-                      placeholder="e.g., 2 hours"
+                      placeholder="e.g., 2 hours, Full day"
+                      isInvalid={!formData.duration.trim()}
                     />
                   </FormControl>
 
-                  <FormControl>
-                    <FormLabel>Price</FormLabel>
+                  <FormControl isRequired>
+                    <FormLabel>Price (USD) *</FormLabel>
                     <Input
                       value={formData.price}
                       onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
                       placeholder="0.00"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      isInvalid={!formData.price || parseFloat(formData.price) < 0}
                     />
                   </FormControl>
 
-                  <FormControl>
-                    <FormLabel>Currency</FormLabel>
+                  <FormControl isRequired>
+                    <FormLabel>Currency *</FormLabel>
                     <Select
                       value={formData.currency}
                       onChange={(e) => setFormData(prev => ({ ...prev, currency: e.target.value }))}
+                      isInvalid={!formData.currency}
                     >
+                      <option value="">Select Currency</option>
                       <option value="USD">USD</option>
                       <option value="EUR">EUR</option>
                       <option value="GBP">GBP</option>
@@ -619,37 +661,24 @@ export function AdminExperiences() {
                   </FormControl>
                 </HStack>
 
-                <HStack spacing={4} w="full">
-                  <FormControl>
-                    <FormLabel>Location</FormLabel>
-                    <Select
-                      value={formData.location_id || ''}
-                      onChange={(e) => setFormData(prev => ({ ...prev, location_id: e.target.value ? parseInt(e.target.value) : null }))}
-                    >
-                      <option value="">Select Location</option>
-                      {locations?.map(location => (
-                        <option key={location.id} value={location.id}>
-                          {location.island}, {location.atoll}
-                        </option>
-                      ))}
-                    </Select>
-                  </FormControl>
-
-                  <FormControl>
-                    <FormLabel>Destination</FormLabel>
-                    <Select
-                      value={formData.destination_id || ''}
-                      onChange={(e) => setFormData(prev => ({ ...prev, destination_id: e.target.value ? parseInt(e.target.value) : null }))}
-                    >
-                      <option value="">Select Destination</option>
-                      {destinations?.map(destination => (
-                        <option key={destination.id} value={destination.id}>
-                          {destination.name}
-                        </option>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </HStack>
+                <FormControl isRequired>
+                  <FormLabel>Destination (Island/Atoll) *</FormLabel>
+                  <Select
+                    value={formData.destination_id || ''}
+                    onChange={(e) => setFormData(prev => ({ ...prev, destination_id: e.target.value ? parseInt(e.target.value) : null }))}
+                    isInvalid={!formData.destination_id}
+                  >
+                    <option value="">Select Destination (Required)</option>
+                    {destinations?.map(destination => (
+                      <option key={destination.id} value={destination.id}>
+                        {destination.name} - {destination.island}, {destination.atoll}
+                      </option>
+                    ))}
+                  </Select>
+                  <Text fontSize="xs" color="gray.500" mt={1}>
+                    Select the specific destination where this experience takes place
+                  </Text>
+                </FormControl>
 
                 <HStack spacing={4} w="full">
                   <FormControl>
@@ -796,8 +825,9 @@ export function AdminExperiences() {
                     onClick={handleSubmit}
                     isLoading={createExperience.isPending || updateExperience.isPending}
                     loadingText={isCreating ? 'Creating...' : 'Updating...'}
+                    isDisabled={!isFormValid()}
                   >
-                    {isCreating ? 'Create' : 'Update'}
+                    {isCreating ? 'Create Experience' : 'Update Experience'}
                   </Button>
                 </HStack>
               </VStack>

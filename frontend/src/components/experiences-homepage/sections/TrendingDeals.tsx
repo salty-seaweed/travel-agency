@@ -40,9 +40,9 @@ import {
 import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
 import { useTranslation } from '../../../i18n';
 import type { Package as ApiPackage } from '../../../types';
-import { getWhatsAppUrl } from '../../../config';
+import { useWhatsApp } from '../../../hooks/useQueries';
 
-interface Props { packages?: ApiPackage[]; properties?: any[]; }
+interface Props { packages?: ApiPackage[]; }
 
 interface LocalPackage {
   id: number;
@@ -83,6 +83,7 @@ const convertApiPackageToCardFormat = (apiPackage: ApiPackage): LocalPackage => 
 export const ExperiencesTrendingDeals: React.FC<Props> = ({ packages = [] }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { getWhatsAppUrl } = useWhatsApp();
   
   const bgColor = useColorModeValue('gray.50', 'gray.900');
   const cardBg = useColorModeValue('white', 'gray.800');
@@ -130,14 +131,14 @@ export const ExperiencesTrendingDeals: React.FC<Props> = ({ packages = [] }) => 
             <Badge colorScheme="green" variant="solid" px={4} py={2} borderRadius="full" fontSize="sm" fontWeight="semibold">
               <HStack spacing={2}>
                 <Icon as={FireIcon} className="w-4 h-4" />
-                <Text>Best Maldives Deals</Text>
+                <Text>{t('homepage.trending.badge', 'Best Maldives Deals')}</Text>
               </HStack>
             </Badge>
             <Heading size="2xl" color={textColor} fontWeight="bold" fontSize={{ base: '2xl', md: '3xl', lg: '4xl' }}>
-              Curated Maldives Packages
+              {t('homepage.trending.title', 'Curated Maldives Packages')}
             </Heading>
             <Text fontSize="lg" color={mutedTextColor} maxW="2xl" lineHeight="1.6">
-              Handpicked packages combining the best accommodations, activities, and experiences for the perfect Maldives getaway
+              {t('homepage.trending.subtitle', 'Handpicked packages combining the best accommodations, activities, and experiences for the perfect Maldives getaway')}
             </Text>
           </VStack>
 
@@ -251,7 +252,7 @@ export const ExperiencesTrendingDeals: React.FC<Props> = ({ packages = [] }) => 
                             {pkg.destinations.length > 3 && (
                               <WrapItem>
                                 <Badge colorScheme="gray" variant="subtle">
-                                  +{pkg.destinations.length - 3} more
+                                  +{pkg.destinations.length - 3} {t('homepage.activities.more', 'more')}
                                 </Badge>
                               </WrapItem>
                             )}
@@ -262,7 +263,7 @@ export const ExperiencesTrendingDeals: React.FC<Props> = ({ packages = [] }) => 
                       {/* Highlights */}
                       {pkg.highlights.length > 0 && (
                         <VStack align="start" spacing={2}>
-                          <Text fontWeight="semibold" fontSize="sm" color="gray.700">Highlights:</Text>
+                          <Text fontWeight="semibold" fontSize="sm" color="gray.700">{t('homepage.trending.highlights', 'Highlights:')}</Text>
                           <List spacing={1}>
                             {pkg.highlights.slice(0, 3).map((highlight, index) => (
                               <ListItem key={index} fontSize="sm" color="gray.600">
@@ -273,7 +274,7 @@ export const ExperiencesTrendingDeals: React.FC<Props> = ({ packages = [] }) => 
                             {pkg.highlights.length > 3 && (
                               <ListItem fontSize="sm" color="gray.500">
                                 <ListIcon as={CheckIcon} color="green.500" />
-                                +{pkg.highlights.length - 3} more activities
+                                +{pkg.highlights.length - 3} {t('homepage.trending.moreActivities', 'more activities')}
                               </ListItem>
                             )}
                           </List>
@@ -293,11 +294,11 @@ export const ExperiencesTrendingDeals: React.FC<Props> = ({ packages = [] }) => 
                               ${originalPrice.toLocaleString()}
                             </Text>
                             <Text fontSize="sm" color="green.600" fontWeight="semibold">
-                              Save ${savings.toLocaleString()} ({discountPercentage}% off)
+                              {t('homepage.trending.save', 'Save')} ${savings.toLocaleString()} ({discountPercentage}% {t('homepage.trending.off', 'off')})
                             </Text>
                           </VStack>
                           <VStack align="end" spacing={0}>
-                            <Text fontSize="sm" color="gray.500">Total for {pkg.maxTravelers}</Text>
+                            <Text fontSize="sm" color="gray.500">{t('homepage.trending.totalFor', 'Total for')} {pkg.maxTravelers}</Text>
                             <Text fontSize="lg" fontWeight="semibold" color="gray.700">
                               ${(discountedPrice * pkg.maxTravelers).toLocaleString()}
                             </Text>
@@ -311,14 +312,14 @@ export const ExperiencesTrendingDeals: React.FC<Props> = ({ packages = [] }) => 
                             onClick={() => handleWhatsAppBooking(pkg)}
                             leftIcon={<Icon as={HeartIcon} />}
                           >
-                            Book Now
+                            {t('ui.buttons.bookNow')}
                           </Button>
                           <Button
                             variant="outline"
                             colorScheme="blue"
                             onClick={() => navigate(`/packages/${pkg.id}`)}
                           >
-                            Details
+                            {t('homepage.trending.details', 'Details')}
                           </Button>
                         </HStack>
                       </VStack>
@@ -340,9 +341,9 @@ export const ExperiencesTrendingDeals: React.FC<Props> = ({ packages = [] }) => 
               rightIcon={<Icon as={ArrowRightIcon} className="w-5 h-5" />} 
               onClick={() => navigate('/packages?sort=featured')}
             >
-              View All Curated Packages
+              {t('homepage.trending.viewAll', 'View All Curated Packages')}
             </Button>
-            <Text fontSize="sm" color={mutedTextColor}>Limited-time offers. Book now to secure the best prices!</Text>
+            <Text fontSize="sm" color={mutedTextColor}>{t('homepage.trending.limited', 'Limited-time offers. Book now to secure the best prices!')}</Text>
           </VStack>
         </VStack>
       </Container>

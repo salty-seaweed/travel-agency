@@ -14,7 +14,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 interface AnalyticsData {
-  totalProperties: number;
+  totalPackages: number;
   totalBookings: number;
   totalRevenue: number;
   totalCustomers: number;
@@ -25,7 +25,7 @@ interface AnalyticsData {
     bookings: number;
     revenue: number;
   }>;
-  topProperties: Array<{
+  topPackages: Array<{
     id: number;
     name: string;
     bookings: number;
@@ -38,8 +38,8 @@ interface AnalyticsData {
     completed: number;
     cancelled: number;
   };
-  propertyTypes: Array<{
-    type: string;
+  packageCategories: Array<{
+    category: string;
     count: number;
     bookings: number;
   }>;
@@ -81,7 +81,7 @@ export function AdminAnalytics() {
   };
 
   const createMockAnalytics = (): AnalyticsData => ({
-    totalProperties: 24,
+    totalPackages: 24,
     totalBookings: 156,
     totalRevenue: 45600,
     totalCustomers: 89,
@@ -95,12 +95,12 @@ export function AdminAnalytics() {
       { month: 'May', bookings: 28, revenue: 7500 },
       { month: 'Jun', bookings: 31, revenue: 8400 },
     ],
-    topProperties: [
-      { id: 1, name: 'Paradise Beach Resort', bookings: 45, revenue: 12500, rating: 4.8 },
-      { id: 2, name: 'Coral Guesthouse', bookings: 38, revenue: 8900, rating: 4.5 },
-      { id: 3, name: 'Ocean View Villa', bookings: 32, revenue: 11200, rating: 4.7 },
-      { id: 4, name: 'Sunset Lodge', bookings: 28, revenue: 7800, rating: 4.3 },
-      { id: 5, name: 'Island Retreat', bookings: 25, revenue: 9200, rating: 4.6 },
+    topPackages: [
+      { id: 1, name: 'Luxury Island Hopping Package', bookings: 45, revenue: 12500, rating: 4.8 },
+      { id: 2, name: 'Adventure Diving Package', bookings: 38, revenue: 8900, rating: 4.5 },
+      { id: 3, name: 'Romantic Getaway Package', bookings: 32, revenue: 11200, rating: 4.7 },
+      { id: 4, name: 'Family Fun Package', bookings: 28, revenue: 7800, rating: 4.3 },
+      { id: 5, name: 'Wellness Retreat Package', bookings: 25, revenue: 9200, rating: 4.6 },
     ],
     bookingStatuses: {
       pending: 12,
@@ -108,10 +108,10 @@ export function AdminAnalytics() {
       completed: 45,
       cancelled: 10,
     },
-    propertyTypes: [
-      { type: 'Resort', count: 8, bookings: 67 },
-      { type: 'Guesthouse', count: 12, bookings: 58 },
-      { type: 'Villa', count: 4, bookings: 31 },
+    packageCategories: [
+      { category: 'Luxury', count: 8, bookings: 67 },
+      { category: 'Adventure', count: 12, bookings: 58 },
+      { category: 'Romantic', count: 4, bookings: 31 },
     ],
   });
 
@@ -176,8 +176,8 @@ export function AdminAnalytics() {
               <MapPinIcon className="h-6 w-6 text-blue-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Properties</p>
-              <p className="text-2xl font-bold text-gray-900">{analytics.totalProperties}</p>
+              <p className="text-sm font-medium text-gray-600">Total Packages</p>
+              <p className="text-2xl font-bold text-gray-900">{analytics.totalPackages}</p>
               <p className="text-xs text-green-600 flex items-center">
                 <ArrowTrendingUpIcon className="h-3 w-3 mr-1" />
                 +12% from last month
@@ -279,15 +279,15 @@ export function AdminAnalytics() {
         </Card>
       </div>
 
-      {/* Top Properties */}
+      {/* Top Packages */}
       <Card className="p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Performing Properties</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Performing Packages</h3>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Property
+                  Package
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Bookings
@@ -301,23 +301,23 @@ export function AdminAnalytics() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {analytics.topProperties.map((property) => (
-                <tr key={property.id}>
+              {analytics.topPackages.map((pkg) => (
+                <tr key={pkg.id}>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{property.name}</div>
+                    <div className="text-sm font-medium text-gray-900">{pkg.name}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{property.bookings}</div>
+                    <div className="text-sm text-gray-900">{pkg.bookings}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-green-600">
-                      {formatCurrency(property.revenue)}
+                      {formatCurrency(pkg.revenue)}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <StarIcon className="h-4 w-4 text-yellow-400 mr-1" />
-                      <span className="text-sm text-gray-900">{property.rating}</span>
+                      <span className="text-sm text-gray-900">{pkg.rating}</span>
                     </div>
                   </td>
                 </tr>
@@ -327,15 +327,15 @@ export function AdminAnalytics() {
         </div>
       </Card>
 
-      {/* Property Types Performance */}
+      {/* Package Categories Performance */}
       <Card className="p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Property Types Performance</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Package Categories Performance</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {analytics.propertyTypes.map((type) => (
-            <div key={type.type} className="text-center">
-              <div className="text-2xl font-bold text-gray-900">{type.count}</div>
-              <div className="text-sm text-gray-600">{type.type}</div>
-              <div className="text-sm font-medium text-blue-600">{type.bookings} bookings</div>
+          {analytics.packageCategories.map((category) => (
+            <div key={category.category} className="text-center">
+              <div className="text-2xl font-bold text-gray-900">{category.count}</div>
+              <div className="text-sm text-gray-600">{category.category}</div>
+              <div className="text-sm font-medium text-blue-600">{category.bookings} bookings</div>
             </div>
           ))}
         </div>
@@ -364,9 +364,9 @@ export function AdminAnalytics() {
             <ChartBarIcon className="h-8 w-8 text-green-400" />
           </div>
           <div className="text-2xl font-bold text-gray-900">
-            {Math.round((analytics.totalBookings / analytics.totalProperties) * 10) / 10}
+            {Math.round((analytics.totalBookings / analytics.totalPackages) * 10) / 10}
           </div>
-          <div className="text-sm text-gray-600">Avg Bookings per Property</div>
+          <div className="text-sm text-gray-600">Avg Bookings per Package</div>
         </Card>
       </div>
     </div>

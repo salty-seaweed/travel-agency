@@ -29,8 +29,9 @@ import {
   UserGroupIcon,
   SparklesIcon,
 } from '@heroicons/react/24/outline';
-import { getWhatsAppUrl } from '../../../config';
-import { useDestinations } from '../../../hooks/useQueries';
+import { useDestinations, useFeaturedDestinations } from '../../../hooks/useQueries';
+import { useWhatsApp } from '../../../hooks/useQueries';
+import { useTranslation } from '../../../i18n';
 
 interface HeroSectionProps {
   homepageContent?: any;
@@ -39,9 +40,12 @@ interface HeroSectionProps {
 export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
   homepageContent
 }) => {
+  const { t } = useTranslation();
   const toast = useToast();
   const navigate = useNavigate();
   const { data: destinations } = useDestinations();
+  const { data: featuredDestinations } = useFeaturedDestinations();
+  const { getWhatsAppUrl } = useWhatsApp();
   
   const cardBg = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
@@ -100,7 +104,7 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
   const handleCreateCustomExperience = () => {
     if (!searchData.destination.trim()) {
       toast({
-        title: "Please select a destination",
+        title: t('homepage.search.selectDestination', 'Please select a destination'),
         status: "warning",
         duration: 3000,
         isClosable: true,
@@ -123,19 +127,33 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
     setSearchData(prev => ({ ...prev, destination: destination.name }));
   };
 
-  // Get trending destinations from backend only - no fallback
+  const handleWhatsAppClick = () => {
+    window.open(getWhatsAppUrl("Hi! I'd like help planning a Maldives experience"), '_blank');
+  };
+
+  // Get trending destinations from featured destinations API first, then fallback to regular destinations
   const trendingDestinations = useMemo(() => {
+    // First try to use featured destinations from admin panel
+    if (featuredDestinations && featuredDestinations.length > 0) {
+      return featuredDestinations.map((featured: any) => ({
+        name: featured.display_name,
+        image: featured.image_url || `/src/assets/images/ishan${Math.floor(Math.random() * 20) + 51}.jpg`,
+        packages: featured.package_count || 0
+      }));
+    }
+    
+    // Fallback to regular destinations if no featured destinations configured
     if (destinations && destinations.length > 0) {
       return destinations.slice(0, 4).map(dest => ({
         name: dest.name,
         image: dest.image || `/src/assets/images/ishan${Math.floor(Math.random() * 20) + 51}.jpg`,
-        properties: dest.property_count || 0
+        packages: dest.package_count || 0
       }));
     }
     
-    // No fallback data - return empty array
+    // No data available
     return [];
-  }, [destinations]);
+  }, [featuredDestinations, destinations]);
 
   return (
     <Box position="relative" minH="100vh" overflow="hidden">
@@ -151,24 +169,17 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
                     className="bg-white/20 backdrop-blur-md text-white px-6 py-2 rounded-full text-sm font-bold border border-white/30"
                   >
                     <Icon as={SparklesIcon} className="w-4 h-4 mr-2" />
-                    Your Dream Maldives Vacation Awaits
+                    {t('homepage.hero.badge', 'Your Dream Maldives Vacation Awaits')}
                   </Badge>
                   
-                  <Heading size="2xl" className="text-5xl md:text-6xl font-bold text-white">
-                    🌊 Discover Paradise in the Maldives
-                  </Heading>
+                  <Heading size="2xl" className="text-5xl md:text-6xl font-bold text-white">{t('homepage.hero.title')}</Heading>
                   
-                  <Text className="text-xl text-blue-200 max-w-4xl mx-auto leading-relaxed">
-                    Experience crystal-clear turquoise waters, pristine white sand beaches, and overwater bungalows. 
-                    Create your perfect Maldives getaway with personalized experiences, luxury accommodations, and unforgettable adventures.
-                  </Text>
+                  <Text className="text-xl text-blue-200 max-w-4xl mx-auto leading-relaxed">{t('homepage.hero.subtitle')}</Text>
 
               <HStack spacing={4} pt={2}>
-                <a href={getWhatsAppUrl("Hi! I'd like help planning a Maldives experience")} target="_blank" rel="noopener noreferrer">
-                  <Button colorScheme="whatsapp" size="md">Chat on WhatsApp</Button>
-                </a>
+                <Button colorScheme="whatsapp" size="md" onClick={handleWhatsAppClick}>{t('homepage.cta.chatWhatsApp')}</Button>
                 <Link to="/contact">
-                  <Button variant="outline" colorScheme="whiteAlpha" size="md">Contact Us</Button>
+                  <Button variant="outline" colorScheme="whiteAlpha" size="md">{t('homepage.cta.contactUs', 'Contact Now')}</Button>
                 </Link>
               </HStack>
             </VStack>
@@ -179,8 +190,8 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
               <CardBody p={8}>
                 <VStack spacing={6}>
                   <VStack spacing={2} textAlign="center">
-                    <Heading size="lg" color={textColor}>Plan Your Perfect Maldives Trip</Heading>
-                    <Text color={mutedTextColor}>Choose your destination and let us create your dream vacation</Text>
+                    <Heading size="lg" color={textColor}>{t('homepage.search.title')}</Heading>
+                    <Text color={mutedTextColor}>{t('homepage.search.subtitle')}</Text>
                   </VStack>
 
                   <VStack spacing={4} w="full">
@@ -188,7 +199,7 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
                       <InputGroup>
                         <InputLeftElement><Icon as={MapPinIcon} color="gray.400" /></InputLeftElement>
                         <Input 
-                          placeholder="Which island or atoll?" 
+                          placeholder={t('homepage.search.destinationPlaceholder', 'Which island or atoll?')} 
                           value={searchData.destination} 
                           onChange={(e) => setSearchData(prev => ({ ...prev, destination: e.target.value }))} 
                           size="lg" 
@@ -232,7 +243,7 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
                     <InputGroup>
                       <InputLeftElement><Icon as={CalendarIcon} color="gray.400" /></InputLeftElement>
                       <Input 
-                        placeholder="When are you going? (Optional)" 
+                        placeholder={t('homepage.search.datePlaceholder', 'When are you going? (Optional)')} 
                         value={searchData.dates} 
                         onChange={(e) => setSearchData(prev => ({ ...prev, dates: e.target.value }))} 
                         size="lg" 
@@ -243,17 +254,17 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
                     <InputGroup>
                       <InputLeftElement><Icon as={UserGroupIcon} color="gray.400" /></InputLeftElement>
                       <Select 
-                        placeholder="Travelers" 
+                        placeholder={t('homepage.search.travelers', 'Travelers')} 
                         value={searchData.travelers} 
                         onChange={(e) => setSearchData(prev => ({ ...prev, travelers: e.target.value }))} 
                         size="lg" 
                         borderRadius="lg"
                       >
-                        <option value="1">1 Traveler</option>
-                        <option value="2">2 Travelers</option>
-                        <option value="3">3 Travelers</option>
-                        <option value="4">4 Travelers</option>
-                        <option value="5+">5+ Travelers</option>
+                        <option value="1">{t('homepage.search.travelers_one', '1 Traveler')}</option>
+                        <option value="2">{t('homepage.search.travelers_two', '2 Travelers')}</option>
+                        <option value="3">{t('homepage.search.travelers_three', '3 Travelers')}</option>
+                        <option value="4">{t('homepage.search.travelers_four', '4 Travelers')}</option>
+                        <option value="5+">{t('homepage.search.travelers_five_plus', '5+ Travelers')}</option>
                       </Select>
                     </InputGroup>
 
@@ -264,7 +275,7 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
                       onClick={handleCreateCustomExperience}
                       leftIcon={<Icon as={SparklesIcon} />}
                     >
-                      Start Planning My Trip
+                      {t('homepage.search.startPlanning', 'Start Planning My Trip')}
                     </Button>
                   </VStack>
                 </VStack>
@@ -276,8 +287,8 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
         <Box mt={16}>
           <VStack spacing={8}>
             <VStack spacing={2} textAlign="center">
-              <Text color="white" fontSize="lg" fontWeight="medium">Popular Maldives Destinations</Text>
-              <Text color="gray.300" fontSize="sm">Most sought-after islands and atolls for your perfect getaway</Text>
+              <Text color="white" fontSize="lg" fontWeight="medium">{t('homepage.destinations.popularTitle', 'Popular Maldives Destinations')}</Text>
+              <Text color="gray.300" fontSize="sm">{t('homepage.destinations.popularSubtitle', 'Most sought-after islands and atolls for your perfect getaway')}</Text>
             </VStack>
 
             {trendingDestinations.length > 0 ? (
@@ -300,7 +311,7 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
                       <Box position="absolute" top={0} left={0} right={0} bottom={0} bg="blackAlpha.400" />
                       <VStack position="absolute" top={0} left={0} right={0} bottom={0} justify="center" spacing={1}>
                         <Text color="white" fontWeight="bold" fontSize="lg">{destination.name}</Text>
-                        <Text color="gray.200" fontSize="sm">{destination.properties} properties</Text>
+                        <Text color="gray.200" fontSize="sm">{destination.packages} {t('homepage.destinations.packages', 'packages')}</Text>
                       </VStack>
                     </Box>
                   </Card>
@@ -308,8 +319,8 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
               </SimpleGrid>
             ) : (
               <VStack spacing={4} textAlign="center">
-                <Text color="gray.300" fontSize="sm">No destinations available at the moment.</Text>
-                <Text color="gray.400" fontSize="xs">Please check back later or contact us for more information.</Text>
+                <Text color="gray.300" fontSize="sm">{t('homepage.destinations.empty', 'No destinations available at the moment.')}</Text>
+                <Text color="gray.400" fontSize="xs">{t('homepage.destinations.emptyHelp', 'Please check back later or contact us for more information.')}</Text>
               </VStack>
             )}
           </VStack>

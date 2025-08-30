@@ -120,7 +120,7 @@ export const SettingsEditor: React.FC<SettingsEditorProps> = ({ data, onChange }
                   <Input
                     value={settings.contact_phone}
                     onChange={(e) => handleInputChange('contact_phone', e.target.value)}
-                    placeholder="+1234567890"
+                    placeholder="+960 744 1097"
                   />
                 </FormControl>
               </HStack>
@@ -130,7 +130,7 @@ export const SettingsEditor: React.FC<SettingsEditorProps> = ({ data, onChange }
                 <Input
                   value={settings.whatsapp_number}
                   onChange={(e) => handleInputChange('whatsapp_number', e.target.value)}
-                  placeholder="+1234567890"
+                  placeholder="+960 744 1097"
                 />
                 <FormHelperText>WhatsApp number for customer support</FormHelperText>
               </FormControl>

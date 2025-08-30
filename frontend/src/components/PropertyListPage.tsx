@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { MagnifyingGlassIcon, SparklesIcon, GlobeAltIcon, MapIcon, ArrowRightIcon, InformationCircleIcon, FireIcon, HomeIcon, StarIcon, UsersIcon } from '@heroicons/react/24/outline';
 import { PropertyCard } from './ui/PropertyCard';
-import { useProperties, useDestinations } from '../hooks/useQueries';
+import { useProperties, useDestinations, useWhatsApp } from '../hooks/useQueries';
 import { LoadingSpinner } from './LoadingSpinner';
 import { ComponentErrorBoundary } from './SimpleErrorBoundary';
 import { SEO } from './SEO';
@@ -43,6 +43,7 @@ import {
 export function PropertyListPage() {
   const { data: properties, isLoading, error } = useProperties();
   const { data: destinations } = useDestinations();
+  const { getWhatsAppUrl } = useWhatsApp();
   const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDestination, setSelectedDestination] = useState('all');

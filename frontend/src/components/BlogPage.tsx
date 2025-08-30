@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from '../i18n';
 import { 
   CalendarIcon,
   ClockIcon,
@@ -24,6 +25,7 @@ interface BlogPost {
 }
 
 export function BlogPage() {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
 
@@ -130,14 +132,24 @@ export function BlogPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="relative overflow-hidden text-white py-16">
+        {/* Background Image */}
+        <div className="absolute inset-0">
+          <img
+            src="/src/assets/images/ishan112.jpg"
+            alt="Maldives Blog Background"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-black bg-opacity-60"></div>
+        </div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              Maldives Travel Blog
+              {t('blog.hero.title', 'Maldives Travel Blog')}
             </h1>
             <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-              Discover travel tips, destination guides, and insider knowledge to help you plan the perfect Maldives adventure.
+              {t('blog.hero.subtitle', 'Discover travel tips, destination guides, and insider knowledge to help you plan the perfect Maldives adventure.')}
             </p>
           </div>
         </div>
@@ -152,7 +164,7 @@ export function BlogPage() {
                 <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Search articles..."
+                  placeholder={t('blog.search.placeholder', 'Search articles...')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -166,7 +178,7 @@ export function BlogPage() {
             >
               {categories.map((category) => (
                 <option key={category} value={category}>
-                  {category === 'all' ? 'All Categories' : category}
+                  {category === 'all' ? t('blog.categories.all', 'All Categories') : category}
                 </option>
               ))}
             </select>
@@ -174,7 +186,7 @@ export function BlogPage() {
           
           {searchTerm && (
             <p className="text-gray-600">
-              Found {filteredPosts.length} article{filteredPosts.length !== 1 ? 's' : ''} matching "{searchTerm}"
+              {t('blog.search.results', 'Found {{count}} article{{count !== 1 ? "s" : ""}} matching "{{term}}"', { count: filteredPosts.length, term: searchTerm })}
             </p>
           )}
         </div>
@@ -182,7 +194,9 @@ export function BlogPage() {
         {/* Featured Posts */}
         {featuredPosts.length > 0 && (
           <section className="mb-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Featured Articles</h2>
+                         <h2 className="text-2xl font-bold text-gray-900 mb-6">
+               {t('blog.featured.title', 'Featured Articles')}
+             </h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {featuredPosts.map((post) => (
                 <article key={post.id} className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
@@ -220,7 +234,7 @@ export function BlogPage() {
                         to={`/blog/${post.slug}`}
                         className="text-blue-600 hover:text-blue-700 font-medium text-sm"
                       >
-                        Read More →
+                        {t('blog.readMore', 'Read More')} →
                       </Link>
                     </div>
                   </div>
@@ -233,7 +247,9 @@ export function BlogPage() {
         {/* Regular Posts */}
         {regularPosts.length > 0 && (
           <section>
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Latest Articles</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              {t('blog.latest.title', 'Latest Articles')}
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {regularPosts.map((post) => (
                 <article key={post.id} className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
@@ -267,7 +283,7 @@ export function BlogPage() {
                         to={`/blog/${post.slug}`}
                         className="text-blue-600 hover:text-blue-700 font-medium text-sm"
                       >
-                        Read More →
+                        {t('blog.readMore', 'Read More')} →
                       </Link>
                     </div>
                   </div>
@@ -283,26 +299,32 @@ export function BlogPage() {
             <div className="text-gray-400 mb-4">
               <MagnifyingGlassIcon className="h-16 w-16 mx-auto" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No articles found</h3>
-            <p className="text-gray-600">Try adjusting your search terms or browse all categories.</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              {t('blog.noResults.title', 'No articles found')}
+            </h3>
+            <p className="text-gray-600">
+              {t('blog.noResults.description', 'Try adjusting your search terms or browse all categories.')}
+            </p>
           </div>
         )}
 
         {/* Newsletter Signup */}
         <section className="mt-16 bg-blue-50 rounded-lg p-8">
           <div className="text-center">
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">Stay Updated</h3>
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">
+              {t('blog.newsletter.title', 'Stay Updated')}
+            </h3>
             <p className="text-gray-600 mb-6">
-              Subscribe to our newsletter for the latest travel tips, destination guides, and exclusive offers.
+              {t('blog.newsletter.description', 'Subscribe to our newsletter for the latest travel tips, destination guides, and exclusive offers.')}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
               <input
                 type="email"
-                placeholder="Enter your email"
+                placeholder={t('blog.newsletter.emailPlaceholder', 'Enter your email')}
                 className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
               <button className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
-                Subscribe
+                {t('blog.newsletter.subscribe', 'Subscribe')}
               </button>
             </div>
           </div>

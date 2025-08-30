@@ -1,8 +1,28 @@
+// Legacy function for backward compatibility
 export function formatPrice(price: number): string {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
   }).format(price);
+}
+
+// New function that accepts currency parameters
+export function formatPriceWithCurrency(
+  price: number,
+  currency: string = 'USD',
+  locale: string = 'en-US',
+  options: { showSymbol?: boolean; precision?: number } = {}
+): string {
+  const { showSymbol = true, precision } = options;
+
+  const formatter = new Intl.NumberFormat(locale, {
+    style: showSymbol ? 'currency' : 'decimal',
+    currency: currency,
+    minimumFractionDigits: precision !== undefined ? precision : (price >= 100 ? 0 : 2),
+    maximumFractionDigits: precision !== undefined ? precision : (price >= 100 ? 0 : 2),
+  });
+
+  return formatter.format(price);
 }
 
 export function formatDate(dateString: string): string {

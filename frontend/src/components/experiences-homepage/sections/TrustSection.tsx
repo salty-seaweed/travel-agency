@@ -37,25 +37,22 @@ export const ExperiencesTrustSection: React.FC<Props> = ({ homepageContent }) =>
   const mutedTextColor = useColorModeValue('gray.600', 'gray.300');
 
   const trustFeatures = [
-    { icon: ShieldCheckIcon, title: 'Secure Payments', description: 'Your bookings are protected with secure payment processing.', color: 'green' },
-    { icon: GlobeAltIcon, title: 'Local Expertise', description: 'Curated Maldives experiences with verified local partners.', color: 'blue' },
-    { icon: UserGroupIcon, title: 'Personal Support', description: 'Friendly help from real humans—before, during, and after your trip.', color: 'purple' },
-    { icon: StarIcon, title: 'Great Reviews', description: 'We strive for excellence on every trip we organize.', color: 'yellow' },
+    { icon: ShieldCheckIcon, title: t('trust.features.secure', 'Secure Payments'), description: t('trust.features.secureDesc', 'Your bookings are protected with secure payment processing.'), color: 'green' },
+    { icon: GlobeAltIcon, title: t('trust.features.local', 'Local Expertise'), description: t('trust.features.localDesc', 'Curated Maldives experiences with verified local partners.'), color: 'blue' },
+    { icon: UserGroupIcon, title: t('trust.features.support', 'Personal Support'), description: t('trust.features.supportDesc', 'Friendly help from real humans—before, during, and after your trip.'), color: 'purple' },
+    { icon: StarIcon, title: t('trust.features.reviews', 'Great Reviews'), description: t('trust.features.reviewsDesc', 'We strive for excellence on every trip we organize.'), color: 'yellow' },
   ];
 
   const whyChooseUs = [
-    { icon: CheckCircleIcon, title: 'Verified Partners', description: 'We carefully vet our local partners for quality and reliability.' },
-    { icon: CreditCardIcon, title: 'Flexible Payments', description: 'Multiple payment options with industry-grade security.' },
-    { icon: ChatBubbleLeftRightIcon, title: '24/7 Assistance', description: 'Round-the-clock support for your peace of mind.' },
-    { icon: ClockIcon, title: 'Instant Confirmations', description: 'Fast responses and quick confirmations.' },
-    { icon: HeartIcon, title: 'Best Value', description: 'Transparent pricing and the right package for your budget.' },
+    { icon: CheckCircleIcon, title: t('trust.why.verified', 'Verified Partners'), description: t('trust.why.verifiedDesc', 'We carefully vet our local partners for quality and reliability.') },
+    { icon: CreditCardIcon, title: t('trust.why.flexible', 'Flexible Payments'), description: t('trust.why.flexibleDesc', 'Multiple payment options with industry-grade security.') },
+    { icon: ChatBubbleLeftRightIcon, title: t('trust.why.assistance', '24/7 Assistance'), description: t('trust.why.assistanceDesc', 'Round-the-clock support for your peace of mind.') },
+    { icon: ClockIcon, title: t('trust.why.instant', 'Instant Confirmations'), description: t('trust.why.instantDesc', 'Fast responses and quick confirmations.') },
+    { icon: HeartIcon, title: t('trust.why.value', 'Best Value'), description: t('trust.why.valueDesc', 'Transparent pricing and the right package for your budget.') },
   ];
 
-  const trustIndicators = [
-    { label: 'Experiences', value: '75+' },
-    { label: 'Islands Covered', value: '20+' },
-    { label: 'Average Rating', value: '4.8' },
-  ];
+  // Remove hardcoded trust indicators - these should be managed through admin panel
+  const trustIndicators: any[] = [];
 
   return (
     <Box bg={bgColor} py={16}>
@@ -66,10 +63,10 @@ export const ExperiencesTrustSection: React.FC<Props> = ({ homepageContent }) =>
               <VStack spacing={8} align="start">
                 <VStack spacing={4} align="start">
                   <Badge colorScheme="blue" variant="solid" px={4} py={2} borderRadius="full" fontSize="sm" fontWeight="semibold">
-                    <HStack spacing={2}><Icon as={ShieldCheckIcon} className="w-4 h-4" /><Text>Travel Confidently</Text></HStack>
+                    <HStack spacing={2}><Icon as={ShieldCheckIcon} className="w-4 h-4" /><Text>{t('trust.badge', 'Travel Confidently')}</Text></HStack>
                   </Badge>
-                  <Heading size="2xl" color={textColor} fontWeight="bold" fontSize={{ base: '2xl', md: '3xl', lg: '4xl' }} lineHeight="1.2">Travel Confidently, Book Seamlessly</Heading>
-                  <Text fontSize="lg" color={mutedTextColor} lineHeight="1.6">Booking curated Maldives experiences is easy, safe, and transparent—so you can focus on the trip, not the logistics.</Text>
+                  <Heading size="2xl" color={textColor} fontWeight="bold" fontSize={{ base: '2xl', md: '3xl', lg: '4xl' }} lineHeight="1.2">{t('trust.title', 'Travel Confidently, Book Seamlessly')}</Heading>
+                  <Text fontSize="lg" color={mutedTextColor} lineHeight="1.6">{t('trust.subtitle', 'Booking curated Maldives experiences is easy, safe, and transparent—so you can focus on the trip, not the logistics.')}</Text>
                 </VStack>
 
                 <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6} w="full">
@@ -88,10 +85,10 @@ export const ExperiencesTrustSection: React.FC<Props> = ({ homepageContent }) =>
 
                 <HStack spacing={3} pt={2}>
                   <a href={getWhatsAppUrl('Hi! I would like help choosing a Maldives experience')} target="_blank" rel="noopener noreferrer">
-                    <Button colorScheme="whatsapp" size="lg">Chat on WhatsApp</Button>
+                    <Button colorScheme="whatsapp" size="lg">{t('homepage.cta.chatWhatsApp')}</Button>
                   </a>
                   <Link to="/contact">
-                    <Button size="lg" variant="outline" rightIcon={<Icon as={ArrowRightIcon} className="w-5 h-5" />}>Contact Us</Button>
+                    <Button size="lg" variant="outline" rightIcon={<Icon as={ArrowRightIcon} className="w-5 h-5" />}>{t('homepage.cta.contactUs', 'Contact Now')}</Button>
                   </Link>
                 </HStack>
               </VStack>
@@ -102,8 +99,8 @@ export const ExperiencesTrustSection: React.FC<Props> = ({ homepageContent }) =>
                 <CardBody p={8}>
                   <VStack spacing={8}>
                     <VStack spacing={2} textAlign="center">
-                      <Heading size="lg" color={textColor}>Trusted by Travelers</Heading>
-                      <Text color={mutedTextColor}>We\'re committed to excellent service</Text>
+                      <Heading size="lg" color={textColor}>{t('trust.trustedTitle', 'Trusted by Travelers')}</Heading>
+                      <Text color={mutedTextColor}>{t('trust.trustedSubtitle', "We're committed to excellent service")}</Text>
                     </VStack>
 
                     <SimpleGrid columns={{ base: 3, md: 3 }} spacing={6} w="full">
@@ -122,7 +119,7 @@ export const ExperiencesTrustSection: React.FC<Props> = ({ homepageContent }) =>
                         {[1,2,3,4,5].map((star) => (<Icon key={star} as={StarSolidIcon} className="w-5 h-5 text-yellow-400" />))}
                         <Text fontWeight="semibold" color={textColor}>4.8/5</Text>
                       </HStack>
-                      <Text fontSize="sm" color={mutedTextColor} textAlign="center">We aim to delight every traveler</Text>
+                      <Text fontSize="sm" color={mutedTextColor} textAlign="center">{t('trust.aim', 'We aim to delight every traveler')}</Text>
                       <AvatarGroup size="sm" max={5}>
                         <Avatar src="/src/assets/images/ishan63.jpg" />
                         <Avatar src="/src/assets/images/ishan64.jpg" />
@@ -139,8 +136,8 @@ export const ExperiencesTrustSection: React.FC<Props> = ({ homepageContent }) =>
 
           <VStack spacing={12} w="full">
             <VStack spacing={4} textAlign="center">
-              <Heading size="xl" color={textColor} fontWeight="bold">Why Choose Us?</Heading>
-              <Text fontSize="lg" color={mutedTextColor} maxW="2xl" lineHeight="1.6">We make Maldives trip planning simple and stress-free.</Text>
+              <Heading size="xl" color={textColor} fontWeight="bold">{t('trust.why.title', 'Why Choose Us?')}</Heading>
+              <Text fontSize="lg" color={mutedTextColor} maxW="2xl" lineHeight="1.6">{t('trust.why.subtitle', 'We make Maldives trip planning simple and stress-free.')}</Text>
             </VStack>
 
             <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={8} w="full">

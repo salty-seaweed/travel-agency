@@ -4,6 +4,7 @@ import { Card, LoadingSpinner } from './index';
 import { Button } from './ui/Button';
 import { useNotification } from '../hooks';
 import { useCustomerAuth } from '../hooks/useCustomerAuth';
+import { useWhatsApp } from '../hooks/useQueries';
 import {
   CalendarIcon,
   UsersIcon,
@@ -60,6 +61,7 @@ export function BookingPage() {
   const navigate = useNavigate();
   const { showSuccess, showError } = useNotification();
   const { isAuthenticated, customerData } = useCustomerAuth();
+  const { getWhatsAppUrl } = useWhatsApp();
   const [property, setProperty] = useState<Property | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -160,9 +162,8 @@ export function BookingPage() {
   };
 
   const handleWhatsAppBooking = () => {
-    const phone = '+960 744 1097';
     const message = `Hi! I'm interested in booking ${property?.name} for ${formData.guests} guests from ${formData.check_in} to ${formData.check_out}. Can you help me with availability and rates?`;
-    const whatsappUrl = `https://wa.me/${phone.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = getWhatsAppUrl(message);
     window.open(whatsappUrl, '_blank');
   };
 
@@ -388,7 +389,7 @@ export function BookingPage() {
                       {isSubmitting ? 'Submitting...' : 'Submit Booking'}
                     </Button>
                     <a
-                      href="https://wa.me/9607441097?text=Hi! I'm interested in booking. Can you help me?"
+                      href={getWhatsAppUrl(`Hi! I'm interested in booking. Can you help me?`)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white py-3 px-4 rounded-xl text-sm font-semibold hover:from-green-600 hover:to-green-700 focus:ring-4 focus:ring-green-200 active:scale-95 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"

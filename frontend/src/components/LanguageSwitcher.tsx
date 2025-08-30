@@ -1,96 +1,227 @@
-import React, { useState } from 'react';
-import { GlobeAltIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
-import { useTranslation } from '../i18n';
-import { languages, languageUtils, type LanguageCode } from '../i18n';
+import React, { useState, useEffect } from 'react';
+import { 
+  GlobeAltIcon, 
+  ChevronDownIcon,
+  CheckIcon
+} from '@heroicons/react/24/outline';
+import { i18nService, Language } from '../services/i18n-service';
+import { languageUtils, languages as i18nLanguages } from '../i18n';
 
 interface LanguageSwitcherProps {
   className?: string;
-  variant?: 'dropdown' | 'buttons';
+  variant?: 'dropdown' | 'buttons' | 'flags';
+  showLabels?: boolean;
+  onLanguageChange?: (languageCode: string) => void;
 }
 
-export function LanguageSwitcher({ className = '', variant = 'dropdown' }: LanguageSwitcherProps) {
-  const { i18n } = useTranslation();
+export function LanguageSwitcher({ 
+  className = '', 
+  variant = 'dropdown',
+  showLabels = true,
+  onLanguageChange 
+}: LanguageSwitcherProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const currentLanguage = i18n.language as LanguageCode;
+  const [currentLanguage, setCurrentLanguage] = useState<string>('en');
+  const [supportedLanguages, setSupportedLanguages] = useState<Language[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLanguageChange = (lang: LanguageCode) => {
-    languageUtils.setLanguage(lang);
-    setIsOpen(false);
+  useEffect(() => {
+    loadLanguages();
+  }, []);
+
+  const loadLanguages = async () => {
+    try {
+      const languages = i18nService.getSupportedLanguages();
+      // Fallback to hardcoded languages if API fails
+      if (languages.length === 0) {
+        const fallbackLanguages = Object.entries(i18nLanguages).map(([code, info], idx) => ({
+          id: idx + 1,
+          code,
+          name: info.name,
+          native_name: info.nativeName,
+          flag: info.flag,
+          direction: info.direction,
+          is_active: true,
+          is_default: code === 'en',
+        })) as unknown as Language[];
+        setSupportedLanguages(fallbackLanguages);
+      } else {
+        setSupportedLanguages(languages);
+      }
+      setCurrentLanguage(localStorage.getItem('preferred-language') || i18nService.getCurrentLanguage());
+    } catch (error) {
+      console.error('Error loading languages:', error);
+      // Fallback to hardcoded languages on error
+      const fallbackLanguages = Object.entries(i18nLanguages).map(([code, info], idx) => ({
+        id: idx + 1,
+        code,
+        name: info.name,
+        native_name: info.nativeName,
+        flag: info.flag,
+        direction: info.direction,
+        is_active: true,
+        is_default: code === 'en',
+      })) as unknown as Language[];
+      setSupportedLanguages(fallbackLanguages);
+    }
   };
 
+  const handleLanguageChange = async (languageCode: string) => {
+    if (languageCode === currentLanguage) {
+      setIsOpen(false);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Update react-i18next first (immediate UI change with static locales)
+      languageUtils.setLanguage(languageCode as any);
+      // Also try to use the backend-powered i18n service (best effort)
+      try { await i18nService.setLanguage(languageCode); } catch {}
+      setCurrentLanguage(languageCode);
+      setIsOpen(false);
+      onLanguageChange?.(languageCode);
+    } catch (error) {
+      console.error('Error changing language via i18n service:', error);
+      // Fallback: just update local state and localStorage
+      setCurrentLanguage(languageCode);
+      localStorage.setItem('preferred-language', languageCode);
+      setIsOpen(false);
+      onLanguageChange?.(languageCode);
+      
+      // Optional: show a notification that translation might not be available
+      console.log(`Language changed to ${languageCode}. Some translations may not be available.`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getCurrentLanguageInfo = () => {
+    return supportedLanguages.find(lang => lang.code === currentLanguage) || {
+      code: 'en',
+      name: 'English',
+      native_name: 'English',
+      flag: '🇺🇸'
+    };
+  };
+
+  const currentLang = getCurrentLanguageInfo();
+
+  // Button variant
   if (variant === 'buttons') {
     return (
-      <div className={`flex items-center gap-2 ${className}`}>
-        {Object.entries(languages).map(([code, lang]) => (
+      <div className={`flex space-x-2 ${className}`}>
+        {supportedLanguages.map((language) => (
           <button
-            key={code}
-            onClick={() => handleLanguageChange(code as LanguageCode)}
-            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-              currentLanguage === code
-                ? 'bg-blue-600 text-white shadow-lg'
-                : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
-            }`}
-            aria-label={`Switch to ${lang.name}`}
+            key={language.code}
+            onClick={() => handleLanguageChange(language.code)}
+            disabled={isLoading}
+            className={`flex items-center space-x-2 px-3 py-2 rounded-lg border transition-all ${
+              currentLanguage === language.code
+                ? 'bg-blue-50 border-blue-200 text-blue-700'
+                : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50'
+            } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
-            <span className="text-lg">{lang.flag}</span>
-            <span className="hidden sm:inline">{lang.nativeName}</span>
+            <span className="text-lg">{language.flag}</span>
+            {showLabels && (
+              <span className="text-sm font-medium">
+                {language.native_name}
+              </span>
+            )}
+            {currentLanguage === language.code && (
+              <CheckIcon className="w-4 h-4" />
+            )}
           </button>
         ))}
       </div>
     );
   }
 
+  // Flags variant
+  if (variant === 'flags') {
+    return (
+      <div className={`flex space-x-1 ${className}`}>
+        {supportedLanguages.map((language) => (
+          <button
+            key={language.code}
+            onClick={() => handleLanguageChange(language.code)}
+            disabled={isLoading}
+            className={`text-2xl transition-all hover:scale-110 ${
+              currentLanguage === language.code
+                ? 'ring-2 ring-blue-500 ring-offset-2 rounded'
+                : 'opacity-70 hover:opacity-100'
+            } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+            title={`${language.name} (${language.native_name})`}
+          >
+            {language.flag}
+          </button>
+        ))}
+      </div>
+    );
+  }
+
+  // Dropdown variant (default)
   return (
     <div className={`relative ${className}`}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 bg-white rounded-lg border border-gray-200 hover:border-gray-300 transition-all duration-200 shadow-sm"
-        aria-label="Select language"
-        aria-expanded={isOpen}
+        disabled={isLoading}
+        className={`flex items-center space-x-2 px-3 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 transition-all ${
+          isOpen ? 'ring-2 ring-blue-500 ring-offset-2' : ''
+        } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
       >
-        <GlobeAltIcon className="h-4 w-4 text-gray-600" />
-        <span className="text-lg">{languages[currentLanguage]?.flag}</span>
-        <span className="text-sm font-medium text-gray-700 hidden sm:inline">
-          {languages[currentLanguage]?.nativeName}
-        </span>
-        <ChevronDownIcon className={`h-4 w-4 text-gray-600 transition-transform duration-200 ${
+        <GlobeAltIcon className="w-5 h-5 text-gray-600" />
+        <span className="text-lg">{currentLang.flag}</span>
+        {showLabels && (
+          <span className="text-sm font-medium text-gray-700">
+            {currentLang.native_name}
+          </span>
+        )}
+        <ChevronDownIcon className={`w-4 h-4 text-gray-600 transition-transform ${
           isOpen ? 'rotate-180' : ''
         }`} />
       </button>
 
       {isOpen && (
-        <>
-          {/* Backdrop */}
-          <div
-            className="fixed inset-0 z-10"
-            onClick={() => setIsOpen(false)}
-          />
-          
-          {/* Dropdown */}
-          <div className="absolute right-0 top-full mt-1 bg-white rounded-lg border border-gray-200 shadow-lg z-20 min-w-[200px]">
-            <div className="py-1">
-              {Object.entries(languages).map(([code, lang]) => (
-                <button
-                  key={code}
-                  onClick={() => handleLanguageChange(code as LanguageCode)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 transition-colors duration-150 ${
-                    currentLanguage === code ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
-                  }`}
-                  aria-label={`Switch to ${lang.name}`}
-                >
-                  <span className="text-lg">{lang.flag}</span>
-                  <div className="flex flex-col">
-                    <span className="font-medium">{lang.nativeName}</span>
-                    <span className="text-xs text-gray-500">{lang.name}</span>
+        <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+          <div className="py-1">
+            {supportedLanguages.map((language) => (
+              <button
+                key={language.code}
+                onClick={() => handleLanguageChange(language.code)}
+                disabled={isLoading}
+                className={`w-full flex items-center space-x-3 px-4 py-2 text-left hover:bg-gray-50 transition-colors ${
+                  currentLanguage === language.code
+                    ? 'bg-blue-50 text-blue-700'
+                    : 'text-gray-700'
+                } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                <span className="text-lg">{language.flag}</span>
+                <div className="flex-1">
+                  <div className="text-sm font-medium">
+                    {language.native_name}
                   </div>
-                  {currentLanguage === code && (
-                    <div className="ml-auto w-2 h-2 bg-blue-600 rounded-full" />
+                  {language.native_name !== language.name && (
+                    <div className="text-xs text-gray-500">
+                      {language.name}
+                    </div>
                   )}
-                </button>
-              ))}
-            </div>
+                </div>
+                {currentLanguage === language.code && (
+                  <CheckIcon className="w-4 h-4 text-blue-600" />
+                )}
+              </button>
+            ))}
           </div>
-        </>
+        </div>
+      )}
+
+      {/* Backdrop to close dropdown */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-40"
+          onClick={() => setIsOpen(false)}
+        />
       )}
     </div>
   );

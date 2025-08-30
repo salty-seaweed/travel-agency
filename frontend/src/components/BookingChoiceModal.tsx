@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React from 'react';
 import {
   Modal,
   ModalOverlay,
@@ -7,9 +6,7 @@ import {
   ModalHeader,
   ModalBody,
   ModalCloseButton,
-  Button,
   VStack,
-  HStack,
   Text,
   Box,
   Icon,
@@ -18,7 +15,6 @@ import {
   CardBody,
   Heading,
   Badge,
-  Divider,
 } from '@chakra-ui/react';
 
 import {
@@ -35,22 +31,38 @@ import {
 } from '@heroicons/react/24/outline';
 import { whatsappBooking } from '../services/whatsapp-booking';
 import type { Package } from '../types';
+import { useWhatsApp } from '../hooks/useQueries';
+import { useTranslation } from '../i18n';
 
 interface BookingChoiceModalProps {
   isOpen: boolean;
   onClose: () => void;
   package: Package;
+  onFormBooking?: () => void;
 }
 
-export function BookingChoiceModal({ isOpen, onClose, package: pkg }: BookingChoiceModalProps) {
+export function BookingChoiceModal({ isOpen, onClose, package: pkg, onFormBooking }: BookingChoiceModalProps) {
+  const { t } = useTranslation();
   const toast = useToast();
+  const { whatsappNumber } = useWhatsApp();
+
+  const getDestinationsLabel = (): string => {
+    const dests: any = (pkg as any)?.destinations;
+    if (Array.isArray(dests)) {
+      const labels = dests
+        .map((d) => typeof d === 'string' ? d : (d?.location?.island || d?.island || d?.name || d?.location || ''))
+        .filter((s) => typeof s === 'string' && s.trim().length > 0);
+      if (labels.length > 0) return labels.join(', ');
+    }
+    return t('packageCard.defaultDestination', 'Maldives Paradise');
+  };
 
   const handleDirectWhatsApp = () => {
-    whatsappBooking.bookPackageDirect(pkg);
+    whatsappBooking.bookPackageDirect(pkg, whatsappNumber);
     onClose();
     toast({
-      title: "WhatsApp opened!",
-      description: "You can now chat with us directly about your booking.",
+      title: t('bookingModal.whatsappOpened.title', 'WhatsApp opened!'),
+      description: t('bookingModal.whatsappOpened.description', 'You can now chat with us directly about your booking.'),
       status: "success",
       duration: 3000,
       isClosable: true,
@@ -58,37 +70,13 @@ export function BookingChoiceModal({ isOpen, onClose, package: pkg }: BookingCho
   };
 
   const handleFormBooking = () => {
-    // Create a detailed WhatsApp message with form-like information
-    const message = `Hi! I'm interested in booking the "${pkg.name}" package.
-
-📋 *Package Details:*
-• Package: ${pkg.name}
-• Duration: ${pkg.duration} days
-• Price: $${pkg.price} per person
-• Destinations: ${pkg.destinations?.join(', ') || 'Maldives Paradise'}
-• Max Travelers: ${pkg.maxTravelers}
-
-📝 *Please provide the following information:*
-• Preferred travel dates
-• Number of travelers
-• Any special requirements
-• Contact information
-
-I'd like to check availability and get more details about this package. Thank you!`;
-
-    const cleanPhone = '9607441097';
-    const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodedMessage}`;
-    window.open(whatsappUrl, '_blank');
-    
-    onClose();
-    toast({
-      title: "WhatsApp opened!",
-      description: "We've prepared a detailed message with all the information needed for your booking.",
-      status: "success",
-      duration: 3000,
-      isClosable: true,
-    });
+    if (onFormBooking) {
+      onFormBooking();
+      onClose();
+      return;
+    }
+    // Default: navigate to booking page when used from cards/listing
+    window.location.href = `/packages/${pkg.id}/book`;
   };
 
   return (
@@ -102,10 +90,10 @@ I'd like to check availability and get more details about this package. Thank yo
               </div>
             </div>
             <Heading size="lg" className="text-gray-900">
-              Book Your Maldives Adventure
+              {t('bookingModal.title', 'Book Your Maldives Adventure')}
             </Heading>
             <Text className="text-gray-600 mt-2">
-              Choose how you'd like to proceed with your booking
+              {t('bookingModal.subtitle', 'Choose how you\'d like to proceed with your booking')}
             </Text>
           </ModalHeader>
           
@@ -123,7 +111,7 @@ I'd like to check availability and get more details about this package. Thank yo
                     <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
                       <div className="flex items-center gap-2">
                         <Icon as={MapPinIcon} className="w-4 h-4 text-blue-500" />
-                        <span>{pkg.destinations?.join(', ') || 'Maldives Paradise'}</span>
+                        <span>{getDestinationsLabel()}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Icon as={CalendarIcon} className="w-4 h-4 text-green-500" />
@@ -131,7 +119,7 @@ I'd like to check availability and get more details about this package. Thank yo
                       </div>
                       <div className="flex items-center gap-2">
                         <Icon as={UserGroupIcon} className="w-4 h-4 text-purple-500" />
-                        <span>Up to {pkg.maxTravelers} travelers</span>
+                        <span>{t('bookingModal.packageSummary.maxTravelers', 'Up to {{count}} travelers', { count: pkg.maxTravelers })}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Icon as={CurrencyDollarIcon} className="w-4 h-4 text-yellow-500" />
@@ -140,7 +128,7 @@ I'd like to check availability and get more details about this package. Thank yo
                     </div>
                   </div>
                   <Badge className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-3 py-1 rounded-full text-sm font-bold">
-                    Available
+                                         {t('bookingModal.packageSummary.available', 'Available')}
                   </Badge>
                 </div>
               </CardBody>
@@ -161,10 +149,10 @@ I'd like to check availability and get more details about this package. Thank yo
                       </div>
                       <div>
                         <Heading size="md" className="text-gray-900 mb-1">
-                          Direct WhatsApp Booking
-                        </Heading>
-                        <Text className="text-gray-600 text-sm">
-                          Chat with us instantly for immediate assistance
+                                                     {t('bookingModal.directWhatsApp.title', 'Direct WhatsApp Booking')}
+                          </Heading>
+                          <Text className="text-gray-600 text-sm">
+                           {t('bookingModal.directWhatsApp.description', 'Chat with us instantly for immediate assistance')}
                         </Text>
                       </div>
                     </div>
@@ -174,15 +162,15 @@ I'd like to check availability and get more details about this package. Thank yo
                   <div className="mt-4 grid grid-cols-3 gap-4 text-xs text-gray-500">
                     <div className="flex items-center gap-1">
                       <Icon as={ClockIcon} className="w-3 h-3 text-green-500" />
-                      <span>Instant</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Icon as={ShieldCheckIcon} className="w-3 h-3 text-blue-500" />
-                      <span>Secure</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Icon as={UserGroupIcon} className="w-3 h-3 text-purple-500" />
-                      <span>Personal</span>
+                                             <span>{t('bookingModal.directWhatsApp.features.instant', 'Instant')}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Icon as={ShieldCheckIcon} className="w-3 h-3 text-blue-500" />
+                       <span>{t('bookingModal.directWhatsApp.features.secure', 'Secure')}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Icon as={UserGroupIcon} className="w-3 h-3 text-purple-500" />
+                       <span>{t('bookingModal.directWhatsApp.features.personal', 'Personal')}</span>
                     </div>
                   </div>
                 </CardBody>
@@ -190,7 +178,7 @@ I'd like to check availability and get more details about this package. Thank yo
 
               <div className="flex items-center w-full">
                 <div className="flex-1 h-px bg-gray-200"></div>
-                <Text className="px-4 text-gray-500 text-sm font-medium">OR</Text>
+                <Text className="px-4 text-gray-500 text-sm font-medium">{t('bookingModal.or', 'OR')}</Text>
                 <div className="flex-1 h-px bg-gray-200"></div>
               </div>
 
@@ -207,10 +195,10 @@ I'd like to check availability and get more details about this package. Thank yo
                       </div>
                       <div>
                         <Heading size="md" className="text-gray-900 mb-1">
-                          Fill Booking Form
-                        </Heading>
-                        <Text className="text-gray-600 text-sm">
-                          Complete a detailed form for comprehensive booking
+                                                     {t('bookingModal.bookingForm.title', 'Fill Booking Form')}
+                          </Heading>
+                          <Text className="text-gray-600 text-sm">
+                           {t('bookingModal.bookingForm.description', 'Complete a detailed form for comprehensive booking')}
                         </Text>
                       </div>
                     </div>
@@ -220,15 +208,15 @@ I'd like to check availability and get more details about this package. Thank yo
                   <div className="mt-4 grid grid-cols-3 gap-4 text-xs text-gray-500">
                     <div className="flex items-center gap-1">
                       <Icon as={CheckCircleIcon} className="w-3 h-3 text-green-500" />
-                      <span>Detailed</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Icon as={ShieldCheckIcon} className="w-3 h-3 text-blue-500" />
-                      <span>Secure</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Icon as={CalendarIcon} className="w-3 h-3 text-purple-500" />
-                      <span>Structured</span>
+                                             <span>{t('bookingModal.bookingForm.features.detailed', 'Detailed')}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Icon as={ShieldCheckIcon} className="w-3 h-3 text-blue-500" />
+                       <span>{t('bookingModal.bookingForm.features.secure', 'Secure')}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Icon as={CalendarIcon} className="w-3 h-3 text-purple-500" />
+                       <span>{t('bookingModal.bookingForm.features.structured', 'Structured')}</span>
                     </div>
                   </div>
                 </CardBody>
@@ -241,13 +229,13 @@ I'd like to check availability and get more details about this package. Thank yo
                 <Icon as={CheckCircleIcon} className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
                 <div>
                   <Text className="text-sm font-semibold text-yellow-800 mb-1">
-                    Important Booking Information
-                  </Text>
-                  <Text className="text-sm text-yellow-700">
-                    • All bookings are subject to availability confirmation<br/>
-                    • We'll check availability and get back to you within 24 hours<br/>
-                    • Payment is required to confirm your booking<br/>
-                    • Cancellation policies apply based on your selected package
+                                         {t('bookingModal.importantInfo.title', 'Important Booking Information')}
+                    </Text>
+                    <Text className="text-sm text-yellow-700">
+                     {t('bookingModal.importantInfo.availability', '• All bookings are subject to availability confirmation')}<br/>
+                     {t('bookingModal.importantInfo.response', '• We\'ll check availability and get back to you within 24 hours')}<br/>
+                     {t('bookingModal.importantInfo.payment', '• Payment is required to confirm your booking')}<br/>
+                     {t('bookingModal.importantInfo.cancellation', '• Cancellation policies apply based on your selected package')}
                   </Text>
                 </div>
               </div>
@@ -259,11 +247,11 @@ I'd like to check availability and get more details about this package. Thank yo
                 <Icon as={ChatBubbleLeftRightIcon} className="w-5 h-5 text-blue-600" />
                 <div>
                   <Text className="text-sm font-semibold text-blue-800">
-                    Need immediate assistance?
-                  </Text>
-                  <Text className="text-sm text-blue-700">
-                    Call us at +960 744 1097 or WhatsApp us anytime
-                  </Text>
+                                         {t('bookingModal.contactInfo.title', 'Need immediate assistance?')}
+                    </Text>
+                    <Text className="text-sm text-blue-700">
+                      {t('bookingModal.contactInfo.description', 'Call or WhatsApp us at {{num}}', { num: whatsappNumber })}
+                    </Text>
                 </div>
               </div>
             </Box>

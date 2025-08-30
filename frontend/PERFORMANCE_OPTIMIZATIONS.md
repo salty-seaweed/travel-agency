@@ -172,3 +172,5 @@ npm run lint
 - [React Query Performance](https://tanstack.com/query/latest/docs/react/guides/performance)
 - [React Lazy Loading](https://react.dev/reference/react/lazy)
 - [Web Performance Best Practices](https://web.dev/performance/)
+
+

@@ -1273,6 +1273,38 @@ div[class*="min-h-screen"] {
   perspective: 1000px;
 }
 
+/* Additional scrolling performance optimizations */
+body {
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  transform: translateZ(0);
+}
+
+/* Optimize for mobile scrolling */
+@media (max-width: 768px) {
+  body {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+  
+  /* Reduce background attachment on mobile for better performance */
+  .bg-gradient-to-br,
+  .bg-gradient-to-r {
+    background-attachment: scroll !important;
+  }
+}
+
+/* Contain layout shifts */
+.contain-layout {
+  contain: layout style paint;
+}
+
+/* Optimize images for performance */
+img {
+  content-visibility: auto;
+  contain-intrinsic-size: 300px 200px;
+}
+
 /* Optimized loading states */
 .loading-shimmer {
   background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);

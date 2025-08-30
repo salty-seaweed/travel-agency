@@ -143,7 +143,6 @@ export interface Destination extends BaseEntity {
   longitude?: number;
   image?: string;
   is_featured: boolean;
-  property_count: number;
   package_count: number;
   is_active: boolean;
 }
@@ -169,44 +168,10 @@ export interface Experience extends BaseEntity {
   requirements: string[];
 }
 
-// Property types
-export interface PropertyType extends BaseEntity {
-  name: string;
-  description?: string;
-}
-
+// Amenity types (kept for potential future use)
 export interface Amenity extends BaseEntity {
   name: string;
   icon?: string;
-}
-
-export interface PropertyImage extends BaseEntity {
-  property: number;
-  image: string;
-  caption?: string;
-  is_featured?: boolean;
-}
-
-// Unified Property interface
-export interface Property extends BaseEntity {
-  name: string;
-  description: string;
-  price_per_night: string;
-  location: Location;
-  property_type: PropertyType;
-  amenities: Amenity[];
-  images: PropertyImage[];
-  latitude?: number;
-  longitude?: number;
-  address?: string;
-  whatsapp_number?: string;
-  is_featured: boolean;
-  reviews: number[];
-  packages: number[];
-  // UI-specific computed fields
-  price: number; // Computed from price_per_night
-  rating: number; // Computed from reviews
-  reviewCount: number; // Computed from reviews length
 }
 
 // Package types
@@ -226,6 +191,22 @@ export interface PackageItinerary extends BaseEntity {
   meals: string[];
   accommodation?: string;
   transportation?: string;
+  start_time?: string;
+  end_time?: string;
+  location?: string;
+  // Enriched by API: matched activities for this day
+  experience_details?: Array<{
+    id: number;
+    name: string;
+    description: string;
+    duration: string;
+    difficulty: 'easy' | 'moderate' | 'challenging' | 'expert' | string;
+    category: string;
+    included: boolean;
+    price?: string;
+  }>;
+  // Write-only (forms): explicit linkage from day to activity ids
+  activity_ids?: number[];
 }
 
 export interface PackageInclusion extends BaseEntity {
@@ -239,7 +220,11 @@ export interface PackageInclusion extends BaseEntity {
 export interface PackageActivity extends BaseEntity {
   package: number;
   name: string;
+  name_ru?: string;
+  name_zh?: string;
   description: string;
+  description_ru?: string;
+  description_zh?: string;
   duration: string;
   difficulty: 'easy' | 'moderate' | 'challenging';
   category: string;
@@ -259,12 +244,17 @@ export interface PackageDestination extends BaseEntity {
 // Enhanced Package interface with comprehensive information
 export interface Package extends BaseEntity {
   name: string;
+  name_ru?: string;
+  name_zh?: string;
   description: string;
+  description_ru?: string;
+  description_zh?: string;
   detailed_description?: string;
+  detailed_description_ru?: string;
+  detailed_description_zh?: string;
   price: string;
   original_price?: string;
   duration: number;
-  properties: Property[];
   images?: PackageImage[];
   is_featured: boolean;
   start_date?: string;
@@ -328,9 +318,9 @@ export interface Package extends BaseEntity {
   maxTravelers: number; // Computed from group_size.max
 }
 
-// Review types
+// Review types (package-focused)
 export interface Review extends BaseEntity {
-  property: number;
+  package: number;
   name: string;
   email?: string;
   rating: number;
@@ -352,20 +342,7 @@ export interface PaginatedResponse<T> {
   results: T[];
 }
 
-// Form types
-export interface PropertyFormData {
-  name: string;
-  description: string;
-  price_per_night: string;
-  location: number;
-  property_type: number;
-  amenities: number[];
-  address?: string;
-  whatsapp_number?: string;
-  latitude?: number;
-  longitude?: number;
-  is_featured: boolean;
-}
+// Form types (package-focused)
 
 export interface PackageFormData {
   name: string;
@@ -374,7 +351,6 @@ export interface PackageFormData {
   price: string;
   original_price?: string;
   duration: number;
-  properties: number[];
   is_featured: boolean;
   start_date?: string;
   end_date?: string;
@@ -455,23 +431,14 @@ export interface PackageFormData {
 }
 
 export interface ReviewFormData {
-  property: number;
+  package: number;
   name: string;
   email?: string;
   rating: number;
   comment: string;
 }
 
-// Filter types
-export interface PropertyFilters {
-  property_type?: number;
-  amenities?: number[];
-  location?: number;
-  min_price?: number;
-  max_price?: number;
-  is_featured?: boolean;
-  search?: string;
-}
+// Filter types (package-focused)
 
 export interface PackageFilters {
   is_featured?: boolean;
@@ -512,9 +479,9 @@ export interface AuthTokens {
   refresh: string;
 }
 
-// Booking types
+// Booking types (package-focused)
 export interface Booking extends BaseEntity {
-  property: Property;
+  package: Package;
   customer_name: string;
   customer_email: string;
   customer_phone: string;
@@ -527,7 +494,7 @@ export interface Booking extends BaseEntity {
 }
 
 export interface BookingFormData {
-  property: number;
+  package: number;
   customer_name: string;
   customer_email: string;
   customer_phone: string;
@@ -552,9 +519,8 @@ export interface Notification {
   duration?: number;
 }
 
-// Search types
+// Search types (package-focused)
 export interface SearchResults {
-  properties: Property[];
   packages: Package[];
   total: number;
 }
@@ -578,13 +544,7 @@ export interface LoadingStateData<T> {
   error: string | null;
 }
 
-// Component prop types
-export interface PropertyCardProps {
-  property: Property;
-  className?: string;
-  loading?: boolean;
-  onFavorite?: (propertyId: number) => void;
-}
+// Component prop types (package-focused)
 
 export interface PackageCardProps {
   package: Package;

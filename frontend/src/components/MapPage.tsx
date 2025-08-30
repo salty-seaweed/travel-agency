@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { InteractiveMap, Card, LoadingSpinner } from './index';
 import { useNotification } from '../hooks';
 import { SEO } from './SEO';
-import { getApiUrl, getWhatsAppUrl } from '../config';
+import { getApiUrl } from '../config';
 import { useTranslation } from '../i18n';
+import { useWhatsApp, usePageHero } from '../hooks/useQueries';
 import {
   MapPinIcon,
   BuildingOffice2Icon,
@@ -13,7 +14,8 @@ import {
   GlobeAltIcon,
   MapIcon,
   ArrowRightIcon,
-  InformationCircleIcon
+  InformationCircleIcon,
+  GiftIcon
 } from '@heroicons/react/24/outline';
 import {
   Box,
@@ -26,24 +28,26 @@ import {
   Icon,
   useColorModeValue,
   Heading,
+  Image
 } from '@chakra-ui/react';
 
-interface Property {
+interface Package {
   id: number;
   name: string;
   description: string;
-  price_per_night: number;
+  price: string;
   location: {
     latitude: number;
     longitude: number;
     island: string;
     atoll: string;
   };
-  property_type: {
-    name: string;
-  };
-  amenities: Array<{
-    name: string;
+  category: string;
+  destinations: Array<{
+    location: {
+      island: string;
+      atoll: string;
+    };
   }>;
   images: Array<{
     image: string;
@@ -56,32 +60,34 @@ interface Property {
 export function MapPage() {
   const { showError } = useNotification();
   const { t } = useTranslation();
-  const [properties, setProperties] = useState<Property[]>([]);
+  const { getWhatsAppUrl } = useWhatsApp();
+  const { data: hero } = usePageHero('map');
+  const [packages, setPackages] = useState<Package[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+  const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
 
   useEffect(() => {
-    const fetchProperties = async () => {
+    const fetchPackages = async () => {
       try {
-        const response = await fetch(getApiUrl('properties/'));
+        const response = await fetch(getApiUrl('packages/'));
         if (response.ok) {
           const data = await response.json();
-          setProperties(data.results || data);
+          setPackages(data.results || data);
         } else {
-          showError('Failed to load properties');
+          showError('Failed to load packages');
         }
       } catch (error) {
-        showError('Failed to load properties');
+        showError('Failed to load packages');
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchProperties();
+    fetchPackages();
   }, [showError]);
 
-  const handlePropertyClick = (property: Property) => {
-    setSelectedProperty(property);
+  const handlePackageClick = (pkg: Package) => {
+    setSelectedPackage(pkg);
   };
 
   if (isLoading) {
@@ -96,13 +102,25 @@ export function MapPage() {
     <>
       <SEO 
         title="Interactive Map - Thread Travels & Tours"
-        description="Explore our properties across the Maldives with our interactive map. Find the perfect location for your dream vacation."
-        keywords="Maldives map, interactive map, property locations, island resorts, guesthouses Maldives"
+        description="Explore our packages across the Maldives with our interactive map. Find the perfect location for your dream vacation."
+        keywords="Maldives map, interactive map, package locations, island resorts, guesthouses Maldives"
       />
       
       <Box bg="gray.50" className="bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
         {/* Hero Section */}
-        <section className="py-24 bg-gradient-to-r from-blue-800 via-indigo-800 to-blue-900 relative overflow-hidden">
+        <section className="py-24 relative overflow-hidden">
+          {/* Background Image (Admin-controlled) */}
+          <Box position="absolute" top={0} left={0} right={0} bottom={0}>
+            <Image
+              src={hero?.image_url || '/src/assets/images/ishan52.jpg'}
+              alt={hero?.title || 'Maldives Map Background'}
+              w="full"
+              h="full"
+              objectFit="cover"
+            />
+            <Box position="absolute" top={0} left={0} right={0} bottom={0} bg={`blackAlpha.${Math.round((hero?.overlay_opacity ?? 0.6) * 100)}`} />
+          </Box>
+          
           {/* Background Pattern */}
           <div className="absolute inset-0 opacity-10">
             <div className="absolute top-10 left-10 animate-float">
@@ -126,12 +144,11 @@ export function MapPage() {
               </Badge>
               
               <Heading size="2xl" className="text-5xl md:text-6xl font-bold text-white">
-                Explore the Maldives
+                {hero?.title || 'Explore the Maldives'}
               </Heading>
               
               <Text className="text-xl text-blue-200 max-w-4xl mx-auto leading-relaxed">
-                Discover our handpicked properties across the beautiful islands of the Maldives. 
-                Use our interactive map to find the perfect location for your dream vacation.
+                {hero?.subtitle || 'Discover our handpicked packages across the beautiful islands of the Maldives. Use our interactive map to find the perfect location for your dream vacation.'}
               </Text>
 
               <HStack spacing={6} flexDir={{ base: "column", sm: "row" }} justify="center" align="center">
@@ -196,43 +213,43 @@ export function MapPage() {
             {/* Map Section */}
             <div className="lg:col-span-2">
               <InteractiveMap
-                properties={properties}
+                packages={packages}
                 height="700px"
                 showFilters={true}
-                onPropertyClick={handlePropertyClick}
+                onPackageClick={handlePackageClick}
               />
             </div>
 
-            {/* Property Details Sidebar */}
+            {/* Package Details Sidebar */}
             <div className="lg:col-span-1">
               <div className="sticky top-8">
-                {selectedProperty ? (
+                {selectedPackage ? (
                   <Card className="p-6">
                     <div className="space-y-4">
-                      {/* Property Image */}
-                      {selectedProperty.images && selectedProperty.images.length > 0 && (
+                      {/* Package Image */}
+                      {selectedPackage.images && selectedPackage.images.length > 0 && (
                         <img
-                          src={selectedProperty.images[0].image}
-                          alt={selectedProperty.name}
+                          src={selectedPackage.images[0].image}
+                          alt={selectedPackage.name}
                           className="w-full h-48 object-cover rounded-lg"
                         />
                       )}
 
-                      {/* Property Name and Type */}
+                      {/* Package Name and Category */}
                       <div>
                         <h3 className="text-xl font-bold text-gray-900 mb-1">
-                          {selectedProperty.name}
+                          {selectedPackage.name}
                         </h3>
                         <div className="flex items-center text-sm text-gray-600">
-                          <BuildingOffice2Icon className="w-4 h-4 mr-1" />
-                          {selectedProperty.property_type.name}
+                          <GiftIcon className="w-4 h-4 mr-1" />
+                          {selectedPackage.category}
                         </div>
                       </div>
 
                       {/* Location */}
                       <div className="flex items-center text-sm text-gray-600">
                         <MapPinIcon className="w-4 h-4 mr-2" />
-                        {selectedProperty.location.island}, {selectedProperty.location.atoll}
+                        {selectedPackage.destinations?.[0]?.location?.island || selectedPackage.location.island}, {selectedPackage.destinations?.[0]?.location?.atoll || selectedPackage.location.atoll}
                       </div>
 
                       {/* Price and Rating */}
@@ -240,18 +257,17 @@ export function MapPage() {
                         <div className="flex items-center">
                           <CurrencyDollarIcon className="w-4 h-4 text-green-600 mr-1" />
                           <span className="font-semibold text-green-600">
-                            ${selectedProperty.price_per_night}
+                            {selectedPackage.price}
                           </span>
-                          <span className="text-gray-500 text-sm ml-1">/night</span>
                         </div>
                         
-                        {selectedProperty.rating && (
+                        {selectedPackage.rating && (
                           <div className="flex items-center">
                             <StarIcon className="w-4 h-4 text-yellow-400 mr-1" />
-                            <span className="text-sm font-medium">{selectedProperty.rating}</span>
-                            {selectedProperty.review_count && (
+                            <span className="text-sm font-medium">{selectedPackage.rating}</span>
+                            {selectedPackage.review_count && (
                               <span className="text-gray-500 text-sm ml-1">
-                                ({selectedProperty.review_count})
+                                ({selectedPackage.review_count})
                               </span>
                             )}
                           </div>
@@ -259,33 +275,33 @@ export function MapPage() {
                       </div>
 
                       {/* Featured Badge */}
-                      {selectedProperty.is_featured && (
+                      {selectedPackage.is_featured && (
                         <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
-                          ⭐ Featured Property
+                          ⭐ Featured Package
                         </div>
                       )}
 
                       {/* Description */}
                       <p className="text-gray-600 text-sm line-clamp-3">
-                        {selectedProperty.description}
+                        {selectedPackage.description}
                       </p>
 
-                      {/* Amenities */}
-                      {selectedProperty.amenities && selectedProperty.amenities.length > 0 && (
+                      {/* Destinations */}
+                      {selectedPackage.destinations && selectedPackage.destinations.length > 0 && (
                         <div>
-                          <h4 className="font-medium text-gray-900 mb-2">Amenities</h4>
+                          <h4 className="font-medium text-gray-900 mb-2">Destinations</h4>
                           <div className="flex flex-wrap gap-2">
-                            {selectedProperty.amenities.slice(0, 6).map((amenity, index) => (
+                            {selectedPackage.destinations.slice(0, 6).map((destination, index) => (
                               <span
                                 key={index}
                                 className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
                               >
-                                {amenity.name}
+                                {destination.location.island}
                               </span>
                             ))}
-                            {selectedProperty.amenities.length > 6 && (
+                            {selectedPackage.destinations.length > 6 && (
                               <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                                +{selectedProperty.amenities.length - 6} more
+                                +{selectedPackage.destinations.length - 6} more
                               </span>
                             )}
                           </div>
@@ -295,13 +311,13 @@ export function MapPage() {
                       {/* Action Buttons */}
                       <div className="flex space-x-3 pt-4">
                         <button
-                          onClick={() => window.location.href = `/properties/${selectedProperty.id}`}
+                          onClick={() => window.location.href = `/packages/${selectedPackage.id}`}
                           className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
                         >
                           View Details
                         </button>
                         <button
-                          onClick={() => setSelectedProperty(null)}
+                          onClick={() => setSelectedPackage(null)}
                           className="px-4 py-2 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-colors"
                         >
                           Close
@@ -314,10 +330,10 @@ export function MapPage() {
                     <div className="text-center">
                       <MapPinIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                       <h3 className="text-lg font-medium text-gray-900 mb-2">
-                        Select a Property
+                        Select a Package
                       </h3>
                       <p className="text-gray-600 text-sm">
-                        Click on any property marker on the map to view details and information about the location.
+                        Click on any package marker on the map to view details and information about the location.
                       </p>
                     </div>
                   </Card>
@@ -337,7 +353,7 @@ export function MapPage() {
                       <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                     </svg>
                   </div>
-                  <span className="text-sm text-gray-700">Regular Property</span>
+                  <span className="text-sm text-gray-700">Regular Package</span>
                 </div>
                 
                 <div className="flex items-center">
@@ -353,14 +369,14 @@ export function MapPage() {
                       </svg>
                     </div>
                   </div>
-                  <span className="text-sm text-gray-700 ml-3">Featured Property</span>
+                  <span className="text-sm text-gray-700 ml-3">Featured Package</span>
                 </div>
                 
                 <div className="flex items-center">
                   <div className="w-6 h-6 bg-blue-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center mr-3">
                     <span className="text-white text-xs font-bold">3</span>
                   </div>
-                  <span className="text-sm text-gray-700">Property Cluster</span>
+                  <span className="text-sm text-gray-700">Package Cluster</span>
                 </div>
               </div>
             </Card>

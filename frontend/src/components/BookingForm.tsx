@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { CalendarIcon, UsersIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { LoadingSpinner } from './LoadingSpinner';
 import { useNotification } from '../hooks';
+import { useWhatsApp } from '../hooks/useQueries';
 
 interface BookingFormProps {
   propertyId: number;
@@ -25,6 +26,7 @@ interface AvailabilityResponse {
 
 export function BookingForm({ propertyId, propertyName, pricePerNight, onClose, onBookingSuccess }: BookingFormProps) {
   const { showSuccess, showError } = useNotification();
+  const { getWhatsAppUrl } = useWhatsApp();
   const [formData, setFormData] = useState({
     customer_name: '',
     customer_email: '',
@@ -102,9 +104,7 @@ ${formData.special_requests ? `📝 *Special Requests:*\n${formData.special_requ
 Please let me know if this property is available for these dates and help me with the booking process. Thank you!`;
 
               // Open WhatsApp with the booking information
-        const cleanPhone = '9607441097';
-        const encodedMessage = encodeURIComponent(message);
-        const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodedMessage}`;
+        const whatsappUrl = getWhatsAppUrl(message);
       window.open(whatsappUrl, '_blank');
 
       showSuccess('Booking request sent to WhatsApp! We will contact you soon.');

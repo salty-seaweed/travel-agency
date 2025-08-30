@@ -50,12 +50,13 @@ interface AdminLayoutProps {
 
 const adminNav = [
   { name: 'Dashboard', href: '/dashboard/overview', icon: HomeIcon, description: 'Overview and analytics' },
-  { name: 'Properties', href: '/dashboard/properties', icon: BuildingOffice2Icon, description: 'Manage properties' },
+  
   { name: 'Packages', href: '/dashboard/packages', icon: GiftIcon, description: 'Manage packages' },
   { name: 'Destinations', href: '/dashboard/destinations', icon: SparklesIcon, description: 'Manage destinations' },
   { name: 'Experiences', href: '/dashboard/experiences', icon: SparklesIcon, description: 'Manage experiences' },
   { name: 'Reviews', href: '/dashboard/reviews', icon: StarIcon, description: 'Customer reviews' },
   { name: 'Transportation', href: '/dashboard/transportation', icon: SparklesIcon, description: 'Manage transportation' },
+  { name: 'Homepage', href: '/dashboard/homepage', icon: DocumentTextIcon, description: 'Homepage content & settings' },
   { name: 'Content Management', href: '/dashboard/content', icon: DocumentTextIcon, description: 'Create and manage pages' },
   { name: 'Settings', href: '/dashboard/settings', icon: WrenchScrewdriverIcon, description: 'Amenities & locations' },
 ];

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
+import { useWhatsApp } from '../hooks/useQueries';
 
 interface SEOProps {
   title: string;
@@ -20,6 +21,7 @@ export function SEO({
   type = 'website',
   structuredData 
 }: SEOProps) {
+  const { whatsappNumber } = useWhatsApp();
   const siteName = 'Maldives Travel';
   const fullTitle = `${title} | ${siteName}`;
   const defaultImage = 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=1200&h=630&fit=crop';
@@ -85,7 +87,7 @@ export const seoConfigs = {
       },
       "contactPoint": {
         "@type": "ContactPoint",
-        "telephone": "+960-744-1097",
+        "telephone": "Contact us for phone number",
         "contactType": "customer service"
       }
     }

@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Box, Container, VStack, Heading, Text, SimpleGrid, Card, CardBody, CardHeader,
-  Button, HStack, Badge, Icon, useColorModeValue, Tabs, TabList, TabPanels, Tab, TabPanel,
-  Stat, StatLabel, StatNumber, StatHelpText, StatArrow,
+  Button, HStack, Icon, useColorModeValue, Tabs, TabList, TabPanels, Tab, TabPanel,
+  Stat, StatLabel, StatNumber, StatHelpText, StatArrow, useToast, Modal, ModalOverlay,
+  ModalContent, ModalHeader, ModalBody, ModalFooter, ModalCloseButton, useDisclosure,
+  Alert, AlertIcon, Progress, Input, FormControl, FormLabel,
 } from '@chakra-ui/react';
 import {
-  SparklesIcon, MapPinIcon, ChatBubbleLeftRightIcon, CurrencyDollarIcon,
-  InformationCircleIcon, ClockIcon, ShieldCheckIcon, UserGroupIcon,
-  PlusIcon, PencilIcon, EyeIcon, TrashIcon,
+  SparklesIcon, MapPinIcon, ChatBubbleLeftRightIcon,
+  InformationCircleIcon, ClockIcon, UserGroupIcon,
+  PlusIcon, DocumentArrowDownIcon, DocumentArrowUpIcon,
 } from '@heroicons/react/24/outline';
 import { useTransportationData } from '../../../hooks/useTransportationData';
 import { TransferTypesTab } from './TransferTypesTab';
@@ -23,9 +25,15 @@ import {
 import { useNotification } from '../../../hooks';
 
 export const TransportationAdmin = React.memo(() => {
-  const { data, isLoading, error } = useTransportationData();
+  const { data, isLoading, error, refetch } = useTransportationData();
   const [activeTab, setActiveTab] = useState(0);
+  const [isExporting, setIsExporting] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
+  const [importProgress, setImportProgress] = useState(0);
   const { showSuccess, showError } = useNotification();
+  const toast = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { isOpen: isImportModalOpen, onOpen: onImportModalOpen, onClose: onImportModalClose } = useDisclosure();
 
   const bgColor = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
@@ -54,6 +62,117 @@ export const TransportationAdmin = React.memo(() => {
         break;
       default:
         showError('Action not implemented yet');
+    }
+  };
+
+  const handleExportData = async () => {
+    setIsExporting(true);
+    try {
+      const token = localStorage.getItem('access');
+      const response = await fetch('/api/transportation/export/', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to export transportation data');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `transportation-data-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: 'Export Successful',
+        description: 'Transportation data has been exported successfully',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (error) {
+      toast({
+        title: 'Export Failed',
+        description: error instanceof Error ? error.message : 'Failed to export data',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleImportData = async (file: File) => {
+    setIsImporting(true);
+    setImportProgress(0);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const token = localStorage.getItem('access');
+      const response = await fetch('/api/transportation/import/', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to import transportation data');
+      }
+
+      const result = await response.json();
+      
+      toast({
+        title: 'Import Successful',
+        description: `Successfully imported ${result.imported_count || 0} transportation records`,
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+      });
+
+      // Refresh the data
+      refetch();
+      onImportModalClose();
+    } catch (error) {
+      toast({
+        title: 'Import Failed',
+        description: error instanceof Error ? error.message : 'Failed to import data',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setIsImporting(false);
+      setImportProgress(0);
+    }
+  };
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.type !== 'application/json' && !file.name.endsWith('.json')) {
+        toast({
+          title: 'Invalid File Type',
+          description: 'Please select a JSON file',
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+        });
+        return;
+      }
+      handleImportData(file);
     }
   };
 
@@ -154,43 +273,81 @@ export const TransportationAdmin = React.memo(() => {
             <Heading size="md">Quick Actions</Heading>
           </CardHeader>
           <CardBody>
-            <HStack spacing={4} flexWrap="wrap">
-              <Button 
-                leftIcon={<Icon as={PlusIcon} className="w-4 h-4" />} 
-                colorScheme="blue"
-                onClick={() => handleQuickAction('transfer-type')}
-              >
-                Add Transfer Type
-              </Button>
-              <Button 
-                leftIcon={<Icon as={PlusIcon} className="w-4 h-4" />} 
-                colorScheme="green"
-                onClick={() => handleQuickAction('atoll')}
-              >
-                Add Atoll
-              </Button>
-              <Button 
-                leftIcon={<Icon as={PlusIcon} className="w-4 h-4" />} 
-                colorScheme="purple"
-                onClick={() => handleQuickAction('resort')}
-              >
-                Add Resort
-              </Button>
-              <Button 
-                leftIcon={<Icon as={PlusIcon} className="w-4 h-4" />} 
-                colorScheme="orange"
-                onClick={() => handleQuickAction('faq')}
-              >
-                Add FAQ
-              </Button>
-              <Button 
-                leftIcon={<Icon as={PlusIcon} className="w-4 h-4" />} 
-                colorScheme="teal"
-                onClick={() => handleQuickAction('contact')}
-              >
-                Add Contact Method
-              </Button>
-            </HStack>
+            <VStack spacing={4} align="stretch">
+              {/* Add Actions */}
+              <Box>
+                <Text fontSize="sm" color="gray.600" mb={3} fontWeight="medium">Add New Items</Text>
+                <HStack spacing={4} flexWrap="wrap">
+                  <Button 
+                    leftIcon={<Icon as={PlusIcon} className="w-4 h-4" />} 
+                    colorScheme="blue"
+                    size="sm"
+                    onClick={() => handleQuickAction('transfer-type')}
+                  >
+                    Add Transfer Type
+                  </Button>
+                  <Button 
+                    leftIcon={<Icon as={PlusIcon} className="w-4 h-4" />} 
+                    colorScheme="green"
+                    size="sm"
+                    onClick={() => handleQuickAction('atoll')}
+                  >
+                    Add Atoll
+                  </Button>
+                  <Button 
+                    leftIcon={<Icon as={PlusIcon} className="w-4 h-4" />} 
+                    colorScheme="purple"
+                    size="sm"
+                    onClick={() => handleQuickAction('resort')}
+                  >
+                    Add Resort
+                  </Button>
+                  <Button 
+                    leftIcon={<Icon as={PlusIcon} className="w-4 h-4" />} 
+                    colorScheme="orange"
+                    size="sm"
+                    onClick={() => handleQuickAction('faq')}
+                  >
+                    Add FAQ
+                  </Button>
+                  <Button 
+                    leftIcon={<Icon as={PlusIcon} className="w-4 h-4" />} 
+                    colorScheme="teal"
+                    size="sm"
+                    onClick={() => handleQuickAction('contact')}
+                  >
+                    Add Contact Method
+                  </Button>
+                </HStack>
+              </Box>
+
+              {/* Data Management Actions */}
+              <Box>
+                <Text fontSize="sm" color="gray.600" mb={3} fontWeight="medium">Data Management</Text>
+                <HStack spacing={4} flexWrap="wrap">
+                  <Button 
+                    leftIcon={<Icon as={DocumentArrowDownIcon} className="w-4 h-4" />} 
+                    colorScheme="cyan"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleExportData}
+                    isLoading={isExporting}
+                    loadingText="Exporting..."
+                  >
+                    Export All Data
+                  </Button>
+                  <Button 
+                    leftIcon={<Icon as={DocumentArrowUpIcon} className="w-4 h-4" />} 
+                    colorScheme="pink"
+                    variant="outline"
+                    size="sm"
+                    onClick={onImportModalOpen}
+                  >
+                    Import Data
+                  </Button>
+                </HStack>
+              </Box>
+            </VStack>
           </CardBody>
         </Card>
 
@@ -254,6 +411,90 @@ export const TransportationAdmin = React.memo(() => {
           </CardBody>
         </Card>
       </VStack>
+
+      {/* Import Modal */}
+      <Modal isOpen={isImportModalOpen} onClose={onImportModalClose} size="lg">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Import Transportation Data</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <VStack spacing={6}>
+              <Alert status="info">
+                <AlertIcon />
+                <VStack align="start" spacing={2}>
+                  <Text fontWeight="medium">Import Instructions</Text>
+                  <Text fontSize="sm">
+                    Upload a JSON file containing transportation data. This will replace existing data, 
+                    so make sure to export your current data first as a backup.
+                  </Text>
+                </VStack>
+              </Alert>
+
+              {isImporting ? (
+                <VStack spacing={4} w="full">
+                  <Text>Importing data...</Text>
+                  <Progress value={importProgress} size="lg" colorScheme="blue" w="full" />
+                  <Text fontSize="sm" color="gray.600">
+                    Please wait while we process your data...
+                  </Text>
+                </VStack>
+              ) : (
+                <VStack spacing={4} w="full">
+                  <FormControl>
+                    <FormLabel>Select JSON File</FormLabel>
+                    <Input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".json,application/json"
+                      onChange={handleFileSelect}
+                      p={1}
+                    />
+                  </FormControl>
+                  
+                  <Box
+                    border="2px dashed"
+                    borderColor="gray.300"
+                    borderRadius="lg"
+                    p={8}
+                    textAlign="center"
+                    w="full"
+                    _hover={{ borderColor: "blue.400" }}
+                    transition="border-color 0.2s"
+                    cursor="pointer"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <VStack spacing={3}>
+                      <DocumentArrowUpIcon className="w-12 h-12 text-gray-400" />
+                      <VStack spacing={1}>
+                        <Text fontWeight="medium">Click to select file</Text>
+                        <Text fontSize="sm" color="gray.500">
+                          Or drag and drop your JSON file here
+                        </Text>
+                      </VStack>
+                    </VStack>
+                  </Box>
+                </VStack>
+              )}
+            </VStack>
+          </ModalBody>
+          <ModalFooter>
+            <HStack spacing={3}>
+              <Button variant="ghost" onClick={onImportModalClose} isDisabled={isImporting}>
+                Cancel
+              </Button>
+              <Button 
+                colorScheme="blue" 
+                onClick={handleExportData}
+                isDisabled={isImporting}
+                leftIcon={<DocumentArrowDownIcon className="w-4 h-4" />}
+              >
+                Export Current Data First
+              </Button>
+            </HStack>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Container>
   );
 });

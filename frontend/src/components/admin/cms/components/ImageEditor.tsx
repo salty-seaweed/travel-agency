@@ -430,3 +430,5 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
     </Box>
   );
 };
+
+

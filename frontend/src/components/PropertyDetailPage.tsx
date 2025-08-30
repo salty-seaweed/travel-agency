@@ -24,6 +24,7 @@ import {
 import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
 import { LazyImage } from './LazyImage';
 import { SEO } from './SEO';
+import { useWhatsApp } from '../hooks/useQueries';
 
 import type { Property } from '../types';
 
@@ -31,6 +32,7 @@ export function PropertyDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { showError } = useNotification();
+  const { whatsappNumber } = useWhatsApp();
   const [property, setProperty] = useState<Property | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
@@ -316,7 +318,7 @@ export function PropertyDetailPage() {
                   <div className="space-y-3">
                     <div className="flex items-center">
                       <PhoneIcon className="h-4 w-4 text-gray-400 mr-2" />
-                      <span className="text-sm text-gray-700">+960 744 1097</span>
+                      <span className="text-sm text-gray-700">{whatsappNumber}</span>
                     </div>
                     <div className="flex items-center">
                       <EnvelopeIcon className="h-4 w-4 text-gray-400 mr-2" />

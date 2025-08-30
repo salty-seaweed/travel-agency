@@ -172,13 +172,13 @@ export const ExperiencesActivitiesSection: React.FC<ExperiencesActivitiesSection
           <VStack spacing={4}>
             <Badge colorScheme="purple" variant="solid" px={4} py={2} borderRadius="full" fontSize="sm" fontWeight="semibold">
               <Icon as={SparklesIcon} className="w-4 h-4 mr-2" />
-              Custom Experiences
+              {t('homepage.activities.badge', 'Custom Experiences')}
             </Badge>
             <Heading size="xl" fontWeight="bold">
-              Build Your Custom Package
+              {t('homepage.activities.title', 'Build Your Custom Package')}
             </Heading>
             <Text fontSize="lg" color="gray.600" maxW="2xl">
-              Choose from these experiences to build your own custom Maldives package. Mix and match activities to create your perfect trip.
+              {t('homepage.activities.subtitle', 'Choose from these experiences to build your own custom Maldives package. Mix and match activities to create your perfect trip.')}
             </Text>
           </VStack>
 
@@ -238,7 +238,7 @@ export const ExperiencesActivitiesSection: React.FC<ExperiencesActivitiesSection
                       <Text fontSize="lg" fontWeight="bold" color={`${colorScheme}.600`}>
                         ${experience.price}
                       </Text>
-                      <Text fontSize="xs" color="gray.500">per person</Text>
+                      <Text fontSize="xs" color="gray.500">{t('homepage.activities.perPerson', 'per person')}</Text>
                     </VStack>
 
                     {/* Experience Info Overlay */}
@@ -276,7 +276,7 @@ export const ExperiencesActivitiesSection: React.FC<ExperiencesActivitiesSection
                       {/* Difficulty Level */}
                       <HStack justify="space-between">
                         <Text fontSize="sm" color="gray.500">
-                          Difficulty: <Badge colorScheme={colorScheme} variant="subtle" fontSize="xs">
+                          {t('homepage.activities.difficulty', 'Difficulty')}: <Badge colorScheme={colorScheme} variant="subtle" fontSize="xs">
                             {experience.difficulty_level}
                           </Badge>
                         </Text>
@@ -286,7 +286,7 @@ export const ExperiencesActivitiesSection: React.FC<ExperiencesActivitiesSection
                       {/* Includes */}
                       {experience.includes && experience.includes.length > 0 && (
                         <VStack align="start" spacing={2}>
-                          <Text fontSize="sm" fontWeight="semibold" color="gray.700">Includes:</Text>
+                          <Text fontSize="sm" fontWeight="semibold" color="gray.700">{t('homepage.activities.includes', 'Includes:')}</Text>
                           <Wrap>
                             {experience.includes.slice(0, 3).map((item: string, index: number) => (
                               <WrapItem key={index}>
@@ -298,7 +298,7 @@ export const ExperiencesActivitiesSection: React.FC<ExperiencesActivitiesSection
                             {experience.includes.length > 3 && (
                               <WrapItem>
                                 <Badge colorScheme="gray" variant="subtle" fontSize="xs">
-                                  +{experience.includes.length - 3} more
+                                  +{experience.includes.length - 3} {t('homepage.activities.more', 'more')}
                                 </Badge>
                               </WrapItem>
                             )}
@@ -319,10 +319,10 @@ export const ExperiencesActivitiesSection: React.FC<ExperiencesActivitiesSection
               onClick={handleViewAllExperiences}
               rightIcon={<Icon as={ArrowRightIcon} />}
             >
-              View All Custom Experiences
+              {t('homepage.activities.viewAll', 'View All Custom Experiences')}
             </Button>
             <Text fontSize="sm" color="gray.500" textAlign="center">
-              Click on any experience to get more details via WhatsApp
+              {t('homepage.activities.helper', 'Click on any experience to get more details via WhatsApp')}
             </Text>
           </VStack>
         </VStack>

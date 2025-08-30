@@ -151,7 +151,7 @@ class Command(BaseCommand):
                     'property_type': prop_type,
                     'location': location,
                     'is_featured': data['is_featured'],
-                    'whatsapp_number': '+960 123 4567',
+                    'whatsapp_number': '+960 744 1097',
                     'address': f"{data['location']}, Maldives"
                 }
             )

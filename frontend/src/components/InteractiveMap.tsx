@@ -21,22 +21,23 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-interface Property {
+interface Package {
   id: number;
   name: string;
   description: string;
-  price_per_night: number;
+  price: string;
   location: {
     latitude: number;
     longitude: number;
     island: string;
     atoll: string;
   };
-  property_type: {
-    name: string;
-  };
-  amenities: Array<{
-    name: string;
+  category: string;
+  destinations: Array<{
+    location: {
+      island: string;
+      atoll: string;
+    };
   }>;
   images: Array<{
     image: string;
@@ -47,14 +48,14 @@ interface Property {
 }
 
 interface InteractiveMapProps {
-  properties: Property[];
+  packages: Package[];
   height?: string;
   showFilters?: boolean;
-  onPropertyClick?: (property: Property) => void;
+  onPackageClick?: (pkg: Package) => void;
 }
 
-// Custom marker icon for properties
-const createPropertyIcon = (isFeatured: boolean) => {
+// Custom marker icon for packages
+const createPackageIcon = (isFeatured: boolean) => {
   return L.divIcon({
     html: `
       <div class="relative">
@@ -103,14 +104,14 @@ function MapControls({ onResetView }: { onResetView: () => void }) {
 }
 
 export function InteractiveMap({ 
-  properties, 
+  packages, 
   height = "600px", 
   showFilters = false,
-  onPropertyClick 
+  onPackageClick 
 }: InteractiveMapProps) {
   const navigate = useNavigate();
-  const [filteredProperties, setFilteredProperties] = useState<Property[]>(properties);
-  const [selectedPropertyType, setSelectedPropertyType] = useState<string>('all');
+  const [filteredPackages, setFilteredPackages] = useState<Package[]>(packages);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
   const [showFeaturedOnly, setShowFeaturedOnly] = useState(false);
 
@@ -118,42 +119,43 @@ export function InteractiveMap({
   const maldivesCenter = [3.2028, 73.2207];
 
   useEffect(() => {
-    setFilteredProperties(properties);
-  }, [properties]);
+    setFilteredPackages(packages);
+  }, [packages]);
 
   const handleFilterChange = () => {
-    let filtered = properties;
+    let filtered = packages;
 
-    // Filter by property type
-    if (selectedPropertyType !== 'all') {
-      filtered = filtered.filter(p => p.property_type.name === selectedPropertyType);
+    // Filter by category
+    if (selectedCategory !== 'all') {
+      filtered = filtered.filter(p => p.category === selectedCategory);
     }
 
     // Filter by price range
-    filtered = filtered.filter(p => 
-      p.price_per_night >= priceRange[0] && p.price_per_night <= priceRange[1]
-    );
+    filtered = filtered.filter(p => {
+      const price = parseFloat(p.price.replace(/[^0-9.]/g, ''));
+      return price >= priceRange[0] && price <= priceRange[1];
+    });
 
     // Filter by featured
     if (showFeaturedOnly) {
       filtered = filtered.filter(p => p.is_featured);
     }
 
-    setFilteredProperties(filtered);
+    setFilteredPackages(filtered);
   };
 
   useEffect(() => {
     handleFilterChange();
-  }, [selectedPropertyType, priceRange, showFeaturedOnly, properties]);
+  }, [selectedCategory, priceRange, showFeaturedOnly, packages]);
 
-  const propertyTypes = Array.from(new Set(properties.map(p => p.property_type.name)));
-  const maxPrice = Math.max(...properties.map(p => p.price_per_night));
+  const categories = Array.from(new Set(packages.map(p => p.category)));
+  const maxPrice = Math.max(...packages.map(p => parseFloat(p.price.replace(/[^0-9.]/g, '')) || 0));
 
-  const handlePropertyClick = (property: Property) => {
-    if (onPropertyClick) {
-      onPropertyClick(property);
+  const handlePackageClick = (pkg: Package) => {
+    if (onPackageClick) {
+      onPackageClick(pkg);
     } else {
-      navigate(`/properties/${property.id}`);
+      navigate(`/packages/${pkg.id}`);
     }
   };
 
@@ -162,19 +164,19 @@ export function InteractiveMap({
       {showFilters && (
         <Card className="mb-4 p-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {/* Property Type Filter */}
+            {/* Package Category Filter */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Property Type
+                Package Category
               </label>
               <select
-                value={selectedPropertyType}
-                onChange={(e) => setSelectedPropertyType(e.target.value)}
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="all">All Types</option>
-                {propertyTypes.map(type => (
-                  <option key={type} value={type}>{type}</option>
+                <option value="all">All Categories</option>
+                {categories.map(category => (
+                  <option key={category} value={category}>{category}</option>
                 ))}
               </select>
             </div>
@@ -218,7 +220,7 @@ export function InteractiveMap({
             {/* Results Count */}
             <div className="flex items-center justify-end">
               <span className="text-sm text-gray-600">
-                {filteredProperties.length} of {properties.length} properties
+                {filteredPackages.length} of {packages.length} packages
               </span>
             </div>
           </div>
@@ -232,6 +234,10 @@ export function InteractiveMap({
           style={{ height: '100%', width: '100%' }}
           className="rounded-lg"
         >
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -261,50 +267,54 @@ export function InteractiveMap({
               });
             }}
           >
-            {filteredProperties.map((property) => (
-              <Marker
-                key={property.id}
-                position={[property.location.latitude, property.location.longitude]}
-                icon={createPropertyIcon(property.is_featured)}
-                eventHandlers={{
-                  click: () => handlePropertyClick(property),
-                }}
-              >
+            {filteredPackages.map((pkg) => {
+              // Get coordinates from package location (destinations don't have lat/lng)
+              const latitude = pkg.location?.latitude || 3.2028;
+              const longitude = pkg.location?.longitude || 73.2207;
+              
+              return (
+                <Marker
+                  key={pkg.id}
+                  position={[latitude, longitude]}
+                  icon={createPackageIcon(pkg.is_featured)}
+                  eventHandlers={{
+                    click: () => handlePackageClick(pkg),
+                  }}
+                >
                 <Popup>
                   <div className="w-64">
                     <div className="mb-3">
-                      {property.images && property.images.length > 0 && (
+                      {pkg.images && pkg.images.length > 0 && (
                         <LazyImage
-                          src={property.images[0].image}
-                          alt={property.name}
+                          src={pkg.images[0].image}
+                          alt={pkg.name}
                           className="w-full h-32 object-cover rounded-lg mb-2"
                         />
                       )}
                     </div>
                     
-                    <h3 className="font-semibold text-gray-900 mb-1">{property.name}</h3>
+                    <h3 className="font-semibold text-gray-900 mb-1">{pkg.name}</h3>
                     
                     <div className="flex items-center text-sm text-gray-600 mb-2">
                       <MapPinIcon className="w-4 h-4 mr-1" />
-                      {property.location.island}, {property.location.atoll}
+                      {pkg.destinations?.[0]?.location?.island || pkg.location.island}, {pkg.destinations?.[0]?.location?.atoll || pkg.location.atoll}
                     </div>
                     
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center">
                         <CurrencyDollarIcon className="w-4 h-4 text-green-600 mr-1" />
                         <span className="font-semibold text-green-600">
-                          ${property.price_per_night}
+                          {pkg.price}
                         </span>
-                        <span className="text-gray-500 text-sm ml-1">/night</span>
                       </div>
                       
-                      {property.rating && (
+                      {pkg.rating && (
                         <div className="flex items-center">
                           <StarIcon className="w-4 h-4 text-yellow-400 mr-1" />
-                          <span className="text-sm font-medium">{property.rating}</span>
-                          {property.review_count && (
+                          <span className="text-sm font-medium">{pkg.rating}</span>
+                          {pkg.review_count && (
                             <span className="text-gray-500 text-sm ml-1">
-                              ({property.review_count})
+                              ({pkg.review_count})
                             </span>
                           )}
                         </div>
@@ -313,9 +323,9 @@ export function InteractiveMap({
                     
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600">
-                        {property.property_type.name}
+                        {pkg.category}
                       </span>
-                      {property.is_featured && (
+                      {pkg.is_featured && (
                         <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                           Featured
                         </span>
@@ -323,7 +333,7 @@ export function InteractiveMap({
                     </div>
                     
                     <Button
-                      onClick={() => handlePropertyClick(property)}
+                      onClick={() => handlePackageClick(pkg)}
                       variant="primary"
                       className="w-full mt-3"
                     >
@@ -333,11 +343,11 @@ export function InteractiveMap({
                   </div>
                 </Popup>
               </Marker>
-            ))}
+            )})}
           </MarkerClusterGroup>
           
           <MapControls onResetView={() => {
-            setSelectedPropertyType('all');
+            setSelectedCategory('all');
             setPriceRange([0, maxPrice]);
             setShowFeaturedOnly(false);
           }} />

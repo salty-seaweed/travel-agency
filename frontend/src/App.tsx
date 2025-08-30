@@ -4,21 +4,21 @@ import { Helmet } from 'react-helmet-async';
 import { useScrollToTop } from './hooks/useScrollToTop';
 import Layout from './components/Layout';
 import { LoadingSpinner } from './components/LoadingSpinner';
-import { PageErrorBoundary } from './components/SimpleErrorBoundary';
+// import { PageErrorBoundary } from './components/SimpleErrorBoundary';
 
 // Lazy load all route components to reduce initial bundle size
 const ExperiencesHomePage = React.lazy(() => import('./components/experiences-homepage').then(module => ({ default: module.ExperiencesHomePage })));
-const PropertyListPage = React.lazy(() => import('./components/PropertyListPage').then(module => ({ default: module.PropertyListPage })));
-const PropertyDetailPage = React.lazy(() => import('./components/PropertyDetailPage').then(module => ({ default: module.PropertyDetailPage })));
+
+
 const PackagesPage = React.lazy(() => import('./components/PackagesPage').then(module => ({ default: module.PackagesPage })));
 const PackageDetailPage = React.lazy(() => import('./components/PackageDetailPage').then(module => ({ default: module.PackageDetailPage })));
-const PropertyBookingPage = React.lazy(() => import('./components/PropertyBookingPage').then(module => ({ default: module.PropertyBookingPage })));
+
 const PackageBookingPage = React.lazy(() => import('./components/PackageBookingPage').then(module => ({ default: module.PackageBookingPage })));
 const ContactPage = React.lazy(() => import('./components/ContactPage').then(module => ({ default: module.ContactPage })));
 const AboutPage = React.lazy(() => import('./components/AboutPage').then(module => ({ default: module.AboutPage })));
 const BlogPage = React.lazy(() => import('./components/BlogPage').then(module => ({ default: module.BlogPage })));
 const FAQPage = React.lazy(() => import('./components/FAQPage').then(module => ({ default: module.FAQPage })));
-const MapPage = React.lazy(() => import('./components/MapPage').then(module => ({ default: module.MapPage })));
+
 const TransportationPage = React.lazy(() => import('./components/TransportationPage').then(module => ({ default: module.TransportationPage })));
 const CustomerLogin = React.lazy(() => import('./components/auth/CustomerLogin').then(module => ({ default: module.CustomerLogin })));
 const CustomerRegister = React.lazy(() => import('./components/auth/CustomerRegister').then(module => ({ default: module.CustomerRegister })));
@@ -28,7 +28,7 @@ const AdminLogin = React.lazy(() => import('./components/auth/AdminLogin').then(
 const ProtectedRoute = React.lazy(() => import('./components/auth/ProtectedRoute').then(module => ({ default: module.ProtectedRoute })));
 const AdminLayout = React.lazy(() => import('./components/admin/AdminLayout').then(module => ({ default: module.AdminLayout })));
 const AdminDashboard = React.lazy(() => import('./components/admin/AdminDashboard').then(module => ({ default: module.AdminDashboard })));
-const AdminProperties = React.lazy(() => import('./components/admin/AdminProperties').then(module => ({ default: module.AdminProperties })));
+
 const AdminPackages = React.lazy(() => import('./components/admin/AdminPackages').then(module => ({ default: module.AdminPackages })));
 const AdminDestinations = React.lazy(() => import('./components/admin/AdminDestinations').then(module => ({ default: module.AdminDestinations })));
 const AdminExperiences = React.lazy(() => import('./components/admin/AdminExperiences').then(module => ({ default: module.AdminExperiences })));
@@ -40,6 +40,7 @@ const TransportationAdmin = React.lazy(() => import('./components/admin/transpor
 const HomepageAdmin = React.lazy(() => import('./components/admin/HomepageAdmin').then(module => ({ default: module.HomepageAdmin })));
 const PublicRoute = React.lazy(() => import('./components/auth/PublicRoute').then(module => ({ default: module.PublicRoute })));
 const CMSPageRenderer = React.lazy(() => import('./components/CMSPageRenderer').then(module => ({ default: module.CMSPageRenderer })));
+
 
 // Loading component for lazy routes
 const RouteLoading = () => (
@@ -72,21 +73,9 @@ function AppContent() {
               <ExperiencesHomePage />
             </Suspense>
           } />
-          <Route path="properties" element={
-            <Suspense fallback={<RouteLoading />}>
-              <PropertyListPage />
-            </Suspense>
-          } />
-          <Route path="properties/:id" element={
-            <Suspense fallback={<RouteLoading />}>
-              <PropertyDetailPage />
-            </Suspense>
-          } />
-          <Route path="properties/:id/book" element={
-            <Suspense fallback={<RouteLoading />}>
-              <PropertyBookingPage />
-            </Suspense>
-          } />
+          <Route path="properties" element={<Navigate to="/packages" replace />} />
+          <Route path="properties/:id" element={<Navigate to="/packages" replace />} />
+          <Route path="properties/:id/book" element={<Navigate to="/packages" replace />} />
           <Route path="packages" element={
             <Suspense fallback={<RouteLoading />}>
               <PackagesPage />
@@ -97,16 +86,13 @@ function AppContent() {
               <PackageDetailPage />
             </Suspense>
           } />
+
           <Route path="packages/:id/book" element={
             <Suspense fallback={<RouteLoading />}>
               <PackageBookingPage />
             </Suspense>
           } />
-          <Route path="booking" element={
-            <Suspense fallback={<RouteLoading />}>
-              <PropertyBookingPage />
-            </Suspense>
-          } />
+          <Route path="booking" element={<Navigate to="/packages" replace />} />
           <Route path="contact" element={
             <Suspense fallback={<RouteLoading />}>
               <ContactPage />
@@ -127,11 +113,7 @@ function AppContent() {
               <FAQPage />
             </Suspense>
           } />
-          <Route path="map" element={
-            <Suspense fallback={<RouteLoading />}>
-              <MapPage />
-            </Suspense>
-          } />
+          
           <Route path="transportation" element={
             <Suspense fallback={<RouteLoading />}>
               <TransportationPage />
@@ -183,11 +165,7 @@ function AppContent() {
               <AdminDashboard />
             </Suspense>
           } />
-          <Route path="properties" element={
-            <Suspense fallback={<RouteLoading />}>
-              <AdminProperties />
-            </Suspense>
-          } />
+
           <Route path="packages" element={
             <Suspense fallback={<RouteLoading />}>
               <AdminPackages />
@@ -226,6 +204,11 @@ function AppContent() {
           <Route path="content" element={
             <Suspense fallback={<RouteLoading />}>
               <AdminContentManager />
+            </Suspense>
+          } />
+          <Route path="homepage" element={
+            <Suspense fallback={<RouteLoading />}>
+              <HomepageAdmin />
             </Suspense>
           } />
         </Route>
