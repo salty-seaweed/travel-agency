@@ -25,8 +25,8 @@ COPY . /app/
 # Create logs directory
 RUN mkdir -p /app/logs
 
-# Collect static files
-RUN python manage.py collectstatic --noinput --settings=travel_agency.settings_production
+# Collect static files (skip in build, do at runtime)
+# RUN python manage.py collectstatic --noinput --settings=travel_agency.settings_production
 
 # Create non-root user
 RUN adduser --disabled-password --gecos '' appuser
@@ -36,5 +36,5 @@ USER appuser
 # Expose port
 EXPOSE 8000
 
-# Run gunicorn
-CMD ["gunicorn", "travel_agency.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "4", "--worker-class", "gevent", "--worker-connections", "1000"]
+# Run migrations and collect static files at startup, then start gunicorn
+CMD ["sh", "-c", "python manage.py migrate && python manage.py collectstatic --noinput && gunicorn travel_agency.wsgi:application --bind 0.0.0.0:8000 --workers 4 --worker-class gevent --worker-connections 1000"]

@@ -1,0 +1,20 @@
+[build]
+builder = "nixpacks"
+
+[deploy]
+healthcheckPath = "/health/"
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
+
+[scaling]
+minReplicas = 1
+maxReplicas = 3
+
+[[services]]
+name = "travel-agency-backend"
+
+[services.build]
+buildCommand = "pip install -r requirements.txt"
+
+[services.deploy]
+startCommand = "python manage.py migrate && python manage.py collectstatic --noinput && python manage.py populate_transportation_data && python manage.py populate_ferry_schedules && gunicorn travel_agency.wsgi:application --bind 0.0.0.0:$PORT"

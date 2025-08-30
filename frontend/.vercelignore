@@ -1,0 +1,21 @@
+# Vercel ignore file for frontend deployment
+node_modules
+.env.local
+.env.development
+.env.test
+*.log
+.DS_Store
+coverage/
+.nyc_output/
+build/
+dist/
+
+# Backend files (we only want frontend deployed)
+../api/
+../travel_agency/
+../data_exports/
+../*.py
+../requirements*.txt
+../Dockerfile
+../docker-compose*.yml
+../nginx.conf

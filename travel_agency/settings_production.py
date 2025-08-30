@@ -16,7 +16,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY')
 if not SECRET_KEY:
-    raise ValueError("SECRET_KEY environment variable is required in production")
+    # Allow build to proceed, but warn
+    import sys
+    if 'collectstatic' in sys.argv or 'build' in ' '.join(sys.argv):
+        SECRET_KEY = 'build-time-dummy-key-change-in-production'
+        print("WARNING: Using dummy SECRET_KEY for build. Set SECRET_KEY environment variable in production!")
+    else:
+        raise ValueError("SECRET_KEY environment variable is required in production")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
