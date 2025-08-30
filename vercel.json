@@ -3,7 +3,7 @@
   "name": "threadtravels-frontend",
   "buildCommand": "cd frontend && npm run build",
   "outputDirectory": "frontend/dist",
-  "installCommand": "cd frontend && npm install",
+  "installCommand": "cd frontend && npm install --legacy-peer-deps",
   "framework": "vite",
   "rewrites": [
     {
