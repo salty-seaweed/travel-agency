@@ -1,0 +1,87 @@
+[
+{
+  "model": "api.transferpricingfactor",
+  "pk": 1,
+  "fields": {
+    "factor": "Distance",
+    "description": "Longer distances generally cost more",
+    "icon": "MapPinIcon",
+    "impact": "High",
+    "examples": [
+      "Male to nearby islands: $50-80",
+      "Male to Baa Atoll: $150-200",
+      "Male to Ari Atoll: $200-300"
+    ],
+    "is_active": true,
+    "order": 1
+  }
+},
+{
+  "model": "api.transferpricingfactor",
+  "pk": 2,
+  "fields": {
+    "factor": "Transfer Type",
+    "description": "Different transportation methods have different costs",
+    "icon": "SparklesIcon",
+    "impact": "High",
+    "examples": [
+      "Speedboat: $50-300",
+      "Seaplane: $200-500",
+      "Ferry: $2-25"
+    ],
+    "is_active": true,
+    "order": 2
+  }
+},
+{
+  "model": "api.transferpricingfactor",
+  "pk": 3,
+  "fields": {
+    "factor": "Season",
+    "description": "Peak season may have higher rates",
+    "icon": "StarIcon",
+    "impact": "Medium",
+    "examples": [
+      "Peak season (Dec-Apr): +10-20%",
+      "Off-season (May-Nov): Standard rates",
+      "Holiday periods: +15-25%"
+    ],
+    "is_active": true,
+    "order": 3
+  }
+},
+{
+  "model": "api.transferpricingfactor",
+  "pk": 4,
+  "fields": {
+    "factor": "Group Size",
+    "description": "Larger groups may qualify for discounts or require special arrangements",
+    "icon": "UserGroupIcon",
+    "impact": "Medium",
+    "examples": [
+      "Individual travelers: Standard rates",
+      "Groups 4-8: 5-10% discount",
+      "Groups 8+: Custom pricing"
+    ],
+    "is_active": true,
+    "order": 4
+  }
+},
+{
+  "model": "api.transferpricingfactor",
+  "pk": 5,
+  "fields": {
+    "factor": "Time of Day",
+    "description": "Early morning or late evening transfers may have different rates",
+    "icon": "ClockIcon",
+    "impact": "Low",
+    "examples": [
+      "Regular hours (6AM-6PM): Standard rates",
+      "After hours: +15-25%",
+      "Emergency transfers: +50%"
+    ],
+    "is_active": true,
+    "order": 5
+  }
+}
+]

@@ -1,0 +1,392 @@
+[
+{
+  "model": "api.resorttransfer",
+  "pk": 1,
+  "fields": {
+    "atoll": 1,
+    "resort_name": "Adaaran Hudhuranfushi",
+    "price": "130.00",
+    "duration": "45 minutes",
+    "transfer_type": "speedboat",
+    "is_active": true,
+    "order": 1
+  }
+},
+{
+  "model": "api.resorttransfer",
+  "pk": 2,
+  "fields": {
+    "atoll": 1,
+    "resort_name": "Adaaran Rannalhi",
+    "price": "180.00",
+    "duration": "60 minutes",
+    "transfer_type": "speedboat",
+    "is_active": true,
+    "order": 2
+  }
+},
+{
+  "model": "api.resorttransfer",
+  "pk": 3,
+  "fields": {
+    "atoll": 1,
+    "resort_name": "Adaaran Vadoo",
+    "price": "80.00",
+    "duration": "25 minutes",
+    "transfer_type": "speedboat",
+    "is_active": true,
+    "order": 3
+  }
+},
+{
+  "model": "api.resorttransfer",
+  "pk": 4,
+  "fields": {
+    "atoll": 1,
+    "resort_name": "Anantara Veli",
+    "price": "115.00",
+    "duration": "40 minutes",
+    "transfer_type": "speedboat",
+    "is_active": true,
+    "order": 4
+  }
+},
+{
+  "model": "api.resorttransfer",
+  "pk": 5,
+  "fields": {
+    "atoll": 1,
+    "resort_name": "Sheraton Full Moon",
+    "price": "55.00",
+    "duration": "15 minutes",
+    "transfer_type": "speedboat",
+    "is_active": true,
+    "order": 5
+  }
+},
+{
+  "model": "api.resorttransfer",
+  "pk": 6,
+  "fields": {
+    "atoll": 1,
+    "resort_name": "Kurumba Maldives",
+    "price": "58.00",
+    "duration": "15 minutes",
+    "transfer_type": "speedboat",
+    "is_active": true,
+    "order": 6
+  }
+},
+{
+  "model": "api.resorttransfer",
+  "pk": 7,
+  "fields": {
+    "atoll": 1,
+    "resort_name": "Paradise Island",
+    "price": "70.00",
+    "duration": "20 minutes",
+    "transfer_type": "speedboat",
+    "is_active": true,
+    "order": 7
+  }
+},
+{
+  "model": "api.resorttransfer",
+  "pk": 8,
+  "fields": {
+    "atoll": 1,
+    "resort_name": "Velassaru",
+    "price": "90.00",
+    "duration": "30 minutes",
+    "transfer_type": "speedboat",
+    "is_active": true,
+    "order": 8
+  }
+},
+{
+  "model": "api.resorttransfer",
+  "pk": 13,
+  "fields": {
+    "atoll": 1,
+    "resort_name": "Hulhumale Ferry",
+    "price": "2.00",
+    "duration": "20 minutes",
+    "transfer_type": "ferry",
+    "is_active": true,
+    "order": 9
+  }
+},
+{
+  "model": "api.resorttransfer",
+  "pk": 14,
+  "fields": {
+    "atoll": 1,
+    "resort_name": "Maafushi Ferry",
+    "price": "5.00",
+    "duration": "90 minutes",
+    "transfer_type": "ferry",
+    "is_active": true,
+    "order": 10
+  }
+},
+{
+  "model": "api.resorttransfer",
+  "pk": 15,
+  "fields": {
+    "atoll": 1,
+    "resort_name": "Gulhi Ferry",
+    "price": "4.00",
+    "duration": "75 minutes",
+    "transfer_type": "ferry",
+    "is_active": true,
+    "order": 11
+  }
+},
+{
+  "model": "api.resorttransfer",
+  "pk": 9,
+  "fields": {
+    "atoll": 2,
+    "resort_name": "Dusit Thani Maldives",
+    "price": "150.00",
+    "duration": "2 hours 40 minutes",
+    "transfer_type": "seaplane",
+    "is_active": true,
+    "order": 1
+  }
+},
+{
+  "model": "api.resorttransfer",
+  "pk": 10,
+  "fields": {
+    "atoll": 2,
+    "resort_name": "Four Seasons Landaa Giraavaru",
+    "price": "180.00",
+    "duration": "2 hours 40 minutes",
+    "transfer_type": "seaplane",
+    "is_active": true,
+    "order": 2
+  }
+},
+{
+  "model": "api.resorttransfer",
+  "pk": 11,
+  "fields": {
+    "atoll": 2,
+    "resort_name": "Soneva Fushi",
+    "price": "104.00",
+    "duration": "2 hours 40 minutes",
+    "transfer_type": "seaplane",
+    "is_active": true,
+    "order": 3
+  }
+},
+{
+  "model": "api.resorttransfer",
+  "pk": 12,
+  "fields": {
+    "atoll": 2,
+    "resort_name": "The Nautilus Maldives",
+    "price": "180.00",
+    "duration": "2 hours 40 minutes",
+    "transfer_type": "seaplane",
+    "is_active": true,
+    "order": 4
+  }
+},
+{
+  "model": "api.resorttransfer",
+  "pk": 16,
+  "fields": {
+    "atoll": 2,
+    "resort_name": "Eydhafushi Ferry",
+    "price": "8.00",
+    "duration": "4 hours",
+    "transfer_type": "ferry",
+    "is_active": true,
+    "order": 5
+  }
+},
+{
+  "model": "api.resorttransfer",
+  "pk": 17,
+  "fields": {
+    "atoll": 2,
+    "resort_name": "Thulhaadhoo Ferry",
+    "price": "7.00",
+    "duration": "3.5 hours",
+    "transfer_type": "ferry",
+    "is_active": true,
+    "order": 6
+  }
+},
+{
+  "model": "api.resorttransfer",
+  "pk": 18,
+  "fields": {
+    "atoll": 3,
+    "resort_name": "Conrad Maldives Rangali Island",
+    "price": "220.00",
+    "duration": "2 hours 15 minutes",
+    "transfer_type": "seaplane",
+    "is_active": true,
+    "order": 1
+  }
+},
+{
+  "model": "api.resorttransfer",
+  "pk": 19,
+  "fields": {
+    "atoll": 3,
+    "resort_name": "W Maldives",
+    "price": "200.00",
+    "duration": "2 hours",
+    "transfer_type": "seaplane",
+    "is_active": true,
+    "order": 2
+  }
+},
+{
+  "model": "api.resorttransfer",
+  "pk": 20,
+  "fields": {
+    "atoll": 3,
+    "resort_name": "Lily Beach Resort",
+    "price": "180.00",
+    "duration": "1 hour 45 minutes",
+    "transfer_type": "seaplane",
+    "is_active": true,
+    "order": 3
+  }
+},
+{
+  "model": "api.resorttransfer",
+  "pk": 21,
+  "fields": {
+    "atoll": 3,
+    "resort_name": "Mirihi Island Resort",
+    "price": "160.00",
+    "duration": "1 hour 30 minutes",
+    "transfer_type": "seaplane",
+    "is_active": true,
+    "order": 4
+  }
+},
+{
+  "model": "api.resorttransfer",
+  "pk": 22,
+  "fields": {
+    "atoll": 3,
+    "resort_name": "Maamigili Ferry",
+    "price": "10.00",
+    "duration": "5 hours",
+    "transfer_type": "ferry",
+    "is_active": true,
+    "order": 5
+  }
+},
+{
+  "model": "api.resorttransfer",
+  "pk": 23,
+  "fields": {
+    "atoll": 3,
+    "resort_name": "Mahibadhoo Ferry",
+    "price": "9.00",
+    "duration": "4.5 hours",
+    "transfer_type": "ferry",
+    "is_active": true,
+    "order": 6
+  }
+},
+{
+  "model": "api.resorttransfer",
+  "pk": 24,
+  "fields": {
+    "atoll": 4,
+    "resort_name": "Kuredu Island Resort",
+    "price": "140.00",
+    "duration": "1 hour 30 minutes",
+    "transfer_type": "seaplane",
+    "is_active": true,
+    "order": 1
+  }
+},
+{
+  "model": "api.resorttransfer",
+  "pk": 25,
+  "fields": {
+    "atoll": 4,
+    "resort_name": "Komandoo Island Resort",
+    "price": "150.00",
+    "duration": "1 hour 45 minutes",
+    "transfer_type": "seaplane",
+    "is_active": true,
+    "order": 2
+  }
+},
+{
+  "model": "api.resorttransfer",
+  "pk": 26,
+  "fields": {
+    "atoll": 4,
+    "resort_name": "Kunfunadhoo Ferry",
+    "price": "6.00",
+    "duration": "3 hours",
+    "transfer_type": "ferry",
+    "is_active": true,
+    "order": 3
+  }
+},
+{
+  "model": "api.resorttransfer",
+  "pk": 27,
+  "fields": {
+    "atoll": 5,
+    "resort_name": "Alimatha Ferry",
+    "price": "12.00",
+    "duration": "6 hours",
+    "transfer_type": "ferry",
+    "is_active": true,
+    "order": 1
+  }
+},
+{
+  "model": "api.resorttransfer",
+  "pk": 28,
+  "fields": {
+    "atoll": 5,
+    "resort_name": "Fulidhoo Ferry",
+    "price": "11.00",
+    "duration": "5.5 hours",
+    "transfer_type": "ferry",
+    "is_active": true,
+    "order": 2
+  }
+},
+{
+  "model": "api.resorttransfer",
+  "pk": 29,
+  "fields": {
+    "atoll": 6,
+    "resort_name": "Muli Ferry",
+    "price": "13.00",
+    "duration": "6.5 hours",
+    "transfer_type": "ferry",
+    "is_active": true,
+    "order": 1
+  }
+},
+{
+  "model": "api.resorttransfer",
+  "pk": 30,
+  "fields": {
+    "atoll": 6,
+    "resort_name": "Veyvah Ferry",
+    "price": "14.00",
+    "duration": "7 hours",
+    "transfer_type": "ferry",
+    "is_active": true,
+    "order": 2
+  }
+}
+]

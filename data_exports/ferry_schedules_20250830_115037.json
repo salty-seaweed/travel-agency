@@ -1,0 +1,307 @@
+[
+{
+  "model": "api.ferryschedule",
+  "pk": 15,
+  "fields": {
+    "route_name": "Gulhi to Male",
+    "departure_time": "16:00:00",
+    "arrival_time": "17:15:00",
+    "duration": "75 minutes",
+    "price": "4.00",
+    "days_of_week": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+      "Sunday"
+    ],
+    "is_active": true,
+    "notes": "Return ferry from Gulhi",
+    "order": 15
+  }
+},
+{
+  "model": "api.ferryschedule",
+  "pk": 13,
+  "fields": {
+    "route_name": "Hulhumale to Male",
+    "departure_time": "18:00:00",
+    "arrival_time": "18:20:00",
+    "duration": "20 minutes",
+    "price": "2.00",
+    "days_of_week": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+      "Sunday"
+    ],
+    "is_active": true,
+    "notes": "Return ferry from Hulhumale",
+    "order": 13
+  }
+},
+{
+  "model": "api.ferryschedule",
+  "pk": 14,
+  "fields": {
+    "route_name": "Maafushi to Male",
+    "departure_time": "15:00:00",
+    "arrival_time": "16:30:00",
+    "duration": "90 minutes",
+    "price": "5.00",
+    "days_of_week": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+      "Sunday"
+    ],
+    "is_active": true,
+    "notes": "Return ferry from Maafushi",
+    "order": 14
+  }
+},
+{
+  "model": "api.ferryschedule",
+  "pk": 9,
+  "fields": {
+    "route_name": "Male to Alimatha (Vaavu Atoll)",
+    "departure_time": "06:00:00",
+    "arrival_time": "12:00:00",
+    "duration": "6 hours",
+    "price": "12.00",
+    "days_of_week": [
+      "Monday",
+      "Thursday"
+    ],
+    "is_active": true,
+    "notes": "Twice per week to Vaavu Atoll",
+    "order": 9
+  }
+},
+{
+  "model": "api.ferryschedule",
+  "pk": 4,
+  "fields": {
+    "route_name": "Male to Eydhafushi (Baa Atoll)",
+    "departure_time": "07:00:00",
+    "arrival_time": "11:00:00",
+    "duration": "4 hours",
+    "price": "8.00",
+    "days_of_week": [
+      "Monday",
+      "Wednesday",
+      "Friday"
+    ],
+    "is_active": true,
+    "notes": "Three times per week to Baa Atoll",
+    "order": 4
+  }
+},
+{
+  "model": "api.ferryschedule",
+  "pk": 10,
+  "fields": {
+    "route_name": "Male to Fulidhoo (Vaavu Atoll)",
+    "departure_time": "06:30:00",
+    "arrival_time": "12:00:00",
+    "duration": "5.5 hours",
+    "price": "11.00",
+    "days_of_week": [
+      "Tuesday",
+      "Friday"
+    ],
+    "is_active": true,
+    "notes": "Twice per week to Vaavu Atoll",
+    "order": 10
+  }
+},
+{
+  "model": "api.ferryschedule",
+  "pk": 3,
+  "fields": {
+    "route_name": "Male to Gulhi",
+    "departure_time": "08:30:00",
+    "arrival_time": "09:45:00",
+    "duration": "75 minutes",
+    "price": "4.00",
+    "days_of_week": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+      "Sunday"
+    ],
+    "is_active": true,
+    "notes": "Regular ferry to Gulhi island",
+    "order": 3
+  }
+},
+{
+  "model": "api.ferryschedule",
+  "pk": 1,
+  "fields": {
+    "route_name": "Male to Hulhumale",
+    "departure_time": "06:00:00",
+    "arrival_time": "06:20:00",
+    "duration": "20 minutes",
+    "price": "2.00",
+    "days_of_week": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+      "Sunday"
+    ],
+    "is_active": true,
+    "notes": "Regular ferry service to Hulhumale",
+    "order": 1
+  }
+},
+{
+  "model": "api.ferryschedule",
+  "pk": 8,
+  "fields": {
+    "route_name": "Male to Kunfunadhoo (Lhaviyani Atoll)",
+    "departure_time": "08:00:00",
+    "arrival_time": "11:00:00",
+    "duration": "3 hours",
+    "price": "6.00",
+    "days_of_week": [
+      "Monday",
+      "Wednesday",
+      "Friday"
+    ],
+    "is_active": true,
+    "notes": "Three times per week to Lhaviyani Atoll",
+    "order": 8
+  }
+},
+{
+  "model": "api.ferryschedule",
+  "pk": 2,
+  "fields": {
+    "route_name": "Male to Maafushi",
+    "departure_time": "09:00:00",
+    "arrival_time": "10:30:00",
+    "duration": "90 minutes",
+    "price": "5.00",
+    "days_of_week": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+      "Sunday"
+    ],
+    "is_active": true,
+    "notes": "Daily ferry to Maafushi island",
+    "order": 2
+  }
+},
+{
+  "model": "api.ferryschedule",
+  "pk": 6,
+  "fields": {
+    "route_name": "Male to Maamigili (Ari Atoll)",
+    "departure_time": "06:30:00",
+    "arrival_time": "11:30:00",
+    "duration": "5 hours",
+    "price": "10.00",
+    "days_of_week": [
+      "Monday",
+      "Wednesday",
+      "Friday"
+    ],
+    "is_active": true,
+    "notes": "Three times per week to Ari Atoll",
+    "order": 6
+  }
+},
+{
+  "model": "api.ferryschedule",
+  "pk": 7,
+  "fields": {
+    "route_name": "Male to Mahibadhoo (Ari Atoll)",
+    "departure_time": "07:00:00",
+    "arrival_time": "11:30:00",
+    "duration": "4.5 hours",
+    "price": "9.00",
+    "days_of_week": [
+      "Tuesday",
+      "Thursday",
+      "Saturday"
+    ],
+    "is_active": true,
+    "notes": "Three times per week to Ari Atoll",
+    "order": 7
+  }
+},
+{
+  "model": "api.ferryschedule",
+  "pk": 11,
+  "fields": {
+    "route_name": "Male to Muli (Meemu Atoll)",
+    "departure_time": "05:30:00",
+    "arrival_time": "12:00:00",
+    "duration": "6.5 hours",
+    "price": "13.00",
+    "days_of_week": [
+      "Monday",
+      "Wednesday"
+    ],
+    "is_active": true,
+    "notes": "Twice per week to Meemu Atoll",
+    "order": 11
+  }
+},
+{
+  "model": "api.ferryschedule",
+  "pk": 5,
+  "fields": {
+    "route_name": "Male to Thulhaadhoo (Baa Atoll)",
+    "departure_time": "07:30:00",
+    "arrival_time": "11:00:00",
+    "duration": "3.5 hours",
+    "price": "7.00",
+    "days_of_week": [
+      "Tuesday",
+      "Thursday",
+      "Saturday"
+    ],
+    "is_active": true,
+    "notes": "Three times per week to Baa Atoll",
+    "order": 5
+  }
+},
+{
+  "model": "api.ferryschedule",
+  "pk": 12,
+  "fields": {
+    "route_name": "Male to Veyvah (Meemu Atoll)",
+    "departure_time": "05:00:00",
+    "arrival_time": "12:00:00",
+    "duration": "7 hours",
+    "price": "14.00",
+    "days_of_week": [
+      "Tuesday",
+      "Thursday"
+    ],
+    "is_active": true,
+    "notes": "Twice per week to Meemu Atoll",
+    "order": 12
+  }
+}
+]

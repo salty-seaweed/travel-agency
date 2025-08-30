@@ -1,0 +1,98 @@
+[
+{
+  "model": "api.transferfaq",
+  "pk": 2,
+  "fields": {
+    "question": "Is there transfer service available at the international airport on arrival to book?",
+    "answer": "No, everything needs to be pre-arranged before your arrival. However, if you are staying in Male or Hulhumale city, you can grab a taxi from the airport.",
+    "category": "Booking",
+    "icon": "ClockIcon",
+    "is_active": true,
+    "order": 2
+  }
+},
+{
+  "model": "api.transferfaq",
+  "pk": 7,
+  "fields": {
+    "question": "Do I need to book transfers in advance?",
+    "answer": "Yes, all transfers should be booked at least 48 hours in advance, especially for seaplanes and speedboats. Ferry tickets can be purchased on the day of travel.",
+    "category": "Booking",
+    "icon": "ShieldCheckIcon",
+    "is_active": true,
+    "order": 7
+  }
+},
+{
+  "model": "api.transferfaq",
+  "pk": 1,
+  "fields": {
+    "question": "How to get to Maldives islands?",
+    "answer": "To reach any island in the Maldives, you will require either a speedboat transfer or a domestic flight. The choice depends on your destination and budget.",
+    "category": "General",
+    "icon": "MapPinIcon",
+    "is_active": true,
+    "order": 1
+  }
+},
+{
+  "model": "api.transferfaq",
+  "pk": 6,
+  "fields": {
+    "question": "How much luggage can I bring on transfers?",
+    "answer": "Speedboats allow 20kg per person, seaplanes have a 20kg limit, domestic flights allow 15kg, and ferries have no strict limit but space is limited.",
+    "category": "Luggage",
+    "icon": "InformationCircleIcon",
+    "is_active": true,
+    "order": 6
+  }
+},
+{
+  "model": "api.transferfaq",
+  "pk": 4,
+  "fields": {
+    "question": "Why is the Maldives transfer so expensive?",
+    "answer": "Because of the small populations and dispersity, it's very difficult to organize daily schedules on different times for an island. Additionally, speedboats consume a lot of fuel.",
+    "category": "Pricing",
+    "icon": "CurrencyDollarIcon",
+    "is_active": true,
+    "order": 4
+  }
+},
+{
+  "model": "api.transferfaq",
+  "pk": 3,
+  "fields": {
+    "question": "Is it safe to travel by sea?",
+    "answer": "I can tell you it's safer than flights. You will have floating life jackets on speedboats, but during stormy weather, it is not recommended to travel by very small boats.",
+    "category": "Safety",
+    "icon": "CheckCircleIcon",
+    "is_active": true,
+    "order": 3
+  }
+},
+{
+  "model": "api.transferfaq",
+  "pk": 5,
+  "fields": {
+    "question": "What are the ferry schedules?",
+    "answer": "Public ferries typically operate from 6:00 AM to 6:00 PM with departures every 1-2 hours. Schedules vary by route and may be affected by weather conditions.",
+    "category": "Schedules",
+    "icon": "ClockIcon",
+    "is_active": true,
+    "order": 5
+  }
+},
+{
+  "model": "api.transferfaq",
+  "pk": 8,
+  "fields": {
+    "question": "What happens if my transfer is cancelled due to weather?",
+    "answer": "In case of weather-related cancellations, we will reschedule your transfer at no additional cost. We monitor weather conditions and provide updates.",
+    "category": "Weather",
+    "icon": "ExclamationTriangleIcon",
+    "is_active": true,
+    "order": 8
+  }
+}
+]

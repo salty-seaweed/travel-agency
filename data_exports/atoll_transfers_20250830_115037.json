@@ -1,0 +1,74 @@
+[
+{
+  "model": "api.atolltransfer",
+  "pk": 1,
+  "fields": {
+    "atoll_name": "Male Atoll",
+    "description": "The most accessible atoll with the highest concentration of resorts",
+    "icon": "SparklesIcon",
+    "gradient": "from-blue-500 to-indigo-600",
+    "is_active": true,
+    "order": 1
+  }
+},
+{
+  "model": "api.atolltransfer",
+  "pk": 2,
+  "fields": {
+    "atoll_name": "Baa Atoll",
+    "description": "UNESCO Biosphere Reserve with luxury resorts and pristine nature",
+    "icon": "GlobeAltIcon",
+    "gradient": "from-green-500 to-emerald-600",
+    "is_active": true,
+    "order": 2
+  }
+},
+{
+  "model": "api.atolltransfer",
+  "pk": 3,
+  "fields": {
+    "atoll_name": "Ari Atoll",
+    "description": "Famous for diving and water sports with diverse accommodation options",
+    "icon": "StarIcon",
+    "gradient": "from-purple-500 to-pink-600",
+    "is_active": true,
+    "order": 3
+  }
+},
+{
+  "model": "api.atolltransfer",
+  "pk": 4,
+  "fields": {
+    "atoll_name": "Lhaviyani Atoll",
+    "description": "Known for its crystal clear waters and excellent diving spots",
+    "icon": "CheckCircleIcon",
+    "gradient": "from-orange-500 to-red-600",
+    "is_active": true,
+    "order": 4
+  }
+},
+{
+  "model": "api.atolltransfer",
+  "pk": 5,
+  "fields": {
+    "atoll_name": "Vaavu Atoll",
+    "description": "Remote atoll with pristine reefs and limited development",
+    "icon": "MapPinIcon",
+    "gradient": "from-teal-500 to-cyan-600",
+    "is_active": true,
+    "order": 5
+  }
+},
+{
+  "model": "api.atolltransfer",
+  "pk": 6,
+  "fields": {
+    "atoll_name": "Meemu Atoll",
+    "description": "Traditional Maldivian culture with beautiful beaches",
+    "icon": "GlobeAltIcon",
+    "gradient": "from-yellow-500 to-orange-600",
+    "is_active": true,
+    "order": 6
+  }
+}
+]

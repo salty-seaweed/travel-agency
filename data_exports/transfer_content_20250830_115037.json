@@ -1,0 +1,114 @@
+[
+{
+  "model": "api.transfercontent",
+  "pk": 1,
+  "fields": {
+    "section": "hero",
+    "title": "Maldives Transportation & Transfers",
+    "subtitle": "Your complete guide to getting around the Maldives",
+    "description": "From speedboat transfers to seaplane flights, we provide comprehensive transportation services to make your island hopping seamless and memorable.",
+    "badge_text": "Maldives Transportation Guide",
+    "badge_icon": "SparklesIcon",
+    "is_active": true,
+    "order": 1,
+    "created_at": "2025-08-17T10:31:09.725Z",
+    "updated_at": "2025-08-17T10:31:09.726Z"
+  }
+},
+{
+  "model": "api.transfercontent",
+  "pk": 2,
+  "fields": {
+    "section": "transfer_types",
+    "title": "Types of Transfers in Maldives",
+    "subtitle": "Transportation Options",
+    "description": "From budget-friendly ferries to luxury seaplane transfers, discover the perfect transportation option for your Maldives adventure.",
+    "badge_text": "Transportation Options",
+    "badge_icon": "SparklesIcon",
+    "is_active": true,
+    "order": 2,
+    "created_at": "2025-08-17T10:31:09.729Z",
+    "updated_at": "2025-08-17T10:31:09.729Z"
+  }
+},
+{
+  "model": "api.transfercontent",
+  "pk": 3,
+  "fields": {
+    "section": "atoll_transfers",
+    "title": "Atoll Transfer Information",
+    "subtitle": "Atoll Transfer Guide",
+    "description": "Comprehensive transfer information for major atolls in the Maldives. Find the perfect transfer option for your chosen destination.",
+    "badge_text": "Atoll Transfer Guide",
+    "badge_icon": "MapPinIcon",
+    "is_active": true,
+    "order": 3,
+    "created_at": "2025-08-17T10:31:09.731Z",
+    "updated_at": "2025-08-17T10:31:09.731Z"
+  }
+},
+{
+  "model": "api.transfercontent",
+  "pk": 4,
+  "fields": {
+    "section": "transfer_guide",
+    "title": "How to Arrange Your Transfer",
+    "subtitle": "Complete Transfer Guide",
+    "description": "A step-by-step guide to arranging and using transfers in the Maldives. From pre-booking to arrival, we cover everything you need to know.",
+    "badge_text": "Complete Transfer Guide",
+    "badge_icon": "InformationCircleIcon",
+    "is_active": true,
+    "order": 4,
+    "created_at": "2025-08-17T10:31:09.733Z",
+    "updated_at": "2025-08-17T10:31:09.733Z"
+  }
+},
+{
+  "model": "api.transfercontent",
+  "pk": 5,
+  "fields": {
+    "section": "pricing",
+    "title": "Transfer Pricing & Costs",
+    "subtitle": "Transfer Pricing Guide",
+    "description": "Transparent pricing information for all types of transfers in the Maldives. Understand the costs and factors that influence transfer pricing.",
+    "badge_text": "Transfer Pricing Guide",
+    "badge_icon": "CurrencyDollarIcon",
+    "is_active": true,
+    "order": 5,
+    "created_at": "2025-08-17T10:31:09.736Z",
+    "updated_at": "2025-08-17T10:31:09.736Z"
+  }
+},
+{
+  "model": "api.transfercontent",
+  "pk": 6,
+  "fields": {
+    "section": "faq",
+    "title": "Transfer FAQ",
+    "subtitle": "Frequently Asked Questions",
+    "description": "Find answers to the most common questions about transfers in the Maldives. Everything you need to know about getting around the islands.",
+    "badge_text": "Frequently Asked Questions",
+    "badge_icon": "InformationCircleIcon",
+    "is_active": true,
+    "order": 6,
+    "created_at": "2025-08-17T10:31:09.743Z",
+    "updated_at": "2025-08-17T10:31:09.743Z"
+  }
+},
+{
+  "model": "api.transfercontent",
+  "pk": 7,
+  "fields": {
+    "section": "booking",
+    "title": "Ready to Book Your Transfer?",
+    "subtitle": "Book Your Transfer",
+    "description": "Secure your Maldives transfer with Thread Travels. Our simple booking process ensures a smooth and reliable transportation experience.",
+    "badge_text": "Book Your Transfer",
+    "badge_icon": "SparklesIcon",
+    "is_active": true,
+    "order": 7,
+    "created_at": "2025-08-17T10:31:09.747Z",
+    "updated_at": "2025-08-17T10:31:09.747Z"
+  }
+}
+]
