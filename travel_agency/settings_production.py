@@ -29,10 +29,10 @@ DEBUG = False
 
 # Production allowed hosts - add your domain here
 ALLOWED_HOSTS = [
-    os.getenv('DOMAIN_NAME', 'yourdomain.com'),
-    f"www.{os.getenv('DOMAIN_NAME', 'yourdomain.com')}",
+    'threadtravels.com',
+    'www.threadtravels.com',
+    '.railway.app',
     os.getenv('BACKEND_URL', '').replace('https://', '').replace('http://', ''),
-    'localhost',  # Remove this in production
 ]
 
 # Application definition
@@ -130,9 +130,10 @@ USE_TZ = True
 
 # CORS settings for production
 CORS_ALLOWED_ORIGINS = [
-    f"https://{os.getenv('DOMAIN_NAME', 'yourdomain.com')}",
-    f"https://www.{os.getenv('DOMAIN_NAME', 'yourdomain.com')}",
-    os.getenv('FRONTEND_URL', 'https://yourdomain.com'),
+    "https://threadtravels.com",
+    "https://www.threadtravels.com",
+    "https://threadtravels.vercel.app",  # Vercel deployment URL
+    os.getenv('FRONTEND_URL', 'https://threadtravels.com'),
 ]
 
 CORS_ALLOW_CREDENTIALS = True
