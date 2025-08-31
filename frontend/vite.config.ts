@@ -73,65 +73,12 @@ export default defineConfig(({ mode }) => ({
         moduleSideEffects: false,
       },
       output: {
-        // Safe chunking to avoid breaking React
-        manualChunks(id) {
-          // Keep React and ReactDOM together - CRITICAL for hooks to work
-          if (id.includes('react') || id.includes('react-dom')) {
-            if (id.includes('react-router')) {
-              return 'react-router';
-            }
-            if (id.includes('react-select') || id.includes('react-color')) {
-              return 'forms';
-            }
-            // All other React packages stay together
-            return 'react-core';
-          }
-          
-          // Heavy UI libraries - split more granularly  
-          if (id.includes('@chakra-ui') || id.includes('@emotion')) {
-            return 'chakra-ui';
-          }
-          if (id.includes('framer-motion')) {
-            return 'framer-motion'; // Separate heavy animation library
-          }
-          if (id.includes('@heroicons')) {
-            return 'heroicons';
-          }
-          
-          // Data management
-          if (id.includes('@tanstack/react-query')) {
-            return 'react-query';
-          }
-          
-          // Maps - heavy bundle, separate
-          if (id.includes('leaflet')) {
-            return 'maps';
-          }
-          
-          // Forms
-          if (id.includes('react-select') || id.includes('react-color')) {
-            return 'forms';
-          }
-          
-          // Internationalization
-          if (id.includes('i18next')) {
-            return 'i18n';
-          }
-          
-          // Heavy syntax highlighting - separate
-          if (id.includes('react-syntax-highlighter')) {
-            return 'syntax';
-          }
-          
-          // SEO
-          if (id.includes('react-helmet')) {
-            return 'seo';
-          }
-          
-          // Vendor fallback
-          if (id.includes('node_modules')) {
-            return 'vendor';
-          }
+        // Disable manual chunking completely to fix React hook issues
+        manualChunks: {
+          // Simple, safe chunking that doesn't break React
+          'react-vendor': ['react', 'react-dom', 'react-dom/client'],
+          'ui-vendor': ['@chakra-ui/react', '@emotion/react', '@emotion/styled'],
+          'router-vendor': ['react-router-dom'],
         },
         chunkFileNames: 'assets/js/[name]-[hash].js',
         entryFileNames: 'assets/js/[name]-[hash].js',
@@ -172,6 +119,14 @@ export default defineConfig(({ mode }) => ({
   define: {
     'process.env.VITE_API_URL': JSON.stringify(process.env.VITE_API_URL || 'http://localhost:8001'),
   },
+  resolve: {
+    alias: {
+      // Ensure single React instance to fix useLayoutEffect issues
+      'react': 'react',
+      'react-dom': 'react-dom',
+    },
+    dedupe: ['react', 'react-dom'],
+  },
   optimizeDeps: {
     include: [
       'react',
@@ -179,15 +134,10 @@ export default defineConfig(({ mode }) => ({
       'react-dom/client',
       'react/jsx-runtime',
       'react-router-dom',
-      '@chakra-ui/react',
-      '@emotion/react',
-      '@emotion/styled',
-      'framer-motion',
     ],
     exclude: [
-      '@tanstack/react-query-devtools', // Exclude dev tools from production
+      '@tanstack/react-query-devtools',
     ],
-    // Don't force optimization in production to avoid React hook issues
     force: false,
   },
   css: {
