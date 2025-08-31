@@ -1,6 +1,26 @@
 // Modern React Query hooks for data fetching
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { queryKeys, invalidateQueries } from '../lib/query-client';
+// import { queryKeys, invalidateQueries } from '../lib/query-client'; // File doesn't exist
+
+// Define query keys inline
+const queryKeys = {
+  properties: {
+    all: ['properties'],
+    detail: (id: string) => ['properties', id],
+    reviews: (id: string) => ['properties', id, 'reviews'],
+  },
+  packages: {
+    all: ['packages'],
+    detail: (id: string) => ['packages', id],
+  },
+  experiences: {
+    all: ['experiences'],
+    featured: ['experiences', 'featured'],
+  },
+  reviews: {
+    all: ['reviews'],
+  },
+};
 import { unifiedApi } from '../services/unified-api';
 import { whatsappBooking } from '../services/whatsapp-booking';
 import type { 
