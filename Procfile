@@ -1,1 +1,1 @@
-web: DJANGO_SETTINGS_MODULE=travel_agency.settings_railway python manage.py migrate && gunicorn travel_agency.wsgi:application --bind 0.0.0.0:$PORT --timeout 120 --env DJANGO_SETTINGS_MODULE=travel_agency.settings_railway
+web: gunicorn travel_agency.wsgi:application --bind 0.0.0.0:$PORT --env DJANGO_SETTINGS_MODULE=travel_agency.settings_minimal
