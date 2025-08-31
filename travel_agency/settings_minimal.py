@@ -28,6 +28,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -37,6 +38,8 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'travel_agency.urls'
+
+WSGI_APPLICATION = 'travel_agency.wsgi.application'
 
 TEMPLATES = [
     {
@@ -56,23 +59,45 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'travel_agency.wsgi.application'
 
-# Database
+# Database - Railway PostgreSQL with fallback
 import dj_database_url
 
 DATABASE_URL = os.getenv('DATABASE_URL')
+
 if DATABASE_URL:
+    # Parse DATABASE_URL if provided
     DATABASES = {
         'default': dj_database_url.parse(DATABASE_URL)
     }
     print(f"✅ Using DATABASE_URL: {DATABASE_URL[:50]}...")
 else:
-    print("❌ No DATABASE_URL found!")
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+    # Check if we have Railway environment variables
+    railway_host = os.getenv('PGHOST')
+    if railway_host and 'railway' in railway_host.lower():
+        # Use Railway environment variables
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': os.getenv('PGDATABASE'),
+                'USER': os.getenv('PGUSER'),
+                'PASSWORD': os.getenv('PGPASSWORD'),
+                'HOST': os.getenv('PGHOST'),
+                'PORT': os.getenv('PGPORT', '5432'),
+                'OPTIONS': {
+                    'sslmode': 'require',
+                },
+            }
         }
-    }
+        print(f"✅ Using Railway PostgreSQL: {railway_host}")
+    else:
+        # Fallback to SQLite for development
+        print("⚠️  No Railway database found, using SQLite fallback")
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': BASE_DIR / 'db.sqlite3',
+            }
+        }
 
 # Internationalization
 LANGUAGE_CODE = 'en-us'
