@@ -6,8 +6,11 @@
   "installCommand": "cd frontend && npm ci --legacy-peer-deps --no-optional --prefer-offline --production=false",
   "framework": "vite",
   "env": {
-    "NODE_OPTIONS": "--max-old-space-size=4096",
-    "CI": "false"
+    "NODE_OPTIONS": "--max-old-space-size=4096 --no-warnings --max-semi-space-size=64",
+    "CI": "false",
+    "GENERATE_SOURCEMAP": "false",
+    "DISABLE_ESLINT_PLUGIN": "true",
+    "TSC_COMPILE_ON_ERROR": "true"
   },
   "rewrites": [
     {

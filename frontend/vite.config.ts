@@ -17,10 +17,25 @@ export default defineConfig(({ mode }) => ({
     minify: 'esbuild',
     rollupOptions: {
       // Reduce memory usage during build
-      maxParallelFileOps: 2,
+      maxParallelFileOps: 1,  // Reduced from 2 to 1
       cache: false,
+      output: {
+        // Split chunks more aggressively to reduce memory
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          chakra: ['@chakra-ui/react', '@emotion/react', '@emotion/styled'],
+          routing: ['react-router-dom'],
+          query: ['@tanstack/react-query'],
+        },
+        // Smaller chunk sizes
+        chunkFileNames: 'js/[name]-[hash].js',
+        entryFileNames: 'js/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]'
+      }
     },
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 500,  // Reduced from 1000 to 500
+    // Reduce concurrent processing
+    assetsInlineLimit: 0,  // Don't inline any assets
   },
   server: {
     host: '0.0.0.0',

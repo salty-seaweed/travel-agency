@@ -1,0 +1,50 @@
+# Remove unnecessary files to reduce memory usage during npm install
+# Only remove documentation and test files, NOT source code
+
+# Documentation files
+*.md
+README*
+CHANGELOG*
+HISTORY*
+LICENSE*
+NOTICE*
+
+# Test files only
+test/
+tests/
+__tests__/
+coverage/
+.nyc_output/
+*.spec.js
+*.test.js
+spec/
+
+# Build artifacts
+*.orig
+.DS_Store
+Thumbs.db
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.settings/
+.history/
+
+# Documentation folders
+docs/
+doc/
+website/
+examples/
+example/
+
+# Config files that are not needed at runtime
+.babelrc*
+.eslintrc*
+.prettierrc*
+jest.config.js
+rollup.config.js
+webpack.config.js
