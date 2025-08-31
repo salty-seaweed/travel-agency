@@ -1,1 +1,1 @@
-web: python start_railway.py
+web: echo "🚀 Starting Railway deployment..." && echo "🔧 PORT=$PORT" && echo "🔧 DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE" && DJANGO_SETTINGS_MODULE=travel_agency.settings_minimal gunicorn travel_agency.wsgi:application --bind 0.0.0.0:$PORT --workers 1 --timeout 30 --log-level info
