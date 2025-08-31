@@ -583,7 +583,7 @@ export const useHomepageContent = () => {
   return useQuery({
     queryKey: ['homepage-content'],
     queryFn: async () => {
-      const response = await fetch('http://localhost:8001/api/homepage/public/');
+      const response = await fetch(`${config.apiBaseUrl}/homepage/public/`);
       if (!response.ok) {
         throw new Error('Failed to fetch homepage content');
       }

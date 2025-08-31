@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { config } from '../../../config';
 import {
   Box,
   VStack,
@@ -127,7 +128,7 @@ export const HeroSectionEditor: React.FC<HeroSectionEditorProps> = ({ data, onCh
         token: token ? 'Present' : 'Missing'
       });
       
-      const response = await fetch('http://localhost:8001/api/homepage/images/', {
+      const response = await fetch(`${config.apiBaseUrl}/homepage/images/`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -190,7 +191,7 @@ export const HeroSectionEditor: React.FC<HeroSectionEditorProps> = ({ data, onCh
       formData.append('image_type', 'hero');
 
       const token = localStorage.getItem('access');
-      const response = await fetch('http://localhost:8001/api/homepage/images/upload_multiple/', {
+      const response = await fetch(`${config.apiBaseUrl}/homepage/images/upload_multiple/`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

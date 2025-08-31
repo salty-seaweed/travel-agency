@@ -61,8 +61,8 @@ function AppContent() {
         <link rel="icon" type="image/svg+xml" href="/vite.svg" />
         {/* Preload critical resources */}
         <link rel="preload" href="/src/assets/logo.svg" as="image" type="image/svg+xml" />
-        <link rel="dns-prefetch" href="//localhost:8001" />
-        <link rel="preconnect" href="//localhost:8001" />
+        <link rel="dns-prefetch" href="//web-production-a324.up.railway.app" />
+        <link rel="preconnect" href="//web-production-a324.up.railway.app" />
       </Helmet>
 
       <Routes>

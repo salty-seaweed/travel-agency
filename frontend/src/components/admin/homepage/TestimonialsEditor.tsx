@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { config } from '../../../config';
 import {
   Box,
   VStack,
@@ -190,7 +191,7 @@ export const TestimonialsEditor: React.FC<TestimonialsEditorProps> = ({ data, on
       formData.append('image_type', 'testimonial');
 
       const token = localStorage.getItem('access');
-      const response = await fetch('http://localhost:8001/api/homepage/images/', {
+      const response = await fetch(`${config.apiBaseUrl}/homepage/images/`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
