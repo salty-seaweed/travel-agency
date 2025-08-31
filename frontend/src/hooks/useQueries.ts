@@ -335,7 +335,7 @@ export const useUpdateProperty = () => {
       unifiedApi.properties.update(id, data),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.properties.detail(id) });
-      invalidateQueries.properties();
+      queryClient.invalidateQueries({ queryKey: queryKeys.properties.all });
     },
     onError: (error) => {
       console.error('Failed to update property:', error);
@@ -379,7 +379,7 @@ export const useUpdatePackage = () => {
       unifiedApi.packages.update(id, data),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.packages.detail(id) });
-      invalidateQueries.packages();
+      queryClient.invalidateQueries({ queryKey: queryKeys.packages.all });
     },
     onError: (error) => {
       console.error('Failed to update package:', error);
@@ -409,7 +409,7 @@ export const useCreateReview = () => {
     onSuccess: (_, { property: propertyId }) => {
       // Invalidate property reviews
       queryClient.invalidateQueries({ queryKey: queryKeys.properties.reviews(propertyId) });
-      invalidateQueries.reviews();
+      queryClient.invalidateQueries({ queryKey: queryKeys.reviews.all });
     },
     onError: (error) => {
       console.error('Failed to create review:', error);
