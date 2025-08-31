@@ -32,6 +32,23 @@ try {
   
   console.log('✅ Build completed successfully!');
   
+  // Clean up unnecessary files to reduce deployment size
+  console.log('🧹 Cleaning up build artifacts...');
+  const distFiles = fs.readdirSync(distPath, { recursive: true });
+  
+  // Remove source map files if any
+  distFiles.forEach(file => {
+    if (typeof file === 'string' && file.endsWith('.map')) {
+      const mapPath = path.join(distPath, file);
+      if (fs.existsSync(mapPath)) {
+        fs.unlinkSync(mapPath);
+        console.log(`   Removed: ${file}`);
+      }
+    }
+  });
+  
+  console.log('✅ Build cleanup completed!');
+  
 } catch (error) {
   console.error('❌ Build failed:', error.message);
   process.exit(1);

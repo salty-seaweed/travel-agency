@@ -20,32 +20,20 @@ export default defineConfig(({ mode }) => ({
       maxParallelFileOps: 1,
       cache: false,
       output: {
-        // Very aggressive chunking to reduce memory per chunk
-        manualChunks: (id) => {
-          // Split into very small chunks
-          if (id.includes('node_modules')) {
-            if (id.includes('react')) return 'react-vendor';
-            if (id.includes('@chakra-ui')) return 'chakra-vendor';
-            if (id.includes('@emotion')) return 'emotion-vendor';
-            if (id.includes('framer-motion')) return 'framer-vendor';
-            if (id.includes('@tanstack')) return 'query-vendor';
-            if (id.includes('react-router')) return 'router-vendor';
-            return 'vendor';
-          }
-          // Split source code by directory
-          if (id.includes('src/components/admin')) return 'admin';
-          if (id.includes('src/components/experiences')) return 'experiences';
-          if (id.includes('src/components/package')) return 'package';
-          if (id.includes('src/components/transportation')) return 'transport';
-          if (id.includes('src/services')) return 'services';
-          if (id.includes('src/hooks')) return 'hooks';
+        // Balanced chunking - fewer files but still memory efficient
+        manualChunks: {
+          // Group related vendors together
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'ui-vendor': ['@chakra-ui/react', '@emotion/react', '@emotion/styled', 'framer-motion'],
+          'data-vendor': ['@tanstack/react-query'],
+          // Don't split app code too much to reduce file count
         },
         chunkFileNames: 'js/[name]-[hash].js',
         entryFileNames: 'js/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]'
       }
     },
-    chunkSizeWarningLimit: 300,  // Very small chunks
+    chunkSizeWarningLimit: 800,  // Balanced chunk size
     assetsInlineLimit: 0,  // Never inline assets
     reportCompressedSize: false,  // Skip size reporting to save memory
     sourcemap: false,  // No source maps
