@@ -10,6 +10,18 @@ export default defineConfig(({ mode }) => ({
       tsDecorators: true,
     })
   ],
+  
+  // Optimize for memory usage
+  build: {
+    target: 'esnext',
+    minify: 'esbuild',
+    rollupOptions: {
+      // Reduce memory usage during build
+      maxParallelFileOps: 2,
+      cache: false,
+    },
+    chunkSizeWarningLimit: 1000,
+  },
   server: {
     host: '0.0.0.0',
     port: 5174,
