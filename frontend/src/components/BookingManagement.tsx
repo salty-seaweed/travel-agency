@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { config } from '../config';
 import { Card, Button, LoadingSpinner } from './index';
 import { useNotification } from '../hooks';
 import { useCustomerAuth } from '../hooks/useCustomerAuth';
@@ -58,7 +59,7 @@ export function BookingManagement({ onBookingUpdate }: BookingManagementProps) {
   const fetchBookings = async () => {
     try {
       const token = localStorage.getItem('customer_token');
-      const response = await fetch('http://127.0.0.1:8000/api/bookings/my-bookings/', {
+      const response = await fetch(`${config.apiBaseUrl}/bookings/my-bookings/`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -85,7 +86,7 @@ export function BookingManagement({ onBookingUpdate }: BookingManagementProps) {
 
     try {
       const token = localStorage.getItem('customer_token');
-      const response = await fetch(`http://127.0.0.1:8000/api/bookings/${bookingId}/cancel/`, {
+      const response = await fetch(`${config.apiBaseUrl}/bookings/${bookingId}/cancel/`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

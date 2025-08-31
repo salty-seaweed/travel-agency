@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { config } from '../../config';
 import { Card, Button, LoadingSpinner } from '../index';
 import { useNotification } from '../../hooks';
 import { useCustomerAuth } from '../../hooks/useCustomerAuth';
@@ -19,7 +20,7 @@ export function CustomerLogin() {
     setIsLoading(true);
     
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/customer/login/', {
+      const response = await fetch(`${config.apiBaseUrl}/customer/login/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

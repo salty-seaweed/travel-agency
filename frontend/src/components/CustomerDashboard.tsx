@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { config } from '../config';
 import { Card, Button, LoadingSpinner } from './index';
 import { BookingManagement } from './BookingManagement';
 import { useNotification } from '../hooks';
@@ -59,7 +60,7 @@ export function CustomerDashboard() {
   const fetchBookings = async () => {
     try {
       const token = localStorage.getItem('customer_token');
-      const response = await fetch('http://127.0.0.1:8000/api/bookings/my-bookings/', {
+      const response = await fetch(`${config.apiBaseUrl}/bookings/my-bookings/`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',

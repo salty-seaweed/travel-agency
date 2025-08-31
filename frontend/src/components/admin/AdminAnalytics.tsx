@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { config } from '../../config';
 import { Card, LoadingSpinner } from '../index';
 import { useNotification } from '../../hooks';
 import {
@@ -58,7 +59,7 @@ export function AdminAnalytics() {
   const fetchAnalytics = async () => {
     try {
       const token = localStorage.getItem('admin_token');
-      const response = await fetch(`http://127.0.0.1:8000/api/analytics/?time_range=${timeRange}`, {
+      const response = await fetch(`${config.apiBaseUrl}/analytics/?time_range=${timeRange}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',

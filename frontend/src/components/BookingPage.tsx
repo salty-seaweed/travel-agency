@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { config } from '../config';
 import { Card, LoadingSpinner } from './index';
 import { Button } from './ui/Button';
 import { useNotification } from '../hooks';
@@ -94,7 +95,7 @@ export function BookingPage() {
 
   const fetchProperty = async () => {
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/properties/${id}/`);
+      const response = await fetch(`${config.apiBaseUrl}/properties/${id}/`);
       if (response.ok) {
         const data = await response.json();
         setProperty(data);
@@ -133,7 +134,7 @@ export function BookingPage() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/bookings/', {
+      const response = await fetch(`${config.apiBaseUrl}/bookings/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
