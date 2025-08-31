@@ -36,7 +36,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'travel_agency.urls_minimal'
+ROOT_URLCONF = 'travel_agency.urls'
 
 TEMPLATES = [
     {
