@@ -25,8 +25,14 @@ import {
   Badge,
   Tooltip,
 } from '@chakra-ui/react';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { lazy, Suspense } from 'react';
+
+// Lazy load the heavy syntax highlighter
+const SyntaxHighlighter = lazy(() => 
+  import('react-syntax-highlighter').then(module => ({
+    default: module.Prism
+  }))
+);
 
 interface CustomCSSEditorProps {
   css: string;
@@ -531,20 +537,22 @@ export const CustomCSSEditor: React.FC<CustomCSSEditorProps> = ({
             </CardHeader>
             <CardBody p={0}>
               <Box h="calc(100% - 60px)" overflow="hidden">
-                <SyntaxHighlighter
-                  language="css"
-                  style={tomorrow}
-                  customStyle={{
-                    margin: 0,
-                    height: '100%',
-                    fontSize: '14px',
-                    fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace',
-                  }}
-                  showLineNumbers
-                  wrapLines
-                >
-                  {css || '/* Start writing your custom CSS here */'}
-                </SyntaxHighlighter>
+                <Suspense fallback={<Box p={4} textAlign="center">Loading syntax highlighter...</Box>}>
+                  <SyntaxHighlighter
+                    language="css"
+                    style={{}}
+                    customStyle={{
+                      margin: 0,
+                      height: '100%',
+                      fontSize: '14px',
+                      fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace',
+                    }}
+                    showLineNumbers
+                    wrapLines
+                  >
+                    {css || '/* Start writing your custom CSS here */'}
+                  </SyntaxHighlighter>
+                </Suspense>
                 <Textarea
                   value={css}
                   onChange={(e) => onChange(e.target.value)}

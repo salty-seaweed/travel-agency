@@ -1,6 +1,5 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
-import autoprefixer from 'autoprefixer'
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -60,44 +59,75 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     outDir: 'dist',
-    sourcemap: false,
-    minify: 'esbuild',
+    sourcemap: false, // Disabled for memory optimization
+    minify: 'esbuild', // Faster than terser, uses less memory
     target: 'es2015',
     cssTarget: 'chrome80',
     rollupOptions: {
-      // Minimize memory usage
-      maxParallelFileOps: 1,
-      cache: false,
+      // Aggressive memory optimization for large dependency trees
+      maxParallelFileOps: 1, // Serialize operations to minimize memory peaks
+      cache: false, // Disable cache to prevent memory issues
+      // Reduce memory pressure during bundling
+      treeshake: {
+        preset: 'smallest',
+        moduleSideEffects: false,
+      },
       output: {
-        manualChunks: {
-          // Core React libraries
-          'react-core': ['react', 'react-dom'],
-          'react-router': ['react-router-dom'],
+        // More aggressive chunking for better memory management
+        manualChunks(id) {
+          // Core libraries
+          if (id.includes('react') && !id.includes('react-router') && !id.includes('react-select')) {
+            return 'react-core';
+          }
+          if (id.includes('react-router')) {
+            return 'react-router';
+          }
           
-          // UI libraries
-          'chakra-ui': ['@chakra-ui/react', '@emotion/react', '@emotion/styled', 'framer-motion'],
-          'heroicons': ['@heroicons/react'],
+          // Heavy UI libraries - split more granularly  
+          if (id.includes('@chakra-ui') || id.includes('@emotion')) {
+            return 'chakra-ui';
+          }
+          if (id.includes('framer-motion')) {
+            return 'framer-motion'; // Separate heavy animation library
+          }
+          if (id.includes('@heroicons')) {
+            return 'heroicons';
+          }
           
           // Data management
-          'react-query': ['@tanstack/react-query'],
+          if (id.includes('@tanstack/react-query')) {
+            return 'react-query';
+          }
           
-          // Utilities
-          'utils': ['lodash'],
+          // Maps - heavy bundle, separate
+          if (id.includes('leaflet')) {
+            return 'maps';
+          }
           
-          // Maps and location
-          'maps': ['leaflet', 'react-leaflet', 'react-leaflet-cluster'],
-          
-          // Forms and inputs
-          'forms': ['react-select', 'react-color'],
+          // Forms
+          if (id.includes('react-select') || id.includes('react-color')) {
+            return 'forms';
+          }
           
           // Internationalization
-          'i18n': ['i18next', 'react-i18next'],
+          if (id.includes('i18next')) {
+            return 'i18n';
+          }
           
-          // Syntax highlighting
-          'syntax': ['react-syntax-highlighter'],
+          // Heavy syntax highlighting - separate
+          if (id.includes('react-syntax-highlighter')) {
+            return 'syntax';
+          }
           
-          // SEO and meta
-          'seo': ['react-helmet-async'],
+          // SEO
+          if (id.includes('react-helmet')) {
+            return 'seo';
+          }
+          
+          // Vendor fallback
+          if (id.includes('node_modules')) {
+            return 'vendor';
+          }
         },
         chunkFileNames: 'assets/js/[name]-[hash].js',
         entryFileNames: 'assets/js/[name]-[hash].js',
@@ -115,14 +145,14 @@ export default defineConfig(({ mode }) => ({
         },
       },
     },
-    chunkSizeWarningLimit: 800,
-    // Skip compression reporting to save memory
-    reportCompressedSize: false,
-    // Optimize dependencies
+    chunkSizeWarningLimit: 500, // Smaller chunks for better memory management
+    reportCompressedSize: false, // Skip compression reporting to save memory
     commonjsOptions: {
       include: [/node_modules/],
     },
-    assetsInlineLimit: 0,  // Never inline assets to save memory
+    assetsInlineLimit: 0, // Never inline assets to save memory
+    // Additional memory optimizations
+    emptyOutDir: true,
   },
   // Strip all console calls and debugger statements from production builds
   esbuild: mode === 'production' ? { 
@@ -143,16 +173,24 @@ export default defineConfig(({ mode }) => ({
       'react',
       'react-dom',
       'react-router-dom',
-      '@chakra-ui/react',
-      '@heroicons/react/24/outline',
-      '@heroicons/react/24/solid',
-      '@tanstack/react-query',
-      'lodash',
-      'date-fns',
+      'react-fast-compare', // Fix ES module import issue
+      'void-elements', // Fix ES module import issue with html-parse-stringify
+      'html-parse-stringify', // Fix ES module import issue
+      'fast-json-stable-stringify', // Prevent potential CommonJS issues
     ],
     exclude: [
-      '@tanstack/react-query-devtools', // Exclude dev tools from production
+      // Exclude heavy libraries to reduce memory usage during build
+      '@tanstack/react-query-devtools',
+      'react-syntax-highlighter',
+      'leaflet',
+      'react-leaflet',
+      'react-leaflet-cluster',
+      // Note: Removed i18next packages from exclusion to fix module issues
+      'framer-motion', // Heavy animation library
+      'react-color', // Color picker with many dependencies
     ],
+    // Force dependency optimization for memory efficiency
+    force: mode === 'production',
   },
   css: {
     devSourcemap: false,

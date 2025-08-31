@@ -8,8 +8,9 @@
     "dev:5173": "vite --port 5173",
     "dev:5174": "vite --port 5174",
     "dev:5175": "vite --port 5175",
-    "build": "NODE_OPTIONS='--max-old-space-size=3072 --no-warnings --max-semi-space-size=32' vite build --mode production --emptyOutDir",
+    "build": "NODE_OPTIONS='--max-old-space-size=6144 --no-warnings --max-semi-space-size=64' vite build --mode production --emptyOutDir",
     "build:vercel": "npm run build",
+
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -29,9 +30,9 @@
     "i18next": "^25.3.6",
     "leaflet": "^1.9.4",
     "railway": "^2.0.17",
-    "react": "^19.1.0",
+    "react": "19.1.1",
     "react-color": "^2.19.3",
-    "react-dom": "^19.1.0",
+    "react-dom": "19.1.1",
     "react-helmet-async": "^2.0.5",
     "react-i18next": "^15.6.1",
     "react-leaflet": "^5.0.0",

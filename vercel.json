@@ -3,15 +3,16 @@
   "name": "threadtravels-frontend",
   "buildCommand": "cd frontend && node build-low-memory.js",
   "outputDirectory": "frontend/dist",
-  "installCommand": "cd frontend && npm ci --legacy-peer-deps --prefer-offline && npm install @rollup/rollup-linux-x64-gnu --save-optional",
+  "installCommand": "cd frontend && npm ci --legacy-peer-deps --prefer-offline --no-audit --no-fund && npm install @rollup/rollup-linux-x64-gnu --save-optional",
   "framework": "vite",
   "env": {
-    "NODE_OPTIONS": "--max-old-space-size=3072 --no-warnings --max-semi-space-size=32",
+    "NODE_OPTIONS": "--max-old-space-size=6144 --no-warnings --max-semi-space-size=64",
     "CI": "false",
     "GENERATE_SOURCEMAP": "false",
     "DISABLE_ESLINT_PLUGIN": "true",
     "TSC_COMPILE_ON_ERROR": "true",
-    "VITE_BUILD_CHUNK_SIZE_LIMIT": "800"
+    "VITE_BUILD_CHUNK_SIZE_LIMIT": "800",
+    "VERCEL_FORCE_NO_BUILD_CACHE": "1"
   },
   "rewrites": [
     {
