@@ -40,20 +40,24 @@ try {
   
   console.log('✅ Build completed successfully!');
   
-  // Minimal cleanup to avoid OOM
+  // Minimal cleanup to avoid OOM - but avoid touching node_modules
   console.log('🧹 Cleaning up build artifacts...');
   
   try {
-    // Only clean the most essential cache items
-    const cacheDir = path.join(__dirname, 'node_modules/.cache');
-    if (fs.existsSync(cacheDir)) {
-      fs.rmSync(cacheDir, { recursive: true, force: true });
-    }
-    
+    // Only clean standalone cache directories (not inside node_modules)
     const viteDir = path.join(__dirname, '.vite');
     if (fs.existsSync(viteDir)) {
       fs.rmSync(viteDir, { recursive: true, force: true });
     }
+    
+    // Clean any temporary build files in project root
+    const tempFiles = ['.turbo', '.parcel-cache'];
+    tempFiles.forEach(file => {
+      const filePath = path.join(__dirname, file);
+      if (fs.existsSync(filePath)) {
+        fs.rmSync(filePath, { recursive: true, force: true });
+      }
+    });
   } catch (error) {
     // Ignore cleanup errors to avoid deployment failure
     console.log('Note: Some cleanup skipped to avoid memory issues');
