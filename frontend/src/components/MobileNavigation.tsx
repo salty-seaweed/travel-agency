@@ -94,9 +94,9 @@ export function MobileNavigation({ className = '' }: MobileNavigationProps) {
             <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">T</span>
             </div>
-            <div className="flex flex-col">
+            <div className="flex flex-col items-start">
               <span className="font-semibold text-gray-900 leading-tight">Thread Travels</span>
-              <span className="text-xs text-gray-600 uppercase tracking-wide leading-tight ml-4">Travel & Tours Maldives</span>
+              <span className="text-xs text-gray-600 uppercase tracking-wide leading-tight m-0 p-0">Travel & Tours Maldives</span>
             </div>
           </Link>
 
