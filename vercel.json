@@ -3,7 +3,6 @@
   "buildCommand": "cd frontend && npm run build",
   "outputDirectory": "frontend/dist",
   "installCommand": "cd frontend && npm ci --legacy-peer-deps",
-  "nodeVersion": "20.19.3",
   "env": {
     "NODE_OPTIONS": "--max-old-space-size=6144",
     "CI": "true"
