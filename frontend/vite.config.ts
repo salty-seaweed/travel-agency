@@ -178,17 +178,9 @@ export default defineConfig(({ mode }) => ({
       'html-parse-stringify', // Fix ES module import issue
       'fast-json-stable-stringify', // Prevent potential CommonJS issues
     ],
-    exclude: [
-      // Exclude heavy libraries to reduce memory usage during build
-      '@tanstack/react-query-devtools',
-      'react-syntax-highlighter',
-      'leaflet',
-      'react-leaflet',
-      'react-leaflet-cluster',
-      // Note: Removed i18next packages from exclusion to fix module issues
-      'framer-motion', // Heavy animation library
-      'react-color', // Color picker with many dependencies
-    ],
+         exclude: [
+       '@tanstack/react-query-devtools', // Exclude dev tools from production
+     ],
     // Force dependency optimization for memory efficiency
     force: mode === 'production',
   },
