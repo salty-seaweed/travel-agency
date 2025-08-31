@@ -3,7 +3,7 @@
   "name": "threadtravels-frontend",
   "buildCommand": "cd frontend && node build-low-memory.js",
   "outputDirectory": "frontend/dist",
-  "installCommand": "cd frontend && npm ci --legacy-peer-deps --no-optional --prefer-offline --production=false",
+  "installCommand": "cd frontend && npm ci --legacy-peer-deps --prefer-offline && npm install @rollup/rollup-linux-x64-gnu --save-optional",
   "framework": "vite",
   "env": {
     "NODE_OPTIONS": "--max-old-space-size=3072 --no-warnings --max-semi-space-size=32",

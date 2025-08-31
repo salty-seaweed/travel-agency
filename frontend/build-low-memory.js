@@ -15,6 +15,9 @@ console.log('🔧 Starting low-memory build process...');
 // Set aggressive memory limits
 process.env.NODE_OPTIONS = '--max-old-space-size=3072 --no-warnings --max-semi-space-size=32';
 
+// Ensure rollup native module is available
+console.log('🔍 Ensuring Rollup native dependencies...');
+
 // Clean dist directory
 const distPath = path.join(__dirname, 'dist');
 if (fs.existsSync(distPath)) {
