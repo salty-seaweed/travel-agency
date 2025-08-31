@@ -6,7 +6,15 @@ import sys
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travel_agency.settings')
+    # Use settings_minimal for Railway production, regular settings for development
+    if os.environ.get('RAILWAY_ENVIRONMENT_NAME') or os.environ.get('PORT'):
+        settings_module = 'travel_agency.settings_minimal'
+        print(f"🚂 MANAGE: Railway detected, using {settings_module}")
+        os.environ.setdefault('DJANGO_SETTINGS_MODULE', settings_module)
+    else:
+        settings_module = 'travel_agency.settings'
+        print(f"💻 MANAGE: Development environment, using {settings_module}")
+        os.environ.setdefault('DJANGO_SETTINGS_MODULE', settings_module)
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
