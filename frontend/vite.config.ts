@@ -79,7 +79,7 @@ export default defineConfig(({ mode }) => ({
           'react-query': ['@tanstack/react-query'],
           
           // Utilities
-          'utils': ['lodash', 'date-fns'],
+          'utils': ['lodash'],
           
           // Maps and location
           'maps': ['leaflet', 'react-leaflet', 'react-leaflet-cluster'],
