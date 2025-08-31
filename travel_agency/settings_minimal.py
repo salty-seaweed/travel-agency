@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'api',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -119,20 +120,64 @@ STATICFILES_FINDERS = [
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# CORS
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS settings for production
+CORS_ALLOWED_ORIGINS = [
+    "https://threadtravels.com",
+    "https://www.threadtravels.com", 
+    "https://threadtravels.vercel.app",
+    os.getenv('FRONTEND_URL', 'https://threadtravels.com'),
+]
 
-# REST Framework
+CORS_ALLOW_CREDENTIALS = True
+CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']
+
+# Fallback for development - allow all origins if no specific frontend URL
+if not os.getenv('FRONTEND_URL'):
+    CORS_ALLOW_ALL_ORIGINS = True
+
+# REST Framework configuration for production
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ),
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
     ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '100/hour',
+        'user': '1000/hour'
+    },
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
     ],
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 20,
 }
+
+# JWT configuration
+from datetime import timedelta
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'TOKEN_TYPE_CLAIM': 'token_type',
+}
+
+# Static files configuration for production
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Media files configuration
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 print("🚀 Minimal Django settings loaded successfully!")
 print(f"🔧 PORT environment variable: {os.getenv('PORT', 'NOT SET')}")
@@ -141,3 +186,6 @@ print(f"🔧 PORT environment variable: {os.getenv('PORT', 'NOT SET')}")
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 USE_X_FORWARDED_HOST = True
 USE_X_FORWARDED_PORT = True
+
+# Additional security headers
+X_FRAME_OPTIONS = 'DENY'
