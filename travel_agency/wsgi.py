@@ -8,9 +8,21 @@ https://docs.djangoproject.com/en/5.2/howto/deployment/wsgi/
 """
 
 import os
+import sys
+
+print("🔧 WSGI: Starting WSGI application...")
+print(f"🔧 WSGI: DJANGO_SETTINGS_MODULE = {os.environ.get('DJANGO_SETTINGS_MODULE', 'NOT SET')}")
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travel_agency.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travel_agency.settings_minimal')
 
-application = get_wsgi_application()
+print("🔧 WSGI: About to create WSGI application...")
+try:
+    application = get_wsgi_application()
+    print("✅ WSGI: WSGI application created successfully!")
+except Exception as e:
+    print(f"❌ WSGI: Error creating WSGI application: {e}")
+    import traceback
+    traceback.print_exc()
+    sys.exit(1)
