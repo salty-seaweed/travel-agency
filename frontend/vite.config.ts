@@ -11,31 +11,44 @@ export default defineConfig(({ mode }) => ({
     })
   ],
   
-  // Optimize for memory usage
+  // Extreme memory optimization for Vercel
   build: {
     target: 'esnext',
     minify: 'esbuild',
     rollupOptions: {
-      // Reduce memory usage during build
-      maxParallelFileOps: 1,  // Reduced from 2 to 1
+      // Minimize memory usage
+      maxParallelFileOps: 1,
       cache: false,
       output: {
-        // Split chunks more aggressively to reduce memory
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          chakra: ['@chakra-ui/react', '@emotion/react', '@emotion/styled'],
-          routing: ['react-router-dom'],
-          query: ['@tanstack/react-query'],
+        // Very aggressive chunking to reduce memory per chunk
+        manualChunks: (id) => {
+          // Split into very small chunks
+          if (id.includes('node_modules')) {
+            if (id.includes('react')) return 'react-vendor';
+            if (id.includes('@chakra-ui')) return 'chakra-vendor';
+            if (id.includes('@emotion')) return 'emotion-vendor';
+            if (id.includes('framer-motion')) return 'framer-vendor';
+            if (id.includes('@tanstack')) return 'query-vendor';
+            if (id.includes('react-router')) return 'router-vendor';
+            return 'vendor';
+          }
+          // Split source code by directory
+          if (id.includes('src/components/admin')) return 'admin';
+          if (id.includes('src/components/experiences')) return 'experiences';
+          if (id.includes('src/components/package')) return 'package';
+          if (id.includes('src/components/transportation')) return 'transport';
+          if (id.includes('src/services')) return 'services';
+          if (id.includes('src/hooks')) return 'hooks';
         },
-        // Smaller chunk sizes
         chunkFileNames: 'js/[name]-[hash].js',
         entryFileNames: 'js/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]'
       }
     },
-    chunkSizeWarningLimit: 500,  // Reduced from 1000 to 500
-    // Reduce concurrent processing
-    assetsInlineLimit: 0,  // Don't inline any assets
+    chunkSizeWarningLimit: 300,  // Very small chunks
+    assetsInlineLimit: 0,  // Never inline assets
+    reportCompressedSize: false,  // Skip size reporting to save memory
+    sourcemap: false,  // No source maps
   },
   server: {
     host: '0.0.0.0',

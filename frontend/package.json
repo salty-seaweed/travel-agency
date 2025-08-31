@@ -8,7 +8,7 @@
     "dev:5173": "vite --port 5173",
     "dev:5174": "vite --port 5174",
     "dev:5175": "vite --port 5175",
-    "build": "NODE_OPTIONS='--max-old-space-size=4096 --no-warnings' vite build --mode production --emptyOutDir",
+    "build": "NODE_OPTIONS='--max-old-space-size=3072 --no-warnings --max-semi-space-size=32 --optimize-for-size' vite build --mode production --emptyOutDir",
     "build:vercel": "npm run build",
     "lint": "eslint .",
     "preview": "vite preview"
