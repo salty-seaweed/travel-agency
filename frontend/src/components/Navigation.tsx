@@ -157,7 +157,7 @@ export const Navigation = React.memo(() => {
                   <VStack align="start" ml={1} spacing={0}>
                     <Text
                       fontSize={{ base: "lg", md: "2xl", lg: "3xl" }}
-                      fontWeight="extrabold"
+                      fontWeight="bold"
                       bgGradient="linear(to-r, blue.600, purple.600)"
                       bgClip="text"
                       lineHeight="0.9"
@@ -173,7 +173,7 @@ export const Navigation = React.memo(() => {
                       letterSpacing="wide"
                       textTransform="uppercase"
                     >
-                      & Tours
+                      TRAVEL & TOURS MALDIVES
                     </Text>
                   </VStack>
                   </Flex>
