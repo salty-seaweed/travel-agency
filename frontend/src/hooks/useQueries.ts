@@ -319,7 +319,7 @@ export const useCreateProperty = () => {
   return useMutation({
     mutationFn: (data: PropertyFormData) => unifiedApi.properties.create(data),
     onSuccess: () => {
-      invalidateQueries.properties();
+      queryClient.invalidateQueries({ queryKey: queryKeys.properties.all });
     },
     onError: (error) => {
       console.error('Failed to create property:', error);
@@ -349,7 +349,7 @@ export const useDeleteProperty = () => {
   return useMutation({
     mutationFn: (id: number) => unifiedApi.properties.delete(id),
     onSuccess: () => {
-      invalidateQueries.properties();
+      queryClient.invalidateQueries({ queryKey: queryKeys.properties.all });
     },
     onError: (error) => {
       console.error('Failed to delete property:', error);
@@ -363,7 +363,7 @@ export const useCreatePackage = () => {
   return useMutation({
     mutationFn: (data: PackageFormData) => unifiedApi.packages.create(data),
     onSuccess: () => {
-      invalidateQueries.packages();
+      queryClient.invalidateQueries({ queryKey: queryKeys.packages.all });
     },
     onError: (error) => {
       console.error('Failed to create package:', error);
@@ -393,7 +393,7 @@ export const useDeletePackage = () => {
   return useMutation({
     mutationFn: (id: number) => unifiedApi.packages.delete(id),
     onSuccess: () => {
-      invalidateQueries.packages();
+      queryClient.invalidateQueries({ queryKey: queryKeys.packages.all });
     },
     onError: (error) => {
       console.error('Failed to delete package:', error);
@@ -423,7 +423,7 @@ export const useApproveReview = () => {
   return useMutation({
     mutationFn: (id: number) => unifiedApi.reviews.approve(id),
     onSuccess: () => {
-      invalidateQueries.reviews();
+      queryClient.invalidateQueries({ queryKey: queryKeys.reviews.all });
     },
     onError: (error) => {
       console.error('Failed to approve review:', error);
@@ -437,7 +437,7 @@ export const useDeleteReview = () => {
   return useMutation({
     mutationFn: (id: number) => unifiedApi.reviews.delete(id),
     onSuccess: () => {
-      invalidateQueries.reviews();
+      queryClient.invalidateQueries({ queryKey: queryKeys.reviews.all });
     },
     onError: (error) => {
       console.error('Failed to delete review:', error);
@@ -494,7 +494,7 @@ export const useOptimisticFavorite = () => {
     },
     onSettled: () => {
       // Always refetch after error or success
-      invalidateQueries.properties();
+      queryClient.invalidateQueries({ queryKey: queryKeys.properties.all });
     },
   });
 };
