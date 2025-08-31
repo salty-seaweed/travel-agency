@@ -10,7 +10,15 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-minimal-test-key')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    'threadtravels.com',
+    'www.threadtravels.com',
+    '.railway.app',
+    '.up.railway.app',
+    'web-production-a324.up.railway.app',
+    os.getenv('BACKEND_URL', '').replace('https://', '').replace('http://', ''),
+    '*',  # Allow all for now during development
+]
 
 # Application definition
 INSTALLED_APPS = [
@@ -30,6 +38,7 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'api.middleware.MobileCompatibilityMiddleware',  # Mobile support
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -84,6 +93,7 @@ else:
                 'PASSWORD': os.getenv('PGPASSWORD'),
                 'HOST': os.getenv('PGHOST'),
                 'PORT': os.getenv('PGPORT', '5432'),
+                'CONN_MAX_AGE': 600,  # Connection pooling for performance
                 'OPTIONS': {
                     'sslmode': 'require',
                 },
@@ -99,6 +109,22 @@ else:
                 'NAME': BASE_DIR / 'db.sqlite3',
             }
         }
+
+# Password validation
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+]
 
 # Internationalization
 LANGUAGE_CODE = 'en-us'
@@ -186,6 +212,20 @@ print(f"🔧 PORT environment variable: {os.getenv('PORT', 'NOT SET')}")
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 USE_X_FORWARDED_HOST = True
 USE_X_FORWARDED_PORT = True
+
+# Security settings for production
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+SECURE_HSTS_SECONDS = 31536000  # 1 year
+SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+
+# Session configuration for security
+SESSION_COOKIE_AGE = 86400  # 24 hours
+SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
 
 # Additional security headers
 X_FRAME_OPTIONS = 'DENY'
