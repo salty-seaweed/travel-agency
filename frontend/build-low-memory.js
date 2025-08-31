@@ -40,20 +40,24 @@ try {
   
   console.log('✅ Build completed successfully!');
   
-  // Clean up unnecessary files to reduce deployment size
+  // Minimal cleanup to avoid OOM
   console.log('🧹 Cleaning up build artifacts...');
-  const distFiles = fs.readdirSync(distPath, { recursive: true });
   
-  // Remove source map files if any
-  distFiles.forEach(file => {
-    if (typeof file === 'string' && file.endsWith('.map')) {
-      const mapPath = path.join(distPath, file);
-      if (fs.existsSync(mapPath)) {
-        fs.unlinkSync(mapPath);
-        console.log(`   Removed: ${file}`);
-      }
+  try {
+    // Only clean the most essential cache items
+    const cacheDir = path.join(__dirname, 'node_modules/.cache');
+    if (fs.existsSync(cacheDir)) {
+      fs.rmSync(cacheDir, { recursive: true, force: true });
     }
-  });
+    
+    const viteDir = path.join(__dirname, '.vite');
+    if (fs.existsSync(viteDir)) {
+      fs.rmSync(viteDir, { recursive: true, force: true });
+    }
+  } catch (error) {
+    // Ignore cleanup errors to avoid deployment failure
+    console.log('Note: Some cleanup skipped to avoid memory issues');
+  }
   
   console.log('✅ Build cleanup completed!');
   

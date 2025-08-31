@@ -11,33 +11,7 @@ export default defineConfig(({ mode }) => ({
     })
   ],
   
-  // Extreme memory optimization for Vercel
-  build: {
-    target: 'esnext',
-    minify: 'esbuild',
-    rollupOptions: {
-      // Minimize memory usage
-      maxParallelFileOps: 1,
-      cache: false,
-      output: {
-        // Balanced chunking - fewer files but still memory efficient
-        manualChunks: {
-          // Group related vendors together
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'ui-vendor': ['@chakra-ui/react', '@emotion/react', '@emotion/styled', 'framer-motion'],
-          'data-vendor': ['@tanstack/react-query'],
-          // Don't split app code too much to reduce file count
-        },
-        chunkFileNames: 'js/[name]-[hash].js',
-        entryFileNames: 'js/[name]-[hash].js',
-        assetFileNames: 'assets/[name]-[hash].[ext]'
-      }
-    },
-    chunkSizeWarningLimit: 800,  // Balanced chunk size
-    assetsInlineLimit: 0,  // Never inline assets
-    reportCompressedSize: false,  // Skip size reporting to save memory
-    sourcemap: false,  // No source maps
-  },
+
   server: {
     host: '0.0.0.0',
     port: 5174,
@@ -91,6 +65,9 @@ export default defineConfig(({ mode }) => ({
     target: 'es2015',
     cssTarget: 'chrome80',
     rollupOptions: {
+      // Minimize memory usage
+      maxParallelFileOps: 1,
+      cache: false,
       output: {
         manualChunks: {
           // Core React libraries
@@ -122,10 +99,7 @@ export default defineConfig(({ mode }) => ({
           // SEO and meta
           'seo': ['react-helmet-async'],
         },
-        chunkFileNames: (chunkInfo) => {
-          const facadeModuleId = chunkInfo.facadeModuleId ? chunkInfo.facadeModuleId.split('/').pop() : 'chunk';
-          return `assets/js/[name]-[hash].js`;
-        },
+        chunkFileNames: 'assets/js/[name]-[hash].js',
         entryFileNames: 'assets/js/[name]-[hash].js',
         assetFileNames: (assetInfo) => {
           if (!assetInfo.name) return `assets/[ext]/[name]-[hash].[ext]`;
@@ -141,13 +115,14 @@ export default defineConfig(({ mode }) => ({
         },
       },
     },
-    chunkSizeWarningLimit: 1000,
-    // Enable compression for production builds
-    reportCompressedSize: true,
+    chunkSizeWarningLimit: 800,
+    // Skip compression reporting to save memory
+    reportCompressedSize: false,
     // Optimize dependencies
     commonjsOptions: {
       include: [/node_modules/],
     },
+    assetsInlineLimit: 0,  // Never inline assets to save memory
   },
   // Strip all console calls and debugger statements from production builds
   esbuild: mode === 'production' ? { 
