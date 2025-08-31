@@ -26,15 +26,20 @@ if (fs.existsSync(distPath)) {
 }
 
 try {
-  // Run Vite build with memory optimizations
-  console.log('⚡ Building with Vite (memory optimized)...');
+  // Set timeout to prevent infinite hangs
+  const buildTimeout = 600000; // 10 minutes max
+  
+  // Run Vite build with memory optimizations and timeout
+  console.log('⚡ Building with Vite (memory optimized, 10min timeout)...');
   execSync('npx vite build --mode production --emptyOutDir', {
     stdio: 'inherit',
     cwd: __dirname,
+    timeout: buildTimeout,
     env: {
       ...process.env,
       NODE_OPTIONS: '--max-old-space-size=6144 --no-warnings --max-semi-space-size=64',
-      VITE_BUILD_CHUNK_SIZE_LIMIT: '800'
+      VITE_BUILD_CHUNK_SIZE_LIMIT: '800',
+      CI: 'true'
     }
   });
   
@@ -67,5 +72,27 @@ try {
   
 } catch (error) {
   console.error('❌ Build failed:', error.message);
-  process.exit(1);
+  
+  // If it's a timeout error, try a simpler build
+  if (error.signal === 'SIGTERM' || error.message.includes('timeout')) {
+    console.log('⚠️  Build timed out, trying fallback build...');
+    try {
+      execSync('npx vite build --mode production --emptyOutDir --minify false', {
+        stdio: 'inherit',
+        cwd: __dirname,
+        timeout: 300000, // 5 minutes for fallback
+        env: {
+          ...process.env,
+          NODE_OPTIONS: '--max-old-space-size=4096',
+          VITE_BUILD_CHUNK_SIZE_LIMIT: '1000'
+        }
+      });
+      console.log('✅ Fallback build completed successfully!');
+    } catch (fallbackError) {
+      console.error('❌ Fallback build also failed:', fallbackError.message);
+      process.exit(1);
+    }
+  } else {
+    process.exit(1);
+  }
 }

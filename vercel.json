@@ -1,18 +1,33 @@
 {
   "version": 2,
   "name": "threadtravels-frontend",
-  "buildCommand": "cd frontend && node build-low-memory.js",
+  "buildCommand": "cd frontend && timeout 600 node build-low-memory.js",
   "outputDirectory": "frontend/dist",
-  "installCommand": "cd frontend && npm ci --legacy-peer-deps --prefer-offline --no-audit --no-fund --ignore-scripts && npm install @rollup/rollup-linux-x64-gnu --save-optional",
+  "installCommand": "cd frontend && timeout 300 npm ci --legacy-peer-deps --prefer-offline --no-audit --no-fund --ignore-scripts --frozen-lockfile --production=false",
   "framework": "vite",
+  "functions": {
+    "frontend/dist/**": {
+      "maxDuration": 10
+    }
+  },
+  "builds": [
+    {
+      "src": "frontend/dist/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "regions": ["iad1"],
   "env": {
     "NODE_OPTIONS": "--max-old-space-size=6144 --no-warnings --max-semi-space-size=64",
-    "CI": "false",
+    "CI": "true",
     "GENERATE_SOURCEMAP": "false",
     "DISABLE_ESLINT_PLUGIN": "true",
     "TSC_COMPILE_ON_ERROR": "true",
     "VITE_BUILD_CHUNK_SIZE_LIMIT": "800",
-    "VERCEL_FORCE_NO_BUILD_CACHE": "1"
+    "VERCEL_FORCE_NO_BUILD_CACHE": "1",
+    "NPM_CONFIG_PRODUCTION": "false",
+    "NPM_CONFIG_OPTIONAL": "false",
+    "NPM_CONFIG_CACHE": "/tmp/.npm"
   },
   "rewrites": [
     {

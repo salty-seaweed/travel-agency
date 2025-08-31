@@ -1,0 +1,168 @@
+[1mdiff --git a/frontend/.npmrc b/frontend/.npmrc[m
+[1mindex cc38359..86642a8 100644[m
+[1m--- a/frontend/.npmrc[m
+[1m+++ b/frontend/.npmrc[m
+[36m@@ -1,2 +1,17 @@[m
+[31m-legacy-peer-deps=true[m
+[32m+[m[32m# Optimize npm for Vercel builds[m
+ fund=false[m
+[32m+[m[32maudit=false[m
+[32m+[m[32msave-exact=true[m
+[32m+[m[32mprefer-offline=true[m
+[32m+[m[32mcache=/tmp/.npm[m
+[32m+[m[32mprogress=false[m
+[32m+[m[32mloglevel=warn[m
+[32m+[m[32moptional=false[m
+[32m+[m[32msave-dev=false[m
+[32m+[m[32mlegacy-peer-deps=true[m
+[32m+[m[32mengine-strict=false[m
+[32m+[m[32mfetch-retries=3[m
+[32m+[m[32mfetch-retry-mintimeout=10000[m
+[32m+[m[32mfetch-retry-maxtimeout=60000[m
+[32m+[m[32m# Keep package-lock for reproducible builds[m
+[32m+[m[32mpackage-lock=true[m
+\ No newline at end of file[m
+[1mdiff --git a/frontend/.vercelignore b/frontend/.vercelignore[m
+[1mindex f1edd05..8cb5e48 100644[m
+[1m--- a/frontend/.vercelignore[m
+[1m+++ b/frontend/.vercelignore[m
+[36m@@ -10,11 +10,24 @@[m [mcoverage/[m
+ build/[m
+ dist/[m
+ [m
+[31m-# Lock files that can cause deployment delays[m
+[31m-package-lock.json[m
+[32m+[m[32m# Keep package-lock.json for faster, consistent installs[m
+ pnpm-lock.yaml[m
+ yarn.lock[m
+ .pnpm-lock.yaml[m
+[32m+[m[32m.yarnclean[m
+[32m+[m
+[32m+[m[32m# Large dependency files that can cause issues[m
+[32m+[m[32m**/node_modules/**/test/[m
+[32m+[m[32m**/node_modules/**/tests/[m
+[32m+[m[32m**/node_modules/**/*.test.js[m
+[32m+[m[32m**/node_modules/**/*.spec.js[m
+[32m+[m[32m**/node_modules/**/coverage/[m
+[32m+[m[32m**/node_modules/**/.nyc_output/[m
+[32m+[m[32m**/node_modules/**/docs/[m
+[32m+[m[32m**/node_modules/**/doc/[m
+[32m+[m[32m**/node_modules/**/README*[m
+[32m+[m[32m**/node_modules/**/CHANGELOG*[m
+[32m+[m[32m**/node_modules/**/*.md[m
+ [m
+ # Cache and temporary files[m
+ .cache/[m
+[1mdiff --git a/frontend/build-low-memory.js b/frontend/build-low-memory.js[m
+[1mindex 49c7cc9..a2e9840 100644[m
+[1m--- a/frontend/build-low-memory.js[m
+[1m+++ b/frontend/build-low-memory.js[m
+[36m@@ -26,15 +26,20 @@[m [mif (fs.existsSync(distPath)) {[m
+ }[m
+ [m
+ try {[m
+[31m-  // Run Vite build with memory optimizations[m
+[31m-  console.log('⚡ Building with Vite (memory optimized)...');[m
+[32m+[m[32m  // Set timeout to prevent infinite hangs[m
+[32m+[m[32m  const buildTimeout = 600000; // 10 minutes max[m
+[32m+[m[41m  [m
+[32m+[m[32m  // Run Vite build with memory optimizations and timeout[m
+[32m+[m[32m  console.log('⚡ Building with Vite (memory optimized, 10min timeout)...');[m
+   execSync('npx vite build --mode production --emptyOutDir', {[m
+     stdio: 'inherit',[m
+     cwd: __dirname,[m
+[32m+[m[32m    timeout: buildTimeout,[m
+     env: {[m
+       ...process.env,[m
+       NODE_OPTIONS: '--max-old-space-size=6144 --no-warnings --max-semi-space-size=64',[m
+[31m-      VITE_BUILD_CHUNK_SIZE_LIMIT: '800'[m
+[32m+[m[32m      VITE_BUILD_CHUNK_SIZE_LIMIT: '800',[m
+[32m+[m[32m      CI: 'true'[m
+     }[m
+   });[m
+   [m
+[36m@@ -67,5 +72,27 @@[m [mtry {[m
+   [m
+ } catch (error) {[m
+   console.error('❌ Build failed:', error.message);[m
+[31m-  process.exit(1);[m
+[32m+[m[41m  [m
+[32m+[m[32m  // If it's a timeout error, try a simpler build[m
+[32m+[m[32m  if (error.signal === 'SIGTERM' || error.message.includes('timeout')) {[m
+[32m+[m[32m    console.log('⚠️  Build timed out, trying fallback build...');[m
+[32m+[m[32m    try {[m
+[32m+[m[32m      execSync('npx vite build --mode production --emptyOutDir --minify false', {[m
+[32m+[m[32m        stdio: 'inherit',[m
+[32m+[m[32m        cwd: __dirname,[m
+[32m+[m[32m        timeout: 300000, // 5 minutes for fallback[m
+[32m+[m[32m        env: {[m
+[32m+[m[32m          ...process.env,[m
+[32m+[m[32m          NODE_OPTIONS: '--max-old-space-size=4096',[m
+[32m+[m[32m          VITE_BUILD_CHUNK_SIZE_LIMIT: '1000'[m
+[32m+[m[32m        }[m
+[32m+[m[32m      });[m
+[32m+[m[32m      console.log('✅ Fallback build completed successfully!');[m
+[32m+[m[32m    } catch (fallbackError) {[m
+[32m+[m[32m      console.error('❌ Fallback build also failed:', fallbackError.message);[m
+[32m+[m[32m      process.exit(1);[m
+[32m+[m[32m    }[m
+[32m+[m[32m  } else {[m
+[32m+[m[32m    process.exit(1);[m
+[32m+[m[32m  }[m
+ }[m
+[1mdiff --git a/frontend/package.json b/frontend/package.json[m
+[1mindex 87f9e84..e5eb257 100644[m
+[1m--- a/frontend/package.json[m
+[1m+++ b/frontend/package.json[m
+[36m@@ -9,7 +9,8 @@[m
+     "dev:5174": "vite --port 5174",[m
+     "dev:5175": "vite --port 5175",[m
+     "build": "NODE_OPTIONS='--max-old-space-size=6144 --no-warnings --max-semi-space-size=64' vite build --mode production --emptyOutDir",[m
+[31m-    "build:vercel": "npm run build",[m
+[32m+[m[32m    "build:vercel": "node build-low-memory.js",[m
+[32m+[m[32m    "build:fast": "NODE_OPTIONS='--max-old-space-size=4096' vite build --mode production --emptyOutDir --minify false",[m
+ [m
+     "lint": "eslint .",[m
+     "preview": "vite preview"[m
+[1mdiff --git a/vercel.json b/vercel.json[m
+[1mindex 614a35a..ee5936c 100644[m
+[1m--- a/vercel.json[m
+[1m+++ b/vercel.json[m
+[36m@@ -1,18 +1,33 @@[m
+ {[m
+   "version": 2,[m
+   "name": "threadtravels-frontend",[m
+[31m-  "buildCommand": "cd frontend && node build-low-memory.js",[m
+[32m+[m[32m  "buildCommand": "cd frontend && timeout 600 node build-low-memory.js",[m
+   "outputDirectory": "frontend/dist",[m
+[31m-  "installCommand": "cd frontend && npm ci --legacy-peer-deps --prefer-offline --no-audit --no-fund --ignore-scripts && npm install @rollup/rollup-linux-x64-gnu --save-optional",[m
+[32m+[m[32m  "installCommand": "cd frontend && timeout 300 npm ci --legacy-peer-deps --prefer-offline --no-audit --no-fund --ignore-scripts --frozen-lockfile --production=false",[m
+   "framework": "vite",[m
+[32m+[m[32m  "functions": {[m
+[32m+[m[32m    "frontend/dist/**": {[m
+[32m+[m[32m      "maxDuration": 10[m
+[32m+[m[32m    }[m
+[32m+[m[32m  },[m
+[32m+[m[32m  "builds": [[m
+[32m+[m[32m    {[m
+[32m+[m[32m      "src": "frontend/dist/**",[m
+[32m+[m[32m      "use": "@vercel/static"[m
+[32m+[m[32m    }[m
+[32m+[m[32m  ],[m
+[32m+[m[32m  "regions": ["iad1"],[m
+   "env": {[m
+     "NODE_OPTIONS": "--max-old-space-size=6144 --no-warnings --max-semi-space-size=64",[m
+[31m-    "CI": "false",[m
+[32m+[m[32m    "CI": "true",[m
+     "GENERATE_SOURCEMAP": "false",[m
+     "DISABLE_ESLINT_PLUGIN": "true",[m
+     "TSC_COMPILE_ON_ERROR": "true",[m
+     "VITE_BUILD_CHUNK_SIZE_LIMIT": "800",[m
+[31m-    "VERCEL_FORCE_NO_BUILD_CACHE": "1"[m
+[32m+[m[32m    "VERCEL_FORCE_NO_BUILD_CACHE": "1",[m
+[32m+[m[32m    "NPM_CONFIG_PRODUCTION": "false",[m
+[32m+[m[32m    "NPM_CONFIG_OPTIONAL": "false",[m
+[32m+[m[32m    "NPM_CONFIG_CACHE": "/tmp/.npm"[m
+   },[m
+   "rewrites": [[m
+     {[m

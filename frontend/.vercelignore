@@ -10,11 +10,24 @@ coverage/
 build/
 dist/
 
-# Lock files that can cause deployment delays
-package-lock.json
+# Keep package-lock.json for faster, consistent installs
 pnpm-lock.yaml
 yarn.lock
 .pnpm-lock.yaml
+.yarnclean
+
+# Large dependency files that can cause issues
+**/node_modules/**/test/
+**/node_modules/**/tests/
+**/node_modules/**/*.test.js
+**/node_modules/**/*.spec.js
+**/node_modules/**/coverage/
+**/node_modules/**/.nyc_output/
+**/node_modules/**/docs/
+**/node_modules/**/doc/
+**/node_modules/**/README*
+**/node_modules/**/CHANGELOG*
+**/node_modules/**/*.md
 
 # Cache and temporary files
 .cache/
