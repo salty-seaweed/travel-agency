@@ -637,7 +637,13 @@ export const usePageHero = (pageKey: string) => {
       const res = await fetch(`/api/page-heroes/?page_key=${encodeURIComponent(pageKey)}&active=true`);
       if (!res.ok) throw new Error('Failed to fetch page hero');
       const data = await res.json();
-      return Array.isArray(data) ? data[0] : null;
+      console.log('usePageHero API response:', data);
+      
+      // Handle paginated response format
+      const heroes = data.results || data;
+      const hero = Array.isArray(heroes) ? heroes[0] : null;
+      console.log('usePageHero returning:', hero);
+      return hero;
     },
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,

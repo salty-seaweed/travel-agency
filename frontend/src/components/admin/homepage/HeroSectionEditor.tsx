@@ -108,11 +108,25 @@ export const HeroSectionEditor: React.FC<HeroSectionEditorProps> = ({ data, onCh
     try {
       const formData = new FormData();
       formData.append('image', file);
-      formData.append('title', 'Hero Background Image');
-      formData.append('alt_text', 'Hero section background image');
-      formData.append('image_type', 'hero');
+      formData.append('title', heroData.title || 'Hero Background Image');
+      formData.append('alt_text', heroData.subtitle || 'Hero section background image');
+      formData.append('image_type', 'hero');  // Must be one of: hero, feature, testimonial, gallery
+      formData.append('order', '0');
+      formData.append('is_active', 'true');
 
       const token = localStorage.getItem('access');
+      
+      // Debug logging
+      console.log('Uploading image with data:', {
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
+        title: heroData.title || 'Hero Background Image',
+        alt_text: heroData.subtitle || 'Hero section background image',
+        image_type: 'hero',
+        token: token ? 'Present' : 'Missing'
+      });
+      
       const response = await fetch('http://localhost:8001/api/homepage/images/', {
         method: 'POST',
         headers: {
@@ -141,7 +155,9 @@ export const HeroSectionEditor: React.FC<HeroSectionEditorProps> = ({ data, onCh
           isClosable: true,
         });
       } else {
-        throw new Error('Upload failed');
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        console.error('Upload error:', errorData);
+        throw new Error(errorData.error || errorData.message || `HTTP ${response.status}`);
       }
     } catch (error) {
       toast({

@@ -20,7 +20,7 @@ import {
   CurrencyDollarIcon,
   MapPinIcon
 } from '@heroicons/react/24/outline';
-import { usePackages, useDestinations, useFeaturedExperiences, useWhatsApp } from '../hooks/useQueries';
+import { usePackages, useDestinations, useFeaturedExperiences, useWhatsApp, usePageHero } from '../hooks/useQueries';
 import { LoadingSpinner } from './LoadingSpinner';
 import { PackageCard } from './ui/PackageCard';
 import type { Package as ApiPackage } from '../types';
@@ -124,6 +124,7 @@ export function PackagesPage() {
   const { data: apiPackages, isLoading: packagesLoading, error: packagesError } = usePackages();
   const { data: destinations } = useDestinations();
   const { data: featuredExperiences } = useFeaturedExperiences();
+  const { data: hero } = usePageHero('packages');
   const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -346,8 +347,8 @@ Can you help me finalize this package?`;
         {/* Background Images */}
         <Box position="absolute" top={0} left={0} right={0} bottom={0}>
           <Image 
-            src="/src/assets/images/ishan111.jpg" 
-            alt="Maldives Background"
+            src={hero?.image_url || "/src/assets/images/ishan111.jpg"} 
+            alt={hero?.title || "Maldives Background"}
             w="full" 
             h="full" 
             objectFit="cover" 
@@ -365,11 +366,11 @@ Can you help me finalize this package?`;
             </Badge>
             
             <Heading size="xl" className="text-4xl md:text-5xl font-bold text-white">
-              🌟 {t('packages.hero.title', 'Travel Packages & Experiences')}
+              {hero?.title || t('packages.hero.title', 'Travel Packages & Experiences')}
             </Heading>
             
             <Text className="text-lg text-blue-100 max-w-3xl mx-auto leading-relaxed">
-              {t('packages.hero.subtitle', 'Choose from our curated packages or create your own custom experience. From luxury getaways to adventure packages, find your perfect journey or design it yourself.')}
+              {hero?.subtitle || t('packages.hero.subtitle', 'Choose from our curated packages or create your own custom experience. From luxury getaways to adventure packages, find your perfect journey or design it yourself.')}
             </Text>
 
             {/* Quick Stats */}

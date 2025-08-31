@@ -37,6 +37,7 @@ import {
   AlertIcon,
   Spinner,
 } from '@chakra-ui/react';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   PhotoIcon,
   PencilIcon,
@@ -82,6 +83,7 @@ export const PageHeroManager: React.FC<PageHeroManagerProps> = ({ isOpen, onClos
   const [uploadProgress, setUploadProgress] = useState(0);
   const [imagePreview, setImagePreview] = useState<string>('');
   const toast = useToast();
+  const queryClient = useQueryClient();
   
   const { isOpen: isEditModalOpen, onOpen: onEditModalOpen, onClose: onEditModalClose } = useDisclosure();
 
@@ -151,7 +153,9 @@ export const PageHeroManager: React.FC<PageHeroManagerProps> = ({ isOpen, onClos
       formData.append('image', file);
       formData.append('title', `Page Hero - ${selectedHero?.page_key || 'Unknown'}`);
       formData.append('alt_text', `Hero background for ${selectedHero?.page_key || 'page'}`);
-      formData.append('image_type', 'page_hero');
+      formData.append('image_type', 'hero');  // Must be one of: hero, feature, testimonial, gallery
+      formData.append('order', '0');
+      formData.append('is_active', 'true');
 
       const token = localStorage.getItem('access');
       const response = await fetch('/api/homepage/images/', {
@@ -203,21 +207,57 @@ export const PageHeroManager: React.FC<PageHeroManagerProps> = ({ isOpen, onClos
 
     setIsLoading(true);
     try {
-      const url = selectedHero.id 
-        ? `/api/page-heroes/${selectedHero.id}/`
-        : '/api/page-heroes/';
+      // First, try to find existing hero by page_key
+      let existingHero = null;
+      if (!selectedHero.id) {
+        try {
+          const checkResponse = await fetch(`/api/page-heroes/?page_key=${selectedHero.page_key}`);
+          console.log('Check response status:', checkResponse.status);
+          if (checkResponse.ok) {
+            const existingData = await checkResponse.json();
+            console.log('Existing data from API:', existingData);
+            
+            // Handle paginated response format
+            const heroes = existingData.results || existingData;
+            console.log('Heroes array:', heroes);
+            console.log('Is array:', Array.isArray(heroes));
+            console.log('Length:', heroes?.length);
+            
+            if (Array.isArray(heroes) && heroes.length > 0) {
+              existingHero = heroes[0];
+              console.log('Found existing hero:', existingHero);
+            } else {
+              console.log('No heroes found in response');
+            }
+          } else {
+            console.log('Check response not ok:', checkResponse.status);
+          }
+        } catch (e) {
+          console.log('Error checking for existing hero:', e);
+        }
+      }
       
-      const method = selectedHero.id ? 'PUT' : 'POST';
+      const heroId = selectedHero.id || existingHero?.id;
+      const url = heroId ? `/api/page-heroes/${heroId}/` : '/api/page-heroes/';
+      const method = heroId ? 'PUT' : 'POST';
       
       // Prepare data for submission (exclude File object)
       const heroData = {
         page_key: selectedHero.page_key,
         title: selectedHero.title,
         subtitle: selectedHero.subtitle,
-        image_url: selectedHero.image_url,
+        background_image_url: selectedHero.image_url, // Use background_image_url field
         overlay_opacity: selectedHero.overlay_opacity,
         is_active: selectedHero.is_active,
       };
+
+      console.log('Saving hero data:', heroData);
+      console.log('Selected hero:', selectedHero);
+      console.log('Existing hero:', existingHero);
+      console.log('Hero ID:', heroId);
+      console.log('Is editing:', isEditing);
+      console.log('URL:', url);
+      console.log('Method:', method);
 
       const token = localStorage.getItem('access');
       const response = await fetch(url, {
@@ -239,6 +279,12 @@ export const PageHeroManager: React.FC<PageHeroManagerProps> = ({ isOpen, onClos
         onEditModalClose();
         setImagePreview('');
         loadPageHeroes();
+        
+        // Invalidate the page hero cache for the frontend
+        console.log('Invalidating cache for page-hero:', selectedHero.page_key);
+        await queryClient.invalidateQueries({ queryKey: ['page-hero', selectedHero.page_key] });
+        await queryClient.invalidateQueries({ queryKey: ['page-hero'] });
+        console.log('Cache invalidated successfully');
       } else {
         throw new Error('Failed to save page hero');
       }
@@ -300,12 +346,12 @@ export const PageHeroManager: React.FC<PageHeroManagerProps> = ({ isOpen, onClos
 
   return (
     <>
-      <Modal isOpen={isOpen} onClose={onClose} size="6xl">
+      <Modal isOpen={isOpen} onClose={onClose} size="6xl" scrollBehavior="inside">
         <ModalOverlay />
-        <ModalContent>
+        <ModalContent maxH="90vh">
           <ModalHeader>Page Hero Manager</ModalHeader>
           <ModalCloseButton />
-          <ModalBody>
+          <ModalBody overflowY="auto" maxH="calc(90vh - 120px)">
             <VStack spacing={6} align="stretch">
               {/* Header */}
               <HStack justify="space-between">
@@ -452,14 +498,14 @@ export const PageHeroManager: React.FC<PageHeroManagerProps> = ({ isOpen, onClos
       </Modal>
 
       {/* Edit/Create Hero Modal */}
-      <Modal isOpen={isEditModalOpen} onClose={onEditModalClose} size="2xl">
+      <Modal isOpen={isEditModalOpen} onClose={onEditModalClose} size="2xl" scrollBehavior="inside">
         <ModalOverlay />
-        <ModalContent>
+        <ModalContent maxH="90vh">
           <ModalHeader>
             {isEditing ? 'Edit Page Hero' : 'Create Page Hero'}
           </ModalHeader>
           <ModalCloseButton />
-          <ModalBody>
+          <ModalBody overflowY="auto" maxH="calc(90vh - 160px)">
             <VStack spacing={6}>
               <FormControl>
                 <FormLabel>Page</FormLabel>

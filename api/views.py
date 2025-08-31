@@ -1399,6 +1399,12 @@ class HomepageImageViewSet(viewsets.ModelViewSet):
     serializer_class = HomepageImageSerializer
     permission_classes = [IsAuthenticated]
     
+    def create(self, request, *args, **kwargs):
+        """Override create to add debugging"""
+        print(f"Image upload request data: {request.data}")
+        print(f"Image upload files: {request.FILES}")
+        return super().create(request, *args, **kwargs)
+    
     def get_queryset(self):
         queryset = HomepageImage.objects.all()
         image_type = self.request.query_params.get('type', None)
@@ -1540,6 +1546,35 @@ class PageHeroViewSet(viewsets.ModelViewSet):
     queryset = PageHero.objects.all()
     serializer_class = PageHeroSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
+    
+    def create(self, request, *args, **kwargs):
+        """Override create to add debugging"""
+        print(f"PageHero create request data: {request.data}")
+        try:
+            response = super().create(request, *args, **kwargs)
+            if response.status_code != 201:
+                print(f"PageHero create failed with status {response.status_code}: {response.data}")
+            else:
+                print(f"PageHero created successfully: {response.data}")
+            return response
+        except Exception as e:
+            print(f"PageHero create exception: {str(e)}")
+            return Response({'error': str(e)}, status=400)
+    
+    def update(self, request, *args, **kwargs):
+        """Override update to add debugging"""
+        print(f"PageHero update request data: {request.data}")
+        print(f"PageHero update for ID: {kwargs.get('pk')}")
+        try:
+            response = super().update(request, *args, **kwargs)
+            if response.status_code not in [200, 204]:
+                print(f"PageHero update failed with status {response.status_code}: {response.data}")
+            else:
+                print(f"PageHero updated successfully: {response.data}")
+            return response
+        except Exception as e:
+            print(f"PageHero update exception: {str(e)}")
+            return Response({'error': str(e)}, status=400)
 
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:  # public read

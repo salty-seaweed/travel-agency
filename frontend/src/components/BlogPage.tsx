@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from '../i18n';
+import { usePageHero } from '../hooks/useQueries';
 import { 
   CalendarIcon,
   ClockIcon,
@@ -26,6 +27,7 @@ interface BlogPost {
 
 export function BlogPage() {
   const { t } = useTranslation();
+  const { data: hero } = usePageHero('blog');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
 
@@ -136,7 +138,7 @@ export function BlogPage() {
         {/* Background Image */}
         <div className="absolute inset-0">
           <img
-            src="/src/assets/images/ishan112.jpg"
+            src={hero?.image_url || "/src/assets/images/ishan112.jpg"}
             alt="Maldives Blog Background"
             className="w-full h-full object-cover"
           />
@@ -146,10 +148,10 @@ export function BlogPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              {t('blog.hero.title', 'Maldives Travel Blog')}
+              {hero?.title || t('blog.hero.title', 'Maldives Travel Blog')}
             </h1>
             <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-              {t('blog.hero.subtitle', 'Discover travel tips, destination guides, and insider knowledge to help you plan the perfect Maldives adventure.')}
+              {hero?.subtitle || t('blog.hero.subtitle', 'Discover travel tips, destination guides, and insider knowledge to help you plan the perfect Maldives adventure.')}
             </p>
           </div>
         </div>

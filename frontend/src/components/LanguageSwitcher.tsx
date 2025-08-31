@@ -166,9 +166,14 @@ export function LanguageSwitcher({
       <button
         onClick={() => setIsOpen(!isOpen)}
         disabled={isLoading}
-        className={`flex items-center space-x-2 px-3 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 transition-all ${
+        className={`flex items-center space-x-2 px-3 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 transition-all duration-200 ${
           isOpen ? 'ring-2 ring-blue-500 ring-offset-2' : ''
         } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+        style={{ 
+          minHeight: '40px',
+          backgroundColor: 'white',
+          border: '1px solid #e5e7eb'
+        }}
       >
         <GlobeAltIcon className="w-5 h-5 text-gray-600" />
         <span className="text-lg">{currentLang.flag}</span>
@@ -183,7 +188,14 @@ export function LanguageSwitcher({
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+        <div 
+          className="absolute top-full left-0 mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50"
+          style={{
+            backgroundColor: 'white',
+            border: '1px solid #e5e7eb',
+            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
+          }}
+        >
           <div className="py-1">
             {supportedLanguages.map((language) => (
               <button

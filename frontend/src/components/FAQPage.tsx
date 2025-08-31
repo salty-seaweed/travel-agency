@@ -7,6 +7,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { whatsappBooking } from '../services/whatsapp-booking';
 import { useTranslation } from '../i18n';
+import { usePageHero } from '../hooks/useQueries';
 
 interface FAQItem {
   id: string;
@@ -18,6 +19,7 @@ interface FAQItem {
 
 export function FAQPage() {
   const { t } = useTranslation();
+  const { data: hero } = usePageHero('faq');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
@@ -209,7 +211,7 @@ export function FAQPage() {
         {/* Background Image */}
         <div className="absolute inset-0">
           <img
-            src="/src/assets/images/ishan113.jpg"
+            src={hero?.image_url || "/src/assets/images/ishan113.jpg"}
             alt="Maldives FAQ Background"
             className="w-full h-full object-cover"
           />
@@ -219,10 +221,10 @@ export function FAQPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              {t('faq.page.title', 'Frequently Asked Questions')}
+              {hero?.title || t('faq.page.title', 'Frequently Asked Questions')}
             </h1>
             <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-              {t('faq.page.description', 'Find answers to common questions about traveling to the Maldives, booking packages, and planning your perfect vacation.')}
+              {hero?.subtitle || t('faq.page.description', 'Find answers to common questions about traveling to the Maldives, booking packages, and planning your perfect vacation.')}
             </p>
           </div>
         </div>

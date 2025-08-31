@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { MagnifyingGlassIcon, SparklesIcon, GlobeAltIcon, MapIcon, ArrowRightIcon, InformationCircleIcon, FireIcon, HomeIcon, StarIcon, UsersIcon } from '@heroicons/react/24/outline';
 import { PropertyCard } from './ui/PropertyCard';
-import { useProperties, useDestinations, useWhatsApp } from '../hooks/useQueries';
+import { useProperties, useDestinations, useWhatsApp, usePageHero } from '../hooks/useQueries';
 import { LoadingSpinner } from './LoadingSpinner';
 import { ComponentErrorBoundary } from './SimpleErrorBoundary';
 import { SEO } from './SEO';
@@ -44,6 +44,7 @@ export function PropertyListPage() {
   const { data: properties, isLoading, error } = useProperties();
   const { data: destinations } = useDestinations();
   const { getWhatsAppUrl } = useWhatsApp();
+  const { data: hero } = usePageHero('properties');
   const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDestination, setSelectedDestination] = useState('all');
@@ -188,8 +189,8 @@ export function PropertyListPage() {
             {/* Background Images */}
             <Box position="absolute" top={0} left={0} right={0} bottom={0}>
               <Image 
-                src="/src/assets/images/ishan46.jpg" 
-                alt="Maldives Properties Background"
+                src={hero?.image_url || "/src/assets/images/ishan46.jpg"} 
+                alt={hero?.title || "Maldives Properties Background"}
                 w="full" 
                 h="full" 
                 objectFit="cover" 
@@ -207,12 +208,11 @@ export function PropertyListPage() {
                 </Badge>
                 
                 <Heading size="xl" className="text-4xl md:text-5xl font-bold text-white">
-                  🏝️ Luxury Properties
+                  {hero?.title || "🏝️ Luxury Properties"}
                 </Heading>
                 
                 <Text className="text-lg text-blue-100 max-w-3xl mx-auto leading-relaxed">
-                  Discover handpicked luxury properties across the Maldives. From overwater villas to beachfront resorts, 
-                  find your perfect accommodation with world-class amenities and stunning locations.
+                  {hero?.subtitle || "Discover handpicked luxury properties across the Maldives. From overwater villas to beachfront resorts, find your perfect accommodation with world-class amenities and stunning locations."}
                 </Text>
 
                 {/* Quick Stats */}

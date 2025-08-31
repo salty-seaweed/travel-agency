@@ -33,6 +33,9 @@ export function ContactPage() {
   const { t } = useTranslation();
   const { getWhatsAppUrl, whatsappNumber } = useWhatsApp();
   const { data: hero } = usePageHero('contact');
+  
+  // Debug hero data
+  console.log('Contact page hero data:', hero);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [formData, setFormData] = useState({
     name: '',

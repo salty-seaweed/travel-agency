@@ -1,4 +1,5 @@
-module.exports = {
+/** @type {import('tailwindcss').Config} */
+export default {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}"
@@ -190,8 +191,10 @@ module.exports = {
   plugins: [
     // Add any Tailwind plugins here if needed
   ],
-  // Ensure Tailwind doesn't conflict with Chakra UI
+  // Configure Tailwind to work with Chakra UI
   corePlugins: {
-    preflight: false, // Disable Tailwind's base styles to avoid conflicts with Chakra UI
+    preflight: true, // Enable Tailwind's base styles for proper CSS reset
   },
+  // Remove important to prevent conflicts with Chakra UI
+  important: false,
 }

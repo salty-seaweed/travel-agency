@@ -1,12 +1,10 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
-import tailwindcss from '@tailwindcss/vite'
 import autoprefixer from 'autoprefixer'
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => ({
   plugins: [
-    tailwindcss(), 
     react({
       // Skip TypeScript type checking during build
       tsDecorators: true,
@@ -155,12 +153,7 @@ export default defineConfig(({ mode }) => ({
   },
   css: {
     devSourcemap: false,
-    postcss: {
-      plugins: [
-        // Add autoprefixer for better browser compatibility
-        autoprefixer(),
-      ],
-    },
+    // PostCSS configuration is handled by postcss.config.js
   },
   // Performance optimizations
   experimental: {
