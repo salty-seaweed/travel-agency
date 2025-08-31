@@ -15,7 +15,7 @@ print(f"🔧 WSGI: DJANGO_SETTINGS_MODULE = {os.environ.get('DJANGO_SETTINGS_MOD
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travel_agency.settings_minimal')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travel_agency.settings')
 
 print("🔧 WSGI: About to create WSGI application...")
 try:
