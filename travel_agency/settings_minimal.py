@@ -8,7 +8,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-minimal-test-key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [
     'threadtravels.com',
@@ -43,7 +43,7 @@ MIDDLEWARE = [
     'api.middleware.MobileCompatibilityMiddleware',  # Re-enabled - this is useful
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    # 'django.middleware.csrf.CsrfViewMiddleware',  # Disabled for API-only backend
+    'django.middleware.csrf.CsrfViewMiddleware',  # Re-enabled for stability
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -163,6 +163,15 @@ CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']
 # For Railway - allow all origins to avoid CORS issues during deployment
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_ALL_HEADERS = True
+
+# CSRF exemption for API endpoints
+CSRF_TRUSTED_ORIGINS = [
+    "https://threadtravels.com",
+    "https://www.threadtravels.com", 
+    "https://threadtravels.vercel.app",
+    "https://threadtravels-frontend.vercel.app",
+    "https://web-production-a324.up.railway.app",
+]
 
 # REST Framework configuration for production
 REST_FRAMEWORK = {
