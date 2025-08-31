@@ -7,7 +7,18 @@ import { ChakraProvider, extendTheme } from '@chakra-ui/react'
 import App from './App.tsx'
 import AppErrorBoundary from './components/ErrorBoundary.tsx'
 import { CurrencyProvider } from './contexts/CurrencyContext.tsx'
-import { queryClient } from './lib/query-client'
+// import { queryClient } from './lib/query-client'
+import { QueryClient } from '@tanstack/react-query'
+
+// Create query client inline since lib/query-client doesn't exist
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      refetchOnWindowFocus: false,
+    },
+  },
+})
 import './i18n'
 import './main.css'
 
@@ -123,7 +134,7 @@ window.addEventListener('error', (event) => {
   console.error('Global error:', event.error)
 })
 
-window.addEventListener('unhandledrejection', (event) => {
+window.addEventListener('unhandledrejection',, (event) => {
   console.error('Unhandled promise rejection:', event.reason)
 })
 
