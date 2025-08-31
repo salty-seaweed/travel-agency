@@ -6,31 +6,44 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 const queryKeys = {
   properties: {
     all: ['properties'],
-    detail: (id: string) => ['properties', id],
-    reviews: (id: string) => ['properties', id, 'reviews'],
+    list: (filters?: any) => ['properties', 'list', filters],
+    featured: () => ['properties', 'featured'],
+    detail: (id: string | number) => ['properties', id],
+    reviews: (id: string | number) => ['properties', id, 'reviews'],
   },
   packages: {
     all: ['packages'],
-    detail: (id: string) => ['packages', id],
+    list: (filters?: PackageFilters) => ['packages', 'list', filters],
+    featured: () => ['packages', 'featured'],
+    detail: (id: string | number) => ['packages', id],
   },
   experiences: {
     all: ['experiences'],
+    list: (filters?: ExperienceFilters) => ['experiences', 'list', filters],
     featured: ['experiences', 'featured'],
   },
   reviews: {
     all: ['reviews'],
+    list: (approved?: boolean) => ['reviews', 'list', approved],
+  },
+  reference: {
+    propertyTypes: ['reference', 'property-types'],
+    amenities: ['reference', 'amenities'],
+    locations: ['reference', 'locations'],
+    destinations: (featured?: boolean) => ['reference', 'destinations', featured],
+    featuredDestinations: ['reference', 'destinations', 'featured'],
+  },
+  search: {
+    global: (query: string) => ['search', 'global', query],
   },
 };
 import { unifiedApi } from '../services/unified-api';
 import { whatsappBooking } from '../services/whatsapp-booking';
 import type { 
-  Property, 
   Package, 
   Review, 
-  PropertyFilters, 
   PackageFilters,
   ExperienceFilters,
-  PropertyFormData,
   PackageFormData,
   ReviewFormData,
   Destination,
@@ -60,7 +73,7 @@ const criticalQueryOptions = {
 };
 
 // Properties hooks
-export const useProperties = (filters?: PropertyFilters) => {
+export const useProperties = (filters?: any) => {
   return useQuery({
     queryKey: queryKeys.properties.list(filters),
     queryFn: () => unifiedApi.properties.getAll(filters),
@@ -317,7 +330,7 @@ export const useCreateProperty = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (data: PropertyFormData) => unifiedApi.properties.create(data),
+    mutationFn: (data: any) => unifiedApi.properties.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.properties.all });
     },
@@ -331,7 +344,7 @@ export const useUpdateProperty = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<PropertyFormData> }) => 
+    mutationFn: ({ id, data }: { id: number; data: any }) => 
       unifiedApi.properties.update(id, data),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.properties.detail(id) });
@@ -406,9 +419,9 @@ export const useCreateReview = () => {
   
   return useMutation({
     mutationFn: (data: ReviewFormData) => unifiedApi.reviews.create(data),
-    onSuccess: (_, { property: propertyId }) => {
-      // Invalidate property reviews
-      queryClient.invalidateQueries({ queryKey: queryKeys.properties.reviews(propertyId) });
+    onSuccess: (_, { package: packageId }) => {
+      // Invalidate package reviews
+      queryClient.invalidateQueries({ queryKey: queryKeys.packages.detail(packageId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.reviews.all });
     },
     onError: (error) => {
