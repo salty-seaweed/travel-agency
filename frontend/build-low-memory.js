@@ -13,7 +13,7 @@ const __dirname = path.dirname(__filename);
 console.log('🔧 Starting low-memory build process...');
 
 // Set aggressive memory limits
-process.env.NODE_OPTIONS = '--max-old-space-size=3072 --no-warnings --max-semi-space-size=32 --optimize-for-size';
+process.env.NODE_OPTIONS = '--max-old-space-size=3072 --no-warnings --max-semi-space-size=32';
 
 // Clean dist directory
 const distPath = path.join(__dirname, 'dist');
@@ -30,8 +30,8 @@ try {
     cwd: __dirname,
     env: {
       ...process.env,
-      NODE_OPTIONS: '--max-old-space-size=3072 --no-warnings --max-semi-space-size=32 --optimize-for-size --gc-interval=100',
-      VITE_BUILD_CHUNK_SIZE_LIMIT: '300'
+      NODE_OPTIONS: '--max-old-space-size=3072 --no-warnings --max-semi-space-size=32',
+      VITE_BUILD_CHUNK_SIZE_LIMIT: '800'
     }
   });
   
