@@ -1,1 +1,1 @@
-web: DJANGO_SETTINGS_MODULE=travel_agency.settings_minimal gunicorn travel_agency.wsgi:application --bind 0.0.0.0:$PORT --log-level debug --access-logfile - --error-logfile -
+web: python start_railway.py
