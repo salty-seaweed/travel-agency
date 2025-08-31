@@ -85,11 +85,11 @@ WSGI_APPLICATION = 'travel_agency.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT', '5432'),
+        'NAME': os.getenv('PGDATABASE', os.getenv('DB_NAME')),
+        'USER': os.getenv('PGUSER', os.getenv('DB_USER')),
+        'PASSWORD': os.getenv('PGPASSWORD', os.getenv('DB_PASSWORD')),
+        'HOST': os.getenv('PGHOST', os.getenv('DB_HOST')),
+        'PORT': os.getenv('PGPORT', os.getenv('DB_PORT', '5432')),
         'CONN_MAX_AGE': 600,  # Connection pooling
         'OPTIONS': {
             'sslmode': 'require',
