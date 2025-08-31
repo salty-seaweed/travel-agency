@@ -8,19 +8,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-minimal-test-key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True  # Temporarily enable to see detailed error messages
 
-ALLOWED_HOSTS = [
-    'threadtravels.com',
-    'www.threadtravels.com',
-    '.railway.app',
-    '.up.railway.app',
-    'web-production-a324.up.railway.app',
-    'localhost',
-    '127.0.0.1',
-    os.getenv('BACKEND_URL', '').replace('https://', '').replace('http://', ''),
-    '*',  # Allow all for now during development
-]
+ALLOWED_HOSTS = ['*']  # Temporarily allow all hosts to debug the issue
 
 # Application definition
 INSTALLED_APPS = [
