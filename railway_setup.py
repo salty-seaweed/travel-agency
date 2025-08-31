@@ -41,6 +41,17 @@ def main():
     """Main setup function"""
     print("🚀 Starting Railway Database Setup...")
     
+    # Check if we're actually on Railway
+    if not os.getenv('RAILWAY_ENVIRONMENT'):
+        print("⚠️  Not running on Railway, skipping setup")
+        return
+    
+    # Check if database is available
+    if not (os.getenv('DATABASE_URL') or os.getenv('PGHOST')):
+        print("❌ No database connection available")
+        print("   Make sure PostgreSQL service is added to Railway project")
+        return
+    
     setup_django()
     
     # List of commands to run in order

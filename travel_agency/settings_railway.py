@@ -38,27 +38,51 @@ ROOT_URLCONF = 'travel_agency.urls'
 
 # Database - Railway PostgreSQL with fallback
 DATABASE_URL = os.getenv('DATABASE_URL')
+
+# Debug environment variables
+print(f"🔍 Raw Environment Variables:")
+print(f"   DATABASE_URL: {DATABASE_URL}")
+print(f"   PGDATABASE: {os.getenv('PGDATABASE')}")
+print(f"   PGHOST: {os.getenv('PGHOST')}")
+print(f"   PGUSER: {os.getenv('PGUSER')}")
+print(f"   PGPASSWORD: {'***' if os.getenv('PGPASSWORD') else None}")
+print(f"   PGPORT: {os.getenv('PGPORT')}")
+
 if DATABASE_URL:
     # Parse DATABASE_URL if provided
     import dj_database_url
     DATABASES = {
         'default': dj_database_url.parse(DATABASE_URL)
     }
+    print(f"✅ Using DATABASE_URL: {DATABASE_URL[:50]}...")
 else:
-    # Use individual environment variables
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.getenv('PGDATABASE', 'railway'),
-            'USER': os.getenv('PGUSER', 'postgres'),
-            'PASSWORD': os.getenv('PGPASSWORD', ''),
-            'HOST': os.getenv('PGHOST', 'localhost'),
-            'PORT': os.getenv('PGPORT', '5432'),
-            'OPTIONS': {
-                'sslmode': 'require',
-            },
+    # Check if we have Railway environment variables
+    railway_host = os.getenv('PGHOST')
+    if railway_host and 'railway' in railway_host.lower():
+        # Use Railway environment variables
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': os.getenv('PGDATABASE'),
+                'USER': os.getenv('PGUSER'),
+                'PASSWORD': os.getenv('PGPASSWORD'),
+                'HOST': os.getenv('PGHOST'),
+                'PORT': os.getenv('PGPORT', '5432'),
+                'OPTIONS': {
+                    'sslmode': 'require',
+                },
+            }
         }
-    }
+        print(f"✅ Using Railway PostgreSQL: {railway_host}")
+    else:
+        # Fallback to SQLite for development
+        print("⚠️  No Railway database found, using SQLite fallback")
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': BASE_DIR / 'db.sqlite3',
+            }
+        }
 
 # Debug database connection
 print(f"🔍 Database Config:")

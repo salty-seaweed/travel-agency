@@ -1,2 +1,1 @@
-release: python railway_setup.py
-web: gunicorn travel_agency.wsgi:application --bind 0.0.0.0:$PORT
+web: python railway_setup.py && gunicorn travel_agency.wsgi:application --bind 0.0.0.0:$PORT --timeout 120
