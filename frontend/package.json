@@ -13,6 +13,7 @@
     "build:fast": "NODE_OPTIONS='--max-old-space-size=4096' vite build --mode production --emptyOutDir --minify false",
     "postbuild": "echo 'Build completed - no additional dependencies needed'",
 
+
     "lint": "eslint .",
     "preview": "vite preview"
   },

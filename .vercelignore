@@ -1,0 +1,15 @@
+# Vercel root ignore - prevent backend deployment
+api/
+travel_agency/
+data_exports/
+*.py
+requirements*.txt
+Dockerfile
+docker-compose*.yml
+nginx.conf
+manage.py
+railway*
+Procfile
+
+# Only deploy frontend
+!frontend/
