@@ -96,7 +96,7 @@ export function MobileNavigation({ className = '' }: MobileNavigationProps) {
             </div>
             <div className="flex flex-col">
               <span className="font-semibold text-gray-900 leading-tight">Thread Travels</span>
-              <span className="text-xs text-gray-600 uppercase tracking-wide leading-tight">Travel & Tours Maldives</span>
+              <span className="text-xs text-gray-600 uppercase tracking-wide leading-tight ml-4">Travel & Tours Maldives</span>
             </div>
           </Link>
 

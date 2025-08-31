@@ -172,6 +172,7 @@ export const Navigation = React.memo(() => {
                       lineHeight="1"
                       letterSpacing="wide"
                       textTransform="uppercase"
+                      ml={4}
                     >
                       TRAVEL & TOURS MALDIVES
                     </Text>
