@@ -172,7 +172,7 @@ export const TransferBookingSection = React.memo(() => {
       {/* Background Image */}
       <Box position="absolute" top={0} left={0} right={0} bottom={0}>
         <Image
-          src="/src/assets/images/ishan53.jpg"
+          src="/images/ishan53.jpg"
           alt="Maldives Transfer Booking Background"
           w="full"
           h="full"

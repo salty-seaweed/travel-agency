@@ -63,12 +63,12 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
   const [filteredDestinations, setFilteredDestinations] = useState<any[]>([]);
 
   const heroImages = useMemo(() => [
-    "/src/assets/images/ishan45.jpg",
-    "/src/assets/images/ishan46.jpg", 
-    "/src/assets/images/ishan47.jpg",
-    "/src/assets/images/ishan48.jpg",
-    "/src/assets/images/ishan49.jpg",
-    "/src/assets/images/ishan50.jpg",
+    "/images/ishan45.jpg",
+    "/images/ishan46.jpg", 
+    "/images/ishan47.jpg",
+    "/images/ishan48.jpg",
+    "/images/ishan49.jpg",
+    "/images/ishan50.jpg",
   ], []);
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -137,7 +137,7 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
     if (featuredDestinations && featuredDestinations.length > 0) {
       return featuredDestinations.map((featured: any) => ({
         name: featured.display_name,
-        image: featured.image_url || `/src/assets/images/ishan${Math.floor(Math.random() * 20) + 51}.jpg`,
+        image: featured.image_url || `/images/ishan${Math.floor(Math.random() * 20) + 51}.jpg`,
         packages: featured.package_count || 0
       }));
     }
@@ -146,7 +146,7 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
     if (destinations && destinations.length > 0) {
       return destinations.slice(0, 4).map(dest => ({
         name: dest.name,
-        image: dest.image || `/src/assets/images/ishan${Math.floor(Math.random() * 20) + 51}.jpg`,
+        image: dest.image || `/images/ishan${Math.floor(Math.random() * 20) + 51}.jpg`,
         packages: dest.package_count || 0
       }));
     }

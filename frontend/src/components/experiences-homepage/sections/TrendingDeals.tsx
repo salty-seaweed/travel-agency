@@ -73,7 +73,7 @@ const convertApiPackageToCardFormat = (apiPackage: ApiPackage): LocalPackage => 
     included: apiPackage.included || [],
     maxTravelers: apiPackage.maxTravelers || 4,
     featured: apiPackage.is_featured,
-    image: apiPackage.images?.[0]?.image || '/src/assets/images/ishan1.jpg',
+    image: apiPackage.images?.[0]?.image || '/images/ishan1.jpg',
     rating: apiPackage.rating || 4.5,
     reviewCount: apiPackage.review_count || 0,
     category: apiPackage.category || 'Adventure'

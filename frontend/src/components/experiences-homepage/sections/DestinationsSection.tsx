@@ -36,7 +36,7 @@ export const ExperiencesDestinationsSection: React.FC<Props> = () => {
   const { data: destinations, isLoading, error } = useDestinations();
 
   const getImage = (destination: any) => {
-    return destination.image || `/src/assets/images/ishan${Math.floor(Math.random() * 20) + 51}.jpg`;
+    return destination.image || `/images/ishan${Math.floor(Math.random() * 20) + 51}.jpg`;
   };
 
   const handleDestinationClick = (destination: any) => {

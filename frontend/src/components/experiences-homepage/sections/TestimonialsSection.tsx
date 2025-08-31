@@ -42,21 +42,21 @@ export const ExperiencesTestimonialsSection: React.FC<TestimonialsSectionProps> 
       location: 'New York, USA',
       rating: 5,
       text: 'Amazing experience! The tour was perfectly organized and the guides were incredibly knowledgeable.',
-      avatar: '/src/assets/images/ishan74.jpg'
+      avatar: '/images/ishan74.jpg'
     },
     {
       name: 'Michael Chen',
       location: 'London, UK',
       rating: 5,
       text: 'Absolutely breathtaking views and excellent service. Highly recommend!',
-      avatar: '/src/assets/images/ishan75.jpg'
+      avatar: '/images/ishan75.jpg'
     },
     {
       name: 'Emma Davis',
       location: 'Sydney, Australia',
       rating: 5,
       text: 'The best travel experience I\'ve ever had. Everything exceeded my expectations.',
-      avatar: '/src/assets/images/ishan76.jpg'
+      avatar: '/images/ishan76.jpg'
     }
   ];
 

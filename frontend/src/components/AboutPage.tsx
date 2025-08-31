@@ -102,7 +102,7 @@ export function AboutPage() {
         {/* Background Image (Admin-controlled) */}
         <Box position="absolute" top={0} left={0} right={0} bottom={0}>
           <Image
-            src={hero?.image_url || '/src/assets/images/ishan116.jpg'}
+            src={hero?.image_url || '/images/ishan116.jpg'}
             alt={hero?.title || 'Maldives About Background'}
             w="full"
             h="full"

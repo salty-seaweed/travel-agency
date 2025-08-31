@@ -121,11 +121,11 @@ export const ExperiencesTrustSection: React.FC<Props> = ({ homepageContent }) =>
                       </HStack>
                       <Text fontSize="sm" color={mutedTextColor} textAlign="center">{t('trust.aim', 'We aim to delight every traveler')}</Text>
                       <AvatarGroup size="sm" max={5}>
-                        <Avatar src="/src/assets/images/ishan63.jpg" />
-                        <Avatar src="/src/assets/images/ishan64.jpg" />
-                        <Avatar src="/src/assets/images/ishan65.jpg" />
-                        <Avatar src="/src/assets/images/ishan66.jpg" />
-                        <Avatar src="/src/assets/images/ishan67.jpg" />
+                        <Avatar src="/images/ishan63.jpg" />
+                        <Avatar src="/images/ishan64.jpg" />
+                        <Avatar src="/images/ishan65.jpg" />
+                        <Avatar src="/images/ishan66.jpg" />
+                        <Avatar src="/images/ishan67.jpg" />
                       </AvatarGroup>
                     </VStack>
                   </VStack>

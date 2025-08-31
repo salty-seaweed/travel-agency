@@ -121,7 +121,7 @@ export const security = {
   // Content Security Policy
   csp: {
     'default-src': ["'self'"],
-    'img-src': ["'self'", 'data:', 'blob:', 'http://localhost:8000', 'https://images.unsplash.com', 'https://via.placeholder.com'],
+    'img-src': ["'self'", 'data:', 'blob:', 'https://web-production-a324.up.railway.app', 'https://images.unsplash.com', 'https://via.placeholder.com'],
     'script-src': ["'self'", "'unsafe-inline'"],
     'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
     'font-src': ["'self'", 'https://fonts.gstatic.com'],

@@ -111,7 +111,7 @@ const convertApiPackageToCardFormat = (apiPackage: ApiPackage): LocalPackage => 
     included: apiPackage.included || [],
     maxTravelers: apiPackage.maxTravelers || 4,
     featured: apiPackage.is_featured,
-    image: apiPackage.images?.[0]?.image || '/src/assets/images/ishan1.jpg',
+    image: apiPackage.images?.[0]?.image || '/images/ishan1.jpg',
     rating: apiPackage.rating || 4.5,
     reviewCount: apiPackage.review_count || 0,
     category: apiPackage.category || 'Adventure'
@@ -347,7 +347,7 @@ Can you help me finalize this package?`;
         {/* Background Images */}
         <Box position="absolute" top={0} left={0} right={0} bottom={0}>
           <Image 
-            src={hero?.image_url || "/src/assets/images/ishan111.jpg"} 
+            src={hero?.image_url || "/images/ishan111.jpg"} 
             alt={hero?.title || "Maldives Background"}
             w="full" 
             h="full" 

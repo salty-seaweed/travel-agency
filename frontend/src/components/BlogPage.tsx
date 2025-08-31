@@ -138,7 +138,7 @@ export function BlogPage() {
         {/* Background Image */}
         <div className="absolute inset-0">
           <img
-            src={hero?.image_url || "/src/assets/images/ishan112.jpg"}
+            src={hero?.image_url || "/images/ishan112.jpg"}
             alt="Maldives Blog Background"
             className="w-full h-full object-cover"
           />

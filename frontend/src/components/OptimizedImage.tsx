@@ -22,7 +22,7 @@ export function OptimizedImage({
   quality = 80,
   lazy = true,
   placeholder,
-  fallback = '/src/assets/images/placeholder.jpg',
+  fallback = '/images/ishan1.jpg',
   onLoad,
   onError,
   ...props
