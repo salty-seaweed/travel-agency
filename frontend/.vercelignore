@@ -10,6 +10,25 @@ coverage/
 build/
 dist/
 
+# Lock files that can cause deployment delays
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+.pnpm-lock.yaml
+
+# Cache and temporary files
+.cache/
+.vite/
+.parcel-cache/
+.next/
+.nuxt/
+.output/
+.turbo/
+
+# Development and build artifacts
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+
 # Backend files (we only want frontend deployed)
 ../api/
 ../travel_agency/
