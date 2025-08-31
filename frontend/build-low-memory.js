@@ -26,7 +26,7 @@ if (fs.existsSync(distPath)) {
 }
 
 try {
-  // Set timeout to prevent infinite hangs
+  // Set timeout to prevent infinite hangs (Vercel has 15min build limit)
   const buildTimeout = 600000; // 10 minutes max
   
   // Run Vite build with memory optimizations and timeout
