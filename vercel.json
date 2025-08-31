@@ -4,7 +4,8 @@
   "buildCommand": "cd frontend && node build-low-memory.js",
   "outputDirectory": "frontend/dist",
   "installCommand": "cd frontend && npm ci --legacy-peer-deps --prefer-offline --no-audit --no-fund --ignore-scripts --frozen-lockfile",
-  "framework": "vite",
+  "cleanUrls": true,
+  "trailingSlash": false,
   "env": {
     "NODE_OPTIONS": "--max-old-space-size=6144 --no-warnings --max-semi-space-size=64",
     "CI": "true",
@@ -13,7 +14,8 @@
     "TSC_COMPILE_ON_ERROR": "true",
     "VITE_BUILD_CHUNK_SIZE_LIMIT": "800",
     "VERCEL_FORCE_NO_BUILD_CACHE": "1",
-    "NPM_CONFIG_CACHE": "/tmp/.npm"
+    "NPM_CONFIG_CACHE": "/tmp/.npm",
+    "SKIP_INSTALL_DEPS": "true"
   },
   "rewrites": [
     {

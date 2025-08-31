@@ -11,6 +11,7 @@
     "build": "NODE_OPTIONS='--max-old-space-size=6144 --no-warnings --max-semi-space-size=64' vite build --mode production --emptyOutDir",
     "build:vercel": "node build-low-memory.js",
     "build:fast": "NODE_OPTIONS='--max-old-space-size=4096' vite build --mode production --emptyOutDir --minify false",
+    "postbuild": "echo 'Build completed - no additional dependencies needed'",
 
     "lint": "eslint .",
     "preview": "vite preview"
