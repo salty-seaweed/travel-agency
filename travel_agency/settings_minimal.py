@@ -16,6 +16,8 @@ ALLOWED_HOSTS = [
     '.railway.app',
     '.up.railway.app',
     'web-production-a324.up.railway.app',
+    'localhost',
+    '127.0.0.1',
     os.getenv('BACKEND_URL', '').replace('https://', '').replace('http://', ''),
     '*',  # Allow all for now during development
 ]
@@ -38,7 +40,7 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
-    'api.middleware.MobileCompatibilityMiddleware',  # Mobile support
+    # 'api.middleware.MobileCompatibilityMiddleware',  # Temporarily disabled for debugging
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     # 'django.middleware.csrf.CsrfViewMiddleware',  # Disabled for API-only backend
