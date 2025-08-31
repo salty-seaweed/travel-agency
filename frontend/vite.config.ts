@@ -73,14 +73,18 @@ export default defineConfig(({ mode }) => ({
         moduleSideEffects: false,
       },
       output: {
-        // More aggressive chunking for better memory management
+        // Safe chunking to avoid breaking React
         manualChunks(id) {
-          // Core libraries
-          if (id.includes('react') && !id.includes('react-router') && !id.includes('react-select')) {
+          // Keep React and ReactDOM together - CRITICAL for hooks to work
+          if (id.includes('react') || id.includes('react-dom')) {
+            if (id.includes('react-router')) {
+              return 'react-router';
+            }
+            if (id.includes('react-select') || id.includes('react-color')) {
+              return 'forms';
+            }
+            // All other React packages stay together
             return 'react-core';
-          }
-          if (id.includes('react-router')) {
-            return 'react-router';
           }
           
           // Heavy UI libraries - split more granularly  
@@ -172,17 +176,19 @@ export default defineConfig(({ mode }) => ({
     include: [
       'react',
       'react-dom',
+      'react-dom/client',
+      'react/jsx-runtime',
       'react-router-dom',
-      'react-fast-compare', // Fix ES module import issue
-      'void-elements', // Fix ES module import issue with html-parse-stringify
-      'html-parse-stringify', // Fix ES module import issue
-      'fast-json-stable-stringify', // Prevent potential CommonJS issues
+      '@chakra-ui/react',
+      '@emotion/react',
+      '@emotion/styled',
+      'framer-motion',
     ],
-         exclude: [
-       '@tanstack/react-query-devtools', // Exclude dev tools from production
-     ],
-    // Force dependency optimization for memory efficiency
-    force: mode === 'production',
+    exclude: [
+      '@tanstack/react-query-devtools', // Exclude dev tools from production
+    ],
+    // Don't force optimization in production to avoid React hook issues
+    force: false,
   },
   css: {
     devSourcemap: false,
