@@ -54,28 +54,11 @@ def main():
     
     setup_django()
     
-    # List of commands to run in order
+    # List of commands to run in order - simplified for Railway
     commands = [
         # 1. Database migrations
         ['migrate'],
-        
-        # 2. Create admin user
-        ['create_ttm_admin'],
-        
-        # 3. Populate core data
-        ['populate_sample_data'],
-        ['populate_languages'],
-        ['populate_destinations'],
-        ['populate_transportation_data'],
-        ['populate_ferry_schedules'],
-        ['populate_homepage_data'],
-        ['populate_experiences'],
-        ['populate_package_destinations'],
-        
-        # 4. Update counts
-        ['update_destination_counts'],
-        
-        # 5. Collect static files
+        # 2. Collect static files
         ['collectstatic', '--noinput'],
     ]
     
