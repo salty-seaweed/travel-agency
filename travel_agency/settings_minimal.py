@@ -103,8 +103,9 @@ REST_FRAMEWORK = {
 }
 
 print("🚀 Minimal Django settings loaded successfully!")
+print(f"🔧 PORT environment variable: {os.getenv('PORT', 'NOT SET')}")
 
-# Gunicorn settings
+# Gunicorn settings for Railway
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 USE_X_FORWARDED_HOST = True
 USE_X_FORWARDED_PORT = True
