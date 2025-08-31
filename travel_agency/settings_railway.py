@@ -36,17 +36,41 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'travel_agency.urls'
 
-# Database
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('PGDATABASE'),
-        'USER': os.getenv('PGUSER'),
-        'PASSWORD': os.getenv('PGPASSWORD'),
-        'HOST': os.getenv('PGHOST'),
-        'PORT': os.getenv('PGPORT', '5432'),
+# Database - Railway PostgreSQL with fallback
+DATABASE_URL = os.getenv('DATABASE_URL')
+if DATABASE_URL:
+    # Parse DATABASE_URL if provided
+    import dj_database_url
+    DATABASES = {
+        'default': dj_database_url.parse(DATABASE_URL)
     }
-}
+else:
+    # Use individual environment variables
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('PGDATABASE', 'railway'),
+            'USER': os.getenv('PGUSER', 'postgres'),
+            'PASSWORD': os.getenv('PGPASSWORD', ''),
+            'HOST': os.getenv('PGHOST', 'localhost'),
+            'PORT': os.getenv('PGPORT', '5432'),
+            'OPTIONS': {
+                'sslmode': 'require',
+            },
+        }
+    }
+
+# Debug database connection
+print(f"🔍 Database Config:")
+print(f"   ENGINE: {DATABASES['default']['ENGINE']}")
+print(f"   NAME: {DATABASES['default'].get('NAME', 'Not set')}")
+print(f"   HOST: {DATABASES['default'].get('HOST', 'Not set')}")
+print(f"   PORT: {DATABASES['default'].get('PORT', 'Not set')}")
+print(f"   USER: {DATABASES['default'].get('USER', 'Not set')}")
+print(f"   PASSWORD: {'***' if DATABASES['default'].get('PASSWORD') else 'Not set'}")
+print(f"   DATABASE_URL: {'Set' if DATABASE_URL else 'Not set'}")
+print(f"   PGDATABASE: {os.getenv('PGDATABASE', 'Not set')}")
+print(f"   PGHOST: {os.getenv('PGHOST', 'Not set')}")
 
 # Static files
 STATIC_URL = '/static/'

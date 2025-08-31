@@ -10,7 +10,20 @@ from django.core.management import execute_from_command_line
 
 def setup_django():
     """Setup Django environment"""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travel_agency.settings_production')
+    # Use Railway settings for Railway deployment
+    settings_module = 'travel_agency.settings_railway'
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', settings_module)
+    print(f"🔧 Using Django settings: {settings_module}")
+    
+    # Print environment variables for debugging
+    print(f"🔍 Environment Variables:")
+    print(f"   DATABASE_URL: {'Set' if os.getenv('DATABASE_URL') else 'Not set'}")
+    print(f"   PGDATABASE: {os.getenv('PGDATABASE', 'Not set')}")
+    print(f"   PGHOST: {os.getenv('PGHOST', 'Not set')}")
+    print(f"   PGUSER: {os.getenv('PGUSER', 'Not set')}")
+    print(f"   PGPASSWORD: {'***' if os.getenv('PGPASSWORD') else 'Not set'}")
+    print(f"   PGPORT: {os.getenv('PGPORT', 'Not set')}")
+    
     django.setup()
 
 def run_command(command_args):
