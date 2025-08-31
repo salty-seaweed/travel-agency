@@ -36,7 +36,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'travel_agency.urls'
+ROOT_URLCONF = 'travel_agency.urls_minimal'
 
 TEMPLATES = [
     {
@@ -103,3 +103,8 @@ REST_FRAMEWORK = {
 }
 
 print("🚀 Minimal Django settings loaded successfully!")
+
+# Gunicorn settings
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
+USE_X_FORWARDED_PORT = True

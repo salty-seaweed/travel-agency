@@ -1,1 +1,1 @@
-web: gunicorn travel_agency.wsgi:application --bind 0.0.0.0:$PORT --env DJANGO_SETTINGS_MODULE=travel_agency.settings_minimal
+web: DJANGO_SETTINGS_MODULE=travel_agency.settings_minimal gunicorn travel_agency.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 60 --keep-alive 2 --max-requests 1000 --preload
