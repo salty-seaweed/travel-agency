@@ -8,7 +8,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Minimal settings
 SECRET_KEY = os.getenv('SECRET_KEY', 'railway-minimal-key-change-me')
-DEBUG = False
+DEBUG = True
 ALLOWED_HOSTS = ['*']  # Allow all hosts for now
 
 INSTALLED_APPS = [
@@ -101,8 +101,30 @@ print(f"   PGHOST: {os.getenv('PGHOST', 'Not set')}")
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# Whitenoise configuration
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Whitenoise configuration - disabled for debugging
+# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Logging configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}
 
 # CORS
 CORS_ALLOW_ALL_ORIGINS = True
