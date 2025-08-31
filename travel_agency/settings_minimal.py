@@ -41,7 +41,7 @@ MIDDLEWARE = [
     'api.middleware.MobileCompatibilityMiddleware',  # Mobile support
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',  # Disabled for API-only backend
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -146,20 +146,21 @@ STATICFILES_FINDERS = [
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# CORS settings for production
+# CORS settings for production - be more permissive for Railway deployment
 CORS_ALLOWED_ORIGINS = [
     "https://threadtravels.com",
     "https://www.threadtravels.com", 
     "https://threadtravels.vercel.app",
-    os.getenv('FRONTEND_URL', 'https://threadtravels.com'),
+    "https://threadtravels-frontend.vercel.app",
+    os.getenv('FRONTEND_URL', 'https://threadtravels.vercel.app'),
 ]
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']
 
-# Fallback for development - allow all origins if no specific frontend URL
-if not os.getenv('FRONTEND_URL'):
-    CORS_ALLOW_ALL_ORIGINS = True
+# For Railway - allow all origins to avoid CORS issues during deployment
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_HEADERS = True
 
 # REST Framework configuration for production
 REST_FRAMEWORK = {
