@@ -117,7 +117,7 @@ export default defineConfig(({ mode }) => ({
     target: 'es2015',
   },
   define: {
-    'process.env.VITE_API_URL': JSON.stringify(process.env.VITE_API_URL || 'http://localhost:8001'),
+    // Remove hardcoded API URL - using config system instead
   },
   resolve: {
     alias: {
