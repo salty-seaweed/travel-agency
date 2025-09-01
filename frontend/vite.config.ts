@@ -1,7 +1,8 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
+import { resolve } from 'path'
 
-// https://vite.dev/config/
+// https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   plugins: [
     react({
@@ -73,12 +74,13 @@ export default defineConfig(({ mode }) => ({
         moduleSideEffects: false,
       },
       output: {
-        // Disable manual chunking completely to fix React hook issues
+        // Improved chunking strategy for better performance
         manualChunks: {
           // Simple, safe chunking that doesn't break React
           'react-vendor': ['react', 'react-dom', 'react-dom/client'],
           'ui-vendor': ['@chakra-ui/react', '@emotion/react', '@emotion/styled'],
           'router-vendor': ['react-router-dom'],
+          'query-vendor': ['@tanstack/react-query'],
         },
         chunkFileNames: 'assets/js/[name]-[hash].js',
         entryFileNames: 'assets/js/[name]-[hash].js',
@@ -86,7 +88,7 @@ export default defineConfig(({ mode }) => ({
           if (!assetInfo.name) return `assets/[ext]/[name]-[hash].[ext]`;
           const info = assetInfo.name.split('.');
           const ext = info[info.length - 1];
-          if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(ext)) {
+          if (/png|jpe?g|svg|gif|tiff|bmp|ico|webp|avif/i.test(ext)) {
             return `assets/images/[name]-[hash].[ext]`;
           }
           if (/css/i.test(ext)) {
@@ -96,12 +98,12 @@ export default defineConfig(({ mode }) => ({
         },
       },
     },
-    chunkSizeWarningLimit: 500, // Smaller chunks for better memory management
+    chunkSizeWarningLimit: 1000, // Increased for better performance
     reportCompressedSize: false, // Skip compression reporting to save memory
     commonjsOptions: {
       include: [/node_modules/],
     },
-    assetsInlineLimit: 0, // Never inline assets to save memory
+    assetsInlineLimit: 4096, // Inline small assets for better performance
     // Additional memory optimizations
     emptyOutDir: true,
   },
@@ -121,6 +123,7 @@ export default defineConfig(({ mode }) => ({
   },
   resolve: {
     alias: {
+      '@': resolve(__dirname, 'src'),
       // Ensure single React instance to fix useLayoutEffect issues
       'react': 'react',
       'react-dom': 'react-dom',
@@ -134,6 +137,7 @@ export default defineConfig(({ mode }) => ({
       'react-dom/client',
       'react/jsx-runtime',
       'react-router-dom',
+      '@chakra-ui/react',
     ],
     exclude: [
       '@tanstack/react-query-devtools',

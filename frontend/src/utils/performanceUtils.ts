@@ -127,7 +127,7 @@ export const usePerformanceMonitor = (name: string) => {
     (label: string) => {
       const duration = Date.now() - startTime.current;
       
-      if (process.env.NODE_ENV === 'development') {
+      if (import.meta.env.DEV) {
         console.log(`⏱️ Performance [${name}:${label}]: ${duration}ms`);
       }
 

@@ -1,17 +1,13 @@
 // Unified API service layer - Clean implementation
 import type { 
-  Property, 
   Package, 
   Review, 
-  PropertyType, 
   Amenity, 
   Location,
   Destination,
   Experience,
-  PropertyFilters,
   PackageFilters,
   ExperienceFilters,
-  PropertyFormData,
   PackageFormData,
   ReviewFormData,
   User,
@@ -217,12 +213,16 @@ const apiRequest = async <T>(
   const timeoutId = setTimeout(() => controller.abort(), performance.apiTimeout);
 
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
     'X-Requested-With': 'XMLHttpRequest',
     'Accept': 'application/json, text/plain, */*',
     'Accept-Language': 'en-US,en;q=0.9',
     'Cache-Control': 'no-cache',
   };
+
+  // Only set Content-Type for non-FormData requests
+  if (!(options.body instanceof FormData)) {
+    headers['Content-Type'] = 'application/json';
+  }
 
   const accessToken = tokenStorage.getAccessToken();
   if (accessToken) {
@@ -282,7 +282,7 @@ const apiRequest = async <T>(
 };
 
 // Data transformers
-const transformProperty = (raw: any): Property => ({
+const transformProperty = (raw: any): any => ({
   id: raw.id,
   name: sanitizeInput(raw.name || '', security.sanitization.maxLength.name),
   description: sanitizeInput(raw.description || '', security.sanitization.maxLength.description),
@@ -305,13 +305,12 @@ const transformProperty = (raw: any): Property => ({
   updated_at: raw.updated_at,
 });
 
-const transformPackage = (raw: any): Package => ({
+const transformPackage = (raw: any): any => ({
   id: raw.id,
   name: sanitizeInput(raw.name || '', security.sanitization.maxLength.name),
   description: sanitizeInput(raw.description || '', security.sanitization.maxLength.description),
   price: raw.price || '0',
   duration: raw.duration || 7,
-  properties: Array.isArray(raw.properties) ? raw.properties.map(transformProperty) : [],
   images: raw.images || [],
   is_featured: raw.is_featured || false,
   start_date: raw.start_date,
@@ -329,82 +328,10 @@ const transformPackage = (raw: any): Package => ({
 
 // API Services
 export const unifiedApi = {
-  // Properties
-  properties: {
-    getAll: async (filters?: PropertyFilters): Promise<Property[]> => {
-      const params = new URLSearchParams();
-      if (filters) {
-        Object.entries(filters).forEach(([key, value]) => {
-          if (value !== undefined && value !== null) {
-            if (Array.isArray(value)) {
-              value.forEach(v => params.append(key, v.toString()));
-            } else {
-              params.append(key, value.toString());
-            }
-          }
-        });
-      }
-      
-      const endpoint = `properties/${params.toString() ? `?${params.toString()}` : ''}`;
-      const data = await publicApiRequest<any>(endpoint, {}, true, performance.cacheTimeout.medium);
-      // Handle paginated response
-      const results = data?.results || data;
-      return Array.isArray(results) ? results.map(transformProperty) : [];
-    },
-
-    getFeatured: async (): Promise<Property[]> => {
-      console.log('🔍 [MOBILE DEBUG] API call: getFeatured properties starting...');
-      try {
-        const data = await publicApiRequest<any>('properties/?is_featured=true', {}, true, performance.cacheTimeout.long);
-        console.log('🔍 [MOBILE DEBUG] API call: getFeatured properties response:', data);
-        // Handle paginated response
-        const results = data?.results || data;
-        const transformed = Array.isArray(results) ? results.map(transformProperty) : [];
-        console.log('✅ [MOBILE DEBUG] API call: getFeatured properties transformed:', transformed.length, 'items');
-        return transformed;
-      } catch (error) {
-        console.error('❌ [MOBILE DEBUG] API call: getFeatured properties error:', error);
-        throw error;
-      }
-    },
-
-    getById: async (id: number): Promise<Property> => {
-      const data = await publicApiRequest<any>(`properties/${id}/`, {}, true, performance.cacheTimeout.medium);
-      return transformProperty(data);
-    },
-
-    create: async (propertyData: PropertyFormData): Promise<Property> => {
-      cacheUtils.invalidate('properties');
-      const data = await apiRequest<any>('properties/', {
-        method: 'POST',
-        body: JSON.stringify(propertyData),
-      });
-      return transformProperty(data);
-    },
-
-    update: async (id: number, propertyData: Partial<PropertyFormData>): Promise<Property> => {
-      cacheUtils.invalidate('properties');
-      const data = await apiRequest<any>(`properties/${id}/`, {
-        method: 'PATCH',
-        body: JSON.stringify(propertyData),
-      });
-      return transformProperty(data);
-    },
-
-    delete: async (id: number): Promise<void> => {
-      cacheUtils.invalidate('properties');
-      await apiRequest<void>(`properties/${id}/`, { method: 'DELETE' });
-    },
-
-    getReviews: async (propertyId: number): Promise<Review[]> => {
-      const data = await publicApiRequest<Review[]>(`properties/${propertyId}/reviews/`, {}, true, performance.cacheTimeout.short);
-      return Array.isArray(data) ? data : [];
-    },
-  },
 
   // Packages
   packages: {
-    getAll: async (filters?: PackageFilters): Promise<Package[]> => {
+    getAll: async (filters?: PackageFilters): Promise<any[]> => {
       const params = new URLSearchParams();
       if (filters) {
         Object.entries(filters).forEach(([key, value]) => {
@@ -421,7 +348,7 @@ export const unifiedApi = {
       return Array.isArray(results) ? results.map(transformPackage) : [];
     },
 
-    getFeatured: async (): Promise<Package[]> => {
+    getFeatured: async (): Promise<any[]> => {
       console.log('🔍 [MOBILE DEBUG] API call: getFeatured packages starting...');
       try {
         const data = await publicApiRequest<any>('packages/?is_featured=true', {}, true, performance.cacheTimeout.long);
@@ -437,12 +364,12 @@ export const unifiedApi = {
       }
     },
 
-    getById: async (id: number): Promise<Package> => {
+    getById: async (id: number): Promise<any> => {
       const data = await publicApiRequest<any>(`packages/${id}/`, {}, true, performance.cacheTimeout.medium);
       return transformPackage(data);
     },
 
-    create: async (packageData: PackageFormData): Promise<Package> => {
+    create: async (packageData: PackageFormData): Promise<any> => {
       cacheUtils.invalidate('packages');
       const data = await apiRequest<any>('packages/', {
         method: 'POST',
@@ -451,7 +378,7 @@ export const unifiedApi = {
       return transformPackage(data);
     },
 
-    update: async (id: number, packageData: Partial<PackageFormData>): Promise<Package> => {
+    update: async (id: number, packageData: Partial<PackageFormData>): Promise<any> => {
       cacheUtils.invalidate('packages');
       const data = await apiRequest<any>(`packages/${id}/`, {
         method: 'PATCH',
@@ -511,7 +438,7 @@ export const unifiedApi = {
 
   // Reference data
   propertyTypes: {
-    getAll: async (): Promise<PropertyType[]> => {
+    getAll: async (): Promise<any[]> => {
       const data = await publicApiRequest<any>('property-types/', {}, true, performance.cacheTimeout.long);
       // Handle paginated response
       const results = data?.results || data;
@@ -552,6 +479,72 @@ export const unifiedApi = {
       const results = data?.results || data;
       return Array.isArray(results) ? results : [];
     },
+
+    getById: async (id: number): Promise<Destination> => {
+      return await publicApiRequest<Destination>(`destinations/${id}/`, {}, true, performance.cacheTimeout.medium);
+    },
+
+    create: async (data: any): Promise<Destination> => {
+      // Check if data contains file uploads
+      const hasFileUpload = data.image instanceof File;
+      
+      if (hasFileUpload) {
+        // Use FormData for file uploads
+        const formData = new FormData();
+        Object.keys(data).forEach(key => {
+          if (key === 'image' && data[key] instanceof File) {
+            formData.append(key, data[key]);
+          } else if (data[key] !== null && data[key] !== undefined) {
+            formData.append(key, data[key].toString());
+          }
+        });
+        
+        return await apiRequest<Destination>('destinations/', {
+          method: 'POST',
+          body: formData,
+        });
+      } else {
+        // Use JSON for non-file data
+        return await apiRequest<Destination>('destinations/', {
+          method: 'POST',
+          body: JSON.stringify(data),
+        });
+      }
+    },
+
+    update: async (id: number, data: any): Promise<Destination> => {
+      // Check if data contains file uploads
+      const hasFileUpload = data.image instanceof File;
+      
+      if (hasFileUpload) {
+        // Use FormData for file uploads
+        const formData = new FormData();
+        Object.keys(data).forEach(key => {
+          if (key === 'image' && data[key] instanceof File) {
+            formData.append(key, data[key]);
+          } else if (data[key] !== null && data[key] !== undefined) {
+            formData.append(key, data[key].toString());
+          }
+        });
+        
+        return await apiRequest<Destination>(`destinations/${id}/`, {
+          method: 'PUT',
+          body: formData,
+        });
+      } else {
+        // Use JSON for non-file data
+        return await apiRequest<Destination>(`destinations/${id}/`, {
+          method: 'PUT',
+          body: JSON.stringify(data),
+        });
+      }
+    },
+
+    delete: async (id: number): Promise<void> => {
+      return await apiRequest<void>(`destinations/${id}/`, {
+        method: 'DELETE',
+      });
+    },
   },
 
   experiences: {
@@ -581,17 +574,75 @@ export const unifiedApi = {
     },
 
     create: async (data: any): Promise<Experience> => {
-      return await apiRequest<Experience>('experiences/', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      });
+      // Check if data contains file uploads
+      const hasFileUpload = data.image instanceof File;
+      
+      if (hasFileUpload) {
+        // Use FormData for file uploads
+        const formData = new FormData();
+        Object.keys(data).forEach(key => {
+          if (key === 'image' && data[key] instanceof File) {
+            formData.append(key, data[key]);
+          } else if (Array.isArray(data[key])) {
+            // Handle arrays (like includes, excludes, requirements)
+            data[key].forEach((item: any, index: number) => {
+              formData.append(`${key}[${index}]`, item);
+            });
+          } else if (data[key] !== null && data[key] !== undefined) {
+            formData.append(key, data[key].toString());
+          }
+        });
+        
+        return await apiRequest<Experience>('experiences/', {
+          method: 'POST',
+          body: formData,
+          headers: {
+            // Don't set Content-Type - let browser set it with boundary
+          },
+        });
+      } else {
+        // Use JSON for non-file data
+        return await apiRequest<Experience>('experiences/', {
+          method: 'POST',
+          body: JSON.stringify(data),
+        });
+      }
     },
 
     update: async (id: number, data: any): Promise<Experience> => {
-      return await apiRequest<Experience>(`experiences/${id}/`, {
-        method: 'PUT',
-        body: JSON.stringify(data),
-      });
+      // Check if data contains file uploads
+      const hasFileUpload = data.image instanceof File;
+      
+      if (hasFileUpload) {
+        // Use FormData for file uploads
+        const formData = new FormData();
+        Object.keys(data).forEach(key => {
+          if (key === 'image' && data[key] instanceof File) {
+            formData.append(key, data[key]);
+          } else if (Array.isArray(data[key])) {
+            // Handle arrays (like includes, excludes, requirements)
+            data[key].forEach((item: any, index: number) => {
+              formData.append(`${key}[${index}]`, item);
+            });
+          } else if (data[key] !== null && data[key] !== undefined) {
+            formData.append(key, data[key].toString());
+          }
+        });
+        
+        return await apiRequest<Experience>(`experiences/${id}/`, {
+          method: 'PUT',
+          body: formData,
+          headers: {
+            // Don't set Content-Type - let browser set it with boundary
+          },
+        });
+      } else {
+        // Use JSON for non-file data
+        return await apiRequest<Experience>(`experiences/${id}/`, {
+          method: 'PUT',
+          body: JSON.stringify(data),
+        });
+      }
     },
 
     delete: async (id: number): Promise<void> => {
@@ -632,7 +683,7 @@ export const unifiedApi = {
 
   // Search
   search: {
-    global: async (query: string): Promise<{ properties: Property[]; packages: Package[] }> => {
+    global: async (query: string): Promise<{ properties: any[]; packages: any[] }> => {
       if (!query.trim()) {
         return { properties: [], packages: [] };
       }

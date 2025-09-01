@@ -428,7 +428,7 @@ export const securityMonitor = {
     console.warn(`🔒 Security Event: ${event}`, details);
     
     // In production, send to security monitoring service
-    if (process.env.NODE_ENV === 'production') {
+    if (import.meta.env.PROD) {
       // Send to your security monitoring service
       fetch('/api/security/events', {
         method: 'POST',

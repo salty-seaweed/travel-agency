@@ -1,7 +1,7 @@
 // UI Components
 export { Card } from './Card';
 export { Button } from './Button';
-export { PropertyCard } from './ui/PropertyCard';
+// export { PropertyCard } from './ui/PropertyCard'; // Removed - focusing on destinations and experiences
 export { PackageCard } from './ui/PackageCard';
 export { SearchFilters } from './ui/SearchFilters';
 export { LoadingSpinner } from './LoadingSpinner';
@@ -22,8 +22,7 @@ export { default as Layout } from './Layout';
 
 // Page Components
 // export { HomePage } from './HomePage'; // Removed - moved to backup
-export { PropertyListPage } from './PropertyListPage';
-export { PropertyDetailPage } from './PropertyDetailPage';
+// Property components removed - focusing on destinations and experiences
 export { BookingPage } from './BookingPage';
 export { PackagesPage } from './PackagesPage';
 export { ContactPage } from './ContactPage';
@@ -51,7 +50,7 @@ export { CustomerProtectedRoute } from './auth/CustomerProtectedRoute';
 // Admin Components
 export { AdminDashboard } from './admin/AdminDashboard';
 export { AdminLayout } from './admin/AdminLayout';
-export { AdminProperties } from './admin/AdminProperties';
+// export { AdminProperties } from './admin/AdminProperties'; // Removed - focusing on destinations and experiences
 export { AdminPackages } from './admin/AdminPackages';
 export { AdminReviews } from './admin/AdminReviews';
 export { AdminSettings } from './admin/AdminSettings';
@@ -60,7 +59,7 @@ export { AdminAnalytics } from './admin/AdminAnalytics';
 
 // Admin Settings Components
 export { default as AdminAmenities } from './admin/settings/AdminAmenities';
-export { default as AdminPropertyTypes } from './admin/settings/AdminPropertyTypes';
+// export { default as AdminPropertyTypes } from './admin/settings/AdminPropertyTypes'; // Removed - focusing on destinations and experiences
 export { default as AdminLocations } from './admin/settings/AdminLocations';
 
 // Utility Components

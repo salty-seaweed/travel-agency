@@ -1,4 +1,7 @@
 from rest_framework import serializers
+from django.core.files.base import ContentFile
+import requests
+import os
 from .models import (
     PropertyType, Amenity, Location, Destination, Experience, PropertyImage, Property, Package, PackageImage, Review, 
     Booking, Availability, Customer, Page, PageBlock, MediaAsset, Menu, MenuItem, 
@@ -9,6 +12,43 @@ from .models import (
     PageHero, Language, TranslationKey, Translation, CulturalContent, RegionalSettings, LocalizedPage, LocalizedFAQ,
     AboutPageContent, AboutPageValue, AboutPageStatistic, FeaturedDestination
 )
+
+class FlexibleImageField(serializers.ImageField):
+    """Custom image field that can handle both file uploads and URL strings"""
+    
+    def to_internal_value(self, data):
+        if data is None:
+            return None
+            
+        # If it's already a file, use the parent method
+        if hasattr(data, 'read'):
+            return super().to_internal_value(data)
+        
+        # If it's a string (URL), download and create a file
+        if isinstance(data, str):
+            try:
+                # Check if it's a URL
+                if data.startswith('http') or data.startswith('/'):
+                    # Download the image
+                    response = requests.get(data, timeout=30)
+                    response.raise_for_status()
+                    
+                    # Get filename from URL or use a default
+                    filename = os.path.basename(data.split('?')[0])
+                    if not filename or '.' not in filename:
+                        filename = 'image.jpg'
+                    
+                    # Create a ContentFile from the downloaded data
+                    content_file = ContentFile(response.content, name=filename)
+                    return super().to_internal_value(content_file)
+                else:
+                    # It's a file path, return as is
+                    return data
+            except Exception as e:
+                raise serializers.ValidationError(f"Invalid image URL: {str(e)}")
+        
+        # For any other type, use the parent method
+        return super().to_internal_value(data)
 
 class PropertyTypeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -28,6 +68,7 @@ class LocationSerializer(serializers.ModelSerializer):
 class DestinationSerializer(serializers.ModelSerializer):
     property_count = serializers.SerializerMethodField()
     package_count = serializers.SerializerMethodField()
+    image = FlexibleImageField(required=False, allow_null=True)
     
     class Meta:
         model = Destination
@@ -68,6 +109,7 @@ class PageHeroSerializer(serializers.ModelSerializer):
 class ExperienceSerializer(serializers.ModelSerializer):
     destination = DestinationSerializer(read_only=True)
     destination_id = serializers.PrimaryKeyRelatedField(queryset=Destination.objects.all(), source='destination', write_only=True)
+    image = FlexibleImageField(required=False, allow_null=True)
     
     class Meta:
         model = Experience

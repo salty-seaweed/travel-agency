@@ -211,7 +211,7 @@ export function FAQPage() {
         {/* Background Image */}
         <div className="absolute inset-0">
           <img
-            src={hero?.image_url || "/images/ishan113.jpg"}
+            src={hero?.image_url || "/images/optimized/medium/ishan113.webp"}
             alt="Maldives FAQ Background"
             className="w-full h-full object-cover"
           />

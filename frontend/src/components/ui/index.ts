@@ -9,5 +9,5 @@ export { default as ResponsiveButton } from './ResponsiveButton';
 export { default as Button } from './Button';
 export { default as Card } from './Card';
 export { default as PackageCard } from './PackageCard';
-export { PropertyCard } from './PropertyCard';
+// export { PropertyCard } from './PropertyCard'; // Removed - focusing on destinations and experiences
 export { default as SearchFilters } from './SearchFilters'; 

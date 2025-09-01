@@ -25,7 +25,7 @@ export function GoogleMap({ destinations, height = 360, apiKey }: GoogleMapProps
   useEffect(() => {
     const loadGoogleMaps = () => {
       // Check if we have a valid API key
-      const googleApiKey = apiKey || process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
+      const googleApiKey = apiKey || import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
       
       // If no valid API key, skip Google Maps but still show journey route
       if (!googleApiKey || googleApiKey === 'AIzaSyBFw0Qbyq9zTFTd-tUY6dOWTgHz-TrU_T4') {

@@ -12,8 +12,7 @@
     "build:vercel": "node build-low-memory.js",
     "build:fast": "NODE_OPTIONS='--max-old-space-size=4096' vite build --mode production --emptyOutDir --minify false",
     "postbuild": "echo 'Build completed - no additional dependencies needed'",
-
-
+    "optimize-images": "node scripts/optimize-images.js",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -59,6 +58,11 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.2.0",
+    "imagemin": "^8.0.1",
+    "imagemin-mozjpeg": "^10.0.0",
+    "imagemin-pngquant": "^9.0.2",
+    "imagemin-webp": "^8.0.0",
+    "sharp": "^0.33.5",
     "typescript-eslint": "^8.34.1"
   }
 }

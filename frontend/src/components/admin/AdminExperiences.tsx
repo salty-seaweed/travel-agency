@@ -53,7 +53,12 @@ import {
   Tooltip,
   Flex,
   Spacer,
-  Divider
+  Divider,
+  Tabs,
+  TabList,
+  TabPanels,
+  Tab,
+  TabPanel
 } from '@chakra-ui/react';
 import {
   PlusIcon,
@@ -67,10 +72,12 @@ import {
   UsersIcon,
   MapPinIcon,
   StarIcon,
-  FireIcon
+  FireIcon,
+  PhotoIcon
 } from '@heroicons/react/24/outline';
 import { useExperiences, useDestinations, useLocations, useCreateExperience, useUpdateExperience, useDeleteExperience } from '../../hooks/useQueries';
 import { LoadingSpinner } from '../LoadingSpinner';
+import { ImageUpload } from './ImageUpload';
 import type { Experience, Destination, Location } from '../../types';
 
 interface ExperienceFormData {
@@ -89,6 +96,19 @@ interface ExperienceFormData {
   requirements: string[];
   is_featured: boolean;
   is_active: boolean;
+  image?: string | null;
+}
+
+interface ImageFile {
+  id: string;
+  file?: File;
+  name: string;
+  size: number;
+  url?: string;
+  isUploading: boolean;
+  uploadProgress: number;
+  isFeatured: boolean;
+  isNew: boolean;
 }
 
 export function AdminExperiences() {
@@ -132,6 +152,9 @@ export function AdminExperiences() {
       is_featured: false,
       is_active: true,
     });
+
+    const [images, setImages] = useState<ImageFile[]>([]);
+    const [activeTab, setActiveTab] = useState(0);
 
   const [newInclude, setNewInclude] = useState('');
   const [newExclude, setNewExclude] = useState('');
@@ -190,12 +213,49 @@ export function AdminExperiences() {
         is_featured: false,
         is_active: true,
       });
+    setImages([]);
     onOpen();
   };
 
   const handleEdit = (experience: Experience) => {
     setEditingExperience(experience);
     setIsCreating(false);
+    
+    // Load form data
+    setFormData({
+      name: experience.name,
+      description: experience.description,
+      experience_type: experience.experience_type,
+      duration: experience.duration,
+      price: experience.price.toString(),
+      currency: experience.currency,
+      destination_id: experience.destination?.id || null,
+      max_participants: experience.max_participants,
+      min_age: experience.min_age,
+      difficulty_level: experience.difficulty_level,
+      includes: experience.includes || [],
+      excludes: experience.excludes || [],
+      requirements: experience.requirements || [],
+      is_featured: experience.is_featured,
+      is_active: experience.is_active,
+    });
+    
+    // Load existing images if any
+    if (experience.image) {
+      setImages([{
+        id: 'existing-image',
+        name: 'Current image',
+        size: 0,
+        url: experience.image,
+        isUploading: false,
+        uploadProgress: 0,
+        isFeatured: true,
+        isNew: false,
+      }]);
+    } else {
+      setImages([]);
+    }
+    
     onOpen();
   };
 
@@ -244,15 +304,46 @@ export function AdminExperiences() {
     }
 
     try {
+      // Check if we have new images that need to be uploaded
+      const newImages = images.filter(img => img.isNew && img.file);
+      
+      // Create experience data
+      const experienceData: any = {
+        name: formData.name,
+        description: formData.description,
+        experience_type: formData.experience_type,
+        duration: formData.duration,
+        price: formData.price,
+        currency: formData.currency,
+        destination_id: formData.destination_id,
+        max_participants: formData.max_participants,
+        min_age: formData.min_age,
+        difficulty_level: formData.difficulty_level,
+        includes: formData.includes,
+        excludes: formData.excludes,
+        requirements: formData.requirements,
+        is_featured: formData.is_featured,
+        is_active: formData.is_active,
+      };
+
+      // Add image data - either File object for new uploads or URL for existing
+      if (newImages.length > 0) {
+        // Use the File object directly for new uploads
+        experienceData.image = newImages[0].file!;
+      } else if (images.length > 0 && images[0].url) {
+        // Use existing image URL
+        experienceData.image = images[0].url;
+      }
+
       if (isCreating) {
-        await createExperience.mutateAsync(formData);
+        await createExperience.mutateAsync(experienceData);
         toast({
           title: 'Experience created',
           status: 'success',
           duration: 3000,
         });
       } else if (editingExperience) {
-        await updateExperience.mutateAsync({ id: editingExperience.id, data: formData });
+        await updateExperience.mutateAsync({ id: editingExperience.id, data: experienceData });
         toast({
           title: 'Experience updated',
           status: 'success',
@@ -556,16 +647,30 @@ export function AdminExperiences() {
             </ModalHeader>
             <ModalCloseButton />
             <ModalBody pb={6}>
-              <VStack spacing={6}>
-                {/* Form Header */}
-                <Box w="full" p={4} bg="blue.50" borderRadius="md" border="1px solid" borderColor="blue.200">
-                  <Text fontSize="sm" color="blue.800" fontWeight="medium">
-                    📋 Required Fields: Experience Name, Description, Type, Duration, Price, Currency, Destination, and Difficulty Level
-                  </Text>
-                  <Text fontSize="xs" color="blue.600" mt={1}>
-                    Fields marked with * are required. Destination refers to the specific island/atoll where the experience takes place.
-                  </Text>
-                </Box>
+              <Tabs index={activeTab} onChange={setActiveTab}>
+                <TabList>
+                  <Tab>Basic Information</Tab>
+                  <Tab>
+                    <HStack spacing={2}>
+                      <PhotoIcon className="w-4 h-4" />
+                      <Text>Images</Text>
+                    </HStack>
+                  </Tab>
+                </TabList>
+
+                <TabPanels>
+                  {/* Basic Information Tab */}
+                  <TabPanel>
+                    <VStack spacing={6}>
+                      {/* Form Header */}
+                      <Box w="full" p={4} bg="blue.50" borderRadius="md" border="1px solid" borderColor="blue.200">
+                        <Text fontSize="sm" color="blue.800" fontWeight="medium">
+                          📋 Required Fields: Experience Name, Description, Type, Duration, Price, Currency, Destination, and Difficulty Level
+                        </Text>
+                        <Text fontSize="xs" color="blue.600" mt={1}>
+                          Fields marked with * are required. Destination refers to the specific island/atoll where the experience takes place.
+                        </Text>
+                      </Box>
                 {/* Basic Information */}
                 <FormControl isRequired>
                   <FormLabel>Experience Name *</FormLabel>
@@ -818,19 +923,57 @@ export function AdminExperiences() {
                 </HStack>
 
                 {/* Actions */}
-                <HStack spacing={4} w="full" justify="flex-end">
-                  <Button onClick={onClose}>Cancel</Button>
-                  <Button 
-                    colorScheme="blue" 
-                    onClick={handleSubmit}
-                    isLoading={createExperience.isPending || updateExperience.isPending}
-                    loadingText={isCreating ? 'Creating...' : 'Updating...'}
-                    isDisabled={!isFormValid()}
-                  >
-                    {isCreating ? 'Create Experience' : 'Update Experience'}
-                  </Button>
-                </HStack>
-              </VStack>
+                      <HStack spacing={4} w="full" justify="flex-end">
+                        <Button onClick={onClose}>Cancel</Button>
+                        <Button 
+                          colorScheme="blue" 
+                          onClick={handleSubmit}
+                          isLoading={createExperience.isPending || updateExperience.isPending}
+                          loadingText={isCreating ? 'Creating...' : 'Updating...'}
+                          isDisabled={!isFormValid()}
+                        >
+                          {isCreating ? 'Create Experience' : 'Update Experience'}
+                        </Button>
+                      </HStack>
+                    </VStack>
+                  </TabPanel>
+
+                  {/* Images Tab */}
+                  <TabPanel>
+                    <VStack spacing={6}>
+                      <Box w="full">
+                        <Text fontSize="lg" fontWeight="medium" mb={4}>
+                          Experience Images
+                        </Text>
+                        <Text color="gray.600" mb={4}>
+                          Upload high-quality images of this experience. The first image will be used as the featured image.
+                        </Text>
+                        <ImageUpload
+                          images={images}
+                          onImagesChange={setImages}
+                          maxImages={5}
+                          maxFileSize={5}
+                          title="Experience Images"
+                          description="Upload images showcasing this experience"
+                        />
+                      </Box>
+
+                      <HStack spacing={4} w="full" justify="flex-end">
+                        <Button onClick={onClose}>Cancel</Button>
+                        <Button 
+                          colorScheme="blue" 
+                          onClick={handleSubmit}
+                          isLoading={createExperience.isPending || updateExperience.isPending}
+                          loadingText={isCreating ? 'Creating...' : 'Updating...'}
+                          isDisabled={!isFormValid()}
+                        >
+                          {isCreating ? 'Create Experience' : 'Update Experience'}
+                        </Button>
+                      </HStack>
+                    </VStack>
+                  </TabPanel>
+                </TabPanels>
+              </Tabs>
             </ModalBody>
           </ModalContent>
         </Modal>

@@ -48,11 +48,13 @@ import {
   EyeSlashIcon,
   StarIcon,
   MapIcon,
+  PhotoIcon,
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
-import { useDestinations } from '../../hooks/useQueries';
+import { useDestinations, useCreateDestination, useUpdateDestination, useDeleteDestination } from '../../hooks/useQueries';
 import { LoadingSpinner } from '../LoadingSpinner';
 import { LocationMapPicker } from './LocationMapPicker';
+import { ImageUpload } from './ImageUpload';
 import type { Destination } from '../../types';
 
 interface DestinationFormData {
@@ -64,6 +66,19 @@ interface DestinationFormData {
   longitude?: number;
   is_featured: boolean;
   is_active: boolean;
+  image?: string | null;
+}
+
+interface ImageFile {
+  id: string;
+  file?: File;
+  name: string;
+  size: number;
+  url?: string;
+  isUploading: boolean;
+  uploadProgress: number;
+  isFeatured: boolean;
+  isNew: boolean;
 }
 
 export function AdminDestinations() {
@@ -79,6 +94,7 @@ export function AdminDestinations() {
     is_featured: false,
     is_active: true,
   });
+  const [images, setImages] = useState<ImageFile[]>([]);
   const [activeTab, setActiveTab] = useState(0);
   const toast = useToast();
 
@@ -91,6 +107,9 @@ export function AdminDestinations() {
   };
   
   const { data: destinations, isLoading, error, refetch } = useDestinations();
+  const createDestination = useCreateDestination();
+  const updateDestination = useUpdateDestination();
+  const deleteDestination = useDeleteDestination();
   
   const bgColor = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
@@ -108,6 +127,23 @@ export function AdminDestinations() {
       is_featured: destination.is_featured,
       is_active: destination.is_active,
     });
+    
+    // Load existing images if any
+    if (destination.image) {
+      setImages([{
+        id: 'existing-image',
+        name: 'Current image',
+        size: 0,
+        url: destination.image,
+        isUploading: false,
+        uploadProgress: 0,
+        isFeatured: true,
+        isNew: false,
+      }]);
+    } else {
+      setImages([]);
+    }
+    
     setActiveTab(0);
     onOpen();
   };
@@ -124,39 +160,54 @@ export function AdminDestinations() {
       is_featured: false,
       is_active: true,
     });
+    setImages([]);
     setActiveTab(0);
     onOpen();
   };
 
   const handleSubmit = async () => {
     try {
-      const url = editingDestination 
-        ? `/api/destinations/${editingDestination.id}/`
-        : '/api/destinations/';
+      // Check if we have new images that need to be uploaded
+      const newImages = images.filter(img => img.isNew && img.file);
       
-      const method = editingDestination ? 'PUT' : 'POST';
-      
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('access')}`,
-        },
-        body: JSON.stringify(formData),
-      });
+      // Create destination data
+      const destinationData: any = {
+        name: formData.name,
+        description: formData.description,
+        island: formData.island,
+        atoll: formData.atoll,
+        latitude: formData.latitude,
+        longitude: formData.longitude,
+        is_featured: formData.is_featured,
+        is_active: formData.is_active,
+      };
 
-      if (!response.ok) {
-        throw new Error('Failed to save destination');
+      // Add image data - either File object for new uploads or URL for existing
+      if (newImages.length > 0) {
+        // Use the File object directly for new uploads
+        destinationData.image = newImages[0].file!;
+      } else if (images.length > 0 && images[0].url) {
+        // Use existing image URL
+        destinationData.image = images[0].url;
       }
 
-      toast({
-        title: editingDestination ? 'Destination updated' : 'Destination created',
-        status: 'success',
-        duration: 3000,
-      });
+      if (editingDestination) {
+        await updateDestination.mutateAsync({ id: editingDestination.id, data: destinationData });
+        toast({
+          title: 'Destination updated',
+          status: 'success',
+          duration: 3000,
+        });
+      } else {
+        await createDestination.mutateAsync(destinationData);
+        toast({
+          title: 'Destination created',
+          status: 'success',
+          duration: 3000,
+        });
+      }
 
       onClose();
-      refetch();
     } catch (error) {
       toast({
         title: 'Error',
@@ -173,24 +224,12 @@ export function AdminDestinations() {
     }
 
     try {
-      const response = await fetch(`/api/destinations/${id}/`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('access')}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete destination');
-      }
-
+      await deleteDestination.mutateAsync(id);
       toast({
         title: 'Destination deleted',
         status: 'success',
         duration: 3000,
       });
-
-      refetch();
     } catch (error) {
       toast({
         title: 'Error',
@@ -272,7 +311,7 @@ export function AdminDestinations() {
                   <Td>{destination.island}</Td>
                   <Td>{destination.atoll}</Td>
                   <Td>
-                    <Badge colorScheme="blue">{destination.property_count}</Badge>
+                    <Badge colorScheme="blue">{(destination as any).property_count || 0}</Badge>
                   </Td>
                   <Td>
                     <Badge colorScheme="green">{destination.package_count}</Badge>
@@ -329,6 +368,12 @@ export function AdminDestinations() {
                     <HStack spacing={2}>
                       <MapIcon className="w-4 h-4" />
                       <Text>Location</Text>
+                    </HStack>
+                  </Tab>
+                  <Tab>
+                    <HStack spacing={2}>
+                      <PhotoIcon className="w-4 h-4" />
+                      <Text>Images</Text>
                     </HStack>
                   </Tab>
                 </TabList>
@@ -398,7 +443,13 @@ export function AdminDestinations() {
                         <Button onClick={onClose} flex={1}>
                           Cancel
                         </Button>
-                        <Button colorScheme="blue" onClick={handleSubmit} flex={1}>
+                        <Button 
+                          colorScheme="blue" 
+                          onClick={handleSubmit} 
+                          flex={1}
+                          isLoading={createDestination.isPending || updateDestination.isPending}
+                          loadingText={editingDestination ? 'Updating...' : 'Creating...'}
+                        >
                           {editingDestination ? 'Update' : 'Create'}
                         </Button>
                       </HStack>
@@ -424,7 +475,50 @@ export function AdminDestinations() {
                         <Button onClick={onClose} flex={1}>
                           Cancel
                         </Button>
-                        <Button colorScheme="blue" onClick={handleSubmit} flex={1}>
+                        <Button 
+                          colorScheme="blue" 
+                          onClick={handleSubmit} 
+                          flex={1}
+                          isLoading={createDestination.isPending || updateDestination.isPending}
+                          loadingText={editingDestination ? 'Updating...' : 'Creating...'}
+                        >
+                          {editingDestination ? 'Update' : 'Create'}
+                        </Button>
+                      </HStack>
+                    </VStack>
+                  </TabPanel>
+
+                  {/* Images Tab */}
+                  <TabPanel>
+                    <VStack spacing={6}>
+                      <Box w="full">
+                        <Text fontSize="lg" fontWeight="medium" mb={4}>
+                          Destination Images
+                        </Text>
+                        <Text color="gray.600" mb={4}>
+                          Upload high-quality images of this destination. The first image will be used as the featured image.
+                        </Text>
+                        <ImageUpload
+                          images={images}
+                          onImagesChange={setImages}
+                          maxImages={5}
+                          maxFileSize={5}
+                          title="Destination Images"
+                          description="Upload images showcasing this destination"
+                        />
+                      </Box>
+
+                      <HStack spacing={4} w="full" pt={4}>
+                        <Button onClick={onClose} flex={1}>
+                          Cancel
+                        </Button>
+                        <Button 
+                          colorScheme="blue" 
+                          onClick={handleSubmit} 
+                          flex={1}
+                          isLoading={createDestination.isPending || updateDestination.isPending}
+                          loadingText={editingDestination ? 'Updating...' : 'Creating...'}
+                        >
                           {editingDestination ? 'Update' : 'Create'}
                         </Button>
                       </HStack>

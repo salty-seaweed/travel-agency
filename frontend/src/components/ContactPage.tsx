@@ -122,7 +122,7 @@ export function ContactPage() {
         {/* Background Image (Admin-controlled) */}
         <Box position="absolute" top={0} left={0} right={0} bottom={0}>
           <Image
-            src={hero?.image_url || '/images/ishan115.jpg'}
+            src={hero?.image_url || '/images/optimized/medium/ishan115.webp'}
             alt={hero?.title || 'Maldives Contact Background'}
             w="full"
             h="full"

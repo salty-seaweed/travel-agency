@@ -28,7 +28,7 @@ interface PerformanceMonitorProps {
 
 export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = React.memo(({ 
   children, 
-  enabled = process.env.NODE_ENV === 'development' 
+  enabled = import.meta.env.DEV 
 }) => {
   const startTime = useRef<number>(Date.now());
   

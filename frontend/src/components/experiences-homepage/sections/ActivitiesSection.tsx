@@ -203,7 +203,7 @@ export const ExperiencesActivitiesSection: React.FC<ExperiencesActivitiesSection
                 >
                   <Box position="relative" h="200px">
                     <Image
-                      src={experience.image || `/images/ishan${experience.id + 50}.jpg`}
+                      src={experience.image || `/images/optimized/medium/ishan${experience.id + 50}.webp`}
                       alt={experience.name}
                       w="full"
                       h="full"

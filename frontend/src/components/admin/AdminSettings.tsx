@@ -18,7 +18,7 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react';
 import { AdminAmenities } from './settings/AdminAmenities';
-import { AdminPropertyTypes } from './settings/AdminPropertyTypes';
+// import { AdminPropertyTypes } from './settings/AdminPropertyTypes'; // Removed - focusing on destinations and experiences
 import { AdminLocations } from './settings/AdminLocations';
 import { AdminContactSettings } from './settings/AdminContactSettings';
 import {
@@ -40,7 +40,7 @@ export function AdminSettings() {
 
   const tabs = [
     { id: 'amenities', name: 'Amenities', icon: SparklesIcon, color: 'purple' },
-    { id: 'types', name: 'Property Types', icon: HomeIcon, color: 'blue' },
+    // { id: 'types', name: 'Property Types', icon: HomeIcon, color: 'blue' }, // Removed - focusing on destinations and experiences
     { id: 'locations', name: 'Locations', icon: MapPinIcon, color: 'emerald' },
     { id: 'contact', name: 'Contact', icon: WrenchScrewdriverIcon, color: 'pink' },
   ];
@@ -77,7 +77,7 @@ export function AdminSettings() {
       <Container maxW="7xl">
         <Card bg={cardBg} borderColor={borderColor} borderWidth="1px">
           <Tabs variant="enclosed" onChange={(index) => {
-            const tabIds = ['amenities', 'types', 'locations', 'contact'];
+            const tabIds = ['amenities', 'locations', 'contact']; // Removed 'types'
             setActiveTab(tabIds[index] as any);
           }} defaultIndex={0}>
             <TabList borderBottom="1px solid" borderColor={borderColor}>
@@ -105,9 +105,7 @@ export function AdminSettings() {
               <TabPanel p={6}>
                 <AdminAmenities />
               </TabPanel>
-              <TabPanel p={6}>
-                <AdminPropertyTypes />
-              </TabPanel>
+              {/* Property Types tab removed - focusing on destinations and experiences */}
               <TabPanel p={6}>
                 <AdminLocations />
               </TabPanel>

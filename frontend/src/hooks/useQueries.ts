@@ -38,6 +38,7 @@ const queryKeys = {
   },
 };
 import { unifiedApi } from '../services/unified-api';
+import { config } from '../config';
 import { whatsappBooking } from '../services/whatsapp-booking';
 import type { 
   Package, 
@@ -72,61 +73,61 @@ const criticalQueryOptions = {
   retryDelay: (attemptIndex: number) => Math.min(1000 * 2 ** attemptIndex, 10000),
 };
 
-// Properties hooks
-export const useProperties = (filters?: any) => {
-  return useQuery({
-    queryKey: queryKeys.properties.list(filters),
-    queryFn: () => unifiedApi.properties.getAll(filters),
-    ...defaultQueryOptions,
-  });
-};
+// Properties hooks - commented out since properties section removed from unified API
+// export const useProperties = (filters?: any) => {
+//   return useQuery({
+//     queryKey: queryKeys.properties.list(filters),
+//     queryFn: () => unifiedApi.properties.getAll(filters),
+//     ...defaultQueryOptions,
+//   });
+// };
 
-export const useFeaturedProperties = () => {
-  const query = useQuery({
-    queryKey: queryKeys.properties.featured(),
-    queryFn: () => {
-      console.log('🔍 [MOBILE DEBUG] Fetching featured properties...');
-      return unifiedApi.properties.getFeatured();
-    },
-    staleTime: 30 * 60 * 1000, // 30 minutes for featured content
-    gcTime: 60 * 60 * 1000, // 1 hour
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    refetchOnReconnect: true,
-    // Add placeholder data for better perceived performance
-    placeholderData: (previousData) => previousData,
-  });
+// export const useFeaturedProperties = () => {
+//   const query = useQuery({
+//     queryKey: queryKeys.properties.featured(),
+//     queryFn: () => {
+//       console.log('🔍 [MOBILE DEBUG] Fetching featured properties...');
+//       return unifiedApi.properties.getFeatured();
+//     },
+//     staleTime: 30 * 60 * 1000, // 30 minutes for featured content
+//     gcTime: 60 * 60 * 1000, // 1 hour
+//     refetchOnWindowFocus: false,
+//     refetchOnMount: false,
+//     refetchOnReconnect: true,
+//     // Add placeholder data for better perceived performance
+//     placeholderData: (previousData) => previousData,
+//   });
 
-  // Debug logging
-  if (query.isSuccess) {
-    console.log('✅ [MOBILE DEBUG] Featured properties loaded:', query.data?.length || 0, 'items');
-  }
-  if (query.isError) {
-    console.error('❌ [MOBILE DEBUG] Featured properties error:', query.error);
-  }
+//   // Debug logging
+//   if (query.isSuccess) {
+//     console.log('✅ [MOBILE DEBUG] Featured properties loaded:', query.data?.length || 0, 'items');
+//   }
+//   if (query.isError) {
+//     console.error('❌ [MOBILE DEBUG] Featured properties error:', query.error);
+//   }
 
-  return query;
-};
+//   return query;
+// };
 
-export const useProperty = (id: number) => {
-  return useQuery({
-    queryKey: queryKeys.properties.detail(id),
-    queryFn: () => unifiedApi.properties.getById(id),
-    enabled: !!id,
-    staleTime: 10 * 60 * 1000, // 10 minutes
-    gcTime: 30 * 60 * 1000, // 30 minutes
-  });
-};
+// export const useProperty = (id: number) => {
+//   return useQuery({
+//     queryKey: queryKeys.properties.detail(id),
+//     queryFn: () => unifiedApi.properties.getById(id),
+//     enabled: !!id,
+//     staleTime: 10 * 60 * 1000, // 10 minutes
+//     gcTime: 30 * 60 * 1000, // 30 minutes
+//   });
+// };
 
-export const usePropertyReviews = (propertyId: number) => {
-  return useQuery({
-    queryKey: queryKeys.properties.reviews(propertyId),
-    queryFn: () => unifiedApi.properties.getReviews(propertyId),
-    enabled: !!propertyId,
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    gcTime: 5 * 60 * 1000, // 5 minutes
-  });
-};
+// export const usePropertyReviews = (propertyId: number) => {
+//   return useQuery({
+//     queryKey: queryKeys.properties.reviews(propertyId),
+//     queryFn: () => unifiedApi.properties.getReviews(propertyId),
+//     enabled: !!propertyId,
+//     staleTime: 2 * 60 * 1000, // 2 minutes
+//     gcTime: 5 * 60 * 1000, // 5 minutes
+//   });
+// };
 
 // Packages hooks
 export const usePackages = (filters?: PackageFilters) => {
@@ -314,6 +315,52 @@ export const useDeleteExperience = () => {
   });
 };
 
+export const useCreateDestination = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: (data: any) => unifiedApi.destinations.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['destinations'] });
+      queryClient.invalidateQueries({ queryKey: ['destinations', 'featured'] });
+    },
+    onError: (error) => {
+      console.error('Failed to create destination:', error);
+    },
+  });
+};
+
+export const useUpdateDestination = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: any }) => 
+      unifiedApi.destinations.update(id, data),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ['destinations'] });
+      queryClient.invalidateQueries({ queryKey: ['destinations', 'featured'] });
+    },
+    onError: (error) => {
+      console.error('Failed to update destination:', error);
+    },
+  });
+};
+
+export const useDeleteDestination = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: (id: number) => unifiedApi.destinations.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['destinations'] });
+      queryClient.invalidateQueries({ queryKey: ['destinations', 'featured'] });
+    },
+    onError: (error) => {
+      console.error('Failed to delete destination:', error);
+    },
+  });
+};
+
 // Search hooks
 export const useGlobalSearch = (query: string) => {
   return useQuery({
@@ -326,49 +373,50 @@ export const useGlobalSearch = (query: string) => {
 };
 
 // Mutation hooks for data modifications
-export const useCreateProperty = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: (data: any) => unifiedApi.properties.create(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.properties.all });
-    },
-    onError: (error) => {
-      console.error('Failed to create property:', error);
-    },
-  });
-};
+// Property mutations commented out since properties section removed from unified API
+// export const useCreateProperty = () => {
+//   const queryClient = useQueryClient();
+//   
+//   return useMutation({
+//     mutationFn: (data: any) => unifiedApi.properties.create(data),
+//     onSuccess: () => {
+//       queryClient.invalidateQueries({ queryKey: queryKeys.properties.all });
+//     },
+//     onError: (error) => {
+//       console.error('Failed to create property:', error);
+//     },
+//   });
+// };
 
-export const useUpdateProperty = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: any }) => 
-      unifiedApi.properties.update(id, data),
-    onSuccess: (_, { id }) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.properties.detail(id) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.properties.all });
-    },
-    onError: (error) => {
-      console.error('Failed to update property:', error);
-    },
-  });
-};
+// export const useUpdateProperty = () => {
+//   const queryClient = useQueryClient();
+//   
+//   return useMutation({
+//     mutationFn: ({ id, data }: { id: number; data: any }) => 
+//       unifiedApi.properties.update(id, data),
+//     onSuccess: (_, { id }) => {
+//       queryClient.invalidateQueries({ queryKey: queryKeys.properties.detail(id) });
+//       queryClient.invalidateQueries({ queryKey: queryKeys.properties.all });
+//     },
+//     onError: (error) => {
+//       console.error('Failed to update property:', error);
+//     },
+//   });
+// };
 
-export const useDeleteProperty = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: (id: number) => unifiedApi.properties.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.properties.all });
-    },
-    onError: (error) => {
-      console.error('Failed to delete property:', error);
-    },
-  });
-};
+// export const useDeleteProperty = () => {
+//   const queryClient = useQueryClient();
+//   
+//   return useMutation({
+//     mutationFn: (id: number) => unifiedApi.properties.delete(id),
+//     onSuccess: () => {
+//       queryClient.invalidateQueries({ queryKey: queryKeys.properties.all });
+//     },
+//     onError: (error) => {
+//       console.error('Failed to delete property:', error);
+//     },
+//   });
+// };
 
 export const useCreatePackage = () => {
   const queryClient = useQueryClient();
@@ -516,14 +564,14 @@ export const useOptimisticFavorite = () => {
 export const usePrefetchRelatedData = () => {
   const queryClient = useQueryClient();
   
-  const prefetchPropertyDetails = (id: number) => {
-    queryClient.prefetchQuery({
-      queryKey: queryKeys.properties.detail(id),
-      queryFn: () => unifiedApi.properties.getById(id),
-      staleTime: 10 * 60 * 1000,
-      gcTime: 30 * 60 * 1000,
-    });
-  };
+  // const prefetchPropertyDetails = (id: number) => {
+  //   queryClient.prefetchQuery({
+  //     queryKey: queryKeys.properties.detail(id),
+  //     queryFn: () => unifiedApi.properties.getById(id),
+  //     staleTime: 10 * 60 * 1000,
+  //     gcTime: 30 * 60 * 1000,
+  //   });
+  // };
   
   const prefetchPackageDetails = (id: number) => {
     queryClient.prefetchQuery({
@@ -536,12 +584,12 @@ export const usePrefetchRelatedData = () => {
 
   const prefetchCriticalData = () => {
     // Prefetch critical data for better performance
-    queryClient.prefetchQuery({
-      queryKey: queryKeys.properties.featured(),
-      queryFn: () => unifiedApi.properties.getFeatured(),
-      staleTime: 30 * 60 * 1000,
-      gcTime: 60 * 60 * 1000,
-    });
+    // queryClient.prefetchQuery({
+    //   queryKey: queryKeys.properties.featured(),
+    //   queryFn: () => unifiedApi.properties.getFeatured(),
+    //   staleTime: 30 * 60 * 1000,
+    //   gcTime: 60 * 60 * 1000,
+    // });
 
     queryClient.prefetchQuery({
       queryKey: queryKeys.packages.featured(),
@@ -552,7 +600,7 @@ export const usePrefetchRelatedData = () => {
   };
   
   return {
-    prefetchPropertyDetails,
+    // prefetchPropertyDetails,
     prefetchPackageDetails,
     prefetchCriticalData,
   };
@@ -560,19 +608,19 @@ export const usePrefetchRelatedData = () => {
 
 // Optimized batch data fetcher for homepage with better performance
 export const useHomepageData = () => {
-  const propertiesQuery = useFeaturedProperties();
+  // const propertiesQuery = useFeaturedProperties();
   const packagesQuery = useFeaturedPackages();
   const reviewsQuery = useReviews(true); // Only approved reviews
   
   return {
-    properties: propertiesQuery.data || [],
+    properties: [], // propertiesQuery.data || [],
     packages: packagesQuery.data || [],
     reviews: reviewsQuery.data || [],
-    isLoading: propertiesQuery.isLoading || packagesQuery.isLoading || reviewsQuery.isLoading,
-    isError: propertiesQuery.isError || packagesQuery.isError || reviewsQuery.isError,
-    error: propertiesQuery.error || packagesQuery.error || reviewsQuery.error,
+    isLoading: packagesQuery.isLoading || reviewsQuery.isLoading,
+    isError: packagesQuery.isError || reviewsQuery.isError,
+    error: packagesQuery.error || reviewsQuery.error,
     // Add individual loading states for progressive loading
-    propertiesLoading: propertiesQuery.isLoading,
+    propertiesLoading: false, // propertiesQuery.isLoading,
     packagesLoading: packagesQuery.isLoading,
     reviewsLoading: reviewsQuery.isLoading,
   };
