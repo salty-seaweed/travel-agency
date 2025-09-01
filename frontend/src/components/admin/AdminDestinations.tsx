@@ -56,6 +56,7 @@ import { LoadingSpinner } from '../LoadingSpinner';
 import { LocationMapPicker } from './LocationMapPicker';
 import { ImageUpload } from './ImageUpload';
 import type { Destination } from '../../types';
+import { getErrorMessage, getValidationErrors, isValidationError, formatFieldName } from '../../utils/errorHandling';
 
 interface DestinationFormData {
   name: string;
@@ -209,12 +210,30 @@ export function AdminDestinations() {
 
       onClose();
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Something went wrong',
-        status: 'error',
-        duration: 5000,
-      });
+      const errorMessage = getErrorMessage(error);
+      const validationErrors = getValidationErrors(error);
+      
+      if (isValidationError(error) && Object.keys(validationErrors).length > 0) {
+        // Show validation errors for specific fields
+        const fieldErrors = Object.entries(validationErrors)
+          .map(([field, message]) => `${formatFieldName(field)}: ${message}`)
+          .join('\n');
+        
+        toast({
+          title: 'Validation Error',
+          description: fieldErrors,
+          status: 'error',
+          duration: 8000,
+          isClosable: true,
+        });
+      } else {
+        toast({
+          title: 'Error',
+          description: errorMessage,
+          status: 'error',
+          duration: 5000,
+        });
+      }
     }
   };
 

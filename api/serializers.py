@@ -20,8 +20,8 @@ class FlexibleImageField(serializers.ImageField):
         if data is None:
             return None
             
-        # If it's already a file, use the parent method
-        if hasattr(data, 'read'):
+        # If it's already a file object, use the parent method directly
+        if hasattr(data, 'read') and hasattr(data, 'name'):
             return super().to_internal_value(data)
         
         # If it's a string (URL), download and create a file
@@ -49,6 +49,17 @@ class FlexibleImageField(serializers.ImageField):
         
         # For any other type, use the parent method
         return super().to_internal_value(data)
+    
+    def to_representation(self, value):
+        """Convert the image to a URL for API responses"""
+        if not value:
+            return None
+        
+        try:
+            # Return the URL of the image
+            return value.url if hasattr(value, 'url') else str(value)
+        except Exception:
+            return None
 
 class PropertyTypeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -73,6 +84,21 @@ class DestinationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Destination
         fields = '__all__'
+    
+    def validate(self, data):
+        """Custom validation for destination data"""
+        # Ensure required fields are present
+        required_fields = ['name', 'description', 'island', 'atoll']
+        for field in required_fields:
+            if not data.get(field):
+                raise serializers.ValidationError(f"{field} is required")
+        
+        # Validate image if provided
+        if 'image' in data and data['image'] is not None:
+            if not hasattr(data['image'], 'read') and not isinstance(data['image'], str):
+                raise serializers.ValidationError("Image must be a file upload or valid URL")
+        
+        return data
     
     def get_property_count(self, obj):
         """Calculate property count dynamically"""
@@ -114,6 +140,25 @@ class ExperienceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Experience
         fields = '__all__'
+    
+    def validate(self, data):
+        """Custom validation for experience data"""
+        # Ensure required fields are present
+        required_fields = ['name', 'description', 'experience_type', 'duration', 'price', 'destination_id']
+        for field in required_fields:
+            if not data.get(field):
+                raise serializers.ValidationError(f"{field} is required")
+        
+        # Validate image if provided
+        if 'image' in data and data['image'] is not None:
+            if not hasattr(data['image'], 'read') and not isinstance(data['image'], str):
+                raise serializers.ValidationError("Image must be a file upload or valid URL")
+        
+        # Validate price is positive
+        if 'price' in data and data['price'] <= 0:
+            raise serializers.ValidationError("Price must be greater than 0")
+        
+        return data
 
 class PropertyImageSerializer(serializers.ModelSerializer):
     class Meta:

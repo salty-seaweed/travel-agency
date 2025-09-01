@@ -79,6 +79,7 @@ import { useExperiences, useDestinations, useLocations, useCreateExperience, use
 import { LoadingSpinner } from '../LoadingSpinner';
 import { ImageUpload } from './ImageUpload';
 import type { Experience, Destination, Location } from '../../types';
+import { getErrorMessage, getValidationErrors, isValidationError, formatFieldName } from '../../utils/errorHandling';
 
 interface ExperienceFormData {
   name: string;
@@ -352,12 +353,30 @@ export function AdminExperiences() {
       }
       onClose();
     } catch (error) {
-      toast({
-        title: 'Error saving experience',
-        description: error instanceof Error ? error.message : 'Please check all required fields',
-        status: 'error',
-        duration: 5000,
-      });
+      const errorMessage = getErrorMessage(error);
+      const validationErrors = getValidationErrors(error);
+      
+      if (isValidationError(error) && Object.keys(validationErrors).length > 0) {
+        // Show validation errors for specific fields
+        const fieldErrors = Object.entries(validationErrors)
+          .map(([field, message]) => `${formatFieldName(field)}: ${message}`)
+          .join('\n');
+        
+        toast({
+          title: 'Validation Error',
+          description: fieldErrors,
+          status: 'error',
+          duration: 8000,
+          isClosable: true,
+        });
+      } else {
+        toast({
+          title: 'Error saving experience',
+          description: errorMessage,
+          status: 'error',
+          duration: 5000,
+        });
+      }
     }
   };
 
