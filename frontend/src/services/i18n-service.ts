@@ -99,7 +99,11 @@ class I18nService {
       const data = await apiPublicGet('/languages/');
       this.supportedLanguages = data;
     } catch (error) {
-      console.error('Error loading supported languages:', error);
+      console.warn('Translation service not available, using defaults');
+      // Provide default languages if backend is not available
+      this.supportedLanguages = [
+        { id: 1, code: 'en', name: 'English', native_name: 'English', flag: '🇺🇸', direction: 'ltr', is_active: true, is_default: true }
+      ];
     }
   }
 
@@ -108,7 +112,9 @@ class I18nService {
       const data = await apiPublicGet(`/translations/?lang=${this.currentLanguage}`);
       this.translations = data;
     } catch (error) {
-      console.error('Error loading translations:', error);
+      console.warn('Translation service not available, using defaults');
+      // Provide empty translations if backend is not available
+      this.translations = {};
     }
   }
 
@@ -117,7 +123,9 @@ class I18nService {
       const data = await apiPublicGet(`/cultural-content/?lang=${this.currentLanguage}`);
       this.culturalContent = data;
     } catch (error) {
-      console.error('Error loading cultural content:', error);
+      console.warn('Cultural content service not available, using defaults');
+      // Provide empty cultural content if backend is not available
+      this.culturalContent = [];
     }
   }
 
@@ -126,7 +134,16 @@ class I18nService {
       const data = await apiPublicGet(`/regional-settings/${this.currentLanguage}/`);
       this.regionalSettings = data;
     } catch (error) {
-      console.error('Error loading regional settings:', error);
+      console.warn('Regional settings service not available, using defaults');
+      // Provide default regional settings if backend is not available
+      this.regionalSettings = {
+        currency_code: 'USD',
+        currency_symbol: '$',
+        date_format: 'MM/DD/YYYY',
+        time_format: '12',
+        timezone: 'UTC',
+        phone_format: '+1 (###) ###-####'
+      };
     }
   }
 
@@ -242,7 +259,7 @@ class I18nService {
       const data = await apiPublicPost('/detect-language/', { text });
       return data.detected_language;
     } catch (error) {
-      console.error('Error detecting language:', error);
+      console.warn('Language detection service not available, defaulting to English');
       return 'en';
     }
   }
@@ -253,7 +270,7 @@ class I18nService {
       const data = await apiPublicGet(`/translations/stats/?lang=${lang}`);
       return data;
     } catch (error) {
-      console.error('Error getting translation stats:', error);
+      console.warn('Translation stats service not available, returning defaults');
       return {
         language_code: languageCode || this.currentLanguage,
         total_keys: 0,
