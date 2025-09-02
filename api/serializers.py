@@ -998,6 +998,12 @@ class DestinationSerializer(serializers.ModelSerializer):
 
 
 class PackageSerializer(serializers.ModelSerializer):
+    # Include related data for frontend display
+    destinations = serializers.SerializerMethodField()
+    inclusions = serializers.SerializerMethodField()
+    activities = serializers.SerializerMethodField()
+    images = serializers.SerializerMethodField()
+    
     # Include localized fields
     localized_name = serializers.CharField(read_only=True)
     localized_description = serializers.CharField(read_only=True)
@@ -1007,6 +1013,69 @@ class PackageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Package
         fields = '__all__'
+    
+    def get_destinations(self, obj):
+        """Get package destinations with location info"""
+        destinations = obj.destinations.all()
+        return [
+            {
+                'id': dest.id,
+                'island': dest.location.island if dest.location else None,
+                'atoll': dest.location.atoll if dest.location else None,
+                'name': dest.location.island if dest.location else None,
+                'duration': dest.duration,
+                'description': dest.description,
+                'highlights': dest.highlights or [],
+                'activities': dest.activities or []
+            }
+            for dest in destinations
+        ]
+    
+    def get_inclusions(self, obj):
+        """Get package inclusions/exclusions"""
+        inclusions = obj.inclusions.all()
+        return [
+            {
+                'id': inc.id,
+                'category': inc.category,
+                'item': inc.item,
+                'description': inc.description,
+                'icon': inc.icon
+            }
+            for inc in inclusions
+        ]
+    
+    def get_activities(self, obj):
+        """Get package activities"""
+        activities = obj.activities.all()
+        return [
+            {
+                'id': act.id,
+                'name': act.name,
+                'description': act.description,
+                'duration': act.duration,
+                'difficulty': act.difficulty,
+                'category': act.category,
+                'included': act.included,
+                'price': act.price
+            }
+            for act in activities
+        ]
+    
+    def get_images(self, obj):
+        """Get package images with URLs"""
+        images = obj.images.all()
+        request = self.context.get('request')
+        return [
+            {
+                'id': img.id,
+                'image': request.build_absolute_uri(img.image.url) if request else img.image.url,
+                'caption': img.caption,
+                'order': img.order,
+                'is_featured': img.is_featured
+            }
+            for img in images
+        ]
 
 
 class PropertySerializerI18n(serializers.ModelSerializer):

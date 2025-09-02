@@ -44,52 +44,19 @@ export const GoogleTranslateWidget = memo<GoogleTranslateWidgetProps>(({
     initializedRef.current = true;
 
     const loadGoogleTranslate = () => {
-      // Check if already loaded
-      if ((window as any).google?.translate) {
-        setIsGoogleTranslateLoaded(true);
-        return;
-      }
+      if (isGoogleTranslateLoaded) return;
 
-      // Check if script is already being loaded
-      if (document.querySelector('script[src*="translate.google.com"]')) {
-        return;
-      }
-
-      console.log('Loading Google Translate...');
-      
-      // Create a unique callback name
-      const callbackName = `googleTranslateElementInit_${Date.now()}`;
-      
-      // Set a timeout to detect if Google Translate is blocked
+      const callbackName = 'googleTranslateElementInit';
       const timeoutId = setTimeout(() => {
-        console.log('Google Translate initialization timed out (likely blocked by ad blocker)');
-        setIsGoogleTranslateLoaded(false);
+        console.log('Google Translate API timeout, using fallback');
         delete (window as any)[callbackName];
-      }, 5000); // 5 second timeout
-      
-      // Define the callback function
+        setIsGoogleTranslateLoaded(false);
+      }, 5000);
+
       (window as any)[callbackName] = () => {
         clearTimeout(timeoutId);
-        console.log('Google Translate initialized');
-        setIsGoogleTranslateLoaded(true);
-        
-        try {
-          if ((window as any).google?.translate) {
-            new (window as any).google.translate.TranslateElement({
-              pageLanguage: 'en',
-              includedLanguages: supportedLanguages.map(lang => lang.code).join(','),
-              layout: (window as any).google.translate.TranslateElement.InlineLayout.SIMPLE,
-              autoDisplay: false,
-            }, 'google_translate_element');
-          }
-        } catch (error) {
-          console.error('Error initializing Google Translate:', error);
-          // If Google Translate fails, we'll use the fallback method
-          setIsGoogleTranslateLoaded(false);
-        }
-        
-        // Clean up the callback
         delete (window as any)[callbackName];
+        setIsGoogleTranslateLoaded(true);
       };
 
       // Check if ad blockers are likely blocking the request
@@ -104,9 +71,9 @@ export const GoogleTranslateWidget = memo<GoogleTranslateWidgetProps>(({
       
       try {
         testRequest.send();
-        if (testRequest.status === 0) {
-          // Request was blocked
-          console.log('Google Translate API blocked, using fallback');
+        if (testRequest.status === 0 || testRequest.status >= 400) {
+          // Request was blocked or failed
+          console.log('Google Translate API blocked or failed, using fallback');
           clearTimeout(timeoutId);
           delete (window as any)[callbackName];
           setIsGoogleTranslateLoaded(false);
@@ -122,16 +89,13 @@ export const GoogleTranslateWidget = memo<GoogleTranslateWidgetProps>(({
       }
 
       const script = document.createElement('script');
-      script.src = `https://translate.google.com/translate_a/element.js?cb=${callbackName}`;
+      script.src = 'https://translate.google.com/translate_a/element.js?cb=' + callbackName;
       script.async = true;
       script.onerror = () => {
+        console.log('Google Translate script failed to load, using fallback');
         clearTimeout(timeoutId);
-        console.error('Failed to load Google Translate script (likely blocked by ad blocker)');
         delete (window as any)[callbackName];
         setIsGoogleTranslateLoaded(false);
-      };
-      script.onload = () => {
-        console.log('Google Translate script loaded successfully');
       };
       document.head.appendChild(script);
     };

@@ -315,12 +315,21 @@ const transformPackage = (raw: any): any => ({
   is_featured: raw.is_featured || false,
   start_date: raw.start_date,
   end_date: raw.end_date,
-  destinations: Array.isArray(raw.properties) 
-    ? raw.properties.map((p: any) => p.location?.island).filter(Boolean) 
+  // Fix destinations mapping - use the PackageDestination relationship
+  destinations: Array.isArray(raw.destinations) 
+    ? raw.destinations.map((dest: any) => dest.location?.island || dest.location?.name || dest.island || dest.name || dest).filter(Boolean)
     : [],
-  highlights: raw.highlights || [],
-  included: raw.included || [],
-  maxTravelers: raw.max_travelers || 4,
+  // Fix highlights mapping - use the highlights field from Package model
+  highlights: Array.isArray(raw.highlights) 
+    ? raw.highlights 
+    : (raw.highlights ? raw.highlights.split(',').map((h: string) => h.trim()).filter(Boolean) : []),
+  // Fix included mapping - use the PackageInclusion relationship
+  included: Array.isArray(raw.inclusions) 
+    ? raw.inclusions.filter((inc: any) => inc.category === 'included').map((inc: any) => inc.item).filter(Boolean)
+    : [],
+  // Fix maxTravelers mapping - use group_size fields
+  maxTravelers: raw.group_size_max || raw.group_size_recommended || 4,
+  // Fix category mapping
   category: raw.category || 'Adventure',
   created_at: raw.created_at,
   updated_at: raw.updated_at,

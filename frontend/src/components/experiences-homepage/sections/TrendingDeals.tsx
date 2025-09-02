@@ -68,12 +68,25 @@ const convertApiPackageToCardFormat = (apiPackage: ApiPackage): LocalPackage => 
     description: apiPackage.description,
     price: parseFloat(apiPackage.price),
     duration: apiPackage.duration.toString(),
-    destinations: apiPackage.destinations || [],
-    highlights: apiPackage.highlights || [],
-    included: apiPackage.included || [],
-    maxTravelers: apiPackage.maxTravelers || 4,
+    // Map destinations from PackageDestination relationship
+    destinations: Array.isArray(apiPackage.destinations) 
+      ? apiPackage.destinations.map((dest: any) => dest.island || dest.name || dest).filter(Boolean)
+      : [],
+    // Map highlights - handle both array and comma-separated string
+    highlights: Array.isArray(apiPackage.highlights) 
+      ? apiPackage.highlights 
+      : (apiPackage.highlights && typeof apiPackage.highlights === 'string' ? apiPackage.highlights.split(',').map((h: string) => h.trim()).filter(Boolean) : []),
+    // Map included items from PackageInclusion relationship
+    included: Array.isArray(apiPackage.inclusions) 
+      ? apiPackage.inclusions.filter((inc: any) => inc.category === 'included').map((inc: any) => inc.item).filter(Boolean)
+      : [],
+    // Map max travelers from group_size field
+    maxTravelers: apiPackage.group_size?.max || apiPackage.group_size?.recommended || 4,
     featured: apiPackage.is_featured,
-    image: apiPackage.images?.[0]?.image || '/images/optimized/medium/ishan1.webp',
+    // Map images from PackageImage relationship
+    image: Array.isArray(apiPackage.images) && apiPackage.images.length > 0 
+      ? apiPackage.images[0].image 
+      : '/images/optimized/medium/ishan1.webp',
     rating: apiPackage.rating || 4.5,
     reviewCount: apiPackage.review_count || 0,
     category: apiPackage.category || 'Adventure'
@@ -237,7 +250,7 @@ export const ExperiencesTrendingDeals: React.FC<Props> = ({ packages = [] }) => 
                       </Text>
 
                       {/* Destinations */}
-                      {pkg.destinations.length > 0 && (
+                      {Array.isArray(pkg.destinations) && pkg.destinations.length > 0 && (
                         <VStack align="start" spacing={2}>
                           <Text fontWeight="semibold" fontSize="sm" color="gray.700">Destinations:</Text>
                           <Wrap>
@@ -261,7 +274,7 @@ export const ExperiencesTrendingDeals: React.FC<Props> = ({ packages = [] }) => 
                       )}
 
                       {/* Highlights */}
-                      {pkg.highlights.length > 0 && (
+                      {Array.isArray(pkg.highlights) && pkg.highlights.length > 0 && (
                         <VStack align="start" spacing={2}>
                           <Text fontWeight="semibold" fontSize="sm" color="gray.700">{t('homepage.trending.highlights', 'Highlights:')}</Text>
                           <List spacing={1}>
@@ -275,6 +288,27 @@ export const ExperiencesTrendingDeals: React.FC<Props> = ({ packages = [] }) => 
                               <ListItem fontSize="sm" color="gray.500">
                                 <ListIcon as={CheckIcon} color="green.500" />
                                 +{pkg.highlights.length - 3} {t('homepage.trending.moreActivities', 'more activities')}
+                              </ListItem>
+                            )}
+                          </List>
+                        </VStack>
+                      )}
+
+                      {/* What's Included */}
+                      {Array.isArray(pkg.included) && pkg.included.length > 0 && (
+                        <VStack align="start" spacing={2}>
+                          <Text fontWeight="semibold" fontSize="sm" color="gray.700">{t('homepage.trending.included', 'What\'s Included:')}</Text>
+                          <List spacing={1}>
+                            {pkg.included.slice(0, 3).map((item, index) => (
+                              <ListItem key={index} fontSize="sm" color="gray.600">
+                                <ListIcon as={CheckIcon} color="blue.500" />
+                                {item}
+                              </ListItem>
+                            ))}
+                            {pkg.included.length > 3 && (
+                              <ListItem fontSize="sm" color="gray.500">
+                                <ListIcon as={CheckIcon} color="blue.500" />
+                                +{pkg.included.length - 3} {t('homepage.trending.moreIncluded', 'more included')}
                               </ListItem>
                             )}
                           </List>

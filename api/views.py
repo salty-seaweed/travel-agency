@@ -246,7 +246,12 @@ class PropertyViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 class PackageViewSet(viewsets.ModelViewSet):
-    queryset = Package.objects.all()
+    queryset = Package.objects.prefetch_related(
+        'destinations__location',
+        'inclusions',
+        'activities',
+        'images'
+    ).all()
     serializer_class = PackageSerializerI18n
 
     def list(self, request, *args, **kwargs):
