@@ -299,8 +299,8 @@ const transformProperty = (raw: any): any => ({
   is_featured: raw.is_featured || false,
   reviews: raw.reviews || [],
   packages: raw.packages || [],
-  rating: 4.8,
-  reviewCount: Array.isArray(raw.reviews) ? raw.reviews.length : 24,
+  rating: raw.rating || null,
+  reviewCount: Array.isArray(raw.reviews) ? raw.reviews.length : 0,
   created_at: raw.created_at,
   updated_at: raw.updated_at,
 });
@@ -317,11 +317,11 @@ const transformPackage = (raw: any): any => ({
   end_date: raw.end_date,
   destinations: Array.isArray(raw.properties) 
     ? raw.properties.map((p: any) => p.location?.island).filter(Boolean) 
-    : ['Maldives Paradise'],
-  highlights: ['All-inclusive', 'Water activities', 'Local tours', 'Island hopping'],
-  included: ['Accommodation', 'Meals', 'Transfers', 'Activities'],
-  maxTravelers: 4,
-  category: 'Adventure',
+    : [],
+  highlights: raw.highlights || [],
+  included: raw.included || [],
+  maxTravelers: raw.max_travelers || 4,
+  category: raw.category || 'Adventure',
   created_at: raw.created_at,
   updated_at: raw.updated_at,
 });

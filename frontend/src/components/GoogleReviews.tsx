@@ -36,78 +36,12 @@ export function GoogleReviews({
   const [averageRating, setAverageRating] = useState(0);
   const [totalReviews, setTotalReviews] = useState(0);
 
-  // Mock data for demonstration - replace with actual Google Places API
-  const mockReviews: GoogleReview[] = [
-    {
-      id: '1',
-      author_name: 'Sarah Johnson',
-      author_url: '#',
-      profile_photo_url: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=40&h=40&fit=crop&crop=face',
-      rating: 5,
-      relative_time_description: '2 weeks ago',
-      text: 'Thread Travels made our Maldives trip absolutely perfect! The accommodation was exactly as described, and the team was incredibly helpful throughout our stay. Highly recommend!',
-      time: Date.now() - 14 * 24 * 60 * 60 * 1000,
-      translated: false
-    },
-    {
-      id: '2',
-      author_name: 'Mike Chen',
-      author_url: '#',
-      profile_photo_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face',
-      rating: 5,
-      relative_time_description: '1 month ago',
-      text: 'Excellent service from start to finish. The team at Thread Travels went above and beyond to ensure we had the best experience. The property was clean, comfortable, and perfectly located.',
-      time: Date.now() - 30 * 24 * 60 * 60 * 1000,
-      translated: false
-    },
-    {
-      id: '3',
-      author_name: 'Emma Wilson',
-      author_url: '#',
-      profile_photo_url: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face',
-      rating: 5,
-      relative_time_description: '2 months ago',
-      text: 'Amazing experience! Thread Travels helped us find the perfect accommodation for our budget. The communication was excellent and everything was arranged perfectly.',
-      time: Date.now() - 60 * 24 * 60 * 60 * 1000,
-      translated: false
-    },
-    {
-      id: '4',
-      author_name: 'David Brown',
-      author_url: '#',
-      profile_photo_url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face',
-      rating: 4,
-      relative_time_description: '3 months ago',
-      text: 'Great service and very professional. The team was responsive and helped us with all our questions. The accommodation was clean and well-maintained.',
-      time: Date.now() - 90 * 24 * 60 * 60 * 1000,
-      translated: false
-    },
-    {
-      id: '5',
-      author_name: 'Lisa Garcia',
-      author_url: '#',
-      profile_photo_url: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=40&h=40&fit=crop&crop=face',
-      rating: 5,
-      relative_time_description: '4 months ago',
-      text: 'Thread Travels exceeded our expectations! The booking process was smooth, and the accommodation was even better than described. Will definitely use their services again.',
-      time: Date.now() - 120 * 24 * 60 * 60 * 1000,
-      translated: false
-    },
-    {
-      id: '6',
-      author_name: 'James Miller',
-      author_url: '#',
-      profile_photo_url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=40&h=40&fit=crop&crop=face',
-      rating: 5,
-      relative_time_description: '5 months ago',
-      text: 'Outstanding service! The team at Thread Travels made our Maldives vacation unforgettable. Professional, reliable, and truly caring about customer satisfaction.',
-      time: Date.now() - 150 * 24 * 60 * 60 * 1000,
-      translated: false
-    }
-  ];
+  // TODO: Replace with actual Google Places API integration
+  // For now, show a message that reviews are coming soon
+  const mockReviews: GoogleReview[] = [];
 
   useEffect(() => {
-    // Simulate API call
+    // TODO: Implement real Google Places API call
     const fetchReviews = async () => {
       try {
         setLoading(true);
@@ -115,14 +49,10 @@ export function GoogleReviews({
         // const response = await fetch(`/api/google-reviews?placeId=${placeId}`);
         // const data = await response.json();
         
-        // Using mock data for now
-        await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API delay
-        setReviews(mockReviews.slice(0, maxReviews));
-        
-        // Calculate average rating
-        const avg = mockReviews.reduce((sum, review) => sum + review.rating, 0) / mockReviews.length;
-        setAverageRating(avg);
-        setTotalReviews(mockReviews.length);
+        // For now, show no reviews until real API is implemented
+        setReviews([]);
+        setAverageRating(0);
+        setTotalReviews(0);
         
       } catch (err) {
         setError('Failed to load reviews');
@@ -146,9 +76,10 @@ export function GoogleReviews({
     ));
   };
 
+  // Render reviews
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-8">
+      <div className="flex justify-center items-center py-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
       </div>
     );
@@ -157,7 +88,16 @@ export function GoogleReviews({
   if (error) {
     return (
       <div className="text-center py-8">
-        <p className="text-gray-600">{error}</p>
+        <p className="text-red-600">{error}</p>
+      </div>
+    );
+  }
+
+  if (reviews.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-600 text-lg">Reviews coming soon!</p>
+        <p className="text-gray-500 text-sm mt-2">We're working on integrating real customer reviews</p>
       </div>
     );
   }

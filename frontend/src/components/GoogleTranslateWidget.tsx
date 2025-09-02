@@ -92,6 +92,35 @@ export const GoogleTranslateWidget = memo<GoogleTranslateWidgetProps>(({
         delete (window as any)[callbackName];
       };
 
+      // Check if ad blockers are likely blocking the request
+      const testRequest = new XMLHttpRequest();
+      testRequest.open('GET', 'https://translate.googleapis.com/element/log?format=json&hasfast=true&authuser=0', false);
+      testRequest.onerror = () => {
+        console.log('Google Translate API blocked by ad blocker, using fallback');
+        clearTimeout(timeoutId);
+        delete (window as any)[callbackName];
+        setIsGoogleTranslateLoaded(false);
+      };
+      
+      try {
+        testRequest.send();
+        if (testRequest.status === 0) {
+          // Request was blocked
+          console.log('Google Translate API blocked, using fallback');
+          clearTimeout(timeoutId);
+          delete (window as any)[callbackName];
+          setIsGoogleTranslateLoaded(false);
+          return;
+        }
+      } catch (e) {
+        // Request failed, likely blocked
+        console.log('Google Translate API test failed, using fallback');
+        clearTimeout(timeoutId);
+        delete (window as any)[callbackName];
+        setIsGoogleTranslateLoaded(false);
+        return;
+      }
+
       const script = document.createElement('script');
       script.src = `https://translate.google.com/translate_a/element.js?cb=${callbackName}`;
       script.async = true;

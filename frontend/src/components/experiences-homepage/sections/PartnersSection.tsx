@@ -18,6 +18,12 @@ import {
 import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
 import { useTranslation } from '../../../i18n';
 
+interface Partner {
+  name: string;
+  rating?: number;
+  reviews?: number;
+}
+
 export const BookmundiPartnersSection: React.FC = () => {
   const { t } = useTranslation();
   
@@ -28,14 +34,14 @@ export const BookmundiPartnersSection: React.FC = () => {
   const textColor = useColorModeValue('gray.800', 'white');
   const mutedTextColor = useColorModeValue('gray.600', 'gray.300');
 
-  // Partners
-  const partners = [
-    { name: 'Intrepid Travel', rating: 4.6, reviews: 206 },
-    { name: 'Travel Talk', rating: 4.6, reviews: 108 },
-    { name: 'G Adventures', rating: 4.9, reviews: 116 },
-    { name: 'Trafalgar', rating: 4.6, reviews: 38 },
-    { name: 'TruTravels', rating: 4.9, reviews: 1727 },
-    { name: 'Bamba', rating: 4.8, reviews: 412 },
+  // Partners - Remove hardcoded ratings, use real data when available
+  const partners: Partner[] = [
+    { name: 'Intrepid Travel' },
+    { name: 'Travel Talk' },
+    { name: 'G Adventures' },
+    { name: 'Trafalgar' },
+    { name: 'TruTravels' },
+    { name: 'Bamba' },
   ];
 
   return (
@@ -83,17 +89,22 @@ export const BookmundiPartnersSection: React.FC = () => {
                     {partner.name}
                   </Text>
                   
-                  <HStack spacing={2}>
-                    <HStack spacing={1}>
-                      <Icon as={StarSolidIcon} className="w-4 h-4 text-yellow-400" />
-                      <Text fontSize="sm" color={mutedTextColor}>
-                        {partner.rating}
-                      </Text>
+                  {/* Only show rating if available */}
+                  {partner.rating && (
+                    <HStack spacing={2}>
+                      <HStack spacing={1}>
+                        <Icon as={StarSolidIcon} className="w-4 h-4 text-yellow-400" />
+                        <Text fontSize="sm" color={mutedTextColor}>
+                          {partner.rating}
+                        </Text>
+                      </HStack>
+                      {partner.reviews && (
+                        <Text fontSize="sm" color={mutedTextColor}>
+                          ({partner.reviews} reviews)
+                        </Text>
+                      )}
                     </HStack>
-                    <Text fontSize="sm" color={mutedTextColor}>
-                      ({partner.reviews} reviews)
-                    </Text>
-                  </HStack>
+                  )}
                 </VStack>
               </Card>
             ))}
