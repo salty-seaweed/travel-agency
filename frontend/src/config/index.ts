@@ -32,11 +32,22 @@ const API_CONFIG = {
 // Application Configuration
 export const config: AppConfig = {
   // API Settings
-  apiBaseUrl: isDevelopment 
-    ? API_CONFIG.development.baseUrl 
-    : isProduction 
-    ? API_CONFIG.production.baseUrl 
-    : API_CONFIG.test.baseUrl,
+  apiBaseUrl: (() => {
+    const baseUrl = isDevelopment 
+      ? API_CONFIG.development.baseUrl 
+      : isProduction 
+      ? API_CONFIG.production.baseUrl 
+      : API_CONFIG.test.baseUrl;
+    
+    // Debug logging for production
+    if (isProduction) {
+      console.log('🔧 [API CONFIG] Production mode detected');
+      console.log('🔧 [API CONFIG] VITE_API_BASE_URL:', import.meta.env.VITE_API_BASE_URL);
+      console.log('🔧 [API CONFIG] Final API Base URL:', baseUrl);
+    }
+    
+    return baseUrl;
+  })(),
   
   // Contact Information
   whatsappNumber: import.meta.env.VITE_WHATSAPP_NUMBER || '+9607441097',
