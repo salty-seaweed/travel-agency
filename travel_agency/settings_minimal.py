@@ -161,20 +161,47 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # CORS settings for production
+# Allow all origins for Railway deployment to avoid CORS issues
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_HEADERS = True
+CORS_ALLOW_ALL_METHODS = True
+
+# Specific allowed origins (backup in case ALLOW_ALL_ORIGINS is disabled)
 CORS_ALLOWED_ORIGINS = [
     "https://threadtravels.com",
     "https://www.threadtravels.com", 
     "https://threadtravels.vercel.app",
     "https://threadtravels-frontend.vercel.app",
+    "https://web-production-a324.up.railway.app",
     os.getenv('FRONTEND_URL', 'https://threadtravels.vercel.app'),
 ]
 
+# Additional CORS settings for better compatibility
 CORS_ALLOW_CREDENTIALS = True
-CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']
+CORS_EXPOSE_HEADERS = [
+    'Content-Type', 
+    'X-CSRFToken', 
+    'Access-Control-Allow-Origin',
+    'Access-Control-Allow-Headers',
+    'Access-Control-Allow-Methods'
+]
 
-# For Railway - allow all origins to avoid CORS issues during deployment
-CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOW_ALL_HEADERS = True
+# Allow specific headers that might be causing issues
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+    'cache-control',
+    'access-control-allow-origin',
+    'access-control-allow-headers',
+    'access-control-allow-methods',
+]
 
 # CSRF exemption for API endpoints
 CSRF_TRUSTED_ORIGINS = [
