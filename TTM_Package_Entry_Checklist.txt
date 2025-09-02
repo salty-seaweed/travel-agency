@@ -1,0 +1,68 @@
+TTM Portal - Add Package: Content Entry Checklist
+
+Basic Info
+- Name (required)
+- Short description (required)
+- Detailed description (optional)
+- Category (required): Adventure, Luxury, Family, Romantic, Wellness
+- Difficulty level (required): Easy, Moderate, Challenging, Expert
+- Duration (days) (required)
+- Price (required)
+- Original price/strikethrough (optional)
+- Featured (yes/no)
+
+Group Size
+- Min travelers (required)
+- Max travelers (required)
+- Recommended group size (required)
+
+Schedule
+- Start date (optional)
+- End date (optional)
+
+Destinations (add one or more) - for each destination
+- Location (island/atoll) (required)
+- Duration at this destination (days) (required)
+- Description (required)
+- Highlights (list) (optional)
+- Activities (list) (optional)
+
+What's Included / Excluded - for each item
+- Category (required): included / excluded / optional
+- Item name (required)
+- Description (optional)
+- Icon (optional)
+
+Activities (optional) - for each activity
+- Name (required)
+- Description (required)
+- Duration (optional)
+- Difficulty (optional)
+- Category (optional)
+- Included (boolean or list) (optional)
+- Price (optional)
+
+Images
+- Upload image (required, at least one)
+- Caption (optional)
+- Order (number) (optional)
+- Featured image (yes/no) (optional)
+
+Accommodation (optional)
+- Accommodation type
+- Room type
+- Meal plan
+
+Transportation (optional)
+- Transportation details
+- Airport transfers (yes/no)
+
+Additional Information (optional)
+- Best time to visit
+- Weather info
+- What to bring (list)
+- Important notes (list)
+
+Formatting Notes
+- Lists (highlights, activities, what to bring, notes): enter one per line or comma-separated.
+- Images: use high-quality, landscape-oriented for featured image where possible.
