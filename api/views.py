@@ -340,57 +340,92 @@ class PackageViewSet(viewsets.ModelViewSet):
             pass
         return data
 
-    def create(self, request, *args, **kwargs):
-        data = request.data.copy()
-        data = self._normalize_package_payload(data)
-        images_data = data.pop('images', [])
-        serializer = self.get_serializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        package_obj = serializer.save()
-        
-        # Create PackageImage objects
-        for image_data in images_data:
-            image_path = image_data.get('image')
-            if isinstance(image_path, str) and image_path.startswith(settings.MEDIA_URL):
-                image_path = image_path[len(settings.MEDIA_URL):]
-            PackageImage.objects.create(
-                package=package_obj,
-                image=image_path,
-                caption=image_data.get('caption', ''),
-                order=image_data.get('order', 0),
-                is_featured=image_data.get('is_featured', False)
-            )
-        
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    def _create_or_replace_images(self, package_obj, request, images_data):
+        """Helper to create PackageImage rows from either uploaded files or JSON image paths."""
+        # Collect uploaded files
+        uploaded_files = []
+        try:
+            uploaded_files = request.FILES.getlist('images') or request.FILES.getlist('images[]')
+            single_image = request.FILES.get('image')
+            if single_image:
+                uploaded_files.append(single_image)
+        except Exception:
+            pass
 
-    def update(self, request, *args, **kwargs):
-        data = request.data.copy()
-        data = self._normalize_package_payload(data)
-        images_data = data.pop('images', [])
-        partial = kwargs.pop('partial', False)
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=data, partial=partial)
-        serializer.is_valid(raise_exception=True)
-        package_obj = serializer.save()
-        
-        # Clear existing images if new ones are provided
-        if images_data:
+        # If replacing (when called from update), clear existing before adding
+        if images_data == '__REPLACE__':
             PackageImage.objects.filter(package=package_obj).delete()
-            
-            # Create new PackageImage objects
-            for image_data in images_data:
-                image_path = image_data.get('image')
+            images_data = []
+
+        # Save uploaded files
+        for f in uploaded_files or []:
+            try:
+                PackageImage.objects.create(
+                    package=package_obj,
+                    image=f,
+                    caption='',
+                    order=0,
+                    is_featured=False,
+                )
+            except Exception:
+                # Continue on error per file to avoid 500 for whole request
+                continue
+
+        # Save JSON-provided images (strings or objects)
+        for item in images_data or []:
+            try:
+                image_path = item
+                caption = ''
+                order = 0
+                is_featured = False
+                if isinstance(item, dict):
+                    image_path = item.get('image') or item.get('url') or item.get('path')
+                    caption = item.get('caption', '')
+                    order = item.get('order', 0)
+                    is_featured = item.get('is_featured', False)
+                if not image_path:
+                    continue
                 if isinstance(image_path, str) and image_path.startswith(settings.MEDIA_URL):
                     image_path = image_path[len(settings.MEDIA_URL):]
                 PackageImage.objects.create(
                     package=package_obj,
                     image=image_path,
-                    caption=image_data.get('caption', ''),
-                    order=image_data.get('order', 0),
-                    is_featured=image_data.get('is_featured', False)
+                    caption=caption,
+                    order=order,
+                    is_featured=is_featured,
                 )
-        
-        return Response(serializer.data)
+            except Exception:
+                continue
+
+    def create(self, request, *args, **kwargs):
+        data = request.data.copy()
+        data = self._normalize_package_payload(data)
+        # images can be provided as JSON list; for multipart FormData, they will be in request.FILES
+        images_data = data.pop('images', [])
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        package_obj = serializer.save()
+
+        # Create PackageImage objects from files and/or JSON
+        self._create_or_replace_images(package_obj, request, images_data)
+        return Response(self.get_serializer(package_obj, context={'request': request}).data, status=status.HTTP_201_CREATED)
+
+    def update(self, request, *args, **kwargs):
+        data = request.data.copy()
+        data = self._normalize_package_payload(data)
+        images_data = data.pop('images', None)
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        package_obj = serializer.save()
+
+        # If images provided (either files or JSON), replace existing
+        if images_data is not None or request.FILES:
+            # signal replace mode with special marker
+            self._create_or_replace_images(package_obj, request, '__REPLACE__' if images_data is None else images_data)
+
+        return Response(self.get_serializer(package_obj, context={'request': request}).data)
 
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
