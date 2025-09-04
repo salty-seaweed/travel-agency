@@ -499,6 +499,8 @@ class MediaAsset(models.Model):
     focal_x = models.FloatField(null=True, blank=True)  # Focal point X coordinate
     focal_y = models.FloatField(null=True, blank=True)  # Focal point Y coordinate
     variants = models.JSONField(default=dict, blank=True)  # Image variants (thumbnails, etc.)
+    usage_count = models.PositiveIntegerField(default=0)
+    usage_locations = models.JSONField(default=list, blank=True)  # Track where image is used: ['page-hero', 'package-image', etc.]
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='media_assets')
     created_at = models.DateTimeField(auto_now_add=True)
     

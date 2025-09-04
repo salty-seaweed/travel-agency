@@ -143,6 +143,13 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+# Ensure staticfiles directory exists
+try:
+    os.makedirs(STATIC_ROOT, exist_ok=True)
+    print(f"✅ Static files directory created: {STATIC_ROOT}")
+except Exception as e:
+    print(f"⚠️  Could not create static files directory: {e}")
+
 # Staticfiles configuration for Railway with Whitenoise
 STATICFILES_DIRS = []
 STATICFILES_FINDERS = [
@@ -168,23 +175,23 @@ except Exception:
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # CORS settings for production
-# Allow all origins for Railway deployment to avoid CORS issues
-CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOW_ALL_HEADERS = True
-CORS_ALLOW_ALL_METHODS = True
-
-# Specific allowed origins (backup in case ALLOW_ALL_ORIGINS is disabled)
+# Use specific origins instead of allowing all for better security
+CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
     "https://threadtravels.com",
-    "https://www.threadtravels.com", 
+    "https://www.threadtravels.com",
     "https://threadtravels.vercel.app",
     "https://threadtravels-frontend.vercel.app",
     "https://web-production-a324.up.railway.app",
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://localhost:5174",
     os.getenv('FRONTEND_URL', 'https://threadtravels.vercel.app'),
 ]
 
-# Additional CORS settings for better compatibility
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_HEADERS = True
+CORS_ALLOW_ALL_METHODS = True
 CORS_EXPOSE_HEADERS = [
     'Content-Type', 
     'X-CSRFToken', 
@@ -261,13 +268,13 @@ SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
 # Session configuration
 SESSION_COOKIE_SECURE = True
 SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SAMESITE = 'None'  # Allow cross-site for Vercel + Railway
 SESSION_COOKIE_AGE = 86400  # 24 hours
 
 # CSRF configuration
 CSRF_COOKIE_SECURE = True
 CSRF_COOKIE_HTTPONLY = True
-CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SAMESITE = 'None'  # Allow cross-site for Vercel + Railway
 
 # Logging configuration
 LOGGING = {

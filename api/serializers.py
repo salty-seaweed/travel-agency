@@ -188,20 +188,27 @@ class PropertySerializer(serializers.ModelSerializer):
 class PackageImageSerializer(serializers.ModelSerializer):
     image_url = serializers.SerializerMethodField(read_only=True)
     package_id = serializers.IntegerField(write_only=True, required=True)
+    image_url_field = serializers.URLField(write_only=True, required=False)  # For selecting from media library
 
     class Meta:
         model = PackageImage
-        fields = ['id', 'package', 'image', 'caption', 'order', 'is_featured', 'image_url', 'package_id']
+        fields = ['id', 'package', 'image', 'caption', 'order', 'is_featured', 'image_url', 'package_id', 'image_url_field']
         extra_kwargs = {
             'package': {'required': False},  # Make package field not required during creation
-            'image': {'required': True},     # Ensure image field is required
+            'image': {'required': False},    # Make image optional when using image_url_field
         }
 
     def create(self, validated_data):
-        """Custom create method to handle package_id field"""
+        """Custom create method to handle package_id and image selection"""
         package_id = validated_data.pop('package_id', None)
+        image_url_field = validated_data.pop('image_url_field', None)
+
         if not package_id:
             raise serializers.ValidationError({'package_id': 'This field is required.'})
+
+        # Ensure either image file or image_url_field is provided
+        if not validated_data.get('image') and not image_url_field:
+            raise serializers.ValidationError({'image': 'Either an image file or image URL must be provided.'})
 
         try:
             from .models import Package
@@ -211,6 +218,10 @@ class PackageImageSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({'package_id': 'Package not found.'})
         except (ValueError, TypeError):
             raise serializers.ValidationError({'package_id': 'Invalid package ID.'})
+
+        # Store the image_url_field for the view to handle
+        if image_url_field:
+            validated_data['_image_url_field'] = image_url_field
 
         # Ensure proper type conversion for order and is_featured
         if 'order' in validated_data:
@@ -317,6 +328,25 @@ class PackageSerializerI18n(serializers.ModelSerializer):
     itinerary_data = serializers.ListField(write_only=True, required=False)
     inclusions_data = serializers.ListField(write_only=True, required=False)
     activities_data = serializers.ListField(write_only=True, required=False)
+
+    def validate(self, data):
+        """Add custom validation with debugging"""
+        print(f"PackageSerializerI18n.validate called with data keys: {list(data.keys())}")
+        print(f"PackageSerializerI18n.validate data: {data}")
+
+        # Validate required fields
+        required_fields = ['name', 'description', 'price', 'duration', 'group_size_min', 'group_size_max']
+        errors = {}
+
+        for field in required_fields:
+            if field not in data or data[field] is None or data[field] == '':
+                errors[field] = f'This field is required.'
+
+        if errors:
+            print(f"PackageSerializerI18n validation errors: {errors}")
+            raise serializers.ValidationError(errors)
+
+        return data
     
     class Meta:
         model = Package
@@ -339,6 +369,9 @@ class PackageSerializerI18n(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
+        print(f"PackageSerializerI18n.create called with validated_data keys: {list(validated_data.keys())}")
+        print(f"PackageSerializerI18n.create initial_data keys: {list(self.initial_data.keys()) if hasattr(self, 'initial_data') else 'None'}")
+
         # Support both *_data keys and plain plural names
         destination_data = validated_data.pop('destination_data', [])
         itinerary_data = validated_data.pop('itinerary_data', [])
