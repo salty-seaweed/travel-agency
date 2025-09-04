@@ -350,17 +350,10 @@ class PackageSerializerI18n(serializers.ModelSerializer):
         print("PackageSerializerI18n.validate - no validation errors found")
         print("=== PackageSerializerI18n.validate END ===")
         return data
-    
+
     class Meta:
         model = Package
-        fields = '__all__'
-        extra_kwargs = {
-            'language': {'required': False, 'allow_null': True},
-            'localized_name': {'required': False},
-            'localized_description': {'required': False},
-            'localized_highlights': {'required': False},
-            'localized_included': {'required': False},
-        }
+        exclude = ['language', 'localized_name', 'localized_description', 'localized_highlights', 'localized_included']
 
     def get_experiences(self, obj):
         exp_qs = obj.activities.filter(category='experience')
@@ -1083,22 +1076,9 @@ class PackageSerializer(serializers.ModelSerializer):
     activities = serializers.SerializerMethodField()
     images = serializers.SerializerMethodField()
     
-    # Include localized fields
-    localized_name = serializers.CharField(read_only=True)
-    localized_description = serializers.CharField(read_only=True)
-    localized_highlights = serializers.ListField(read_only=True)
-    localized_included = serializers.ListField(read_only=True)
-    
     class Meta:
         model = Package
-        fields = '__all__'
-        extra_kwargs = {
-            'language': {'required': False, 'allow_null': True},
-            'localized_name': {'required': False},
-            'localized_description': {'required': False},
-            'localized_highlights': {'required': False},
-            'localized_included': {'required': False},
-        }
+        exclude = ['language', 'localized_name', 'localized_description', 'localized_highlights', 'localized_included']
 
     def get_destinations(self, obj):
         """Get package destinations with location info"""
