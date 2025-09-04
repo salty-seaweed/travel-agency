@@ -31,9 +31,13 @@ export function PricingForm({ form, updateForm }: PricingFormProps) {
 
     // Auto-calculate price when original price or discount changes
     if (name === 'original_price' || name === 'discount_percentage') {
-      const originalPrice = parseFloat(form.original_price) || 0;
-      const discountPercent = parseFloat(form.discount_percentage) || 0;
-      const discountedPrice = originalPrice - (originalPrice * discountPercent / 100);
+      const originalPrice = name === 'original_price' ? parseFloat(value) || 0 : parseFloat(form.original_price) || 0;
+      const discountPercent = name === 'discount_percentage' ? parseFloat(value) || 0 : parseFloat(form.discount_percentage) || 0;
+
+      // Ensure discount percentage doesn't exceed 100% and handle edge cases
+      const validDiscountPercent = Math.min(100, Math.max(0, discountPercent));
+      const discountedPrice = Math.max(0, originalPrice - (originalPrice * validDiscountPercent / 100));
+
       updateForm({ price: discountedPrice.toFixed(2) });
     }
   };
@@ -51,6 +55,10 @@ export function PricingForm({ form, updateForm }: PricingFormProps) {
   const discountPercent = parseFloat(form.discount_percentage) || 0;
   const finalPrice = parseFloat(form.price) || 0;
   const savings = originalPrice - finalPrice;
+
+  // Ensure final price is never negative
+  const validFinalPrice = Math.max(0, finalPrice);
+  const validSavings = originalPrice > 0 ? Math.max(0, savings) : 0;
 
   return (
     <VStack spacing={8} align="stretch">
@@ -147,13 +155,13 @@ export function PricingForm({ form, updateForm }: PricingFormProps) {
               </Box>
               <Box>
                 <Text fontSize="xs" color="gray.600">Final Price</Text>
-                <Text fontSize="lg" fontWeight="bold" color="green.600">${finalPrice.toLocaleString()}</Text>
+                <Text fontSize="lg" fontWeight="bold" color="green.600">${validFinalPrice.toLocaleString()}</Text>
               </Box>
               {discountPercent > 0 && (
                 <>
                   <Box>
                     <Text fontSize="xs" color="gray.600">Discount</Text>
-                    <Text fontSize="lg" fontWeight="bold" color="red.600">-${savings.toLocaleString()}</Text>
+                    <Text fontSize="lg" fontWeight="bold" color="red.600">-${validSavings.toLocaleString()}</Text>
                   </Box>
                   <Box>
                     <Text fontSize="xs" color="gray.600">Savings</Text>
