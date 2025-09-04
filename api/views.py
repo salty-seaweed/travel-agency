@@ -2355,49 +2355,42 @@ class PackageImageViewSet(viewsets.ModelViewSet):
         try:
             image_data = self.request.data
             package_id = image_data.get('package_id')
-            
             if not package_id:
-                raise serializers.ValidationError("package_id is required")
-            
-            # Check if image file is provided
-            image_file = self.request.FILES.get('image')
+                raise serializers.ValidationError({ 'package_id': 'This field is required.' })
+
+            # Accept common file keys
+            image_file = self.request.FILES.get('image') or self.request.FILES.get('file')
             if not image_file:
-                raise serializers.ValidationError("image file is required")
-            
+                raise serializers.ValidationError({ 'image': 'Image file is required.' })
+
             try:
                 package = Package.objects.get(id=package_id)
             except Package.DoesNotExist:
-                raise serializers.ValidationError("Package not found")
-            
-            # Save to package_images directory
-            file_extension = os.path.splitext(image_file.name)[1]
-            unique_filename = f"{uuid.uuid4()}{file_extension}"
-            
-            upload_dir = os.path.join(settings.MEDIA_ROOT, 'package_images')
-            os.makedirs(upload_dir, exist_ok=True)
-            
-            file_path = os.path.join(upload_dir, unique_filename)
-            with open(file_path, 'wb+') as destination:
-                for chunk in image_file.chunks():
-                    destination.write(chunk)
-            
-            image_path = f"package_images/{unique_filename}"
-            
-            # Convert string boolean values to actual booleans
+                raise serializers.ValidationError({ 'package_id': 'Package not found.' })
+
+            # Coerce booleans/ints from strings
             is_featured = image_data.get('is_featured', False)
             if isinstance(is_featured, str):
                 is_featured = is_featured.lower() == 'true'
-            
+            try:
+                order = int(image_data.get('order', 0))
+            except Exception:
+                order = 0
+
+            # Let Django storage handle saving the file
             serializer.save(
                 package=package,
-                image=image_path,
+                image=image_file,
                 caption=image_data.get('caption', ''),
-                order=int(image_data.get('order', 0)),
+                order=order,
                 is_featured=is_featured
             )
+        except serializers.ValidationError as ve:
+            # Re-raise to ensure DRF returns 400, not 500
+            raise ve
         except Exception as e:
-            print(f"Error in PackageImageViewSet.perform_create: {str(e)}")
-            raise
+            # Surface error clearly as 400 to avoid generic 500s
+            raise serializers.ValidationError({ 'detail': f"Failed to upload image: {str(e)}" })
     
     def perform_update(self, serializer):
         """Update image with file handling"""
