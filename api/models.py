@@ -20,8 +20,8 @@ class Amenity(models.Model):
 class Location(models.Model):
     island = models.CharField(max_length=100)
     atoll = models.CharField(max_length=100, blank=True)
-    latitude = models.FloatField()
-    longitude = models.FloatField()
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, help_text="Latitude with max 6 decimal places")
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, help_text="Longitude with max 6 decimal places")
     
     def __str__(self):
         return f"{self.island}, {self.atoll}" if self.atoll else self.island
@@ -42,7 +42,7 @@ class Destination(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     # Internationalization fields
-    language = models.ForeignKey('Language', on_delete=models.CASCADE, related_name='destinations', null=True, blank=True)
+    language = models.ForeignKey('Language', on_delete=models.SET_NULL, related_name='destinations', null=True, blank=True, help_text="Language for this destination (optional)")
     localized_name = models.CharField(max_length=100, blank=True, help_text="Localized name if different from base name")
     localized_description = models.TextField(blank=True, help_text="Localized description")
     

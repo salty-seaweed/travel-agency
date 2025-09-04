@@ -98,6 +98,8 @@ class DestinationSerializer(serializers.ModelSerializer):
             if not hasattr(data['image'], 'read') and not isinstance(data['image'], str):
                 raise serializers.ValidationError("Image must be a file upload or valid URL")
         
+        # Language field is optional, so no validation needed
+        
         return data
     
     def get_property_count(self, obj):
