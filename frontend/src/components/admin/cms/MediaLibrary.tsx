@@ -59,6 +59,8 @@ export function MediaLibrary({
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [showUploadModal, setShowUploadModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [editingAsset, setEditingAsset] = useState<MediaAsset | null>(null);
@@ -96,7 +98,7 @@ export function MediaLibrary({
       setIsDragOver(false);
       const files = Array.from(e.dataTransfer.files);
       if (files.length > 0) {
-        handleFileUpload(files);
+        handleFileSelect(files);
       }
     }
   };
@@ -135,17 +137,11 @@ export function MediaLibrary({
     }
   };
 
-  const handleFileUpload = async (files: FileList | File[]) => {
-    if (!files || files.length === 0) return;
+  const validateFiles = (files: File[]) => {
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'video/mp4', 'video/webm'];
 
-    setIsUploading(true);
-    const fileArray = Array.from(files);
-
-    // Validate files first
-    const validFiles = fileArray.filter(file => {
-      const maxSize = 10 * 1024 * 1024; // 10MB
-      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'video/mp4', 'video/webm'];
-
+    const validFiles = files.filter(file => {
       if (file.size > maxSize) {
         showError(`${file.name} is too large. Maximum size is 10MB.`);
         return false;
@@ -159,12 +155,37 @@ export function MediaLibrary({
       return true;
     });
 
-    if (validFiles.length === 0) {
-      setIsUploading(false);
-      return;
-    }
+    return validFiles;
+  };
 
-    const uploadPromises = validFiles.map(async (file) => {
+  const handleFileSelect = (files: FileList | File[]) => {
+    const fileArray = Array.from(files);
+    const validFiles = validateFiles(fileArray);
+
+    if (validFiles.length > 0) {
+      setSelectedFiles(prev => [...prev, ...validFiles]);
+      setShowUploadModal(true);
+    }
+  };
+
+  const handleFileInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      handleFileSelect(files);
+    }
+    event.target.value = ''; // Reset input
+  };
+
+  const removeSelectedFile = (index: number) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const uploadSelectedFiles = async () => {
+    if (selectedFiles.length === 0) return;
+
+    setIsUploading(true);
+
+    const uploadPromises = selectedFiles.map(async (file) => {
       const formData = new FormData();
       formData.append('file', file);
 
@@ -173,10 +194,17 @@ export function MediaLibrary({
       formData.append('alt_text', altText);
 
       try {
+        const token = localStorage.getItem('access');
+        if (!token) {
+          showError('Authentication required. Please log in again.');
+          return null;
+        }
+
         const response = await fetch('/api/media/', {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('access')}`,
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
           },
           body: formData,
         });
@@ -187,7 +215,7 @@ export function MediaLibrary({
           return asset;
         } else {
           const errorData = await response.json().catch(() => ({}));
-          showError(`Failed to upload ${file.name}: ${errorData.detail || 'Unknown error'}`);
+          showError(`Failed to upload ${file.name}: ${errorData.detail || response.statusText}`);
           return null;
         }
       } catch (error) {
@@ -202,21 +230,17 @@ export function MediaLibrary({
 
       if (successfulUploads.length > 0) {
         setAssets(prev => [...successfulUploads, ...prev]);
-        showSuccess(`Successfully uploaded ${successfulUploads.length} of ${validFiles.length} files`);
+        showSuccess(`Successfully uploaded ${successfulUploads.length} of ${selectedFiles.length} files`);
       }
+
+      // Close modal and clear selected files
+      setShowUploadModal(false);
+      setSelectedFiles([]);
     } catch (error) {
       showError('Upload failed due to network error');
     } finally {
       setIsUploading(false);
     }
-  };
-
-  const handleFileInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (files) {
-      handleFileUpload(files);
-    }
-    event.target.value = ''; // Reset input
   };
 
   const handleDelete = async (assetId: number) => {
@@ -568,6 +592,122 @@ export function MediaLibrary({
               </Card>
             );
           })}
+        </div>
+      )}
+
+      {/* Upload Modal */}
+      {showUploadModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+            {/* Modal Header */}
+            <div className="px-8 py-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Upload Media Files</h2>
+                  <p className="text-gray-600 mt-1">
+                    {selectedFiles.length} file{selectedFiles.length !== 1 ? 's' : ''} selected for upload
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowUploadModal(false)}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                  disabled={isUploading}
+                >
+                  <XMarkIcon className="h-6 w-6 text-gray-400" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Body */}
+            <div className="px-8 py-6 max-h-[calc(90vh-140px)] overflow-y-auto">
+              {/* Selected Files Grid */}
+              {selectedFiles.length > 0 && (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {selectedFiles.map((file, index) => (
+                      <div
+                        key={index}
+                        className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow"
+                      >
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-900 truncate">
+                              {file.name}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {(file.size / 1024 / 1024).toFixed(2)} MB
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => removeSelectedFile(index)}
+                            className="ml-2 p-1 hover:bg-red-100 rounded-full transition-colors"
+                            disabled={isUploading}
+                          >
+                            <XMarkIcon className="h-4 w-4 text-red-500" />
+                          </button>
+                        </div>
+
+                        {/* File Preview */}
+                        {file.type.startsWith('image/') && (
+                          <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden mb-3">
+                            <img
+                              src={URL.createObjectURL(file)}
+                              alt={file.name}
+                              className="w-full h-full object-cover"
+                              onLoad={(e) => URL.revokeObjectURL((e.target as HTMLImageElement).src)}
+                            />
+                          </div>
+                        )}
+
+                        {/* File Type Icon for non-images */}
+                        {!file.type.startsWith('image/') && (
+                          <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center mb-3">
+                            <PhotoIcon className="h-12 w-12 text-gray-400" />
+                          </div>
+                        )}
+
+                        {/* Upload Progress */}
+                        {isUploading && (
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div className="bg-blue-600 h-2 rounded-full animate-pulse"></div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Upload Actions */}
+                  <div className="flex justify-between items-center pt-6 border-t border-gray-200">
+                    <button
+                      onClick={() => setSelectedFiles([])}
+                      className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                      disabled={isUploading}
+                    >
+                      Clear All
+                    </button>
+
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => setShowUploadModal(false)}
+                        className="px-6 py-2 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors"
+                        disabled={isUploading}
+                      >
+                        Cancel
+                      </button>
+
+                      <button
+                        onClick={uploadSelectedFiles}
+                        disabled={isUploading || selectedFiles.length === 0}
+                        className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                      >
+                        {isUploading ? 'Uploading...' : `Upload ${selectedFiles.length} File${selectedFiles.length !== 1 ? 's' : ''}`}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       )}
 
