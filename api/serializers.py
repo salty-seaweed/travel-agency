@@ -93,12 +93,19 @@ class DestinationSerializer(serializers.ModelSerializer):
             if not data.get(field):
                 raise serializers.ValidationError(f"{field} is required")
         
+        # Language is optional – if empty string or None, normalize to None
+        if 'language' in data and not data.get('language'):
+            data['language'] = None
+        
+        # Coordinates: allow floats without enforcing decimal places
+        for coord in ['latitude', 'longitude']:
+            if coord in data and data[coord] in ['', None]:
+                data[coord] = None
+        
         # Validate image if provided
         if 'image' in data and data['image'] is not None:
             if not hasattr(data['image'], 'read') and not isinstance(data['image'], str):
                 raise serializers.ValidationError("Image must be a file upload or valid URL")
-        
-        # Language field is optional, so no validation needed
         
         return data
     

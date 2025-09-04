@@ -20,8 +20,8 @@ class Amenity(models.Model):
 class Location(models.Model):
     island = models.CharField(max_length=100)
     atoll = models.CharField(max_length=100, blank=True)
-    latitude = models.DecimalField(max_digits=9, decimal_places=6, help_text="Latitude with max 6 decimal places")
-    longitude = models.DecimalField(max_digits=9, decimal_places=6, help_text="Longitude with max 6 decimal places")
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
     
     def __str__(self):
         return f"{self.island}, {self.atoll}" if self.atoll else self.island
@@ -31,8 +31,8 @@ class Destination(models.Model):
     description = models.TextField()
     island = models.CharField(max_length=100)
     atoll = models.CharField(max_length=100)
-    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
-    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
     image = models.ImageField(upload_to='destinations/', null=True, blank=True)
     is_featured = models.BooleanField(default=False)
     property_count = models.IntegerField(default=0)  # Computed field
