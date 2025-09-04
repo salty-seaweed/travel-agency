@@ -520,10 +520,12 @@ class MediaAsset(models.Model):
         return self.file_url
     
     @property
-    def usage_count(self):
-        # Count how many times this asset is used
-        # This could be implemented by tracking references in content
-        return 0  # Implement usage tracking if needed
+    def computed_usage_count(self):
+        """Optionally compute dynamic usage; keep DB field `usage_count` intact."""
+        try:
+            return int(self.usage_count or 0)
+        except Exception:
+            return 0
 
 class Menu(models.Model):
     name = models.CharField(max_length=100)
