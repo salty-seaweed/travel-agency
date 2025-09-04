@@ -8,7 +8,7 @@ import os
 from .models import (
     PropertyImage, PackageImage, Destination, Experience, 
     HomepageHero, HomepageFeature, HomepageTestimonial, 
-    PageHero, AboutPageContent, FeaturedDestination
+    PageHero, AboutPageContent, FeaturedDestination, Location
 )
 
 def optimize_image_file(image_field, instance):
@@ -104,7 +104,33 @@ def optimize_package_image(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=Destination)
 def optimize_destination_image(sender, instance, created, **kwargs):
-    """Optimize destination images when saved"""
+    """Ensure Location exists for Destination, and optimize image when created"""
+    # Upsert Location from Destination geo fields
+    try:
+        if instance.island:
+            loc, created_loc = Location.objects.get_or_create(
+                island=instance.island,
+                atoll=instance.atoll or '',
+                defaults={
+                    'latitude': instance.latitude,
+                    'longitude': instance.longitude,
+                }
+            )
+            # If Destination lat/lon updated later, optionally sync Location if it exists
+            if not created_loc:
+                updated = False
+                if instance.latitude is not None and loc.latitude != instance.latitude:
+                    loc.latitude = instance.latitude
+                    updated = True
+                if instance.longitude is not None and loc.longitude != instance.longitude:
+                    loc.longitude = instance.longitude
+                    updated = True
+                if updated:
+                    loc.save(update_fields=['latitude', 'longitude'])
+    except Exception:
+        pass
+
+    # Optimize image on create
     if created and instance.image:
         optimize_image_file(instance.image, instance)
 
