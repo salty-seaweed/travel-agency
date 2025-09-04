@@ -371,21 +371,17 @@ export function MediaLibrary({
 
         {allowUpload && (
           <div className="flex items-center gap-3">
-            <input
-              type="file"
-              multiple
-              accept="image/*,video/*"
-              onChange={handleFileInputChange}
-              className="hidden"
-              id="media-upload"
-              disabled={isUploading}
-            />
-            <label
-              htmlFor="media-upload"
-              className={`bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 cursor-pointer ${
-                isUploading ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-            >
+            <label className={`bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 cursor-pointer ${
+              isUploading ? 'opacity-50 cursor-not-allowed' : ''
+            }`}>
+              <input
+                type="file"
+                multiple
+                accept="image/*,video/*"
+                onChange={handleFileInputChange}
+                className="hidden"
+                disabled={isUploading}
+              />
               <ArrowUpTrayIcon className="h-5 w-5" />
               {isUploading ? 'Uploading...' : 'Upload Files'}
             </label>
@@ -440,19 +436,15 @@ export function MediaLibrary({
             }
           </p>
           {!searchTerm && filterType === 'all' && allowUpload && (
-            <input
-              type="file"
-              multiple
-              accept="image/*,video/*"
-              onChange={handleFileInputChange}
-              className="hidden"
-              id="empty-state-upload"
-              disabled={isUploading}
-            />
-            <label
-              htmlFor="empty-state-upload"
-              className="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-all duration-200 gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 cursor-pointer"
-            >
+            <label className="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-all duration-200 gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 cursor-pointer">
+              <input
+                type="file"
+                multiple
+                accept="image/*,video/*"
+                onChange={handleFileInputChange}
+                className="hidden"
+                disabled={isUploading}
+              />
               <ArrowUpTrayIcon className="h-5 w-5" />
               Upload Files
             </label>

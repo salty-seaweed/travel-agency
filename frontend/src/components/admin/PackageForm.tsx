@@ -334,6 +334,17 @@ export function PackageForm({ isOpen, onClose, package: pkg, onSave, onPackageSa
         // existing_images: undefined,
       };
 
+      console.log('📦 [PACKAGE FORM] About to save package with data:', packageData);
+      console.log('📦 [PACKAGE FORM] Package data keys:', Object.keys(packageData));
+      console.log('📦 [PACKAGE FORM] Package data sample values:', {
+        name: packageData.name,
+        description: packageData.description?.substring(0, 100),
+        price: packageData.price,
+        duration: packageData.duration,
+        group_size_min: packageData.group_size_min,
+        group_size_max: packageData.group_size_max
+      });
+
       const savedPackage = await onSave(packageData);
 
       // If we have images to upload for a newly created package, upload them now

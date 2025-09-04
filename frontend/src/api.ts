@@ -134,8 +134,22 @@ async function secureRequest(
   };
 
   try {
+    console.log('🔧 [SECURE REQUEST] Making request to:', url);
+    console.log('🔧 [SECURE REQUEST] Request options:', {
+      method: secureOptions.method,
+      headers: secureOptions.headers,
+      body: secureOptions.body ? 'Present' : 'None'
+    });
+
     const response = await fetch(url, secureOptions);
-    
+
+    console.log('🔧 [SECURE REQUEST] Response received:', {
+      status: response.status,
+      statusText: response.statusText,
+      ok: response.ok,
+      headers: Object.fromEntries(response.headers.entries())
+    });
+
     // Handle 401 Unauthorized
     if (response.status === 401 && retryCount < MAX_RETRIES) {
       const refreshed = await refreshAccessToken();
@@ -211,11 +225,31 @@ export async function apiGet(path: string) {
 
 export async function apiPost(path: string, data: any) {
   const cleanPath = path.startsWith('/') ? path.slice(1) : path;
-  const response = await secureRequest(`${API_BASE}/${cleanPath}`, {
-    method: 'POST',
-    body: JSON.stringify(data),
-  });
-  return response.json();
+  console.log('🚀 [API POST] Starting request:', `${API_BASE}/${cleanPath}`);
+  console.log('🚀 [API POST] Request data:', data);
+  console.log('🚀 [API POST] API_BASE:', API_BASE);
+
+  try {
+    const response = await secureRequest(`${API_BASE}/${cleanPath}`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+    console.log('✅ [API POST] Response status:', response.status);
+    console.log('✅ [API POST] Response ok:', response.ok);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ [API POST] Error response:', errorText);
+      throw new Error(`Request failed: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+
+    const result = await response.json();
+    console.log('✅ [API POST] Success response:', result);
+    return result;
+  } catch (error) {
+    console.error('❌ [API POST] Request failed:', error);
+    throw error;
+  }
 }
 
 export async function apiPut(path: string, data: any) {

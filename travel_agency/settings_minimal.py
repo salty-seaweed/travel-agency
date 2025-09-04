@@ -344,10 +344,16 @@ FILE_UPLOAD_MAX_NUMBER_FILES = 100
 # Disable debug toolbar in production
 DEBUG_TOOLBAR = False
 
+# Force debug logging for troubleshooting
+import logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
 print("🚀 Railway production settings loaded successfully!")
 print(f"🔧 PORT environment variable: {os.getenv('PORT', 'NOT SET')}")
 print(f"🔧 DEBUG mode: {DEBUG}")
 print(f"🔧 Database: {DATABASE_URL[:50] if DATABASE_URL else 'Railway PostgreSQL env vars'}")
+print(f"🔧 Logging level set to DEBUG for troubleshooting")
 
 # Gunicorn and Railway deployment settings
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
