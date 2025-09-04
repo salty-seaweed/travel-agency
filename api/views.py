@@ -2437,65 +2437,56 @@ class PackageImageViewSet(viewsets.ModelViewSet):
             if image_url:
                 # Copy the image from media assets to package_images
                 from django.core.files.base import ContentFile
+                from django.core.files.storage import default_storage
+                from django.conf import settings as dj_settings
                 import requests
                 from urllib.parse import urlparse
                 import os
 
-                try:
-                    # Download the image from the media asset URL
-                    response = requests.get(image_url, timeout=30)
-                    response.raise_for_status()
-
-                    # Get file extension from URL or content type
-                    parsed_url = urlparse(image_url)
-                    content_type = response.headers.get('content-type', '')
-                    if 'jpeg' in content_type or 'jpg' in content_type:
-                        extension = '.jpg'
-                    elif 'png' in content_type:
-                        extension = '.png'
-                    elif 'gif' in content_type:
-                        extension = '.gif'
-                    elif 'webp' in content_type:
-                        extension = '.webp'
-                    else:
-                        # Try to get extension from URL
-                        extension = os.path.splitext(parsed_url.path)[1] or '.jpg'
-
-                    # Generate unique filename
-                    unique_filename = f"{uuid.uuid4()}{extension}"
-
-                    # Create package_images directory
-                    upload_dir = os.path.join(settings.MEDIA_ROOT, 'package_images')
+                # Helper to persist bytes to package_images
+                def _save_bytes_to_package_images(raw_bytes: bytes, extension: str) -> str:
+                    ext = extension if extension.startswith('.') else f'.{extension}' if extension else '.jpg'
+                    unique_filename = f"{uuid.uuid4()}{ext}"
+                    upload_dir = os.path.join(dj_settings.MEDIA_ROOT, 'package_images')
                     os.makedirs(upload_dir, exist_ok=True)
-
-                    # Save the image file
                     file_path = os.path.join(upload_dir, unique_filename)
                     with open(file_path, 'wb') as f:
-                        f.write(response.content)
+                        f.write(raw_bytes)
+                    return f"package_images/{unique_filename}"
 
-                    # Save with the new file path
-                    image_path = f"package_images/{unique_filename}"
-                    instance = serializer.save(image=image_path)
-
-                    # Best-effort: increment usage for the source MediaAsset
-                    try:
-                        from .models import MediaAsset
-                        # Match the asset by its absolute URL if available
-                        asset = MediaAsset.objects.filter(file=image_url.replace('/media/', '')).first()
-                        if not asset:
-                            # Fallback: try to match by file_url exact
-                            asset = MediaAsset.objects.filter().first()  # no reliable match; skip
-                        if asset:
-                            asset.usage_count = (asset.usage_count or 0) + 1
-                            locations = set(asset.usage_locations or [])
-                            locations.add('package-image')
-                            asset.usage_locations = list(locations)
-                            asset.save(update_fields=['usage_count', 'usage_locations'])
-                    except Exception:
-                        pass
-
+                try:
+                    # Fast-path for local media URLs: resolve to storage path and copy without HTTP
+                    media_url_prefix = dj_settings.MEDIA_URL if hasattr(dj_settings, 'MEDIA_URL') else '/media/'
+                    parsed = urlparse(image_url)
+                    if image_url.startswith(media_url_prefix) or parsed.path.startswith(media_url_prefix):
+                        rel_path = parsed.path[len(media_url_prefix):] if parsed.path.startswith(media_url_prefix) else image_url[len(media_url_prefix):]
+                        with default_storage.open(rel_path, 'rb') as fh:
+                            data = fh.read()
+                        _, extension = os.path.splitext(rel_path)
+                        image_path = _save_bytes_to_package_images(data, extension)
+                        serializer.save(image=image_path)
+                    else:
+                        # Remote URL: download via HTTP
+                        response = requests.get(image_url, timeout=30)
+                        response.raise_for_status()
+                        content_type = response.headers.get('content-type', '')
+                        parsed_url = urlparse(image_url)
+                        if 'jpeg' in content_type or 'jpg' in content_type:
+                            extension = '.jpg'
+                        elif 'png' in content_type:
+                            extension = '.png'
+                        elif 'gif' in content_type:
+                            extension = '.gif'
+                        elif 'webp' in content_type:
+                            extension = '.webp'
+                        else:
+                            extension = os.path.splitext(parsed_url.path)[1] or '.jpg'
+                        image_path = _save_bytes_to_package_images(response.content, extension)
+                        serializer.save(image=image_path)
                 except requests.RequestException as e:
                     raise serializers.ValidationError({ 'image_url': f"Failed to download image: {str(e)}" })
+                except FileNotFoundError:
+                    raise serializers.ValidationError({ 'image_url': "Source file not found in media storage." })
                 except Exception as e:
                     raise serializers.ValidationError({ 'image_url': f"Failed to process image: {str(e)}" })
             else:
