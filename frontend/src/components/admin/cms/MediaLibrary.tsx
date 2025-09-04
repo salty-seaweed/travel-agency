@@ -248,7 +248,7 @@ export function MediaLibrary({
     if (!confirm('Are you sure you want to delete this asset?')) return;
 
     try {
-      const response = await fetch(`/api/media/${assetId}/`, {
+      const response = await fetch(getApiUrl(`media/${assetId}/`), {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('access')}`,
@@ -269,7 +269,7 @@ export function MediaLibrary({
     if (!editingAsset) return;
 
     try {
-      const response = await fetch(`/api/media/${editingAsset.id}/`, {
+      const response = await fetch(getApiUrl(`media/${editingAsset.id}/`), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -324,12 +324,14 @@ export function MediaLibrary({
     return DocumentIcon;
   };
 
-  const formatFileSize = (bytes: number) => {
+  const formatFileSize = (bytes?: number | null) => {
     if (bytes === 0) return '0 Bytes';
+    if (!Number.isFinite(bytes as number) || bytes == null || (bytes as number) < 0) return '—';
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    const i = Math.min(sizes.length - 1, Math.floor(Math.log(bytes as number) / Math.log(k)) || 0);
+    const value = (bytes as number) / Math.pow(k, i);
+    return `${parseFloat(value.toFixed(2))} ${sizes[i]}`;
   };
 
   const filteredAssets = assets.filter(asset => {

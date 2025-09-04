@@ -835,22 +835,77 @@ class PageUpdateSerializer(PageSerializer):
 
 class MediaAssetSerializer(serializers.ModelSerializer):
     created_by = serializers.ReadOnlyField(source='created_by.username')
+    file_url = serializers.SerializerMethodField(read_only=True)
+    thumbnail_url = serializers.SerializerMethodField(read_only=True)
     
     class Meta:
         model = MediaAsset
         fields = '__all__'
         read_only_fields = ['id', 'file_url', 'thumbnail_url', 'usage_count', 'created_at', 'mime_type']
     
-    def create(self, validated_data):
+    def get_file_url(self, obj):
+        try:
+            url = obj.file.url if obj.file else None
+            request = self.context.get('request') if isinstance(self.context, dict) else None
+            if request and url and isinstance(url, str) and url.startswith('/'):
+                try:
+                    return request.build_absolute_uri(url)
+                except Exception:
+                    return url
+            return url
+        except Exception:
+            return None
+    
+    def get_thumbnail_url(self, obj):
+        # Until thumbnail variants are generated, use main file URL as fallback
+        return self.get_file_url(obj)
+    
+    def _augment_file_metadata(self, validated_data):
+        """Populate mime_type, file_size, width, height when a file is uploaded."""
         file_obj = validated_data.get('file')
-        if file_obj:
-            validated_data['mime_type'] = file_obj.content_type
+        if not file_obj:
+            return validated_data
+        # Mime type and size
+        validated_data['mime_type'] = getattr(file_obj, 'content_type', validated_data.get('mime_type'))
+        try:
+            validated_data['file_size'] = getattr(file_obj, 'size', validated_data.get('file_size'))
+        except Exception:
+            pass
+        # Dimensions (best-effort)
+        try:
+            from PIL import Image
+            current_pos = None
+            try:
+                current_pos = file_obj.tell()
+            except Exception:
+                current_pos = None
+            try:
+                image = Image.open(file_obj)
+                width, height = image.size
+                validated_data['width'] = width
+                validated_data['height'] = height
+            finally:
+                # Reset stream position if possible
+                try:
+                    if current_pos is not None:
+                        file_obj.seek(current_pos)
+                except Exception:
+                    pass
+        except Exception:
+            # Non-image files or PIL not available; ignore silently
+            pass
+        return validated_data
+    
+    def create(self, validated_data):
+        # Attach creator if available
+        request = self.context.get('request') if isinstance(self.context, dict) else None
+        if request and getattr(request, 'user', None) and request.user.is_authenticated:
+            validated_data.setdefault('created_by', request.user)
+        validated_data = self._augment_file_metadata(validated_data)
         return super().create(validated_data)
     
     def update(self, instance, validated_data):
-        file_obj = validated_data.get('file')
-        if file_obj:
-            validated_data['mime_type'] = file_obj.content_type
+        validated_data = self._augment_file_metadata(validated_data)
         return super().update(instance, validated_data)
 
 class MenuItemSerializer(serializers.ModelSerializer):
