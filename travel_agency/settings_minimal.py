@@ -4,6 +4,7 @@ Comprehensive configuration with all production features.
 """
 
 import os
+import logging
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -162,31 +163,48 @@ MEDIA_ROOT = os.getenv('MEDIA_ROOT', os.path.join(BASE_DIR, 'media'))
 
 # Ensure media directory exists and has correct permissions
 def ensure_media_permissions():
-    """Ensure media directory has correct permissions for Railway deployment"""
+    """
+    Ensure media directory exists and is writable.
+    Skip chmod/chown on mounted volumes (e.g., Railway) where it's not permitted.
+    """
+    logger = logging.getLogger(__name__)
+
+    # Ensure the directory exists
     try:
-        if not os.path.exists(MEDIA_ROOT):
-            os.makedirs(MEDIA_ROOT, exist_ok=True)
-
-        # Set broad permissions to handle Railway volume mounting
-        os.chmod(MEDIA_ROOT, 0o777)
-
-        # Try to set ownership if running with sufficient privileges
-        try:
-            import pwd
-            import grp
-            # Get current user info
-            current_uid = os.getuid()
-            current_gid = os.getgid()
-            os.chown(MEDIA_ROOT, current_uid, current_gid)
-        except (ImportError, OSError, AttributeError):
-            # Not available on Windows or insufficient privileges
-            pass
-
+        os.makedirs(MEDIA_ROOT, exist_ok=True)
     except Exception as e:
-        # Log but don't fail - permissions might be set by Railway
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.warning(f"Could not set media directory permissions: {e}")
+        logger.error(f"Could not create MEDIA_ROOT '{MEDIA_ROOT}': {e}")
+        return
+
+    # If MEDIA_ROOT is a mount point (like a Railway volume), do not attempt chmod/chown
+    is_mount = False
+    try:
+        is_mount = os.path.ismount(MEDIA_ROOT)
+    except Exception:
+        pass
+
+    if is_mount:
+        # Best-effort writeability check
+        try:
+            test_file = os.path.join(MEDIA_ROOT, ".rw_test")
+            with open(test_file, "w") as f:
+                f.write("ok")
+            os.remove(test_file)
+        except Exception as write_err:
+            logger.error(f"MEDIA_ROOT not writable: {MEDIA_ROOT} ({write_err})")
+        return
+
+    # For non-mounted directories, only chmod if we own the directory
+    try:
+        if hasattr(os, "getuid"):
+            stat_info = os.stat(MEDIA_ROOT)
+            if stat_info.st_uid == os.getuid():
+                os.chmod(MEDIA_ROOT, 0o755)
+    except PermissionError:
+        # Non-fatal on restricted environments
+        logger.debug("Permission denied changing MEDIA_ROOT mode; continuing")
+    except Exception as e:
+        logger.debug(f"Skipping MEDIA_ROOT chmod due to: {e}")
 
 # Call this when Django starts
 ensure_media_permissions()

@@ -72,8 +72,8 @@ RUN mkdir -p /app/logs /app/media /app/staticfiles && \
     chmod 755 /app/media /app/staticfiles /app/logs && \
     chown -R appuser:appuser /app /home/appuser
 
-# Switch to non-root user
-USER appuser
+# Run as root to ensure write access to mounted volumes (e.g., Railway)
+USER root
 
 # Expose port
 EXPOSE 8000
