@@ -321,7 +321,7 @@ export function PackageBookingPage() {
                   </div>
                   <div className="flex items-center">
                     <EnvelopeIcon className="h-4 w-4 text-gray-400 mr-2" />
-                    <span className="text-sm text-gray-700">{homepageContent?.settings?.contact_email || 'info@threadtravels.mv'}</span>
+                    <span className="text-sm text-gray-700">{homepageContent?.settings?.contact_email || 'info@threadtravels.com'}</span>
                   </div>
                   <div className="flex items-center">
                     <MapPinIcon className="h-4 w-4 text-gray-400 mr-2" />

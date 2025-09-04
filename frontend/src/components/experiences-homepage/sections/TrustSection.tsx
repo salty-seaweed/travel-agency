@@ -22,13 +22,14 @@ import {
 import { ShieldCheckIcon, CreditCardIcon, GlobeAltIcon, UserGroupIcon, StarIcon, CheckCircleIcon, ClockIcon, ChatBubbleLeftRightIcon, HeartIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
 import { useTranslation } from '../../../i18n';
-import { getWhatsAppUrl } from '../../../config';
+import { useWhatsApp } from '../../../hooks/useQueries';
 import { Link } from 'react-router-dom';
 
 interface Props { homepageContent?: any; }
 
 export const ExperiencesTrustSection: React.FC<Props> = ({ homepageContent }) => {
   const { t } = useTranslation();
+  const { getWhatsAppUrl } = useWhatsApp();
   
   const bgColor = useColorModeValue('white', 'gray.900');
   const cardBg = useColorModeValue('gray.50', 'gray.800');

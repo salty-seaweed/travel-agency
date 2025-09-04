@@ -217,7 +217,7 @@ export function MobileNavigation({ className = '' }: MobileNavigationProps) {
                 <h3 className="text-sm font-medium text-gray-900 mb-3">Contact Us</h3>
                 <div className="space-y-2 text-sm text-gray-600">
                   <p>📞 {whatsappNumber}</p>
-                  <p>📧 info@threadtravels.mv</p>
+                  <p>📧 info@threadtravels.com</p>
                   <p>📍 Male, Maldives</p>
                 </div>
               </div>

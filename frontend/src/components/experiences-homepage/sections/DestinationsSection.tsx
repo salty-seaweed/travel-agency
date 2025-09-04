@@ -118,9 +118,6 @@ export const ExperiencesDestinationsSection: React.FC<Props> = () => {
                     
                     <VStack position="absolute" top={0} left={0} right={0} bottom={0} justify="center" spacing={2}>
                       <Text color="white" fontWeight="bold" fontSize="lg" textAlign="center">{destination.name}</Text>
-                      <Text color="gray.200" fontSize="sm" textAlign="center">
-                        {destination.property_count} {t('homepage.destinations.properties', 'properties')}
-                      </Text>
                       <Text color="gray.300" fontSize="xs" textAlign="center">
                         {destination.island || destination.name}, {destination.atoll || 'Maldives'}
                       </Text>

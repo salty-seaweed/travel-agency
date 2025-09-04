@@ -50,7 +50,7 @@ export const config: AppConfig = {
   })(),
   
   // Contact Information
-  whatsappNumber: import.meta.env.VITE_WHATSAPP_NUMBER || '+9607441097',
+  whatsappNumber: import.meta.env.VITE_WHATSAPP_NUMBER || '+9607441097', // Legacy - now using centralized config
   supportEmail: import.meta.env.VITE_SUPPORT_EMAIL || 'support@threadtravels.com',
   companyName: import.meta.env.VITE_COMPANY_NAME || 'Thread Travels & Tours',
   

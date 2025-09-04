@@ -55,6 +55,7 @@ export function PackageDetailPage() {
   }, [packageData]);
 
   const handleBookNow = () => {
+    // Ensure the modal opens without jumping to top
     onOpen();
   };
 

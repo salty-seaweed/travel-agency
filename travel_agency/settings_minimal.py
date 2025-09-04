@@ -157,15 +157,41 @@ STATICFILES_FINDERS = [
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media files configuration
-MEDIA_URL = '/media/'
+MEDIA_URL = os.getenv('MEDIA_URL', '/media/')
 MEDIA_ROOT = os.getenv('MEDIA_ROOT', os.path.join(BASE_DIR, 'media'))
-# Ensure MEDIA_ROOT is absolute and exists
-if not os.path.isabs(MEDIA_ROOT):
-    MEDIA_ROOT = os.path.join(BASE_DIR, MEDIA_ROOT)
-try:
-    os.makedirs(MEDIA_ROOT, exist_ok=True)
-except Exception:
-    pass
+# Ensure MEDIA_ROOT is absolute and exists when using local storage
+if not os.getenv('USE_CLOUD_MEDIA', 'false').lower() == 'true':
+    if not os.path.isabs(MEDIA_ROOT):
+        MEDIA_ROOT = os.path.join(BASE_DIR, MEDIA_ROOT)
+    try:
+        os.makedirs(MEDIA_ROOT, exist_ok=True)
+    except Exception:
+        pass
+
+# Optional cloud storage for persistent media (recommended for Railway/Vercel)
+USE_S3 = os.getenv('USE_S3', 'false').lower() == 'true'
+USE_CLOUDINARY = os.getenv('USE_CLOUDINARY', 'false').lower() == 'true'
+
+if USE_S3:
+    INSTALLED_APPS += ['storages']
+    AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+    AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+    AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME', 'us-east-1')
+    AWS_S3_FILE_OVERWRITE = False
+    AWS_DEFAULT_ACL = None
+    AWS_S3_VERIFY = True
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    MEDIA_URL = os.getenv('MEDIA_URL', f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/')
+elif USE_CLOUDINARY:
+    INSTALLED_APPS += ['cloudinary', 'cloudinary_storage']
+    CLOUDINARY_STORAGE = {
+        'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME'),
+        'API_KEY': os.getenv('CLOUDINARY_API_KEY'),
+        'API_SECRET': os.getenv('CLOUDINARY_API_SECRET'),
+    }
+    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+    MEDIA_URL = os.getenv('MEDIA_URL', MEDIA_URL)
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

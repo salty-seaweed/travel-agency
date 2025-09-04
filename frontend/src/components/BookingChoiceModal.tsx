@@ -82,7 +82,15 @@ export function BookingChoiceModal({ isOpen, onClose, package: pkg, onFormBookin
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="2xl" isCentered blockScrollOnMount={true}>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      size="2xl"
+      isCentered
+      blockScrollOnMount={false}
+      autoFocus={false}
+      scrollBehavior="inside"
+    >
         <ModalOverlay backdropFilter="blur(10px)" />
         <ModalContent className="bg-white rounded-3xl shadow-2xl border border-gray-100">
           <ModalHeader className="text-center border-b border-gray-100 pb-6">

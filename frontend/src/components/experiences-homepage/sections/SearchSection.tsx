@@ -37,12 +37,12 @@ import {
 } from '@heroicons/react/24/outline';
 import { useTranslation } from '../../../i18n';
 import { useWhatsApp } from '../../../hooks/useQueries';
-import { getWhatsAppUrl } from '../../../config';
 
 export const ExperiencesSearchSection: React.FC = () => {
   const { t } = useTranslation();
   const toast = useToast();
   const navigate = useNavigate();
+  const { getWhatsAppUrl } = useWhatsApp();
   
   const bgColor = useColorModeValue('white', 'gray.900');
   const cardBg = useColorModeValue('white', 'gray.800');

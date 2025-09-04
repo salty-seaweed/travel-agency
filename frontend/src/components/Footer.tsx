@@ -136,7 +136,7 @@ export function Footer() {
               <HStack spacing={3}>
                 <Icon as={EnvelopeIcon} w={4} h={4} />
                 <Text fontSize="sm">
-                  {settings?.contact_email || 'info@threadtravels.mv'}
+                  {settings?.contact_email || 'info@threadtravels.com'}
                 </Text>
               </HStack>
               <HStack spacing={3}>

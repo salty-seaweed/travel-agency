@@ -24,6 +24,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import { useCurrency } from '../../contexts/CurrencyContext';
+import { useWhatsApp } from '../../hooks/useQueries';
 import type { Package } from '../../types';
 
 interface StickyBookingBarProps {
@@ -44,6 +45,7 @@ export function StickyBookingBar({
   const isMobile = useBreakpointValue({ base: true, md: false });
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { formatPrice } = useCurrency();
+  const { getWhatsAppUrl } = useWhatsApp();
 
   if (!isMobile) {
     return null;
@@ -51,7 +53,7 @@ export function StickyBookingBar({
 
   const handleWhatsApp = () => {
     const message = `Hi! I'm interested in booking the "${packageData.name}" package.`;
-    const whatsappUrl = `https://wa.me/+9601234567?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = getWhatsAppUrl(message);
     window.open(whatsappUrl, '_blank');
     onClose();
   };
@@ -59,7 +61,7 @@ export function StickyBookingBar({
   const handleEmail = () => {
     const subject = `Inquiry about ${packageData.name} package`;
     const body = `Hi,\n\nI'm interested in booking the "${packageData.name}" package.\n\nPlease provide more information.\n\nThank you!`;
-    const mailtoUrl = `mailto:info@travelagency.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    const mailtoUrl = `mailto:info@threadtravels.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.open(mailtoUrl);
     onClose();
   };

@@ -74,7 +74,7 @@ export const properties: Property[] = [
     checkOut: "11:00 AM",
     cancellation: "Free cancellation up to 24 hours before check-in",
     contactPhone: "+960 744 1097",
-    contactEmail: "info@paradisebeachresort.com",
+    contactEmail: "info@threadtravels.com",
     latitude: 3.2028,
     longitude: 73.2207
   },
@@ -98,7 +98,7 @@ export const properties: Property[] = [
     checkOut: "10:00 AM",
     cancellation: "Free cancellation up to 48 hours before check-in",
     contactPhone: "+960 987 6543",
-    contactEmail: "info@crystalwatervilla.com",
+    contactEmail: "info@threadtravels.com",
     latitude: 4.2105,
     longitude: 73.5448
   },
@@ -122,7 +122,7 @@ export const properties: Property[] = [
     checkOut: "11:00 AM",
     cancellation: "Free cancellation up to 24 hours before check-in",
     contactPhone: "+960 744 1097",
-    contactEmail: "info@sunsetguesthouse.com",
+    contactEmail: "info@threadtravels.com",
     latitude: 3.1234,
     longitude: 73.5678
   },
@@ -146,7 +146,7 @@ export const properties: Property[] = [
     checkOut: "11:00 AM",
     cancellation: "Free cancellation up to 24 hours before check-in",
     contactPhone: "+960 333 4444",
-    contactEmail: "info@oceanviewhotel.com",
+    contactEmail: "info@threadtravels.com",
     latitude: 4.1755,
     longitude: 73.5093
   },
@@ -170,7 +170,7 @@ export const properties: Property[] = [
     checkOut: "10:00 AM",
     cancellation: "Free cancellation up to 72 hours before check-in",
     contactPhone: "+960 777 8888",
-    contactEmail: "info@islandparadise.com",
+    contactEmail: "info@threadtravels.com",
     latitude: 4.2345,
     longitude: 73.6789
   },
@@ -194,7 +194,7 @@ export const properties: Property[] = [
     checkOut: "11:00 AM",
     cancellation: "Free cancellation up to 48 hours before check-in",
     contactPhone: "+960 999 0000",
-    contactEmail: "info@coralreefvilla.com",
+    contactEmail: "info@threadtravels.com",
     latitude: 4.3456,
     longitude: 73.7890
   }

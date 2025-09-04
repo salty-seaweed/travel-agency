@@ -73,10 +73,10 @@ export function ContactPage() {
     {
       icon: EnvelopeIcon,
       title: t('contact.info.email.title', 'Email'),
-      details: ["info@threadtravels.mv"],
+      details: ["info@threadtravels.com"],
       description: t('contact.info.email.description', 'Send us an email anytime'),
       action: t('contact.info.email.action', 'Send Email'),
-      actionUrl: "mailto:info@threadtravels.mv"
+      actionUrl: "mailto:info@threadtravels.com"
     },
     {
       icon: PhoneIcon,
@@ -99,7 +99,7 @@ export function ContactPage() {
   const faqs = [
     {
       question: t('contact.faq.booking.question', 'How do I book a package?'),
-      answer: t('contact.faq.booking.answer', "You can book packages through WhatsApp, email, or by calling us directly. We'll guide you through the entire process.")
+      answer: t('contact.faq.booking.answer', "You can book packages through WhatsApp or email. We'll guide you through the entire process.")
     },
     {
       question: t('contact.faq.inclusions.question', "What's included in the travel packages?"),

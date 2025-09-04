@@ -236,7 +236,7 @@ export const CMSPageRenderer: React.FC<CMSPageRendererProps> = ({ slug, pageId }
                       <CardBody>
                         <VStack spacing={3} align="stretch">
                           <Text fontSize="sm" color="gray.600">
-                            📧 info@threadtravels.mv
+                            📧 info@threadtravels.com
                           </Text>
                           <Text fontSize="sm" color="gray.600">
                             📞 {whatsappNumber}
@@ -400,7 +400,7 @@ export const CMSPageRenderer: React.FC<CMSPageRendererProps> = ({ slug, pageId }
                               <Text fontWeight="semibold" color={textColor}>
                                 Email
                               </Text>
-                              <Text color="gray.600">info@threadtravels.mv</Text>
+                              <Text color="gray.600">info@threadtravels.com</Text>
                             </Box>
                           </HStack>
                           <HStack>

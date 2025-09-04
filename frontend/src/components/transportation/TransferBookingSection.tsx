@@ -77,12 +77,12 @@ export const TransferBookingSection = React.memo(() => {
       color: 'purple',
       description: 'Detailed inquiries and quotes',
       details: [
-        'Email: info@threadtravels.mv',
+        'Email: info@threadtravels.com',
         'Response within 24 hours',
         'Detailed quotes provided'
       ],
       action: 'Send Email',
-      actionUrl: 'mailto:info@threadtravels.mv'
+      actionUrl: 'mailto:info@threadtravels.com'
     }
   ];
 

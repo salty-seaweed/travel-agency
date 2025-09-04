@@ -28,9 +28,8 @@ import { Card } from '../Card';
 import { Button } from '../ui/Button';
 import { LoadingSpinner } from '../LoadingSpinner';
 import { LazyImage } from '../LazyImage';
-import { usePackage, usePackages } from '../../hooks/useQueries';
+import { usePackage, usePackages, useWhatsApp } from '../../hooks/useQueries';
 import { useNotification } from '../../hooks/useNotification';
-import { getWhatsAppUrl } from '../../config';
 import { whatsappBooking } from '../../services/whatsapp-booking';
 
 // Calendar component for date selection
@@ -347,6 +346,7 @@ export default function PackageDetailPageRaajje() {
   const packageId = Number(id);
   const { data: pkg, isLoading, error } = usePackage(packageId);
   const { data: relatedPackages = [] } = usePackages({ is_featured: true });
+  const { getWhatsAppUrl } = useWhatsApp();
 
   // Booking form state
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);

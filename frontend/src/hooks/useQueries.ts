@@ -648,13 +648,13 @@ export const useHomepageContent = () => {
   });
 };
 
-// Centralized WhatsApp number hook
+// Centralized WhatsApp number hook - single number from TTM admin
 export const useWhatsAppNumber = () => {
   const { data: homepageContent } = useHomepageContent();
-  
-  // Get WhatsApp number from homepage settings, fallback to config
+
+  // Get WhatsApp number from homepage settings, fallback to default
   const whatsappNumber = homepageContent?.settings?.whatsapp_number || '+9607441097';
-  
+
   return {
     whatsappNumber,
     isLoading: !homepageContent,
@@ -664,12 +664,12 @@ export const useWhatsAppNumber = () => {
 // Enhanced WhatsApp hook with URL generation
 export const useWhatsApp = () => {
   const { whatsappNumber, isLoading } = useWhatsAppNumber();
-  
+
   const getWhatsAppUrl = (message: string) => {
     // Use the improved WhatsApp service for consistent formatting
     return whatsappBooking.getWhatsAppUrl(message, whatsappNumber);
   };
-  
+
   return {
     whatsappNumber,
     getWhatsAppUrl,

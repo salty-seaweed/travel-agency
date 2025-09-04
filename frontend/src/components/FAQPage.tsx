@@ -5,9 +5,8 @@ import {
   ChevronUpIcon,
   QuestionMarkCircleIcon
 } from '@heroicons/react/24/outline';
-import { whatsappBooking } from '../services/whatsapp-booking';
 import { useTranslation } from '../i18n';
-import { usePageHero } from '../hooks/useQueries';
+import { usePageHero, useWhatsApp } from '../hooks/useQueries';
 
 interface FAQItem {
   id: string;
@@ -20,6 +19,7 @@ interface FAQItem {
 export function FAQPage() {
   const { t } = useTranslation();
   const { data: hero } = usePageHero('faq');
+  const { getWhatsAppUrl } = useWhatsApp();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
@@ -29,7 +29,7 @@ export function FAQPage() {
     {
       id: 'booking-1',
       question: 'How do I book a package in the Maldives?',
-      answer: 'You can book packages through our website, WhatsApp, email, or by calling us directly. We recommend contacting us via WhatsApp for immediate assistance and personalized recommendations based on your preferences and budget.',
+      answer: 'You can book packages through our website or WhatsApp. We recommend contacting us via WhatsApp for immediate assistance and personalized recommendations based on your preferences and budget.',
       category: 'Booking & Reservations',
       tags: ['booking', 'reservation', 'how to book']
     },
@@ -335,7 +335,7 @@ export function FAQPage() {
               {t('faq.contact.contactUs', 'Contact Us')}
             </a>
             <a
-              href={whatsappBooking.getWhatsAppUrl(t('faq.contact.whatsappMessage', 'Hi! I have a question about your travel services.'))}
+              href={getWhatsAppUrl(t('faq.contact.whatsappMessage', 'Hi! I have a question about your travel services.'))}
               target="_blank"
               rel="noopener noreferrer"
               className="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors"

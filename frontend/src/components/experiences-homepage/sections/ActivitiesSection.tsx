@@ -30,8 +30,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useTranslation } from '../../../i18n';
 import { useNavigate } from 'react-router-dom';
-import { useFeaturedExperiences } from '../../../hooks/useQueries';
-import { getWhatsAppUrl } from '../../../config';
+import { useFeaturedExperiences, useWhatsApp } from '../../../hooks/useQueries';
 
 interface ExperiencesActivitiesSectionProps {
   homepageContent?: any;
@@ -50,6 +49,7 @@ export const ExperiencesActivitiesSection: React.FC<ExperiencesActivitiesSection
   const mutedTextColor = useColorModeValue('gray.600', 'gray.300');
 
   const { data: experiences, isLoading } = useFeaturedExperiences();
+  const { getWhatsAppUrl } = useWhatsApp();
 
   const handleViewAllExperiences = () => {
     navigate('/packages');
@@ -96,74 +96,7 @@ export const ExperiencesActivitiesSection: React.FC<ExperiencesActivitiesSection
     }
   };
 
-  const displayExperiences = experiences && experiences.length > 0 ? experiences.slice(0, 6) : [
-    { 
-      id: 1, 
-      name: 'Snorkeling Adventure', 
-      description: 'Explore vibrant coral reefs and marine life in crystal clear waters',
-      experience_type: 'water_sports',
-      duration: '3 hours',
-      price: '75',
-      currency: 'USD',
-      max_participants: 8,
-      difficulty_level: 'easy'
-    },
-    { 
-      id: 2, 
-      name: 'Scuba Diving', 
-      description: 'Discover underwater wonders with certified instructors',
-      experience_type: 'diving',
-      duration: '4 hours',
-      price: '150',
-      currency: 'USD',
-      max_participants: 6,
-      difficulty_level: 'moderate'
-    },
-    { 
-      id: 3, 
-      name: 'Island Hopping', 
-      description: 'Visit multiple islands and experience different cultures',
-      experience_type: 'cultural',
-      duration: '8 hours',
-      price: '120',
-      currency: 'USD',
-      max_participants: 12,
-      difficulty_level: 'easy'
-    },
-    { 
-      id: 4, 
-      name: 'Water Sports', 
-      description: 'Jet skiing, parasailing, and other thrilling water activities',
-      experience_type: 'water_sports',
-      duration: '2 hours',
-      price: '95',
-      currency: 'USD',
-      max_participants: 4,
-      difficulty_level: 'moderate'
-    },
-    { 
-      id: 5, 
-      name: 'Cultural Tours', 
-      description: 'Experience local Maldivian culture and traditions',
-      experience_type: 'cultural',
-      duration: '5 hours',
-      price: '60',
-      currency: 'USD',
-      max_participants: 15,
-      difficulty_level: 'easy'
-    },
-    { 
-      id: 6, 
-      name: 'Adventure Activities', 
-      description: 'Rock climbing, zip lining, and other thrilling adventures',
-      experience_type: 'adventure',
-      duration: '6 hours',
-      price: '110',
-      currency: 'USD',
-      max_participants: 10,
-      difficulty_level: 'challenging'
-    },
-  ];
+  const displayExperiences = experiences && experiences.length > 0 ? experiences.slice(0, 6) : [];
 
   return (
     <Box bg={bgColor} py={16}>

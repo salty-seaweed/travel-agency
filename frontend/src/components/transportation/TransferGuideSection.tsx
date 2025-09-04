@@ -270,14 +270,6 @@ export const TransferGuideSection = React.memo(() => {
               
               <Box>
                 <HStack spacing={3} mb={3}>
-                  <Icon as={MapPinIcon} className="w-5 h-5 text-purple-600" />
-                  <Text className="font-semibold text-gray-800">Airport Counter</Text>
-                </HStack>
-                <Text className="text-gray-700">Counter #7 (Ministry of Tourism)</Text>
-              </Box>
-              
-              <Box>
-                <HStack spacing={3} mb={3}>
                   <Icon as={ClockIcon} className="w-5 h-5 text-orange-600" />
                   <Text className="font-semibold text-gray-800">Response Time</Text>
                 </HStack>
