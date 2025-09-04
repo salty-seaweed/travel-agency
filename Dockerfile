@@ -19,22 +19,21 @@ RUN apt-get update \
 COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy project
+# Copy project with .dockerignore optimizations
 COPY . /app/
 
-# Create logs directory
-RUN mkdir -p /app/logs
+# Create directories and set permissions before creating user (faster)
+RUN mkdir -p /app/logs /app/media && \
+    chmod 755 /app/media
 
-# Collect static files (skip in build, do at runtime)
-# RUN python manage.py collectstatic --noinput --settings=travel_agency.settings_production
+# Create non-root user and set ownership efficiently
+RUN groupadd -r appuser && useradd --no-log-init -r -g appuser appuser && \
+    chown -R appuser:appuser /app
 
-# Create non-root user
-RUN adduser --disabled-password --gecos '' appuser
-RUN chown -R appuser:appuser /app
 USER appuser
 
 # Expose port
 EXPOSE 8000
 
-# Run migrations and collect static files at startup, then start gunicorn
-CMD ["sh", "-c", "python manage.py migrate && python manage.py collectstatic --noinput && gunicorn travel_agency.wsgi:application --bind 0.0.0.0:8000 --workers 4 --worker-class gevent --worker-connections 1000"]
+# Optimized startup command
+CMD ["sh", "-c", "python manage.py migrate && python manage.py collectstatic --noinput --clear && gunicorn travel_agency.wsgi:application --bind 0.0.0.0:$PORT --workers 3 --worker-class gevent --worker-connections 1000 --access-logfile - --error-logfile -"]

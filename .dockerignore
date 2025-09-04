@@ -1,0 +1,95 @@
+# Version control
+.git
+.gitignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+.pytest_cache
+.coverage
+htmlcov
+*.egg-info
+dist
+build
+
+# Django
+staticfiles
+media
+db.sqlite3
+*.log
+
+# Environment files
+.env*
+!.env.example
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node.js (if any frontend build artifacts)
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Railway
+railway.json
+railway.toml
+nixpacks.toml
+
+# Documentation
+*.md
+!README.md
+
+# Tests
+test_*.py
+*_test.py
+tests/
+
+# Development files
+.env.local
+.env.development
+.env.test
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+.cache
+
+# Data exports
+data_exports/
+
+# Frontend build artifacts (if separate)
+frontend/build
+frontend/dist
+frontend/.next
+frontend/.nuxt
+
+# Database backups
+*.sql
+*.dump
+
+# Railway specific
+railway_*.py
+railway_*.sh
