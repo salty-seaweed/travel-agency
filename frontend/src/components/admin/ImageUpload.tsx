@@ -36,6 +36,7 @@ import {
   CloudArrowUpIcon,
 } from '@heroicons/react/24/outline';
 import { apiUpload } from '../../api';
+import { MediaLibrary } from './cms/MediaLibrary';
 
 interface ImageFile {
   id: string;
@@ -57,6 +58,8 @@ interface ImageUploadProps {
   acceptedTypes?: string[];
   title?: string;
   description?: string;
+  usageContext?: 'destination-image' | 'experience-image' | 'general';
+  showMediaLibraryOption?: boolean;
 }
 
 export function ImageUpload({
@@ -66,10 +69,13 @@ export function ImageUpload({
   maxFileSize = 5,
   acceptedTypes = ['image/jpeg', 'image/png', 'image/webp'],
   title = 'Images',
-  description = 'Upload images for this item'
+  description = 'Upload images for this item',
+  usageContext = 'general',
+  showMediaLibraryOption = true
 }: ImageUploadProps) {
   const [isDragOver, setIsDragOver] = useState(false);
   const [previewImage, setPreviewImage] = useState<ImageFile | null>(null);
+  const [isMediaLibraryOpen, setIsMediaLibraryOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const toast = useToast();
 
@@ -248,6 +254,41 @@ export function ImageUpload({
     onImagesChange(newImages);
   };
 
+  const handleMediaLibrarySelect = (asset: any) => {
+    // Check if we've reached max images
+    if (images.length >= maxImages) {
+      toast({
+        title: 'Maximum images reached',
+        description: `You can only upload up to ${maxImages} images`,
+        status: 'warning',
+        duration: 3000,
+      });
+      return;
+    }
+
+    // Create a new ImageFile from the selected media asset
+    const newImage: ImageFile = {
+      id: `media-${asset.id}-${Date.now()}`,
+      url: asset.file_url,
+      name: asset.alt_text || asset.caption || 'Selected image',
+      size: asset.file_size || 0,
+      isUploading: false,
+      uploadProgress: 100,
+      isFeatured: images.length === 0, // First image is featured by default
+      isNew: false // This is from MediaLibrary, not a new upload
+    };
+
+    onImagesChange([...images, newImage]);
+    setIsMediaLibraryOpen(false);
+
+    toast({
+      title: 'Image selected',
+      description: 'Image has been added from Media Library',
+      status: 'success',
+      duration: 3000,
+    });
+  };
+
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -307,16 +348,29 @@ export function ImageUpload({
         style={{ display: 'none' }}
       />
 
-      {/* Upload Button */}
-      {hasNewImages && !hasUploadingImages && (
-        <Button
-          colorScheme="purple"
-          leftIcon={<Icon as={CloudArrowUpIcon} h={4} w={4} />}
-          onClick={uploadAllImages}
-        >
-          Upload {images.filter(img => img.isNew && img.file).length} Images
-        </Button>
-      )}
+      {/* Action Buttons */}
+      <HStack spacing={3}>
+        {hasNewImages && !hasUploadingImages && (
+          <Button
+            colorScheme="purple"
+            leftIcon={<Icon as={CloudArrowUpIcon} h={4} w={4} />}
+            onClick={uploadAllImages}
+          >
+            Upload {images.filter(img => img.isNew && img.file).length} Images
+          </Button>
+        )}
+
+        {showMediaLibraryOption && images.length < maxImages && (
+          <Button
+            colorScheme="green"
+            variant="outline"
+            leftIcon={<Icon as={PhotoIcon} h={4} w={4} />}
+            onClick={() => setIsMediaLibraryOpen(true)}
+          >
+            Select from Media Library
+          </Button>
+        )}
+      </HStack>
 
       {/* Images Grid */}
       {images.length > 0 && (
@@ -517,6 +571,25 @@ export function ImageUpload({
           </ModalBody>
         </ModalContent>
       </Modal>
+
+      {/* Media Library Modal */}
+      {isMediaLibraryOpen && (
+        <Modal isOpen={isMediaLibraryOpen} onClose={() => setIsMediaLibraryOpen(false)} size="6xl">
+          <ModalOverlay />
+          <ModalContent maxW="90vw" maxH="90vh">
+            <ModalHeader>Select Images from Media Library</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody p={0} maxH="calc(90vh - 80px)" overflow="hidden">
+              <MediaLibrary
+                usageContext={usageContext}
+                showUsageInfo={false}
+                onSelect={handleMediaLibrarySelect}
+                multiSelect={true}
+              />
+            </ModalBody>
+          </ModalContent>
+        </Modal>
+      )}
     </VStack>
   );
 }

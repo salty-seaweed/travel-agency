@@ -21,11 +21,11 @@ export function useFetch<T>(
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const response = await apiGet(endpoint);
       const apiResponse = response as ApiResponse<T>;
-      
+
       if (apiResponse.results) {
         setData(apiResponse.results);
         setTotalCount(apiResponse.count || apiResponse.results.length);
@@ -39,7 +39,7 @@ export function useFetch<T>(
     } finally {
       setIsLoading(false);
     }
-  }, [endpoint]);
+  }, []); // Remove endpoint dependency to prevent infinite loop
 
   const refresh = useCallback(() => {
     fetchData();

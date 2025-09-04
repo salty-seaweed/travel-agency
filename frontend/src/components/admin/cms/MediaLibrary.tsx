@@ -26,8 +26,12 @@ interface MediaAsset {
   mime_type: string;
   file_size: number;
   usage_count: number;
+  usage_locations?: string[];
   created_at: string;
   created_by?: number;
+  width?: number;
+  height?: number;
+  tags?: string;
 }
 
 interface MediaLibraryProps {
@@ -35,18 +39,25 @@ interface MediaLibraryProps {
   multiSelect?: boolean;
   selectedAssets?: MediaAsset[];
   onSelectionChange?: (assets: MediaAsset[]) => void;
+  usageContext?: 'page-hero' | 'package-image' | 'destination-image' | 'experience-image' | 'general';
+  showUsageInfo?: boolean;
+  allowUpload?: boolean;
 }
 
-export function MediaLibrary({ 
-  onSelect, 
-  multiSelect = false, 
-  selectedAssets = [], 
-  onSelectionChange 
+export function MediaLibrary({
+  onSelect,
+  multiSelect = false,
+  selectedAssets = [],
+  onSelectionChange,
+  usageContext = 'general',
+  showUsageInfo = true,
+  allowUpload = true
 }: MediaLibraryProps) {
   const { showSuccess, showError } = useNotification();
   const [assets, setAssets] = useState<MediaAsset[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [editingAsset, setEditingAsset] = useState<MediaAsset | null>(null);
@@ -241,24 +252,34 @@ export function MediaLibrary({
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Media Library</h2>
-          <p className="text-gray-600">Manage your media assets</p>
+          <h2 className="text-2xl font-bold text-gray-900">
+            Media Library
+            {usageContext !== 'general' && (
+              <span className="text-sm font-normal text-gray-500 ml-2">
+                ({usageContext.replace('-', ' ')})
+              </span>
+            )}
+          </h2>
+          <p className="text-gray-600">
+            {usageContext === 'general'
+              ? 'Manage your media assets'
+              : `Select images for ${usageContext.replace('-', ' ')}`
+            }
+          </p>
         </div>
-        
-        <div className="flex items-center gap-3">
-          <label className="relative cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors">
-            <ArrowUpTrayIcon className="h-5 w-5 inline mr-2" />
-            Upload Files
-            <input
-              type="file"
-              multiple
-              accept="image/*,video/*,.pdf,.doc,.docx"
-              onChange={handleFileUpload}
-              className="hidden"
+
+        {allowUpload && (
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setShowUploadModal(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               disabled={isUploading}
-            />
-          </label>
-        </div>
+            >
+              <ArrowUpTrayIcon className="h-5 w-5" />
+              Upload Files
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Search and Filters */}
@@ -308,17 +329,13 @@ export function MediaLibrary({
             }
           </p>
           {!searchTerm && filterType === 'all' && (
-            <label className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors cursor-pointer">
-              <ArrowUpTrayIcon className="h-5 w-5 mr-2" />
+            <button
+              onClick={() => setShowUploadModal(true)}
+              className="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-all duration-200 gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            >
+              <ArrowUpTrayIcon className="h-5 w-5" />
               Upload Files
-              <input
-                type="file"
-                multiple
-                accept="image/*,video/*,.pdf,.doc,.docx"
-                onChange={handleFileUpload}
-                className="hidden"
-              />
-            </label>
+            </button>
           )}
         </Card>
       ) : (
@@ -404,6 +421,25 @@ export function MediaLibrary({
                     <span>{formatFileSize(asset.file_size)}</span>
                     <span>{asset.usage_count} uses</span>
                   </div>
+                  {showUsageInfo && asset.usage_locations && asset.usage_locations.length > 0 && (
+                    <div className="mt-2">
+                      <div className="flex flex-wrap gap-1">
+                        {asset.usage_locations.slice(0, 3).map((location, index) => (
+                          <span
+                            key={index}
+                            className="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full"
+                          >
+                            {location.replace('-', ' ')}
+                          </span>
+                        ))}
+                        {asset.usage_locations.length > 3 && (
+                          <span className="inline-block px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-full">
+                            +{asset.usage_locations.length - 3} more
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Select Button for Single Select */}
@@ -477,6 +513,430 @@ export function MediaLibrary({
               </div>
             </div>
           </Card>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Unified Image Picker Component
+interface ImagePickerProps {
+  value?: MediaAsset | null;
+  onChange: (asset: MediaAsset | null) => void;
+  usageContext: 'page-hero' | 'package-image' | 'destination-image' | 'experience-image';
+  placeholder?: string;
+  allowClear?: boolean;
+  showPreview?: boolean;
+}
+
+export function ImagePicker({
+  value,
+  onChange,
+  usageContext,
+  placeholder = "Select an image...",
+  allowClear = true,
+  showPreview = true
+}: ImagePickerProps) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleSelect = (asset: MediaAsset) => {
+    onChange(asset);
+    setIsOpen(false);
+  };
+
+  const handleClear = () => {
+    onChange(null);
+  };
+
+  return (
+    <div className="space-y-2">
+      {value && showPreview ? (
+        <div className="relative">
+          <img
+            src={value.file_url}
+            alt={value.alt_text}
+            className="w-full h-32 object-cover rounded-lg border"
+          />
+          <div className="absolute top-2 right-2 flex gap-1">
+            <button
+              onClick={() => setIsOpen(true)}
+              className="p-1 bg-white/90 backdrop-blur-sm rounded hover:bg-white transition-colors"
+              title="Change image"
+            >
+              <PencilIcon className="h-4 w-4 text-gray-600" />
+            </button>
+            {allowClear && (
+              <button
+                onClick={handleClear}
+                className="p-1 bg-white/90 backdrop-blur-sm rounded hover:bg-red-100 transition-colors"
+                title="Remove image"
+              >
+                <XMarkIcon className="h-4 w-4 text-red-600" />
+              </button>
+            )}
+          </div>
+        </div>
+      ) : (
+        <button
+          onClick={() => setIsOpen(true)}
+          className="w-full h-32 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center hover:border-gray-400 transition-colors"
+        >
+          <PhotoIcon className="h-8 w-8 text-gray-400 mb-2" />
+          <span className="text-sm text-gray-600">{placeholder}</span>
+        </button>
+      )}
+
+      {/* Media Library Modal */}
+      {isOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl mx-4 max-h-[90vh] overflow-hidden">
+            <div className="p-6 border-b">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Select {usageContext.replace('-', ' ')} Image
+                </h3>
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="p-1 hover:bg-gray-100 rounded"
+                >
+                  <XMarkIcon className="h-6 w-6" />
+                </button>
+              </div>
+            </div>
+            <div className="p-6 max-h-[calc(90vh-120px)] overflow-y-auto">
+              <MediaLibrary
+                usageContext={usageContext}
+                showUsageInfo={false}
+                onSelect={handleSelect}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modern Upload Modal */}
+      {showUploadModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+            {/* Modal Header */}
+            <div className="px-8 py-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Upload Media Assets</h2>
+                  <p className="text-gray-600 mt-1">Add images, videos, and documents to your media library</p>
+                </div>
+                <button
+                  onClick={() => setShowUploadModal(false)}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <XMarkIcon className="h-6 w-6 text-gray-400" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Body */}
+            <div className="px-8 py-6 max-h-[calc(90vh-140px)] overflow-y-auto">
+              <UploadModalContent
+                onUploadComplete={(assets) => {
+                  setAssets(prev => [...assets, ...prev]);
+                  setShowUploadModal(false);
+                }}
+                onClose={() => setShowUploadModal(false)}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Modern Upload Modal Content Component
+function UploadModalContent({ onUploadComplete, onClose }: {
+  onUploadComplete: (assets: MediaAsset[]) => void;
+  onClose: () => void;
+}) {
+  const { showSuccess, showError } = useNotification();
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [uploadingFiles, setUploadingFiles] = useState<Set<string>>(new Set());
+  const [uploadedAssets, setUploadedAssets] = useState<MediaAsset[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+
+    const files = Array.from(e.dataTransfer.files);
+    handleFiles(files);
+  };
+
+  const handleFiles = (files: File[]) => {
+    const validFiles = files.filter(file => {
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'video/mp4', 'video/webm'];
+
+      if (file.size > maxSize) {
+        showError(`${file.name} is too large. Maximum size is 10MB.`);
+        return false;
+      }
+
+      if (!allowedTypes.includes(file.type)) {
+        showError(`${file.name} is not a supported file type.`);
+        return false;
+      }
+
+      return true;
+    });
+
+    setSelectedFiles(prev => [...prev, ...validFiles]);
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      handleFiles(Array.from(files));
+    }
+  };
+
+  const removeFile = (index: number) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const uploadFiles = async () => {
+    if (selectedFiles.length === 0) return;
+
+    setIsUploading(true);
+    const uploadPromises = selectedFiles.map(async (file) => {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      // Add alt text based on filename
+      const altText = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
+      formData.append('alt_text', altText);
+
+      try {
+        setUploadingFiles(prev => new Set([...prev, file.name]));
+
+        const response = await fetch('/api/media/', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('access')}`,
+          },
+          body: formData,
+        });
+
+        if (response.ok) {
+          const asset = await response.json();
+          showSuccess(`Uploaded ${file.name} successfully`);
+          return asset;
+        } else {
+          showError(`Failed to upload ${file.name}`);
+          return null;
+        }
+      } catch (error) {
+        showError(`Failed to upload ${file.name}`);
+        return null;
+      } finally {
+        setUploadingFiles(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(file.name);
+          return newSet;
+        });
+      }
+    });
+
+    const results = await Promise.all(uploadPromises);
+    const successfulUploads = results.filter(result => result !== null);
+
+    if (successfulUploads.length > 0) {
+      setUploadedAssets(successfulUploads);
+      onUploadComplete(successfulUploads);
+    }
+
+    setIsUploading(false);
+    setSelectedFiles([]);
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Upload Area */}
+      <div
+        className={`relative border-2 border-dashed rounded-2xl p-12 text-center transition-all duration-300 cursor-pointer ${
+          isDragOver
+            ? 'border-blue-400 bg-blue-50 scale-105'
+            : 'border-gray-300 bg-gray-50 hover:border-gray-400 hover:bg-gray-100'
+        }`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        onClick={() => fileInputRef.current?.click()}
+      >
+        {/* Animated background pattern */}
+        <div className="absolute inset-0 opacity-5 rounded-2xl">
+          <div
+            className="absolute inset-0 bg-repeat"
+            style={{
+              backgroundImage: `radial-gradient(circle at 20px 20px, rgba(59, 130, 246, 0.3) 2px, transparent 2px)`,
+              backgroundSize: '40px 40px'
+            }}
+          ></div>
+        </div>
+
+        <div className="relative z-10">
+          <div className="mx-auto w-20 h-20 bg-white rounded-full shadow-lg flex items-center justify-center mb-6">
+            <CloudArrowUpIcon className={`h-10 w-10 ${isDragOver ? 'text-blue-600' : 'text-gray-400'} transition-colors`} />
+          </div>
+
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            {isDragOver ? 'Drop your files here' : 'Upload Media Files'}
+          </h3>
+
+          <p className="text-gray-600 mb-6 max-w-md mx-auto">
+            Drag and drop your files here, or click to browse. Supports images, videos, and documents.
+          </p>
+
+          {/* File type badges */}
+          <div className="flex flex-wrap justify-center gap-2 mb-6">
+            <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">JPG</span>
+            <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">PNG</span>
+            <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">WebP</span>
+            <span className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-medium">GIF</span>
+            <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium">MP4</span>
+          </div>
+
+          <button
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            disabled={isUploading}
+          >
+            Choose Files
+          </button>
+
+          <p className="text-xs text-gray-500 mt-4">
+            Maximum file size: 10MB per file
+          </p>
+        </div>
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          accept="image/*,video/*,.pdf,.doc,.docx"
+          onChange={handleFileSelect}
+          className="hidden"
+        />
+      </div>
+
+      {/* Selected Files */}
+      {selectedFiles.length > 0 && (
+        <div className="space-y-4">
+          <h4 className="text-lg font-semibold text-gray-900">
+            Selected Files ({selectedFiles.length})
+          </h4>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {selectedFiles.map((file, index) => (
+              <div
+                key={index}
+                className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow"
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">
+                      {file.name}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {formatFileSize(file.size)}
+                    </p>
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeFile(index);
+                    }}
+                    className="ml-2 p-1 hover:bg-red-100 rounded-full transition-colors"
+                  >
+                    <XMarkIcon className="h-4 w-4 text-red-500" />
+                  </button>
+                </div>
+
+                {/* File preview for images */}
+                {file.type.startsWith('image/') && (
+                  <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden mb-3">
+                    <img
+                      src={URL.createObjectURL(file)}
+                      alt={file.name}
+                      className="w-full h-full object-cover"
+                      onLoad={(e) => URL.revokeObjectURL((e.target as HTMLImageElement).src)}
+                    />
+                  </div>
+                )}
+
+                {/* Upload progress */}
+                {uploadingFiles.has(file.name) && (
+                  <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
+                    <div className="bg-blue-600 h-2 rounded-full animate-pulse"></div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Upload Actions */}
+          <div className="flex justify-between items-center pt-4 border-t border-gray-200">
+            <button
+              onClick={() => setSelectedFiles([])}
+              className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+            >
+              Clear All
+            </button>
+
+            <div className="flex gap-3">
+              <button
+                onClick={onClose}
+                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={uploadFiles}
+                disabled={isUploading || selectedFiles.length === 0}
+                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              >
+                {isUploading ? 'Uploading...' : `Upload ${selectedFiles.length} Files`}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Upload Progress */}
+      {isUploading && (
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
+          <div className="flex items-center justify-center">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mr-3"></div>
+            <span className="text-blue-800 font-medium">Uploading files...</span>
+          </div>
         </div>
       )}
     </div>

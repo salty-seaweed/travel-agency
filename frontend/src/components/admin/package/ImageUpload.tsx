@@ -1,7 +1,8 @@
 import React, { useState, useRef } from 'react';
-import { Box, Button, Image, VStack, HStack, Text, IconButton, useToast, Progress, Icon } from '@chakra-ui/react';
-import { PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { Box, Button, Image, VStack, HStack, Text, IconButton, useToast, Progress, Icon, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton } from '@chakra-ui/react';
+import { PlusIcon, XMarkIcon, PhotoIcon } from '@heroicons/react/24/outline';
 import { apiUpload, apiPost, apiDelete } from '../../../api';
+import { MediaLibrary } from '../cms/MediaLibrary';
 
 interface ImageUploadProps {
   images: Array<{
@@ -26,6 +27,7 @@ interface ImageUploadProps {
 const ImageUpload: React.FC<ImageUploadProps> = ({ images, onChange, packageId }) => {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [isMediaLibraryOpen, setIsMediaLibraryOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const toast = useToast();
 
@@ -160,6 +162,57 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ images, onChange, packageId }
     onChange(newImages);
   };
 
+  const handleMediaLibrarySelect = (asset: any) => {
+    if (!packageId) {
+      toast({
+        title: 'Cannot select images',
+        description: 'Please save the package first before selecting images.',
+        status: 'warning',
+        duration: 3000,
+      });
+      return;
+    }
+
+    // Create FormData for the selected media asset
+    const formData = new FormData();
+    formData.append('package_id', packageId.toString());
+    formData.append('image_url_field', asset.file_url); // Use the media asset URL
+    formData.append('caption', asset.alt_text || asset.caption || '');
+    formData.append('order', images.length.toString());
+    formData.append('is_featured', images.length === 0 ? 'true' : 'false');
+
+    // Call the package images API to create a package image from the media asset
+    apiUpload('/package-images/', formData).then((response) => {
+      if (response.success) {
+        const newImage = {
+          id: response.data.id,
+          image: response.data.image,
+          caption: response.data.caption || asset.alt_text,
+          order: response.data.order || images.length,
+          is_featured: response.data.is_featured || images.length === 0
+        };
+
+        onChange([...images, newImage]);
+
+        toast({
+          title: 'Image selected successfully',
+          status: 'success',
+          duration: 3000,
+        });
+      }
+    }).catch((error) => {
+      console.error('Failed to select image:', error);
+      toast({
+        title: 'Failed to select image',
+        description: 'Please try again.',
+        status: 'error',
+        duration: 5000,
+      });
+    });
+
+    setIsMediaLibraryOpen(false);
+  };
+
   return (
     <VStack spacing={4} align="stretch">
       <Box>
@@ -179,17 +232,30 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ images, onChange, packageId }
             </Text>
           </Box>
         ) : (
-          <Button
-            leftIcon={<Icon as={PlusIcon} />}
-            onClick={() => fileInputRef.current?.click()}
-            isLoading={uploading}
-            loadingText="Uploading..."
-            colorScheme="blue"
-            variant="outline"
-            w="full"
-          >
-            Add Images
-          </Button>
+          <HStack spacing={2} w="full">
+            <Button
+              leftIcon={<Icon as={PlusIcon} />}
+              onClick={() => fileInputRef.current?.click()}
+              isLoading={uploading}
+              loadingText="Uploading..."
+              colorScheme="blue"
+              variant="outline"
+              flex={1}
+              size="sm"
+            >
+              Upload New
+            </Button>
+            <Button
+              leftIcon={<Icon as={PhotoIcon} />}
+              onClick={() => setIsMediaLibraryOpen(true)}
+              colorScheme="green"
+              variant="outline"
+              flex={1}
+              size="sm"
+            >
+              Select Existing
+            </Button>
+          </HStack>
         )}
 
         {uploading && (
@@ -268,6 +334,25 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ images, onChange, packageId }
             </Box>
           ))}
         </VStack>
+      )}
+
+      {/* Media Library Modal */}
+      {isMediaLibraryOpen && (
+        <Modal isOpen={isMediaLibraryOpen} onClose={() => setIsMediaLibraryOpen(false)} size="6xl">
+          <ModalOverlay />
+          <ModalContent maxW="90vw" maxH="90vh">
+            <ModalHeader>Select Package Images</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody p={0} maxH="calc(90vh - 80px)" overflow="hidden">
+              <MediaLibrary
+                usageContext="package-image"
+                showUsageInfo={false}
+                onSelect={handleMediaLibrarySelect}
+                multiSelect={false} // Single select for now to keep it simple
+              />
+            </ModalBody>
+          </ModalContent>
+        </Modal>
       )}
     </VStack>
   );

@@ -974,6 +974,8 @@ export function AdminExperiences() {
                           maxFileSize={5}
                           title="Experience Images"
                           description="Upload images showcasing this experience"
+                          usageContext="experience-image"
+                          showMediaLibraryOption={true}
                         />
                       </Box>
 

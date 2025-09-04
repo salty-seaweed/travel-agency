@@ -213,7 +213,7 @@ export function PackageForm({ isOpen, onClose, package: pkg, onSave, onPackageSa
     const validations = {
       name: form.name.trim(),
       description: form.description.trim(),
-      price: form.price && parseFloat(form.price) > 0,
+      price: form.price && !isNaN(parseFloat(form.price)) && parseFloat(form.price) > 0,
       duration: form.duration > 0,
       groupSize: form.group_size.min > 0 && form.group_size.max >= form.group_size.min,
       destinations: form.destinations.length > 0,

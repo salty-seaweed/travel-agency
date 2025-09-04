@@ -524,6 +524,8 @@ export function AdminDestinations() {
                           maxFileSize={5}
                           title="Destination Images"
                           description="Upload images showcasing this destination"
+                          usageContext="destination-image"
+                          showMediaLibraryOption={true}
                         />
                       </Box>
 

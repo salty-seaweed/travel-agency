@@ -46,6 +46,7 @@ import {
   EyeIcon,
   CloudArrowUpIcon,
 } from '@heroicons/react/24/outline';
+import { ImagePicker } from './cms/MediaLibrary';
 
 interface PageHero {
   id?: number;
@@ -54,6 +55,7 @@ interface PageHero {
   subtitle: string;
   image_url: string;
   background_image?: File;
+  media_asset?: any; // MediaAsset from MediaLibrary
   overlay_opacity: number;
   is_active: boolean;
   created_at?: string;
@@ -79,9 +81,8 @@ export const PageHeroManager: React.FC<PageHeroManagerProps> = ({ isOpen, onClos
   const [selectedHero, setSelectedHero] = useState<PageHero | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
   const [imagePreview, setImagePreview] = useState<string>('');
+  const [selectedMediaAsset, setSelectedMediaAsset] = useState<any>(null);
   const toast = useToast();
   const queryClient = useQueryClient();
   
@@ -131,6 +132,7 @@ export const PageHeroManager: React.FC<PageHeroManagerProps> = ({ isOpen, onClos
     });
     setIsEditing(false);
     setImagePreview('');
+    setSelectedMediaAsset(null);
     onEditModalOpen();
   };
 
@@ -138,69 +140,10 @@ export const PageHeroManager: React.FC<PageHeroManagerProps> = ({ isOpen, onClos
     setSelectedHero(hero);
     setIsEditing(true);
     setImagePreview(hero.image_url || '');
+    setSelectedMediaAsset(hero.media_asset || null);
     onEditModalOpen();
   };
 
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    setIsUploading(true);
-    setUploadProgress(0);
-
-    try {
-      const formData = new FormData();
-      formData.append('image', file);
-      formData.append('title', `Page Hero - ${selectedHero?.page_key || 'Unknown'}`);
-      formData.append('alt_text', `Hero background for ${selectedHero?.page_key || 'page'}`);
-      formData.append('image_type', 'hero');  // Must be one of: hero, feature, testimonial, gallery
-      formData.append('order', '0');
-      formData.append('is_active', 'true');
-
-      const token = localStorage.getItem('access');
-      const response = await fetch('/api/homepage/images/', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-        body: formData,
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        setImagePreview(result.image_url);
-        
-        setSelectedHero(prev => prev ? {
-          ...prev,
-          image_url: result.image_url,
-          background_image: file
-        } : null);
-        
-        toast({
-          title: 'Image uploaded',
-          description: 'Background image has been uploaded successfully',
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
-        });
-      } else {
-        throw new Error('Upload failed');
-      }
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to upload background image',
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-      });
-    } finally {
-      setIsUploading(false);
-      setUploadProgress(0);
-      // Clear the input
-      event.target.value = '';
-    }
-  };
 
   const handleSaveHero = async () => {
     if (!selectedHero) return;
@@ -544,83 +487,45 @@ export const PageHeroManager: React.FC<PageHeroManagerProps> = ({ isOpen, onClos
 
               <FormControl>
                 <FormLabel>Background Image</FormLabel>
-                <VStack spacing={4} align="stretch">
-                  {/* Image Upload Area */}
-                  <Box
-                    border="2px dashed"
-                    borderColor="gray.300"
-                    borderRadius="lg"
-                    p={6}
-                    textAlign="center"
-                    position="relative"
-                    _hover={{ borderColor: "blue.400" }}
-                    transition="border-color 0.2s"
-                  >
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        height: '100%',
-                        opacity: 0,
-                        cursor: 'pointer',
-                      }}
-                      disabled={isUploading}
-                    />
-                    
-                    {isUploading ? (
-                      <VStack spacing={3}>
-                        <Spinner size="lg" color="blue.500" />
-                        <Text>Uploading image...</Text>
-                        <Progress value={uploadProgress} size="sm" colorScheme="blue" w="full" />
-                      </VStack>
-                    ) : (
-                      <VStack spacing={3}>
-                        <CloudArrowUpIcon className="w-12 h-12 text-gray-400" />
-                        <VStack spacing={1}>
-                          <Text fontWeight="medium">Click to upload image</Text>
-                          <Text fontSize="sm" color="gray.500">
-                            PNG, JPG, GIF up to 10MB
-                          </Text>
-                        </VStack>
-                      </VStack>
-                    )}
-                  </Box>
+                <ImagePicker
+                  value={selectedMediaAsset}
+                  onChange={(asset) => {
+                    setSelectedMediaAsset(asset);
+                    if (asset) {
+                      setSelectedHero(prev => prev ? {
+                        ...prev,
+                        image_url: asset.file_url,
+                        media_asset: asset
+                      } : null);
+                      setImagePreview(asset.file_url);
+                    } else {
+                      setSelectedHero(prev => prev ? {
+                        ...prev,
+                        image_url: '',
+                        media_asset: null
+                      } : null);
+                      setImagePreview('');
+                    }
+                  }}
+                  usageContext="page-hero"
+                  placeholder="Select a background image for the hero section"
+                />
 
-                  {/* Current Image Preview */}
-                  {(imagePreview || selectedHero?.image_url) && (
-                    <Box>
-                      <Text fontSize="sm" color="gray.600" mb={2}>Current Image:</Text>
-                      <Image
-                        src={imagePreview || selectedHero?.image_url}
-                        alt="Current background"
-                        maxH="200px"
-                        w="full"
-                        objectFit="cover"
-                        borderRadius="md"
-                      />
-                    </Box>
-                  )}
-
-                  {/* Manual URL Input (Optional) */}
-                  <Box>
-                    <Text fontSize="sm" color="gray.600" mb={2}>Or enter image URL:</Text>
-                    <Input
-                      value={selectedHero?.image_url || ''}
-                      onChange={(e) => {
-                        const url = e.target.value;
-                        setSelectedHero(prev => prev ? { ...prev, image_url: url } : null);
-                        setImagePreview(url);
-                      }}
-                      placeholder="https://example.com/image.jpg"
-                      size="sm"
-                    />
-                  </Box>
-                </VStack>
+                {/* Manual URL Input (Fallback) */}
+                <Box mt={4}>
+                  <Text fontSize="sm" color="gray.600" mb={2}>Or enter image URL directly:</Text>
+                  <Input
+                    value={selectedHero?.image_url || ''}
+                    onChange={(e) => {
+                      const url = e.target.value;
+                      setSelectedHero(prev => prev ? { ...prev, image_url: url } : null);
+                      setImagePreview(url);
+                      setSelectedMediaAsset(null); // Clear media asset when using manual URL
+                    }}
+                    placeholder="https://example.com/image.jpg"
+                    size="sm"
+                  />
+                </Box>
               </FormControl>
 
               <FormControl>
