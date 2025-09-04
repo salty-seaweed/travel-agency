@@ -388,10 +388,66 @@ class PackageSerializerI18n(serializers.ModelSerializer):
             except Exception:
                 experiences_data = []
         package = super().create(validated_data)
-        
-        # Create PackageDestination objects
+
+        # Create PackageDestination objects with robust Location handling
+        # Accept either a valid Location ID, a Destination ID (fallback), or raw location fields
+        from .models import Location as LocationModel, Destination as DestinationModel
+
         for dest_data in destination_data:
-            PackageDestination.objects.create(package=package, **dest_data)
+            # Extract fields safely
+            location_id = dest_data.get('location_id')
+            island = dest_data.get('island') or dest_data.get('location_island')
+            atoll = dest_data.get('atoll') or dest_data.get('location_atoll') or ''
+            latitude = dest_data.get('latitude')
+            longitude = dest_data.get('longitude')
+
+            location_instance = None
+
+            # 1) Try direct Location by ID
+            if location_id:
+                try:
+                    location_instance = LocationModel.objects.get(id=location_id)
+                except LocationModel.DoesNotExist:
+                    # 2) Fallback: treat provided ID as Destination ID and upsert Location from it
+                    try:
+                        src_dest = DestinationModel.objects.get(id=location_id)
+                        location_instance, _ = LocationModel.objects.get_or_create(
+                            island=src_dest.island,
+                            atoll=src_dest.atoll or '',
+                            defaults={
+                                'latitude': src_dest.latitude,
+                                'longitude': src_dest.longitude,
+                            }
+                        )
+                    except DestinationModel.DoesNotExist:
+                        location_instance = None
+
+            # 3) If still missing, create/find by raw fields
+            if location_instance is None and island:
+                location_instance, _ = LocationModel.objects.get_or_create(
+                    island=island,
+                    atoll=atoll,
+                    defaults={
+                        'latitude': latitude,
+                        'longitude': longitude,
+                    }
+                )
+
+            # If we still don't have a location, raise a clear validation error
+            if location_instance is None:
+                raise serializers.ValidationError({
+                    'destination_data': 'Destination is missing a valid location. Provide location_id (Location or Destination), or island/atoll.'
+                })
+
+            # Build PackageDestination fields explicitly, ignoring non-model keys
+            PackageDestination.objects.create(
+                package=package,
+                location=location_instance,
+                duration=dest_data.get('duration') or 1,
+                description=dest_data.get('description') or '',
+                highlights=dest_data.get('highlights') or [],
+                activities=dest_data.get('activities') or [],
+            )
         
         # Create inclusions rows
         for inc in inclusions_data:
