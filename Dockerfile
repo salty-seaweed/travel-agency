@@ -87,6 +87,12 @@ RUN echo '#!/bin/bash\n\
 set -e\n\
 echo "🚀 Starting Railway deployment..."\n\
 \n\
+# Handle media directory permissions (Railway volume mounting)\n\
+echo "📁 Setting up media directory..."\n\
+mkdir -p /app/media\n\
+# Try to set permissions, but don'\''t fail if volume is mounted\n\
+chmod 755 /app/media 2>/dev/null || echo "⚠️  Could not set media permissions (volume mounted)"\n\
+\n\
 # Run migrations\n\
 echo "📦 Running database migrations..."\n\
 python manage.py migrate --verbosity=1\n\
