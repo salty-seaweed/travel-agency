@@ -1,0 +1,39 @@
+#!/bin/bash
+set -e
+echo "🚀 Starting Railway deployment..."
+
+# Handle media directory permissions (Railway volume mounting)
+echo "📁 Setting up media directory..."
+mkdir -p /app/media
+
+# Try to set permissions, but don't fail if volume is mounted
+chmod 755 /app/media 2>/dev/null || {
+    echo "⚠️  Could not set media permissions (volume mounted)"
+    echo "📂 Trying alternative: chmod a+X /app"
+    chmod a+X /app 2>/dev/null || echo "⚠️  Parent directory permissions failed"
+    echo "🔧 Setting directory permissions recursively..."
+    /bin/sh -c "find /app -type d -exec chmod a+X {} \;" 2>/dev/null || echo "⚠️  Directory permissions failed"
+}
+
+# Run migrations
+echo "📦 Running database migrations..."
+python manage.py migrate --verbosity=1
+
+# Collect static files
+echo "🎨 Collecting static files..."
+python manage.py collectstatic --noinput --clear --verbosity=1
+
+# Start gunicorn
+echo "🌐 Starting Gunicorn server..."
+exec gunicorn travel_agency.wsgi:application \
+  --bind "0.0.0.0:${PORT:-8000}" \
+  --workers 3 \
+  --worker-class gevent \
+  --worker-connections 1000 \
+  --max-requests 1000 \
+  --max-requests-jitter 50 \
+  --access-logfile - \
+  --error-logfile - \
+  --log-level info \
+  --timeout 30 \
+  --keep-alive 10
