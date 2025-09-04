@@ -488,7 +488,7 @@ class PageBlock(models.Model):
         return f"{self.page.title} - {self.type} (Order: {self.order})"
 
 class MediaAsset(models.Model):
-    file = models.FileField(upload_to='media/')
+    file = models.FileField(upload_to='')
     alt_text = models.CharField(max_length=255, blank=True)
     caption = models.TextField(blank=True)
     mime_type = models.CharField(max_length=100, blank=True)

@@ -159,6 +159,8 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # Media files configuration
 MEDIA_URL = os.getenv('MEDIA_URL', '/media/')
 MEDIA_ROOT = os.getenv('MEDIA_ROOT', os.path.join(BASE_DIR, 'media'))
+# Alternative: if volume is mounted at /app/, use:
+# MEDIA_ROOT = os.getenv('MEDIA_ROOT', BASE_DIR)
 # Ensure MEDIA_ROOT is absolute and exists when using local storage
 if not os.getenv('USE_CLOUD_MEDIA', 'false').lower() == 'true':
     if not os.path.isabs(MEDIA_ROOT):
