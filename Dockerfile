@@ -91,7 +91,13 @@ echo "🚀 Starting Railway deployment..."\n\
 echo "📁 Setting up media directory..."\n\
 mkdir -p /app/media\n\
 # Try to set permissions, but don'\''t fail if volume is mounted\n\
-chmod 755 /app/media 2>/dev/null || echo "⚠️  Could not set media permissions (volume mounted)"\n\
+chmod 755 /app/media 2>/dev/null || {
+    echo "⚠️  Could not set media permissions (volume mounted)"
+    echo "📂 Trying alternative: chmod a+X /app"
+    chmod a+X /app 2>/dev/null || echo "⚠️  Parent directory permissions failed"
+    echo "🔧 Trying: find /app -type d -exec chmod a+X {} \\;"
+    find /app -type d -exec chmod a+X {} \; 2>/dev/null || echo "⚠️  Directory permissions failed"
+}\n\
 \n\
 # Run migrations\n\
 echo "📦 Running database migrations..."\n\
