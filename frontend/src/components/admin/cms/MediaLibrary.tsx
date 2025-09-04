@@ -298,18 +298,23 @@ export function MediaLibrary({
   };
 
   const handleAssetSelect = (asset: MediaAsset) => {
+    console.log('MediaLibrary handleAssetSelect called with asset:', asset);
+
     if (multiSelect) {
+      console.log('Multi-select mode');
       const isSelected = selectedAssets.some(selected => selected.id === asset.id);
       let newSelection: MediaAsset[];
-      
+
       if (isSelected) {
         newSelection = selectedAssets.filter(selected => selected.id !== asset.id);
       } else {
         newSelection = [...selectedAssets, asset];
       }
-      
+
+      console.log('New selection:', newSelection);
       onSelectionChange?.(newSelection);
     } else {
+      console.log('Single-select mode, calling onSelect with asset:', asset);
       onSelect?.(asset);
     }
   };

@@ -163,6 +163,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ images, onChange, packageId }
   };
 
   const handleMediaLibrarySelect = (asset: any) => {
+    console.log('Media library selection triggered with asset:', asset);
+
     if (!packageId) {
       toast({
         title: 'Cannot select images',
@@ -173,6 +175,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ images, onChange, packageId }
       return;
     }
 
+    console.log('Package ID available:', packageId);
+
     // Create FormData for the selected media asset
     const formData = new FormData();
     formData.append('package_id', packageId.toString());
@@ -181,36 +185,49 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ images, onChange, packageId }
     formData.append('order', images.length.toString());
     formData.append('is_featured', images.length === 0 ? 'true' : 'false');
 
+    console.log('FormData created for package image:', {
+      package_id: packageId.toString(),
+      image_url_field: asset.file_url,
+      caption: asset.alt_text || asset.caption || '',
+      order: images.length.toString(),
+      is_featured: images.length === 0 ? 'true' : 'false'
+    });
+
     // Call the package images API to create a package image from the media asset
     apiUpload('/package-images/', formData).then((response) => {
-      if (response.success) {
-        const newImage = {
-          id: response.data.id,
-          image: response.data.image,
-          caption: response.data.caption || asset.alt_text,
-          order: response.data.order || images.length,
-          is_featured: response.data.is_featured || images.length === 0
-        };
+      console.log('Package image API response:', response); // Debug logging
 
-        onChange([...images, newImage]);
+      // API returns data directly, not wrapped in success property
+      const newImage = {
+        id: response.id,
+        image: response.image,
+        caption: response.caption || asset.alt_text,
+        order: response.order || images.length,
+        is_featured: response.is_featured || images.length === 0
+      };
 
-        toast({
-          title: 'Image selected successfully',
-          status: 'success',
-          duration: 3000,
-        });
-      }
+      onChange([...images, newImage]);
+
+      toast({
+        title: 'Image selected successfully',
+        status: 'success',
+        duration: 3000,
+      });
+
+      // Close modal after successful selection
+      setIsMediaLibraryOpen(false);
     }).catch((error) => {
       console.error('Failed to select image:', error);
       toast({
         title: 'Failed to select image',
-        description: 'Please try again.',
+        description: error.message || 'Please try again.',
         status: 'error',
         duration: 5000,
       });
-    });
 
-    setIsMediaLibraryOpen(false);
+      // Don't close modal on error so user can try again
+      // setIsMediaLibraryOpen(false);
+    });
   };
 
   return (
