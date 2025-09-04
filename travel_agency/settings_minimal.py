@@ -159,8 +159,38 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # Media files configuration
 MEDIA_URL = os.getenv('MEDIA_URL', '/media/')
 MEDIA_ROOT = os.getenv('MEDIA_ROOT', os.path.join(BASE_DIR, 'media'))
-# Alternative: if volume is mounted at /app/, use:
-# MEDIA_ROOT = os.getenv('MEDIA_ROOT', BASE_DIR)
+
+# Ensure media directory exists and has correct permissions
+def ensure_media_permissions():
+    """Ensure media directory has correct permissions for Railway deployment"""
+    try:
+        if not os.path.exists(MEDIA_ROOT):
+            os.makedirs(MEDIA_ROOT, exist_ok=True)
+
+        # Set broad permissions to handle Railway volume mounting
+        os.chmod(MEDIA_ROOT, 0o777)
+
+        # Try to set ownership if running with sufficient privileges
+        try:
+            import pwd
+            import grp
+            # Get current user info
+            current_uid = os.getuid()
+            current_gid = os.getgid()
+            os.chown(MEDIA_ROOT, current_uid, current_gid)
+        except (ImportError, OSError, AttributeError):
+            # Not available on Windows or insufficient privileges
+            pass
+
+    except Exception as e:
+        # Log but don't fail - permissions might be set by Railway
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.warning(f"Could not set media directory permissions: {e}")
+
+# Call this when Django starts
+ensure_media_permissions()
+
 # Ensure MEDIA_ROOT is absolute and exists when using local storage
 if not os.getenv('USE_CLOUD_MEDIA', 'false').lower() == 'true':
     if not os.path.isabs(MEDIA_ROOT):

@@ -7,7 +7,7 @@ import io
 import os
 from .models import (
     PropertyImage, PackageImage, Destination, Experience,
-    HomepageHero, HomepageFeature, HomepageTestimonial,
+    HomepageHero, HomepageFeature, HomepageTestimonial, HomepageImage,
     PageHero, AboutPageContent, FeaturedDestination, Location, Package, PackageDestination
 )
 
@@ -157,6 +157,12 @@ def optimize_homepage_testimonial_image(sender, instance, created, **kwargs):
     """Optimize homepage testimonial images when saved"""
     if created and instance.avatar:
         optimize_image_file(instance.avatar, instance)
+
+@receiver(post_save, sender=HomepageImage)
+def optimize_homepage_image(sender, instance, created, **kwargs):
+    """Optimize homepage images when saved"""
+    if created and instance.image:
+        optimize_image_file(instance.image, instance)
 
 @receiver(post_save, sender=PageHero)
 def optimize_page_hero_image(sender, instance, created, **kwargs):
