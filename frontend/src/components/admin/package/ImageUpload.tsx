@@ -10,6 +10,7 @@ interface ImageUploadProps {
     caption?: string;
     order?: number;
     is_featured?: boolean;
+    file?: File; // Store original file for new packages
   }>;
   onChange: (images: Array<{
     id?: number;
@@ -17,6 +18,7 @@ interface ImageUploadProps {
     caption?: string;
     order?: number;
     is_featured?: boolean;
+    file?: File; // Store original file for new packages
   }>) => void;
   packageId?: number;
 }
@@ -31,65 +33,73 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ images, onChange, packageId }
     const files = event.target.files;
     if (!files || files.length === 0) return;
 
+    // If no packageId is available, we'll store the files for later upload
+    if (!packageId) {
+      // Create preview URLs and store files for later upload
+      const newImages = [...images];
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const previewUrl = URL.createObjectURL(file);
+
+        newImages.push({
+          image: previewUrl,
+          caption: file.name,
+          order: images.length + i,
+          is_featured: images.length === 0 && i === 0,
+          file: file // Store the file for later upload
+        });
+      }
+
+      onChange(newImages);
+
+      toast({
+        title: 'Images added',
+        description: 'Images will be uploaded after you save the package.',
+        status: 'info',
+        duration: 3000,
+      });
+
+      return;
+    }
+
     setUploading(true);
     setUploadProgress(0);
 
     try {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        
+
         // Create FormData for file upload
         const formData = new FormData();
         formData.append('image', file);
-        
-        if (packageId) {
-          // Use dedicated package image endpoint
-          formData.append('package_id', packageId.toString());
-          formData.append('caption', file.name);
-          formData.append('order', images.length.toString());
-          formData.append('is_featured', images.length === 0 ? 'true' : 'false');
-          
-          const response = await apiUpload('/package-images/', formData);
-          
-          if (response.success) {
-            const newImage = {
-              id: response.data.id,
-              image: response.data.image,
-              caption: response.data.caption || file.name,
-              order: response.data.order || images.length,
-              is_featured: response.data.is_featured || images.length === 0
-            };
-            
-            onChange([...images, newImage]);
-            
-            toast({
-              title: 'Image uploaded successfully',
-              status: 'success',
-              duration: 3000,
-            });
-          }
-        } else {
-          // Fallback to generic upload for new packages
-          const response = await apiUpload('/package-images/', formData);
-          
-          if (response.success) {
-            const newImage = {
-              image: response.data.url || response.data.image,
-              caption: file.name,
-              order: images.length,
-              is_featured: images.length === 0
-            };
-            
-            onChange([...images, newImage]);
-            
-            toast({
-              title: 'Image uploaded successfully',
-              status: 'success',
-              duration: 3000,
-            });
-          }
+
+        // Use dedicated package image endpoint
+        formData.append('package_id', packageId.toString());
+        formData.append('caption', file.name);
+        formData.append('order', images.length.toString());
+        formData.append('is_featured', images.length === 0 ? 'true' : 'false');
+
+        const response = await apiUpload('/package-images/', formData);
+
+        if (response.success) {
+          const newImage = {
+            id: response.data.id,
+            image: response.data.image,
+            caption: response.data.caption || file.name,
+            order: response.data.order || images.length,
+            is_featured: response.data.is_featured || images.length === 0,
+            file: file // Store the original file for later use
+          };
+
+          onChange([...images, newImage]);
+
+          toast({
+            title: 'Image uploaded successfully',
+            status: 'success',
+            duration: 3000,
+          });
         }
-        
+
         setUploadProgress(((i + 1) / files.length) * 100);
       }
     } catch (error) {
@@ -111,7 +121,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ images, onChange, packageId }
 
   const removeImage = async (index: number) => {
     const imageToRemove = images[index];
-    
+
     // If we have an ID and packageId, delete from backend
     if (imageToRemove.id && packageId) {
       try {
@@ -120,10 +130,15 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ images, onChange, packageId }
         console.error('Failed to delete image from backend:', error);
       }
     }
-    
+
+    // Clean up blob URLs for images that haven't been uploaded yet
+    if (imageToRemove.image.startsWith('blob:')) {
+      URL.revokeObjectURL(imageToRemove.image);
+    }
+
     const newImages = images.filter((_, i) => i !== index);
     onChange(newImages);
-    
+
     toast({
       title: 'Image removed',
       status: 'info',
@@ -156,18 +171,27 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ images, onChange, packageId }
           onChange={handleFileSelect}
           style={{ display: 'none' }}
         />
-        <Button
-          leftIcon={<Icon as={PlusIcon} />}
-          onClick={() => fileInputRef.current?.click()}
-          isLoading={uploading}
-          loadingText="Uploading..."
-          colorScheme="blue"
-          variant="outline"
-          w="full"
-        >
-          Add Images
-        </Button>
-        
+
+        {!packageId ? (
+          <Box p={4} bg="yellow.50" border="1px" borderColor="yellow.200" borderRadius="md">
+            <Text fontSize="sm" color="yellow.800">
+              💡 Save the package first to enable image uploads
+            </Text>
+          </Box>
+        ) : (
+          <Button
+            leftIcon={<Icon as={PlusIcon} />}
+            onClick={() => fileInputRef.current?.click()}
+            isLoading={uploading}
+            loadingText="Uploading..."
+            colorScheme="blue"
+            variant="outline"
+            w="full"
+          >
+            Add Images
+          </Button>
+        )}
+
         {uploading && (
           <Progress value={uploadProgress} size="sm" mt={2} />
         )}
@@ -193,6 +217,12 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ images, onChange, packageId }
                   objectFit="cover"
                   borderRadius="md"
                   fallbackSrc="https://via.placeholder.com/80x80?text=Image"
+                  onError={(e) => {
+                    // Handle blob URL cleanup on error
+                    if (image.image.startsWith('blob:')) {
+                      URL.revokeObjectURL(image.image);
+                    }
+                  }}
                 />
                 
                 <VStack flex={1} align="start" spacing={2}>

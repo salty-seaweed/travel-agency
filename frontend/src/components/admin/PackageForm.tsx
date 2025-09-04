@@ -37,14 +37,14 @@ import { ExperiencePicker } from './package/ExperiencePicker';
 import { InclusionsForm } from './package/InclusionsForm';
 import { AccommodationForm } from './package/AccommodationForm';
 import { AdditionalInfoForm } from './package/AdditionalInfoForm';
-import { apiGet } from '../../api';
+import { apiGet, apiUpload } from '../../api';
 import type { Package } from '../../types';
 
 interface PackageFormProps {
   isOpen: boolean;
   onClose: () => void;
   package?: Package;
-  onSave: (packageData: Partial<Package>) => Promise<void>;
+  onSave: (packageData: Partial<Package>) => Promise<Package>;
   onPackageSaved?: () => void;
 }
 
@@ -334,8 +334,47 @@ export function PackageForm({ isOpen, onClose, package: pkg, onSave, onPackageSa
         // existing_images: undefined,
       };
 
-      await onSave(packageData);
-      
+      const savedPackage = await onSave(packageData);
+
+      // If we have images to upload for a newly created package, upload them now
+      if (!pkg && images.length > 0 && savedPackage?.id) {
+        try {
+          for (const image of images) {
+            if (!image.id) { // Only upload images that aren't already saved
+              const formData = new FormData();
+
+              // Use the stored file if available, otherwise try to handle other formats
+              if (image.file instanceof File) {
+                formData.append('image', image.file);
+              } else if (image.image && typeof image.image === 'string' && image.image.startsWith('blob:')) {
+                // Handle blob URLs - this would need additional logic to convert blob to File
+                console.warn('Blob URLs not yet supported for image upload');
+                continue;
+              } else {
+                // Skip images that don't have valid file data
+                console.warn('Skipping image upload - no valid file data:', image);
+                continue;
+              }
+
+              formData.append('package_id', savedPackage.id.toString());
+              formData.append('caption', image.caption || '');
+              formData.append('order', image.order?.toString() || '0');
+              formData.append('is_featured', image.is_featured?.toString() || 'false');
+
+              await apiUpload('/package-images/', formData);
+            }
+          }
+        } catch (imageError) {
+          console.error('Failed to upload some images:', imageError);
+          toast({
+            title: 'Warning',
+            description: 'Package saved but some images failed to upload.',
+            status: 'warning',
+            duration: 5000,
+          });
+        }
+      }
+
       toast({
         title: 'Success',
         description: `Package ${pkg ? 'updated' : 'created'} successfully!`,
@@ -343,12 +382,12 @@ export function PackageForm({ isOpen, onClose, package: pkg, onSave, onPackageSa
         duration: 3000,
         isClosable: true,
       });
-      
+
       // Refresh the packages list
       if (onPackageSaved) {
         onPackageSaved();
       }
-      
+
       onClose();
     } catch (error) {
       console.error('Failed to save package:', error);

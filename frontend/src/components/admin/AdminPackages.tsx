@@ -110,19 +110,22 @@ export function AdminPackages() {
     totalValue: packages.reduce((sum, pkg) => sum + parseFloat(pkg.price), 0),
   };
 
-  const handleSavePackage = async (packageData: Partial<Package>) => {
+  const handleSavePackage = async (packageData: Partial<Package>): Promise<Package> => {
     try {
+      let savedPackage;
       if (editingPackage) {
-        await apiPut(`/packages/${editingPackage.id}/`, packageData);
+        savedPackage = await apiPut(`/packages/${editingPackage.id}/`, packageData);
         showSuccess('Package updated successfully');
       } else {
-        await apiPost('/packages/', packageData);
+        savedPackage = await apiPost('/packages/', packageData);
         showSuccess('Package created successfully');
       }
       refresh();
+      return savedPackage; // Return the saved package data
     } catch (error) {
       console.error('Failed to save package:', error);
       showError('Failed to save package');
+      throw error; // Re-throw so PackageForm can handle it
     }
   };
 

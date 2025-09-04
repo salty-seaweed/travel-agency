@@ -4,7 +4,7 @@ from django.db import models
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.db import connection
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, serializers
 from rest_framework.generics import ListAPIView, CreateAPIView, UpdateAPIView
 from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
@@ -2353,38 +2353,9 @@ class PackageImageViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         """Create image with proper file handling"""
         try:
-            image_data = self.request.data
-            package_id = image_data.get('package_id')
-            if not package_id:
-                raise serializers.ValidationError({ 'package_id': 'This field is required.' })
-
-            # Accept common file keys
-            image_file = self.request.FILES.get('image') or self.request.FILES.get('file')
-            if not image_file:
-                raise serializers.ValidationError({ 'image': 'Image file is required.' })
-
-            try:
-                package = Package.objects.get(id=package_id)
-            except Package.DoesNotExist:
-                raise serializers.ValidationError({ 'package_id': 'Package not found.' })
-
-            # Coerce booleans/ints from strings
-            is_featured = image_data.get('is_featured', False)
-            if isinstance(is_featured, str):
-                is_featured = is_featured.lower() == 'true'
-            try:
-                order = int(image_data.get('order', 0))
-            except Exception:
-                order = 0
-
-            # Let Django storage handle saving the file
-            serializer.save(
-                package=package,
-                image=image_file,
-                caption=image_data.get('caption', ''),
-                order=order,
-                is_featured=is_featured
-            )
+            # The serializer handles all the validation and data processing now
+            # Just save the serializer instance
+            serializer.save()
         except serializers.ValidationError as ve:
             # Re-raise to ensure DRF returns 400, not 500
             raise ve

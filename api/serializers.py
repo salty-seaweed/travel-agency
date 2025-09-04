@@ -187,14 +187,45 @@ class PropertySerializer(serializers.ModelSerializer):
 
 class PackageImageSerializer(serializers.ModelSerializer):
     image_url = serializers.SerializerMethodField(read_only=True)
-    package_id = serializers.IntegerField(write_only=True, required=False)
-    
+    package_id = serializers.IntegerField(write_only=True, required=True)
+
     class Meta:
         model = PackageImage
         fields = ['id', 'package', 'image', 'caption', 'order', 'is_featured', 'image_url', 'package_id']
         extra_kwargs = {
-            'package': {'required': False}  # Make package field not required during creation
+            'package': {'required': False},  # Make package field not required during creation
+            'image': {'required': True},     # Ensure image field is required
         }
+
+    def create(self, validated_data):
+        """Custom create method to handle package_id field"""
+        package_id = validated_data.pop('package_id', None)
+        if not package_id:
+            raise serializers.ValidationError({'package_id': 'This field is required.'})
+
+        try:
+            from .models import Package
+            package = Package.objects.get(id=package_id)
+            validated_data['package'] = package
+        except Package.DoesNotExist:
+            raise serializers.ValidationError({'package_id': 'Package not found.'})
+        except (ValueError, TypeError):
+            raise serializers.ValidationError({'package_id': 'Invalid package ID.'})
+
+        # Ensure proper type conversion for order and is_featured
+        if 'order' in validated_data:
+            try:
+                validated_data['order'] = int(validated_data['order'])
+            except (ValueError, TypeError):
+                validated_data['order'] = 0
+
+        if 'is_featured' in validated_data:
+            if isinstance(validated_data['is_featured'], str):
+                validated_data['is_featured'] = validated_data['is_featured'].lower() in ('true', '1', 'yes')
+            elif not isinstance(validated_data['is_featured'], bool):
+                validated_data['is_featured'] = bool(validated_data['is_featured'])
+
+        return super().create(validated_data)
 
     def get_image_url(self, obj):
         request = self.context.get('request') if hasattr(self, 'context') else None

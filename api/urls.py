@@ -76,7 +76,6 @@ router.register(r'featured-destinations', FeaturedDestinationViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path('upload-image/', views.upload_image, name='upload_image'),
-    path('package-images/', views.upload_image, name='upload_package_image'),
     path('search/', views.search, name='search'),
     path('analytics/', views.analytics, name='analytics'),
     path('analytics/content-stats/', views.content_stats, name='content_stats'),
