@@ -148,9 +148,9 @@ class ExperienceSerializer(serializers.ModelSerializer):
     
     def validate(self, data):
         """Custom validation for experience data"""
-        # Ensure required fields are present
-        required_fields = ['name', 'description', 'experience_type', 'duration', 'price', 'destination_id']
-        for field in required_fields:
+        # Ensure required fields are present (check internal keys)
+        required_internal_fields = ['name', 'description', 'experience_type', 'duration', 'price', 'destination']
+        for field in required_internal_fields:
             if not data.get(field):
                 raise serializers.ValidationError(f"{field} is required")
         
