@@ -788,13 +788,13 @@ export function AdminExperiences() {
                 <FormControl isRequired>
                   <FormLabel>Destination (Island/Atoll) *</FormLabel>
                   <Select
-                    value={formData.destination_id || ''}
-                    onChange={(e) => setFormData(prev => ({ ...prev, destination_id: e.target.value ? parseInt(e.target.value) : null }))}
+                    value={formData.destination_id !== null && formData.destination_id !== undefined ? String(formData.destination_id) : ''}
+                    onChange={(e) => setFormData(prev => ({ ...prev, destination_id: e.target.value ? parseInt(e.target.value, 10) : null }))}
                     isInvalid={!formData.destination_id}
                   >
                     <option value="">Select Destination (Required)</option>
                     {destinations?.map(destination => (
-                      <option key={destination.id} value={destination.id}>
+                      <option key={destination.id} value={String(destination.id)}>
                         {destination.name} - {destination.island}, {destination.atoll}
                       </option>
                     ))}
