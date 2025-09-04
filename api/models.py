@@ -41,14 +41,13 @@ class Destination(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
-    # Internationalization fields
-    language = models.ForeignKey('Language', on_delete=models.SET_NULL, related_name='destinations', null=True, blank=True, help_text="Language for this destination (optional)")
+    # Localized fields (no language FK enforcement)
     localized_name = models.CharField(max_length=100, blank=True, help_text="Localized name if different from base name")
     localized_description = models.TextField(blank=True, help_text="Localized description")
     
     class Meta:
         ordering = ['-is_featured', 'name']
-        unique_together = ['name', 'language']
+        # Removed unique_together on (name, language)
     
     def __str__(self):
         return self.name

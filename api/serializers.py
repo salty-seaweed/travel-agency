@@ -93,11 +93,7 @@ class DestinationSerializer(serializers.ModelSerializer):
             if not data.get(field):
                 raise serializers.ValidationError(f"{field} is required")
         
-        # Language is optional – if empty string or None, normalize to None
-        if 'language' in data and not data.get('language'):
-            data['language'] = None
-        
-        # Coordinates: allow floats without enforcing decimal places
+        # Coordinates: allow floats; normalize empty strings to None
         for coord in ['latitude', 'longitude']:
             if coord in data and data[coord] in ['', None]:
                 data[coord] = None
