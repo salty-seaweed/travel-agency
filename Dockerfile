@@ -1,39 +1,101 @@
-FROM python:3.11-slim
+# Multi-stage build for optimized image size and faster exports
+FROM python:3.11-slim as base
 
 # Set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        postgresql-client \
+        build-essential \
+        libpq-dev \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Create non-root user early for better layer caching
+RUN groupadd -r appuser && useradd --no-log-init -r -g appuser appuser
 
 # Set work directory
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
+# Install Python dependencies (this layer will be cached if requirements.txt doesn't change)
+COPY requirements.txt .
+RUN pip install --no-cache-dir --user -r requirements.txt
+
+# Production stage
+FROM python:3.11-slim as production
+
+# Copy environment variables
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PATH="/root/.local/bin:$PATH"
+
+# Install only runtime dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
         postgresql-client \
-        build-essential \
-        libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
+        libpq5 \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
+    && apt-get clean
 
-# Install Python dependencies
-COPY requirements.txt /app/
-RUN pip install --no-cache-dir -r requirements.txt
+# Create non-root user
+RUN groupadd -r appuser && useradd --no-log-init -r -g appuser appuser
 
-# Copy project with .dockerignore optimizations
-COPY . /app/
+# Set work directory
+WORKDIR /app
 
-# Create directories and set permissions before creating user (faster)
-RUN mkdir -p /app/logs /app/media && \
-    chmod 755 /app/media
+# Copy Python packages from base stage
+COPY --from=base /root/.local /root/.local
 
-# Create non-root user and set ownership efficiently
-RUN groupadd -r appuser && useradd --no-log-init -r -g appuser appuser && \
+# Copy application code with optimizations
+COPY --chown=appuser:appuser . .
+
+# Create necessary directories with proper permissions
+RUN mkdir -p /app/logs /app/media /app/staticfiles && \
+    chmod 755 /app/media /app/staticfiles /app/logs && \
     chown -R appuser:appuser /app
 
+# Switch to non-root user
 USER appuser
 
 # Expose port
 EXPOSE 8000
 
-# Optimized startup command
-CMD ["sh", "-c", "python manage.py migrate && python manage.py collectstatic --noinput --clear && gunicorn travel_agency.wsgi:application --bind 0.0.0.0:$PORT --workers 3 --worker-class gevent --worker-connections 1000 --access-logfile - --error-logfile -"]
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python -c "import requests; requests.get('http://localhost:8000/health/', timeout=5)" || exit 1
+
+# Optimized startup script
+RUN echo '#!/bin/bash\n\
+set -e\n\
+echo "🚀 Starting Railway deployment..."\n\
+\n\
+# Run migrations\n\
+echo "📦 Running database migrations..."\n\
+python manage.py migrate --verbosity=1\n\
+\n\
+# Collect static files\n\
+echo "🎨 Collecting static files..."\n\
+python manage.py collectstatic --noinput --clear --verbosity=1\n\
+\n\
+# Start gunicorn\n\
+echo "🌐 Starting Gunicorn server..."\n\
+exec gunicorn travel_agency.wsgi:application \
+  --bind "0.0.0.0:${PORT:-8000}" \
+  --workers 3 \
+  --worker-class gevent \
+  --worker-connections 1000 \
+  --max-requests 1000 \
+  --max-requests-jitter 50 \
+  --access-logfile - \
+  --error-logfile - \
+  --log-level info \
+  --timeout 30 \
+  --keep-alive 10' > /app/start.sh && chmod +x /app/start.sh
+
+# Set ownership of startup script
+RUN chown appuser:appuser /app/start.sh
+
+# Final startup command
+CMD ["/app/start.sh"]

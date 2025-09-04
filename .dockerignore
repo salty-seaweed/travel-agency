@@ -1,95 +1,169 @@
-# Version control
-.git
-.gitignore
+# 🚫 EXCLUDE ALL OF THESE FROM DOCKER BUILD CONTEXT 🚫
 
-# Python
-__pycache__
+# === VERSION CONTROL ===
+.git/
+.gitignore
+.github/
+
+# === PYTHON ===
+__pycache__/
 *.pyc
 *.pyo
 *.pyd
 .Python
 *.so
-.pytest_cache
+.pytest_cache/
 .coverage
-htmlcov
-*.egg-info
-dist
-build
+htmlcov/
+*.egg-info/
+dist/
+build/
+*.egg
+pip-log.txt
+pip-delete-this-directory.txt
 
-# Django
-staticfiles
-media
+# === DJANGO ===
+staticfiles/
+media/
 db.sqlite3
 *.log
+logs/
+*.pid
+*.lock
 
-# Environment files
+# === ENVIRONMENT FILES ===
 .env*
 !.env.example
 
-# IDE
-.vscode
-.idea
+# === IDE & EDITORS ===
+.vscode/
+.idea/
 *.swp
 *.swo
+*~
 
-# OS
+# === OPERATING SYSTEMS ===
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
+Desktop.ini
 
-# Node.js (if any frontend build artifacts)
-node_modules
+# === NODE.JS ===
+node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .npm
 .yarn-integrity
+package-lock.json
+yarn.lock
 
-# Docker
+# === FRONTEND BUILD ARTIFACTS ===
+frontend/build/
+frontend/dist/
+frontend/.next/
+frontend/.nuxt/
+frontend/.cache/
+frontend/public/sw.js
+frontend/public/workbox-*.js
+
+# === DOCKER ===
 Dockerfile*
 docker-compose*.yml
 .dockerignore
 
-# Railway
+# === RAILWAY ===
 railway.json
 railway.toml
 nixpacks.toml
+railway_*.py
+railway_*.sh
 
-# Documentation
+# === DOCUMENTATION ===
 *.md
 !README.md
+docs/
+*.pdf
+*.docx
 
-# Tests
+# === TESTS ===
 test_*.py
 *_test.py
 tests/
+.pytest_cache/
+.coverage.*
+coverage.xml
+nosetests.xml
 
-# Development files
+# === DEVELOPMENT FILES ===
 .env.local
 .env.development
 .env.test
+.env.production
+debug.log
 
-# Logs
-logs/
-*.log
-
-# Temporary files
+# === TEMPORARY FILES ===
 *.tmp
 *.temp
-.cache
+.cache/
+.tmp/
+temp/
+*.bak
+*.backup
 
-# Data exports
+# === DATA EXPORTS & BACKUPS ===
 data_exports/
-
-# Frontend build artifacts (if separate)
-frontend/build
-frontend/dist
-frontend/.next
-frontend/.nuxt
-
-# Database backups
 *.sql
 *.dump
+*.gz
+*.zip
+*.tar
+backup_*/
 
-# Railway specific
-railway_*.py
-railway_*.sh
+# === LOGS ===
+*.log
+logs/
+log/
+*.log.*
+
+# === DATABASE ===
+*.db
+*.sqlite
+*.sqlite3
+
+# === MISC ===
+.cache/
+.tmp/
+.temp/
+.vscode-test/
+.history/
+.ionide/
+.nyc_output/
+*.tgz
+*.tar.gz
+
+# === SPECIFIC LARGE DIRECTORIES ===
+**/node_modules/
+**/build/
+**/dist/
+**/static/
+**/media/
+**/uploads/
+**/cache/
+**/temp/
+**/tmp/
+
+# === PYTHON VIRTUAL ENVIRONMENTS ===
+venv/
+env/
+ENV/
+.venv/
+.env/
+
+# === JUPYTER NOTEBOOKS ===
+.ipynb_checkpoints/
+*.ipynb
