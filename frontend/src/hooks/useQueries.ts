@@ -682,7 +682,8 @@ export const usePageHero = (pageKey: string) => {
   return useQuery({
     queryKey: ['page-hero', pageKey],
     queryFn: async () => {
-      const res = await fetch(`/api/page-heroes/?page_key=${encodeURIComponent(pageKey)}&active=true`);
+      const { getApiUrl } = await import('../config');
+      const res = await fetch(getApiUrl(`page-heroes/?page_key=${encodeURIComponent(pageKey)}&active=true`));
       if (!res.ok) throw new Error('Failed to fetch page hero');
       const data = await res.json();
       console.log('usePageHero API response:', data);

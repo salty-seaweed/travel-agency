@@ -47,6 +47,7 @@ import {
   CloudArrowUpIcon,
 } from '@heroicons/react/24/outline';
 import { ImagePicker } from './cms/MediaLibrary';
+import { getApiUrl } from '../../config';
 
 interface PageHero {
   id?: number;
@@ -98,7 +99,7 @@ export const PageHeroManager: React.FC<PageHeroManagerProps> = ({ isOpen, onClos
   const loadPageHeroes = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/page-heroes/');
+      const response = await fetch(getApiUrl('page-heroes/'));
       if (response.ok) {
         const data = await response.json();
         // Ensure data is always an array
@@ -154,7 +155,7 @@ export const PageHeroManager: React.FC<PageHeroManagerProps> = ({ isOpen, onClos
       let existingHero = null;
       if (!selectedHero.id) {
         try {
-          const checkResponse = await fetch(`/api/page-heroes/?page_key=${selectedHero.page_key}`);
+          const checkResponse = await fetch(getApiUrl(`page-heroes/?page_key=${selectedHero.page_key}`));
           console.log('Check response status:', checkResponse.status);
           if (checkResponse.ok) {
             const existingData = await checkResponse.json();
@@ -181,7 +182,7 @@ export const PageHeroManager: React.FC<PageHeroManagerProps> = ({ isOpen, onClos
       }
       
       const heroId = selectedHero.id || existingHero?.id;
-      const url = heroId ? `/api/page-heroes/${heroId}/` : '/api/page-heroes/';
+      const url = heroId ? getApiUrl(`page-heroes/${heroId}/`) : getApiUrl('page-heroes/');
       const method = heroId ? 'PUT' : 'POST';
       
       // Prepare data for submission (exclude File object)
@@ -248,7 +249,7 @@ export const PageHeroManager: React.FC<PageHeroManagerProps> = ({ isOpen, onClos
 
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/page-heroes/${heroId}/`, {
+      const response = await fetch(getApiUrl(`page-heroes/${heroId}/`), {
         method: 'DELETE',
       });
 

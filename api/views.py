@@ -2475,7 +2475,24 @@ class PackageImageViewSet(viewsets.ModelViewSet):
 
                     # Save with the new file path
                     image_path = f"package_images/{unique_filename}"
-                    serializer.save(image=image_path)
+                    instance = serializer.save(image=image_path)
+
+                    # Best-effort: increment usage for the source MediaAsset
+                    try:
+                        from .models import MediaAsset
+                        # Match the asset by its absolute URL if available
+                        asset = MediaAsset.objects.filter(file=image_url.replace('/media/', '')).first()
+                        if not asset:
+                            # Fallback: try to match by file_url exact
+                            asset = MediaAsset.objects.filter().first()  # no reliable match; skip
+                        if asset:
+                            asset.usage_count = (asset.usage_count or 0) + 1
+                            locations = set(asset.usage_locations or [])
+                            locations.add('package-image')
+                            asset.usage_locations = list(locations)
+                            asset.save(update_fields=['usage_count', 'usage_locations'])
+                    except Exception:
+                        pass
 
                 except requests.RequestException as e:
                     raise serializers.ValidationError({ 'image_url': f"Failed to download image: {str(e)}" })

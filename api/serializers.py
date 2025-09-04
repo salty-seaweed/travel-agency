@@ -1174,10 +1174,19 @@ class DestinationSerializer(serializers.ModelSerializer):
     # Include localized fields
     localized_name = serializers.CharField(read_only=True)
     localized_description = serializers.CharField(read_only=True)
+    # Accept either a file upload or an absolute URL (e.g., from MediaAsset.file_url)
+    image = FlexibleImageField(required=False, allow_null=True)
     
     class Meta:
         model = Destination
         fields = '__all__'
+
+    def validate(self, data):
+        # Normalize empty coordinates
+        for coord in ['latitude', 'longitude']:
+            if coord in data and data[coord] in ['', None]:
+                data[coord] = None
+        return data
 
 
 class PackageSerializer(serializers.ModelSerializer):

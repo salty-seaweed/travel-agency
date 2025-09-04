@@ -86,7 +86,6 @@ if DATABASE_URL:
     DATABASES = {
         'default': dj_database_url.parse(DATABASE_URL)
     }
-    print(f"✅ Using DATABASE_URL: {DATABASE_URL[:50]}...")
 else:
     # Check if we have Railway environment variables
     railway_host = os.getenv('PGHOST')
@@ -106,10 +105,8 @@ else:
                 },
             }
         }
-        print(f"✅ Using Railway PostgreSQL: {railway_host}")
     else:
         # Fallback to SQLite for development
-        print("⚠️  No Railway database found, using SQLite fallback")
         DATABASES = {
             'default': {
                 'ENGINE': 'django.db.backends.sqlite3',
@@ -146,9 +143,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # Ensure staticfiles directory exists
 try:
     os.makedirs(STATIC_ROOT, exist_ok=True)
-    print(f"✅ Static files directory created: {STATIC_ROOT}")
-except Exception as e:
-    print(f"⚠️  Could not create static files directory: {e}")
+except Exception:
+    pass
 
 # Staticfiles configuration for Railway with Whitenoise
 STATICFILES_DIRS = []
@@ -276,7 +272,7 @@ CSRF_COOKIE_SECURE = True
 CSRF_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SAMESITE = 'None'  # Allow cross-site for Vercel + Railway
 
-# Logging configuration
+# Logging configuration for production
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -285,30 +281,26 @@ LOGGING = {
             'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
             'style': '{',
         },
-        'simple': {
-            'format': '{levelname} {message}',
-            'style': '{',
-        },
     },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
-            'formatter': 'simple',
+            'formatter': 'verbose',
         },
     },
     'root': {
         'handlers': ['console'],
-        'level': 'DEBUG',
+        'level': 'INFO',
     },
     'loggers': {
         'django': {
             'handlers': ['console'],
-            'level': 'DEBUG',
+            'level': 'WARNING',
             'propagate': False,
         },
         'api': {
             'handlers': ['console'],
-            'level': 'DEBUG',
+            'level': 'INFO',
             'propagate': False,
         },
     },
@@ -343,17 +335,6 @@ FILE_UPLOAD_MAX_NUMBER_FILES = 100
 
 # Disable debug toolbar in production
 DEBUG_TOOLBAR = False
-
-# Force debug logging for troubleshooting
-import logging
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
-
-print("🚀 Railway production settings loaded successfully!")
-print(f"🔧 PORT environment variable: {os.getenv('PORT', 'NOT SET')}")
-print(f"🔧 DEBUG mode: {DEBUG}")
-print(f"🔧 Database: {DATABASE_URL[:50] if DATABASE_URL else 'Railway PostgreSQL env vars'}")
-print(f"🔧 Logging level set to DEBUG for troubleshooting")
 
 # Gunicorn and Railway deployment settings
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
