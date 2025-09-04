@@ -354,7 +354,14 @@ class PackageSerializerI18n(serializers.ModelSerializer):
     class Meta:
         model = Package
         fields = '__all__'
-    
+        extra_kwargs = {
+            'language': {'required': False, 'allow_null': True},
+            'localized_name': {'required': False},
+            'localized_description': {'required': False},
+            'localized_highlights': {'required': False},
+            'localized_included': {'required': False},
+        }
+
     def get_experiences(self, obj):
         exp_qs = obj.activities.filter(category='experience')
         return [
@@ -1085,7 +1092,14 @@ class PackageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Package
         fields = '__all__'
-    
+        extra_kwargs = {
+            'language': {'required': False, 'allow_null': True},
+            'localized_name': {'required': False},
+            'localized_description': {'required': False},
+            'localized_highlights': {'required': False},
+            'localized_included': {'required': False},
+        }
+
     def get_destinations(self, obj):
         """Get package destinations with location info"""
         destinations = obj.destinations.all()

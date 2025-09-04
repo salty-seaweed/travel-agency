@@ -705,7 +705,7 @@ export function ImagePicker({
             <div className="p-6 border-b">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-gray-900">
-                  Select {usageContext.replace('-', ' ')} Image
+                  Select or Upload {usageContext.replace('-', ' ')} Image
                 </h3>
                 <button
                   onClick={() => setIsOpen(false)}
@@ -720,6 +720,7 @@ export function ImagePicker({
                 usageContext={usageContext}
                 showUsageInfo={false}
                 onSelect={handleSelect}
+                allowUpload={true}
               />
             </div>
           </div>
