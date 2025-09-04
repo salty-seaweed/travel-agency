@@ -335,6 +335,15 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@threadtravels.com')
 
+# Additional production settings that might help
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
+FILE_UPLOAD_MAX_NUMBER_FILES = 100
+
+# Disable debug toolbar in production
+DEBUG_TOOLBAR = False
+
 print("🚀 Railway production settings loaded successfully!")
 print(f"🔧 PORT environment variable: {os.getenv('PORT', 'NOT SET')}")
 print(f"🔧 DEBUG mode: {DEBUG}")
