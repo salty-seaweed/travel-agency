@@ -1944,12 +1944,7 @@ def translations(request):
         language = Language.objects.filter(is_default=True).first()
 
     if not language:
-        # Return empty translations instead of 404 for production compatibility
-        return Response({
-            'language': language_code,
-            'translations': {},
-            'context': context
-        })
+        return Response({'error': 'No default language found'}, status=404)
     
     # Get translations
     translations = Translation.objects.filter(
@@ -2058,12 +2053,7 @@ def cultural_content(request):
         language = Language.objects.filter(is_default=True).first()
 
     if not language:
-        # Return empty cultural content instead of 404 for production compatibility
-        return Response({
-            'language': language_code,
-            'content': [],
-            'content_type': content_type
-        })
+        return Response({'error': 'No default language found'}, status=404)
     
     content = CulturalContent.objects.filter(
         language=language,
