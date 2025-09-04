@@ -187,6 +187,42 @@ class ExperienceViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(experience_type=experience_type)
         return queryset
 
+    def _normalize_experience_payload(self, data):
+        try:
+            # Accept either destination_id or destination (id/string)
+            if 'destination_id' not in data:
+                dest_val = data.get('destination') or data.get('destinationId')
+                if dest_val is not None and dest_val != '':
+                    try:
+                        data['destination_id'] = int(dest_val)
+                    except Exception:
+                        pass
+            # Normalize arrays possibly sent as comma-separated strings
+            for key in ['includes', 'excludes', 'requirements']:
+                if key in data and isinstance(data[key], str):
+                    data[key] = [item.strip() for item in data[key].split(',') if item.strip()]
+        except Exception:
+            pass
+        return data
+
+    def create(self, request, *args, **kwargs):
+        data = request.data.copy()
+        data = self._normalize_experience_payload(data)
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        instance = serializer.save()
+        return Response(self.get_serializer(instance).data, status=status.HTTP_201_CREATED)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        data = request.data.copy()
+        data = self._normalize_experience_payload(data)
+        serializer = self.get_serializer(instance, data=data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        instance = serializer.save()
+        return Response(self.get_serializer(instance).data)
+
 class PropertyImageViewSet(viewsets.ModelViewSet):
     queryset = PropertyImage.objects.all()
     serializer_class = PropertyImageSerializer
