@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { CalendarIcon, UsersIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { LoadingSpinner } from './LoadingSpinner';
 import { useNotification } from '../hooks';
@@ -16,6 +16,7 @@ export function PackageBookingForm({ packageId, packageName, packagePrice, packa
   const { showSuccess, showError } = useNotification();
   const { getWhatsAppUrl } = useWhatsApp();
   const [loading, setLoading] = useState(false);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const [formData, setFormData] = useState({
     customer_name: '',
     customer_email: '',
@@ -70,13 +71,50 @@ export function PackageBookingForm({ packageId, packageName, packagePrice, packa
     }
   };
 
+  // Ensure the modal is visible and background doesn't scroll
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    // Scroll the modal into view and also ensure viewport is in a good position
+    const id = window.requestAnimationFrame(() => {
+      if (containerRef.current) {
+        try {
+          containerRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          // Move focus for accessibility and to help some mobile browsers
+          containerRef.current.focus?.();
+        } catch (_) {
+          // no-op
+        }
+      }
+      // As a fallback, scroll to top so the overlay is definitely visible
+      try {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (_) {
+        // no-op
+      }
+    });
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.cancelAnimationFrame(id);
+    };
+  }, []);
+
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div
+        ref={containerRef}
+        tabIndex={-1}
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="booking-form-title"
+      >
         <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 rounded-t-2xl">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-xl font-bold text-gray-900">Book This Package</h3>
+              <h3 id="booking-form-title" className="text-xl font-bold text-gray-900">Book This Package</h3>
               <p className="text-sm text-gray-500">{packageName}</p>
             </div>
             <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100">
