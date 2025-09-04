@@ -300,9 +300,14 @@ class PackageViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         """Override create to add debugging for production issues"""
+        print("=== PackageViewSet.create START ===")
         try:
             print(f"PackageViewSet.create called with data keys: {list(request.data.keys())}")
             print(f"PackageViewSet.create called with data: {request.data}")
+            print(f"Request method: {request.method}")
+            print(f"Request content type: {request.content_type}")
+            print(f"Request user: {request.user}")
+            print(f"Request headers: {dict(request.headers)}")
 
             # Check for required fields
             required_fields = ['name', 'description', 'price', 'duration', 'group_size_min', 'group_size_max']
@@ -314,7 +319,7 @@ class PackageViewSet(viewsets.ModelViewSet):
             if missing_fields:
                 print(f"Missing required fields: {missing_fields}")
                 return Response(
-                    {'error': f'Missing required fields: {missing_fields}'},
+                    {'error': f'Missing required fields: {missing_fields}', 'missing_fields': missing_fields},
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
@@ -334,12 +339,17 @@ class PackageViewSet(viewsets.ModelViewSet):
                         status=status.HTTP_400_BAD_REQUEST
                     )
 
-            return super().create(request, *args, **kwargs)
+            print("Calling super().create()...")
+            response = super().create(request, *args, **kwargs)
+            print(f"super().create() returned successfully: {response.status_code}")
+            return response
         except Exception as e:
             print(f"PackageViewSet.create error: {str(e)}")
             import traceback
             print(f"PackageViewSet.create traceback: {traceback.format_exc()}")
             raise
+        finally:
+            print("=== PackageViewSet.create END ===")
 
     def list(self, request, *args, **kwargs):
         """Override list to ensure nested data is returned with proper context"""
@@ -479,8 +489,10 @@ class PackageViewSet(viewsets.ModelViewSet):
         return Response(self.get_serializer(package_obj, context={'request': request}).data)
 
 class ReviewViewSet(viewsets.ModelViewSet):
-    queryset = Review.objects.all()
+    queryset = Review.objects.all().order_by('-created_at')
     serializer_class = ReviewSerializer
+    ordering_fields = ['created_at', 'rating', 'approved']
+    ordering = ['-created_at']
 
 # Package-related viewsets
 class PackageItineraryViewSet(viewsets.ModelViewSet):

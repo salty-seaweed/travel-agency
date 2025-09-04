@@ -331,6 +331,7 @@ class PackageSerializerI18n(serializers.ModelSerializer):
 
     def validate(self, data):
         """Add custom validation with debugging"""
+        print(f"=== PackageSerializerI18n.validate START ===")
         print(f"PackageSerializerI18n.validate called with data keys: {list(data.keys())}")
         print(f"PackageSerializerI18n.validate data: {data}")
 
@@ -346,6 +347,8 @@ class PackageSerializerI18n(serializers.ModelSerializer):
             print(f"PackageSerializerI18n validation errors: {errors}")
             raise serializers.ValidationError(errors)
 
+        print("PackageSerializerI18n.validate - no validation errors found")
+        print("=== PackageSerializerI18n.validate END ===")
         return data
     
     class Meta:
