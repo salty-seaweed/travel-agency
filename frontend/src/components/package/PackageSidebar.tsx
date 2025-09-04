@@ -26,6 +26,7 @@ import {
   ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
 import { useWhatsApp } from '../../hooks/useQueries';
+import { useCurrency } from '../../contexts/CurrencyContext';
 import type { Package } from '../../types';
 
 interface PackageSidebarProps {
@@ -35,6 +36,7 @@ interface PackageSidebarProps {
 
 export function PackageSidebar({ packageData, onBookNow }: PackageSidebarProps) {
   const { getWhatsAppUrl } = useWhatsApp();
+  const { formatPrice, convertPrice } = useCurrency();
 
   const handleWhatsApp = () => {
     const message = `Hi! I'd like to book the "${packageData.name}" package.`;
@@ -50,23 +52,51 @@ export function PackageSidebar({ packageData, onBookNow }: PackageSidebarProps) 
           <VStack spacing={3}>
             <Text fontSize="sm" color="gray.600" textAlign="center">Starting from</Text>
             <HStack align="baseline" justify="center">
-              {packageData.original_price && packageData.original_price !== packageData.price && (
-                <Text fontSize="lg" color="gray.400" textDecoration="line-through">
-                  {packageData.original_price}
-                </Text>
-              )}
-              <Text fontSize="3xl" fontWeight="bold" color="purple.600">
-                {packageData.price}
-              </Text>
+              {(() => {
+                // Parse prices safely
+                const currentPrice = parseFloat(typeof packageData.price === 'string' ? packageData.price.replace(/[^0-9.]/g, '') : packageData.price);
+                const originalPrice = packageData.original_price && packageData.original_price !== '0' && packageData.original_price !== null
+                  ? parseFloat(typeof packageData.original_price === 'string' ? packageData.original_price.replace(/[^0-9.]/g, '') : packageData.original_price)
+                  : null;
+
+                return (
+                  <>
+                    {originalPrice && originalPrice !== currentPrice && (
+                      <Text fontSize="lg" color="gray.400" textDecoration="line-through">
+                        {formatPrice(originalPrice)}
+                      </Text>
+                    )}
+                    <Text fontSize="3xl" fontWeight="bold" color="purple.600">
+                      {formatPrice(currentPrice)}
+                    </Text>
+                  </>
+                );
+              })()}
             </HStack>
             <Text fontSize="sm" color="gray.600" textAlign="center">
               per person • {packageData.duration} days
             </Text>
-            {packageData.original_price && packageData.original_price !== packageData.price && (
-              <Badge colorScheme="green" size="sm">
-                Save {Math.round(((parseFloat(packageData.original_price.replace(/[^0-9.]/g, '')) - parseFloat(packageData.price.replace(/[^0-9.]/g, ''))) / parseFloat(packageData.original_price.replace(/[^0-9.]/g, ''))) * 100)}%
-              </Badge>
-            )}
+            {(() => {
+              // Calculate discount percentage safely
+              if (packageData.original_price && packageData.original_price !== packageData.price && packageData.original_price !== '0' && packageData.original_price !== null) {
+                try {
+                  const originalPrice = parseFloat(typeof packageData.original_price === 'string' ? packageData.original_price.replace(/[^0-9.]/g, '') : packageData.original_price);
+                  const currentPrice = parseFloat(typeof packageData.price === 'string' ? packageData.price.replace(/[^0-9.]/g, '') : packageData.price);
+
+                  if (originalPrice > currentPrice && originalPrice > 0) {
+                    const discountPercent = Math.round(((originalPrice - currentPrice) / originalPrice) * 100);
+                    return (
+                      <Badge colorScheme="green" size="sm">
+                        Save {discountPercent}%
+                      </Badge>
+                    );
+                  }
+                } catch (error) {
+                  console.warn('Error calculating discount:', error);
+                }
+              }
+              return null;
+            })()}
           </VStack>
         </CardBody>
       </Card>

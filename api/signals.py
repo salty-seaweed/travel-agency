@@ -1,4 +1,4 @@
-from django.db.models.signals import post_save, pre_save
+from django.db.models.signals import post_save, pre_save, post_delete
 from django.dispatch import receiver
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
@@ -6,9 +6,9 @@ from PIL import Image
 import io
 import os
 from .models import (
-    PropertyImage, PackageImage, Destination, Experience, 
-    HomepageHero, HomepageFeature, HomepageTestimonial, 
-    PageHero, AboutPageContent, FeaturedDestination, Location
+    PropertyImage, PackageImage, Destination, Experience,
+    HomepageHero, HomepageFeature, HomepageTestimonial,
+    PageHero, AboutPageContent, FeaturedDestination, Location, Package, PackageDestination
 )
 
 def optimize_image_file(image_field, instance):
@@ -175,3 +175,52 @@ def optimize_featured_destination_image(sender, instance, created, **kwargs):
     """Optimize featured destination images when saved"""
     if created and instance.image:
         optimize_image_file(instance.image, instance)
+
+
+# Package-related signals for updating destination counts
+@receiver(post_save, sender=PackageDestination)
+def update_destination_counts_on_package_destination_save(sender, instance, created, **kwargs):
+    """Update destination package counts when package destinations are created/updated"""
+    try:
+        instance.location.destination_set.all().update_counts()
+    except Exception:
+        pass
+
+
+@receiver(post_save, sender=Package)
+def update_destination_counts_on_package_save(sender, instance, created, **kwargs):
+    """Update destination package counts when packages are created/updated"""
+    try:
+        # Get all destinations related to this package and update their counts
+        destinations = Destination.objects.filter(
+            island__in=instance.destinations.values_list('location__island', flat=True).distinct()
+        )
+        for destination in destinations:
+            destination.update_counts()
+            destination.save(update_fields=['property_count', 'package_count'])
+    except Exception:
+        pass
+
+
+@receiver(post_delete, sender=PackageDestination)
+def update_destination_counts_on_package_destination_delete(sender, instance, **kwargs):
+    """Update destination package counts when package destinations are deleted"""
+    try:
+        instance.location.destination_set.all().update_counts()
+    except Exception:
+        pass
+
+
+@receiver(post_delete, sender=Package)
+def update_destination_counts_on_package_delete(sender, instance, **kwargs):
+    """Update destination package counts when packages are deleted"""
+    try:
+        # Get all destinations that were related to this package and update their counts
+        destinations = Destination.objects.filter(
+            island__in=instance.destinations.values_list('location__island', flat=True).distinct()
+        )
+        for destination in destinations:
+            destination.update_counts()
+            destination.save(update_fields=['property_count', 'package_count'])
+    except Exception:
+        pass

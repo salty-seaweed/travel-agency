@@ -7,6 +7,7 @@ import type { Package } from '../../types';
 import { whatsappBooking } from '../../services/whatsapp-booking';
 import { BookingChoiceModal } from '../BookingChoiceModal';
 import { useTranslation } from '../../i18n';
+import { useCurrency } from '../../contexts/CurrencyContext';
 
 interface PackageCardProps {
   package: Package;
@@ -16,6 +17,7 @@ interface PackageCardProps {
 
 export function PackageCard({ package: pkg, className = '', loading = false }: PackageCardProps) {
   const { t, i18n } = useTranslation();
+  const { formatPrice } = useCurrency();
   const [imageLoaded, setImageLoaded] = React.useState(false);
   const [imageError, setImageError] = React.useState(false);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
@@ -125,8 +127,33 @@ export function PackageCard({ package: pkg, className = '', loading = false }: P
         {/* Price Badge */}
         <div className="absolute top-4 right-4">
           <div className="bg-white/95 backdrop-blur-sm rounded-2xl px-4 py-3 shadow-lg">
-            <div className="text-2xl font-bold text-green-600">${pkg.price}</div>
-            <div className="text-xs text-gray-500 font-medium">{t('packageCard.perPerson', 'per person')}</div>
+            {(() => {
+              // Parse prices safely
+              const currentPrice = parseFloat(typeof pkg.price === 'string' ? pkg.price.replace(/[^0-9.]/g, '') : pkg.price);
+              const originalPrice = pkg.original_price && pkg.original_price !== null && pkg.original_price !== 'null' && pkg.original_price !== '0' && pkg.original_price !== '0.00'
+                ? parseFloat((pkg.original_price as string).replace(/[^0-9.]/g, ''))
+                : null;
+              const discountPercent = originalPrice && originalPrice > currentPrice
+                ? Math.round(((originalPrice - currentPrice) / originalPrice) * 100)
+                : 0;
+
+              return (
+                <>
+                  {discountPercent > 0 && originalPrice && (
+                    <div className="text-sm text-gray-400 line-through mb-1">
+                      {formatPrice(originalPrice)}
+                    </div>
+                  )}
+                  <div className="text-2xl font-bold text-green-600">
+                    {formatPrice(currentPrice)}
+                  </div>
+                  {discountPercent > 0 && (
+                    <div className="text-xs text-green-600 font-semibold text-right">{discountPercent}% OFF</div>
+                  )}
+                  <div className="text-xs text-gray-500 font-medium">{t('packageCard.perPerson', 'per person')}</div>
+                </>
+              );
+            })()}
           </div>
         </div>
         

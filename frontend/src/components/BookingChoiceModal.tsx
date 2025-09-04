@@ -16,6 +16,7 @@ import {
   Heading,
   Badge,
 } from '@chakra-ui/react';
+import { useCurrency } from '../contexts/CurrencyContext';
 
 import {
   ChatBubbleLeftRightIcon,
@@ -45,6 +46,7 @@ export function BookingChoiceModal({ isOpen, onClose, package: pkg, onFormBookin
   const { t } = useTranslation();
   const toast = useToast();
   const { whatsappNumber } = useWhatsApp();
+  const { formatPrice } = useCurrency();
 
   const getDestinationsLabel = (): string => {
     const dests: any = (pkg as any)?.destinations;
@@ -80,7 +82,7 @@ export function BookingChoiceModal({ isOpen, onClose, package: pkg, onFormBookin
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="2xl" isCentered>
+    <Modal isOpen={isOpen} onClose={onClose} size="2xl" isCentered blockScrollOnMount={true}>
         <ModalOverlay backdropFilter="blur(10px)" />
         <ModalContent className="bg-white rounded-3xl shadow-2xl border border-gray-100">
           <ModalHeader className="text-center border-b border-gray-100 pb-6">
@@ -121,9 +123,34 @@ export function BookingChoiceModal({ isOpen, onClose, package: pkg, onFormBookin
                         <Icon as={UserGroupIcon} className="w-4 h-4 text-purple-500" />
                         <span>{t('bookingModal.packageSummary.maxTravelers', 'Up to {{count}} travelers', { count: pkg.maxTravelers })}</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Icon as={CurrencyDollarIcon} className="w-4 h-4 text-yellow-500" />
-                        <span>${pkg.price} per person</span>
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2">
+                          <Icon as={CurrencyDollarIcon} className="w-4 h-4 text-yellow-500" />
+                          {(() => {
+                            const currentPrice = parseFloat(typeof pkg.price === 'string' ? pkg.price.replace(/[^0-9.]/g, '') : pkg.price);
+                            const originalPrice = pkg.original_price && pkg.original_price !== null && pkg.original_price !== 'null' && pkg.original_price !== '0' && pkg.original_price !== '0.00'
+                              ? parseFloat(pkg.original_price.replace(/[^0-9.]/g, ''))
+                              : null;
+
+                            return (
+                              <div className="flex flex-col">
+                                {originalPrice && originalPrice !== currentPrice && (
+                                  <span className="text-sm text-gray-400 line-through">
+                                    {formatPrice(originalPrice)} per person
+                                  </span>
+                                )}
+                                <span className="font-semibold">
+                                  {formatPrice(currentPrice)} per person
+                                </span>
+                                {originalPrice && originalPrice !== currentPrice && (
+                                  <span className="text-xs text-green-600 font-medium">
+                                    Save {formatPrice(originalPrice - currentPrice)} ({Math.round(((originalPrice - currentPrice) / originalPrice) * 100)}% off)
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          })()}
+                        </div>
                       </div>
                     </div>
                   </div>

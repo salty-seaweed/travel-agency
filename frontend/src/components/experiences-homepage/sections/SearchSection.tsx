@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { unifiedApi } from '../../../services/unified-api';
+import { defaultQueryOptions } from '../../../hooks/useQueries';
 import {
   Box,
   VStack,
@@ -56,7 +59,14 @@ export const ExperiencesSearchSection: React.FC = () => {
     budget: '2000-5000'
   });
 
-  const popularDestinations = ['Malé', 'Maafushi', 'Hulhumalé', 'Thulusdhoo', 'Ukulhas', 'Rasdhoo'];
+  // Fetch destinations from backend
+  const { data: destinationsData } = useQuery({
+    queryKey: ['destinations'],
+    queryFn: () => unifiedApi.destinations.getAll(),
+    ...defaultQueryOptions,
+  });
+
+  const popularDestinations = destinationsData?.results?.slice(0, 6).map(dest => dest.name) || ['Malé', 'Maafushi', 'Hulhumalé'];
   const popularExperiences = ['Snorkeling', 'Diving', 'Island Hopping', 'Water Sports', 'Cultural', 'Sunset Cruise'];
 
   const handleSearch = () => {

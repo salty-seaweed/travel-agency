@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useCurrency } from '../../../contexts/CurrencyContext';
 import {
   Box,
   VStack,
@@ -49,6 +50,7 @@ interface LocalPackage {
   name: string;
   description: string;
   price: number;
+  original_price?: string | null;
   duration: string;
   destinations: any[];
   highlights: string[];
@@ -67,6 +69,7 @@ const convertApiPackageToCardFormat = (apiPackage: ApiPackage): LocalPackage => 
     name: apiPackage.name,
     description: apiPackage.description,
     price: parseFloat(apiPackage.price),
+    original_price: apiPackage.original_price || null,
     duration: apiPackage.duration.toString(),
     // Map destinations from PackageDestination relationship
     destinations: Array.isArray(apiPackage.destinations) 
@@ -97,6 +100,7 @@ export const ExperiencesTrendingDeals: React.FC<Props> = ({ packages = [] }) => 
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { getWhatsAppUrl } = useWhatsApp();
+  const { formatPrice } = useCurrency();
   
   const bgColor = useColorModeValue('gray.50', 'gray.900');
   const cardBg = useColorModeValue('white', 'gray.800');
@@ -157,11 +161,14 @@ export const ExperiencesTrendingDeals: React.FC<Props> = ({ packages = [] }) => 
 
           <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={8} w="full">
             {topPackages.map((pkg) => {
-              // Calculate discounted price (20% discount for featured packages, 10% for others)
-              const discountPercentage = pkg.featured ? 20 : 10;
-              const originalPrice = pkg.price;
-              const discountedPrice = originalPrice * (1 - discountPercentage / 100);
-              const savings = originalPrice - discountedPrice;
+              // Use backend pricing - no frontend calculations
+              const currentPrice = pkg.price;
+              const originalPrice = pkg.original_price && pkg.original_price !== 'null' && pkg.original_price !== '0' && pkg.original_price !== '0.00'
+                ? parseFloat(pkg.original_price.replace(/[^0-9.]/g, ''))
+                : null;
+              const discountPercent = originalPrice && originalPrice > currentPrice
+                ? Math.round(((originalPrice - currentPrice) / originalPrice) * 100)
+                : 0;
               const wished = isWished(pkg.id);
 
               return (
@@ -197,9 +204,11 @@ export const ExperiencesTrendingDeals: React.FC<Props> = ({ packages = [] }) => 
                       <Badge colorScheme="blue" variant="solid" px={3} py={1}>
                         {pkg.category}
                       </Badge>
-                      <Badge colorScheme="green" variant="solid" px={3} py={1}>
-                        {discountPercentage}% OFF
-                      </Badge>
+                      {discountPercent > 0 && (
+                        <Badge colorScheme="green" variant="solid" px={3} py={1}>
+                          {discountPercent}% OFF
+                        </Badge>
+                      )}
                     </VStack>
 
                     {/* Wishlist Button */}
@@ -322,19 +331,23 @@ export const ExperiencesTrendingDeals: React.FC<Props> = ({ packages = [] }) => 
                         <HStack justify="space-between" w="full">
                           <VStack align="start" spacing={0}>
                             <Text fontSize="2xl" fontWeight="bold" color="green.500">
-                              ${discountedPrice.toLocaleString()}
+                              {formatPrice(currentPrice)}
                             </Text>
-                            <Text fontSize="sm" color="gray.500" textDecoration="line-through">
-                              ${originalPrice.toLocaleString()}
-                            </Text>
-                            <Text fontSize="sm" color="green.600" fontWeight="semibold">
-                              {t('homepage.trending.save', 'Save')} ${savings.toLocaleString()} ({discountPercentage}% {t('homepage.trending.off', 'off')})
-                            </Text>
+                            {discountPercent > 0 && originalPrice && (
+                              <>
+                                <Text fontSize="sm" color="gray.500" textDecoration="line-through">
+                                  {formatPrice(originalPrice)}
+                                </Text>
+                                <Text fontSize="sm" color="green.600" fontWeight="semibold">
+                                  {t('homepage.trending.save', 'Save')} {formatPrice(originalPrice - currentPrice)} ({discountPercent}% {t('homepage.trending.off', 'off')})
+                                </Text>
+                              </>
+                            )}
                           </VStack>
                           <VStack align="end" spacing={0}>
-                            <Text fontSize="sm" color="gray.500">{t('homepage.trending.totalFor', 'Total for')} {pkg.maxTravelers}</Text>
+                            <Text fontSize="sm" color="gray.500">{t('homepage.trending.totalFor', 'Total for')} {pkg.maxTravelers || 2}</Text>
                             <Text fontSize="lg" fontWeight="semibold" color="gray.700">
-                              ${(discountedPrice * pkg.maxTravelers).toLocaleString()}
+                              {formatPrice(currentPrice * (pkg.maxTravelers || 2))}
                             </Text>
                           </VStack>
                         </HStack>

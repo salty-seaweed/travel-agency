@@ -52,7 +52,7 @@ import type {
 } from '../types';
 
 // Optimized default query options for better performance
-const defaultQueryOptions = {
+export const defaultQueryOptions = {
   staleTime: 10 * 60 * 1000, // 10 minutes - increased from 5
   gcTime: 30 * 60 * 1000, // 30 minutes - increased from 10
   refetchOnWindowFocus: false,
@@ -63,7 +63,7 @@ const defaultQueryOptions = {
 };
 
 // Critical data options - for above-the-fold content
-const criticalQueryOptions = {
+export const criticalQueryOptions = {
   staleTime: 5 * 60 * 1000, // 5 minutes
   gcTime: 15 * 60 * 1000, // 15 minutes
   refetchOnWindowFocus: false,

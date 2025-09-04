@@ -160,11 +160,23 @@ export function PackageHeader({
               <Text fontSize="3xl" fontWeight="bold" color="purple.600">
                 {formatPrice(parseFloat(packageData.price))}
               </Text>
-              {packageData.original_price && parseFloat(packageData.original_price) > parseFloat(packageData.price) && (
-                <Text fontSize="sm" color="gray.500" textDecoration="line-through">
-                  {formatPrice(parseFloat(packageData.original_price))}
-                </Text>
-              )}
+              {(() => {
+                const originalPrice = packageData.original_price && packageData.original_price !== null && packageData.original_price !== 'null' && packageData.original_price !== '0' && packageData.original_price !== '0.00'
+                  ? parseFloat(packageData.original_price.replace(/[^0-9.]/g, ''))
+                  : null;
+                const currentPrice = parseFloat(typeof packageData.price === 'string' ? packageData.price.replace(/[^0-9.]/g, '') : packageData.price);
+
+                return originalPrice && originalPrice !== currentPrice ? (
+                  <>
+                    <Text fontSize="sm" color="gray.500" textDecoration="line-through">
+                      {formatPrice(originalPrice)}
+                    </Text>
+                    <Text fontSize="xs" color="green.600" fontWeight="semibold">
+                      Save {formatPrice(originalPrice - currentPrice)} ({Math.round(((originalPrice - currentPrice) / originalPrice) * 100)}% off)
+                    </Text>
+                  </>
+                ) : null;
+              })()}
               <Text fontSize="sm" color="gray.500">per person</Text>
             </VStack>
           </VStack>

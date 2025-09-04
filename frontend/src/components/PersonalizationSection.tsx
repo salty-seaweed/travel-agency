@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  HeartIcon, 
-  StarIcon, 
-  UserIcon, 
+import {
+  HeartIcon,
+  StarIcon,
+  UserIcon,
   CogIcon,
   MagnifyingGlassIcon,
   MapPinIcon,
@@ -12,6 +12,9 @@ import {
 import { useTranslation } from '../i18n';
 import { Card } from './ui/Card';
 import { Button } from './ui/Button';
+import { useQuery } from '@tanstack/react-query';
+import { unifiedApi } from '../services/unified-api';
+import { defaultQueryOptions } from '../hooks/useQueries';
 
 interface UserPreferences {
   budget: string;
@@ -80,13 +83,19 @@ export function PersonalizationSection({
     { value: 'beachfront', label: 'Beachfront Properties' }
   ];
 
-  const popularDestinations = [
+  // Fetch destinations from backend
+  const { data: destinationsData } = useQuery({
+    queryKey: ['destinations'],
+    queryFn: () => unifiedApi.destinations.getAll(),
+    ...defaultQueryOptions,
+  });
+
+  const popularDestinations = destinationsData?.results?.slice(0, 6).map(dest => ({
+    value: dest.name.toLowerCase().replace(/\s+/g, ''),
+    label: dest.name
+  })) || [
     { value: 'male', label: 'Male & Hulhumale' },
-    { value: 'maafushi', label: 'Maafushi' },
-    { value: 'fulidhoo', label: 'Fulidhoo' },
-    { value: 'gulhi', label: 'Gulhi' },
-    { value: 'thulusdhoo', label: 'Thulusdhoo' },
-    { value: 'dhigurah', label: 'Dhigurah' }
+    { value: 'maafushi', label: 'Maafushi' }
   ];
 
   const groupSizes = [

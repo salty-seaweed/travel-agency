@@ -310,6 +310,7 @@ const transformPackage = (raw: any): any => ({
   name: sanitizeInput(raw.name || '', security.sanitization.maxLength.name),
   description: sanitizeInput(raw.description || '', security.sanitization.maxLength.description),
   price: raw.price || '0',
+  original_price: raw.original_price || null,
   duration: raw.duration || 7,
   images: raw.images || [],
   is_featured: raw.is_featured || false,

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, Button, LoadingSpinner } from '../../index';
 import { useNotification } from '../../../hooks';
+import { config, getApiUrl } from '../../../config';
 
 import {
   PhotoIcon,
@@ -113,7 +114,7 @@ export function MediaLibrary({
         return;
       }
 
-      const response = await fetch('/api/media/', {
+      const response = await fetch(getApiUrl('media/'), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -200,11 +201,11 @@ export function MediaLibrary({
           return null;
         }
 
-        const response = await fetch('/api/media/', {
+        const response = await fetch(getApiUrl('media/'), {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
+            // Don't set Content-Type for FormData - let browser set it automatically
           },
           body: formData,
         });

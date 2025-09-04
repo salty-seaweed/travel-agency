@@ -87,6 +87,7 @@ interface LocalPackage {
   name: string;
   description: string;
   price: number;
+  original_price?: string | null;
   duration: string;
   destinations: any[];
   highlights: string[];
@@ -105,6 +106,7 @@ const convertApiPackageToCardFormat = (apiPackage: ApiPackage): LocalPackage => 
     name: apiPackage.name,
     description: apiPackage.description,
     price: parseFloat(apiPackage.price),
+    original_price: apiPackage.original_price || null,
     duration: apiPackage.duration.toString(),
     destinations: apiPackage.destinations || [],
     highlights: apiPackage.highlights || [],
@@ -565,11 +567,16 @@ Can you help me finalize this package?`;
             {sortedPackages.length > 0 ? (
               <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={8} w="full">
                 {sortedPackages.map(pkg => {
-                  // Calculate discounted price (20% discount for featured packages, 10% for others)
-                  const discountPercentage = pkg.featured ? 20 : 10;
-                  const originalPrice = pkg.price;
-                  const discountedPrice = originalPrice * (1 - discountPercentage / 100);
-                  const savings = originalPrice - discountedPrice;
+                  // Use backend pricing - no frontend calculations
+                  const currentPrice = pkg.price;
+                  const originalPrice = pkg.original_price && pkg.original_price !== 'null' && pkg.original_price !== '0' && pkg.original_price !== '0.00'
+                    ? parseFloat(pkg.original_price.replace(/[^0-9.]/g, ''))
+                    : null;
+                  const discountPercentage = originalPrice && originalPrice > currentPrice
+                    ? Math.round(((originalPrice - currentPrice) / originalPrice) * 100)
+                    : 0;
+                  const discountedPrice = currentPrice;
+                  const savings = originalPrice ? (originalPrice - discountedPrice) : 0;
 
                   return (
                     <Card key={pkg.id} shadow="lg" borderRadius="xl" overflow="hidden" 
@@ -596,9 +603,11 @@ Can you help me finalize this package?`;
                           <Badge colorScheme="blue" variant="solid" px={3} py={1}>
                             {pkg.category}
                           </Badge>
-                          <Badge colorScheme="green" variant="solid" px={3} py={1}>
-                            {t('packages.card.discount', '{{percentage}}% OFF', { percentage: discountPercentage })}
-                          </Badge>
+                          {discountPercentage > 0 && (
+                            <Badge colorScheme="green" variant="solid" px={3} py={1}>
+                              {t('packages.card.discount', '{{percentage}}% OFF', { percentage: discountPercentage })}
+                            </Badge>
+                          )}
                         </VStack>
 
                         {/* Rating */}
@@ -708,12 +717,16 @@ Can you help me finalize this package?`;
                                 <Text fontSize="2xl" fontWeight="bold" color="green.500">
                                   {formatPrice(discountedPrice)}
                                 </Text>
-                                <Text fontSize="sm" color="gray-500" textDecoration="line-through">
-                                  {formatPrice(originalPrice)}
-                                </Text>
-                                <Text fontSize="sm" color="green.600" fontWeight="semibold">
-                                  {t('packages.card.save', 'Save {{amount}} ({{percentage}}% off)', { amount: formatPrice(savings, { showSymbol: false }), percentage: discountPercentage })}
-                                </Text>
+                                {discountPercentage > 0 && originalPrice && (
+                                  <>
+                                    <Text fontSize="sm" color="gray-500" textDecoration="line-through">
+                                      {formatPrice(originalPrice)}
+                                    </Text>
+                                    <Text fontSize="sm" color="green.600" fontWeight="semibold">
+                                      {t('packages.card.save', 'Save {{amount}} ({{percentage}}% off)', { amount: formatPrice(savings, { showSymbol: false }), percentage: discountPercentage })}
+                                    </Text>
+                                  </>
+                                )}
                               </VStack>
                               <VStack align="end" spacing={0}>
                                 <Text fontSize="sm" color="gray-500">{t('packages.card.totalFor', 'Total for {{count}}', { count: pkg.maxTravelers })}</Text>

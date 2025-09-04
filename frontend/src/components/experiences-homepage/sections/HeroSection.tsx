@@ -136,21 +136,21 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
     // First try to use featured destinations from admin panel
     if (featuredDestinations && featuredDestinations.length > 0) {
       return featuredDestinations.map((featured: any) => ({
-        name: featured.display_name,
-        image: featured.image_url || `/images/optimized/medium/ishan${Math.floor(Math.random() * 20) + 51}.webp`,
+        name: featured.display_name || featured.destination_name || featured.name || 'Unknown Destination',
+        image: featured.image_url || featured.image || `/images/optimized/medium/ishan${Math.floor(Math.random() * 20) + 51}.webp`,
         packages: featured.package_count || 0
       }));
     }
-    
+
     // Fallback to regular destinations if no featured destinations configured
     if (destinations && destinations.length > 0) {
       return destinations.slice(0, 4).map(dest => ({
-        name: dest.name,
+        name: dest.name || dest.localized_name || 'Unknown Destination',
         image: dest.image || `/images/optimized/medium/ishan${Math.floor(Math.random() * 20) + 51}.webp`,
         packages: dest.package_count || 0
       }));
     }
-    
+
     // No data available
     return [];
   }, [featuredDestinations, destinations]);
@@ -311,7 +311,6 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
                       <Box position="absolute" top={0} left={0} right={0} bottom={0} bg="blackAlpha.400" />
                       <VStack position="absolute" top={0} left={0} right={0} bottom={0} justify="center" spacing={1}>
                         <Text color="white" fontWeight="bold" fontSize="lg">{destination.name}</Text>
-                        <Text color="gray.200" fontSize="sm">{destination.packages} {t('homepage.destinations.packages', 'packages')}</Text>
                       </VStack>
                     </Box>
                   </Card>

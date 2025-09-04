@@ -144,7 +144,7 @@ export function PackageActivities({ activities }: PackageActivitiesProps) {
       </Card>
 
       {/* Activity Detail Modal */}
-      <Modal isOpen={isOpen} onClose={onClose} size="2xl" isCentered>
+      <Modal isOpen={isOpen} onClose={onClose} size="2xl" isCentered blockScrollOnMount={true}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>

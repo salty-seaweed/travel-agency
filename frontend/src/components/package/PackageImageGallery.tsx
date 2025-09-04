@@ -215,7 +215,7 @@ export function PackageImageGallery({ images, packageName }: PackageImageGallery
       )}
 
       {/* Lightbox Modal */}
-      <Modal isOpen={isOpen} onClose={onClose} size="6xl" isCentered>
+      <Modal isOpen={isOpen} onClose={onClose} size="6xl" isCentered blockScrollOnMount={true}>
         <ModalOverlay bg="blackAlpha.800" />
         <ModalContent bg="transparent" boxShadow="none" maxW="90vw" maxH="90vh">
           <ModalCloseButton

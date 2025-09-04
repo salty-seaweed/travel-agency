@@ -186,6 +186,7 @@ class Command(BaseCommand):
                 'name': 'Maldives Adventure Package',
                 'description': '7-day adventure package including water sports, island hopping, and cultural experiences.',
                 'price': '1200.00',
+                'original_price': '1500.00',  # 20% discount
                 'is_featured': True,
                 'properties': ['Paradise Beach Resort', 'Coral Guesthouse']
             },
@@ -193,6 +194,7 @@ class Command(BaseCommand):
                 'name': 'Luxury Escape',
                 'description': 'Premium 5-day luxury package with spa treatments, private dining, and exclusive experiences.',
                 'price': '2500.00',
+                'original_price': '3200.00',  # 22% discount
                 'is_featured': True,
                 'properties': ['Ocean View Villa', 'Blue Lagoon Resort']
             },
@@ -200,6 +202,7 @@ class Command(BaseCommand):
                 'name': 'Budget Explorer',
                 'description': 'Affordable 4-day package perfect for budget-conscious travelers.',
                 'price': '600.00',
+                'original_price': '800.00',  # 25% discount
                 'is_featured': False,
                 'properties': ['Sunset Lodge', 'Tropical Haven']
             }
@@ -211,6 +214,7 @@ class Command(BaseCommand):
                 defaults={
                     'description': data['description'],
                     'price': Decimal(data['price']),
+                    'original_price': Decimal(data.get('original_price', 0)) if data.get('original_price') else None,
                     'is_featured': data['is_featured']
                 }
             )

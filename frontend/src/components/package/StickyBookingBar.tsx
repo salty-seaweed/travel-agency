@@ -23,7 +23,7 @@ import {
   ChatBubbleLeftRightIcon,
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
-import { formatPrice } from '../../utils';
+import { useCurrency } from '../../contexts/CurrencyContext';
 import type { Package } from '../../types';
 
 interface StickyBookingBarProps {
@@ -43,6 +43,7 @@ export function StickyBookingBar({
 }: StickyBookingBarProps) {
   const isMobile = useBreakpointValue({ base: true, md: false });
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { formatPrice } = useCurrency();
 
   if (!isMobile) {
     return null;
@@ -80,10 +81,31 @@ export function StickyBookingBar({
         <HStack justify="space-between" align="center">
           {/* Price */}
           <VStack align="start" spacing={0}>
-            <Text fontSize="lg" fontWeight="bold" color="purple.600">
-              {formatPrice(parseFloat(packageData.price))}
-            </Text>
-            <Text fontSize="xs" color="gray.500">per person</Text>
+            {(() => {
+              const currentPrice = parseFloat(typeof packageData.price === 'string' ? packageData.price.replace(/[^0-9.]/g, '') : packageData.price);
+              const originalPrice = packageData.original_price && packageData.original_price !== null && packageData.original_price !== 'null' && packageData.original_price !== '0' && packageData.original_price !== '0.00'
+                ? parseFloat(packageData.original_price.replace(/[^0-9.]/g, ''))
+                : null;
+
+              return (
+                <>
+                  {originalPrice && originalPrice !== currentPrice && (
+                    <Text fontSize="sm" color="gray.400" textDecoration="line-through">
+                      {formatPrice(originalPrice)}
+                    </Text>
+                  )}
+                  <Text fontSize="lg" fontWeight="bold" color="purple.600">
+                    {formatPrice(currentPrice)}
+                  </Text>
+                  {originalPrice && originalPrice !== currentPrice && (
+                    <Text fontSize="xs" color="green.600" fontWeight="semibold">
+                      Save {Math.round(((originalPrice - currentPrice) / originalPrice) * 100)}%
+                    </Text>
+                  )}
+                  <Text fontSize="xs" color="gray.500">per person</Text>
+                </>
+              );
+            })()}
           </VStack>
 
           {/* Action Buttons */}
