@@ -14,8 +14,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libpq-dev \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Create non-root user early for better layer caching
-RUN groupadd -r appuser && useradd --no-log-init -r -g appuser appuser
+# Create non-root user with home directory
+RUN groupadd -r appuser && \
+    useradd --no-log-init -r -g appuser -d /home/appuser -m appuser && \
+    mkdir -p /home/appuser && \
+    chown -R appuser:appuser /home/appuser
 
 # Set work directory
 WORKDIR /app
@@ -49,8 +52,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
     && apt-get clean
 
-# Create non-root user
-RUN groupadd -r appuser && useradd --no-log-init -r -g appuser appuser
+# Create non-root user with home directory
+RUN groupadd -r appuser && \
+    useradd --no-log-init -r -g appuser -d /home/appuser -m appuser && \
+    mkdir -p /home/appuser && \
+    chown -R appuser:appuser /home/appuser
 
 # Set work directory
 WORKDIR /app
