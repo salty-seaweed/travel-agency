@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Modal,
   ModalOverlay,
@@ -47,6 +47,7 @@ export function BookingChoiceModal({ isOpen, onClose, package: pkg, onFormBookin
   const toast = useToast();
   const { whatsappNumber } = useWhatsApp();
   const { formatPrice } = useCurrency();
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const getDestinationsLabel = (): string => {
     const dests: any = (pkg as any)?.destinations;
@@ -72,6 +73,10 @@ export function BookingChoiceModal({ isOpen, onClose, package: pkg, onFormBookin
   };
 
   const handleFormBooking = () => {
+    // Prevent multiple clicks
+    if (isProcessing) return;
+    setIsProcessing(true);
+
     if (onFormBooking) {
       onFormBooking();
       onClose();
@@ -218,9 +223,10 @@ export function BookingChoiceModal({ isOpen, onClose, package: pkg, onFormBookin
               </div>
 
               {/* Option 2: Booking Form */}
-              <Card 
-                className="w-full cursor-pointer hover:shadow-lg transition-all duration-300 border-2 border-transparent hover:border-blue-200"
+              <Card
+                className={`w-full cursor-pointer hover:shadow-lg transition-all duration-300 border-2 border-transparent hover:border-blue-200 ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
                 onClick={handleFormBooking}
+                onMouseDown={(e) => e.preventDefault()} // Prevent double-click issues
               >
                 <CardBody className="p-6">
                   <div className="flex items-center justify-between">

@@ -729,9 +729,9 @@ Can you help me finalize this package?`;
                                 )}
                               </VStack>
                               <VStack align="end" spacing={0}>
-                                <Text fontSize="sm" color="gray-500">{t('packages.card.totalFor', 'Total for {{count}}', { count: pkg.maxTravelers })}</Text>
+                                <Text fontSize="sm" color="gray-500">{t('packages.card.totalFor', 'Total for 2')}</Text>
                                 <Text fontSize="lg" fontWeight="semibold" color="gray-700">
-                                  {formatPrice(discountedPrice * pkg.maxTravelers)}
+                                  {formatPrice(discountedPrice * 2)}
                                 </Text>
                               </VStack>
                             </HStack>

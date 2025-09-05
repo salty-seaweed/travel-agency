@@ -272,15 +272,14 @@ export function PackageDetailPage() {
         }}
       />
 
-      {showBookingForm && (
-        <PackageBookingForm
-          packageId={packageData.id}
-          packageName={packageData.name}
-          packagePrice={parseFloat(packageData.price as any)}
-          packageDurationDays={packageData.duration}
-          onClose={() => setShowBookingForm(false)}
-        />
-      )}
+      <PackageBookingForm
+        isOpen={showBookingForm}
+        packageId={packageData.id}
+        packageName={packageData.name}
+        packagePrice={parseFloat(packageData.price as any)}
+        packageDurationDays={packageData.duration}
+        onClose={() => setShowBookingForm(false)}
+      />
     </ErrorBoundary>
   );
 } 

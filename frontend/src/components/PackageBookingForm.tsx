@@ -1,5 +1,23 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { CalendarIcon, UsersIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import React, { useState, useEffect } from 'react';
+import { CalendarIcon, UsersIcon } from '@heroicons/react/24/outline';
+import {
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalCloseButton,
+  VStack,
+  HStack,
+  Text,
+  Button,
+  Input,
+  Textarea,
+  Select,
+  FormControl,
+  FormLabel,
+  useToast,
+} from '@chakra-ui/react';
 import { LoadingSpinner } from './LoadingSpinner';
 import { useNotification } from '../hooks';
 import { useWhatsApp } from '../hooks/useQueries';
@@ -9,14 +27,14 @@ interface PackageBookingFormProps {
   packageName: string;
   packagePrice: number;
   packageDurationDays: number;
+  isOpen: boolean;
   onClose: () => void;
 }
 
-export function PackageBookingForm({ packageId, packageName, packagePrice, packageDurationDays, onClose }: PackageBookingFormProps) {
+export function PackageBookingForm({ packageId, packageName, packagePrice, packageDurationDays, isOpen, onClose }: PackageBookingFormProps) {
   const { showSuccess, showError } = useNotification();
   const { getWhatsAppUrl } = useWhatsApp();
   const [loading, setLoading] = useState(false);
-  const containerRef = useRef<HTMLDivElement | null>(null);
   const [formData, setFormData] = useState({
     customer_name: '',
     customer_email: '',
@@ -71,113 +89,148 @@ export function PackageBookingForm({ packageId, packageName, packagePrice, packa
     }
   };
 
-  // Ensure the modal is visible and background doesn't scroll
-  useEffect(() => {
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-
-    // Scroll the modal into view and also ensure viewport is in a good position
-    const id = window.requestAnimationFrame(() => {
-      if (containerRef.current) {
-        try {
-          containerRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          // Move focus for accessibility and to help some mobile browsers
-          containerRef.current.focus?.();
-        } catch (_) {
-          // no-op
-        }
-      }
-      // As a fallback, scroll to top so the overlay is definitely visible
-      try {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      } catch (_) {
-        // no-op
-      }
-    });
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.cancelAnimationFrame(id);
-    };
-  }, []);
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div
-        ref={containerRef}
-        tabIndex={-1}
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="booking-form-title"
-      >
-        <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 rounded-t-2xl">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 id="booking-form-title" className="text-xl font-bold text-gray-900">Book This Package</h3>
-              <p className="text-sm text-gray-500">{packageName}</p>
-            </div>
-            <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100">
-              <XMarkIcon className="h-5 w-5" />
-            </button>
-          </div>
-        </div>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      size="2xl"
+      isCentered
+      scrollBehavior="inside"
+    >
+      <ModalOverlay backdropFilter="blur(10px)" />
+      <ModalContent>
+        <ModalHeader>
+          <VStack align="start" spacing={1}>
+            <Text fontSize="xl" fontWeight="bold">Book This Package</Text>
+            <Text fontSize="sm" color="gray.600">{packageName}</Text>
+          </VStack>
+        </ModalHeader>
+        <ModalCloseButton />
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Guest Info */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
-              <input name="customer_name" required value={formData.customer_name} onChange={handleInputChange} className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-gray-50 hover:bg-white" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-              <input type="email" name="customer_email" required value={formData.customer_email} onChange={handleInputChange} className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-gray-50 hover:bg-white" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Phone *</label>
-              <input type="tel" name="customer_phone" required value={formData.customer_phone} onChange={handleInputChange} className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-gray-50 hover:bg-white" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Number of Guests *</label>
-              <select name="number_of_guests" value={formData.number_of_guests} onChange={handleInputChange} className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-gray-50 hover:bg-white">
-                {[1,2,3,4,5,6,7,8,9,10].map(n => <option key={n} value={n}>{n} {n === 1 ? 'Guest' : 'Guests'}</option>)}
-              </select>
-            </div>
-          </div>
+        <ModalBody pb={6}>
+          <form onSubmit={handleSubmit}>
+            <VStack spacing={6}>
+              {/* Guest Info */}
+              <VStack spacing={4} w="full">
+                <HStack spacing={4} w="full">
+                  <FormControl isRequired>
+                    <FormLabel>Full Name</FormLabel>
+                    <Input
+                      name="customer_name"
+                      value={formData.customer_name}
+                      onChange={handleInputChange}
+                      placeholder="Enter your full name"
+                    />
+                  </FormControl>
+                  <FormControl isRequired>
+                    <FormLabel>Email</FormLabel>
+                    <Input
+                      type="email"
+                      name="customer_email"
+                      value={formData.customer_email}
+                      onChange={handleInputChange}
+                      placeholder="Enter your email"
+                    />
+                  </FormControl>
+                </HStack>
 
-          {/* Dates + Duration */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Preferred Start Date</label>
-              <div className="relative">
-                <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <input type="date" name="start_date" value={formData.start_date} onChange={handleInputChange} min={getMinDate()} max={getMaxDate()} className="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-gray-50 hover:bg-white" />
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Duration (days) *</label>
-              <select name="duration_days" value={formData.duration_days} onChange={handleInputChange} className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-gray-50 hover:bg-white">
-                {[...Array(21)].map((_, i) => i+1).map(n => <option key={n} value={n}>{n} day{n>1?'s':''}</option>)}
-              </select>
-            </div>
-          </div>
+                <HStack spacing={4} w="full">
+                  <FormControl isRequired>
+                    <FormLabel>Phone</FormLabel>
+                    <Input
+                      type="tel"
+                      name="customer_phone"
+                      value={formData.customer_phone}
+                      onChange={handleInputChange}
+                      placeholder="Enter your phone number"
+                    />
+                  </FormControl>
+                  <FormControl isRequired>
+                    <FormLabel>Number of Guests</FormLabel>
+                    <Select
+                      name="number_of_guests"
+                      value={formData.number_of_guests}
+                      onChange={handleInputChange}
+                    >
+                      {[1,2,3,4,5,6,7,8,9,10].map(n => (
+                        <option key={n} value={n}>
+                          {n} {n === 1 ? 'Guest' : 'Guests'}
+                        </option>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </HStack>
+              </VStack>
 
-          {/* Special Requests */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Special Requests (Optional)</label>
-            <textarea name="special_requests" value={formData.special_requests} onChange={handleInputChange} rows={3} className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-gray-50 hover:bg-white" />
-          </div>
+              {/* Dates + Duration */}
+              <VStack spacing={4} w="full">
+                <HStack spacing={4} w="full">
+                  <FormControl>
+                    <FormLabel>Preferred Start Date</FormLabel>
+                    <Input
+                      type="date"
+                      name="start_date"
+                      value={formData.start_date}
+                      onChange={handleInputChange}
+                      min={getMinDate()}
+                      max={getMaxDate()}
+                    />
+                  </FormControl>
+                  <FormControl isRequired>
+                    <FormLabel>Duration (days)</FormLabel>
+                    <Select
+                      name="duration_days"
+                      value={formData.duration_days}
+                      onChange={handleInputChange}
+                    >
+                      {[...Array(21)].map((_, i) => i+1).map(n => (
+                        <option key={n} value={n}>
+                          {n} day{n > 1 ? 's' : ''}
+                        </option>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </HStack>
+              </VStack>
 
-          <div className="flex gap-3 pt-4">
-            <button type="button" onClick={onClose} className="flex-1 px-4 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Cancel</button>
-            <button type="submit" disabled={loading} className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-4 py-3 rounded-lg font-semibold hover:from-green-700 hover:to-emerald-700 disabled:bg-gray-400 flex items-center justify-center">
-              {loading ? (<><LoadingSpinner size="sm" /><span className="ml-2">Submitting...</span></>) : 'Send to WhatsApp'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+              {/* Special Requests */}
+              <FormControl>
+                <FormLabel>Special Requests (Optional)</FormLabel>
+                <Textarea
+                  name="special_requests"
+                  value={formData.special_requests}
+                  onChange={handleInputChange}
+                  placeholder="Any special requests or requirements..."
+                  rows={3}
+                />
+              </FormControl>
+
+              {/* Submit Buttons */}
+              <HStack spacing={4} w="full">
+                <Button
+                  type="button"
+                  onClick={onClose}
+                  variant="outline"
+                  flex={1}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  colorScheme="green"
+                  flex={1}
+                  isLoading={loading}
+                  loadingText="Submitting..."
+                >
+                  Send to WhatsApp
+                </Button>
+              </HStack>
+            </VStack>
+          </form>
+        </ModalBody>
+      </ModalContent>
+    </Modal>
   );
 }
 

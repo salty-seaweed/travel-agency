@@ -76,9 +76,9 @@ const convertApiPackageToCardFormat = (apiPackage: ApiPackage): LocalPackage => 
       ? apiPackage.destinations.map((dest: any) => dest.island || dest.name || dest).filter(Boolean)
       : [],
     // Map highlights - handle both array and comma-separated string
-    highlights: Array.isArray(apiPackage.highlights) 
-      ? apiPackage.highlights 
-      : (apiPackage.highlights && typeof apiPackage.highlights === 'string' ? apiPackage.highlights.split(',').map((h: string) => h.trim()).filter(Boolean) : []),
+    highlights: Array.isArray(apiPackage.highlights)
+      ? apiPackage.highlights
+      : (apiPackage.highlights && typeof apiPackage.highlights === 'string' ? (apiPackage.highlights as string).split(',').map((h: string) => h.trim()).filter(Boolean) : []),
     // Map included items from PackageInclusion relationship
     included: Array.isArray(apiPackage.inclusions) 
       ? apiPackage.inclusions.filter((inc: any) => inc.category === 'included').map((inc: any) => inc.item).filter(Boolean)
@@ -345,9 +345,9 @@ export const ExperiencesTrendingDeals: React.FC<Props> = ({ packages = [] }) => 
                             )}
                           </VStack>
                           <VStack align="end" spacing={0}>
-                            <Text fontSize="sm" color="gray.500">{t('homepage.trending.totalFor', 'Total for')} {pkg.maxTravelers || 2}</Text>
+                            <Text fontSize="sm" color="gray.500">{t('homepage.trending.totalFor', 'Total for 2')}</Text>
                             <Text fontSize="lg" fontWeight="semibold" color="gray.700">
-                              {formatPrice(currentPrice * (pkg.maxTravelers || 2))}
+                              {formatPrice(currentPrice * 2)}
                             </Text>
                           </VStack>
                         </HStack>

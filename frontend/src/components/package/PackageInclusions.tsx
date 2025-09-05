@@ -286,14 +286,9 @@ function InclusionItem({ item, type, getCategoryIcon, getCategoryColor }: Inclus
         <Icon as={getTypeIcon()} h={5} w={5} color={`${getTypeColor()}.500`} />
         
         <VStack align="start" spacing={1} flex={1}>
-          <HStack spacing={2} align="center">
-            <Text fontWeight="medium" color="gray.800">
-              {item.item}
-            </Text>
-            <Badge colorScheme={categoryColor} variant="subtle" size="sm">
-              {item.item}
-            </Badge>
-          </HStack>
+          <Text fontWeight="medium" color="gray.800">
+            {item.item}
+          </Text>
           
           {item.description && (
             <Text fontSize="sm" color="gray.600" lineHeight="1.4">
