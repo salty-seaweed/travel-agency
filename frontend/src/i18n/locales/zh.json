@@ -188,7 +188,7 @@
       "moreActivities": "更多活动",
       "save": "节省",
       "off": "优惠",
-      "totalFor": "总计",
+      "totalFor": "2 人总计",
       "details": "详情",
       "viewAll": "查看所有精选套餐",
       "limited": "限时优惠。立即预订以获得最佳价格！"
@@ -533,7 +533,7 @@
       "whatsIncluded": "包含内容：",
       "moreInclusions": "+{{count}} 更多包含项目",
       "save": "节省 ${{amount}}（{{percentage}}% 优惠）",
-      "totalFor": "{{count}} 人总计"
+      "totalFor": "2 人总计"
     },
     "error": {
       "title": "加载套餐时出错",

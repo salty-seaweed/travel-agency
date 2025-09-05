@@ -180,6 +180,19 @@
       "viewAll": "Explore All Packages",
       "featured": "Featured"
     },
+    "trending": {
+      "badge": "Best Maldives Deals",
+      "title": "Curated Maldives Packages",
+      "subtitle": "Handpicked packages combining the best accommodations, activities, and experiences for the perfect Maldives getaway",
+      "highlights": "Highlights:",
+      "moreActivities": "more activities",
+      "save": "Save",
+      "off": "off",
+      "totalFor": "Total for 2",
+      "details": "Details",
+      "viewAll": "View All Curated Packages",
+      "limited": "Limited-time offers. Book now to secure the best prices!"
+    },
     "properties": {
       "title": "Featured Properties",
       "subtitle": "Carefully selected accommodations for your ultimate Maldives experience",
@@ -542,7 +555,7 @@
       "whatsIncluded": "What's Included:",
       "moreInclusions": "+{{count}} more inclusions",
       "save": "Save ${{amount}} ({{percentage}}% off)",
-      "totalFor": "Total for {{count}}"
+      "totalFor": "Total for 2"
     },
     "error": {
       "title": "Error loading packages",
