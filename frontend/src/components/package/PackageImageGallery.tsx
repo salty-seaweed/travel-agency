@@ -96,7 +96,8 @@ export function PackageImageGallery({ images, packageName }: PackageImageGallery
             alt={`${packageName} - Image ${selectedImageIndex + 1}`}
             w="full"
             h="full"
-            objectFit="cover"
+            objectFit="contain"
+            bg="gray.50"
             fallbackSrc="/placeholder-image.jpg"
           />
           
@@ -192,7 +193,8 @@ export function PackageImageGallery({ images, packageName }: PackageImageGallery
                 alt={`${packageName} - Thumbnail ${index + 1}`}
                 h="80px"
                 w="full"
-                objectFit="cover"
+                objectFit="contain"
+                bg="gray.50"
                 fallbackSrc="/placeholder-image.jpg"
               />
               

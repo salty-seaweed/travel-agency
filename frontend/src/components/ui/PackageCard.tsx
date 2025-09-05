@@ -102,7 +102,7 @@ export function PackageCard({ package: pkg, className = '', loading = false }: P
           <img
             src={imageUrl}
             alt={`${pkg.name} - ${destinationsString}`}
-            className={`w-full h-full object-cover transition-all duration-500 ${
+            className={`w-full h-full object-contain bg-gray-50 transition-all duration-500 ${
               imageLoaded ? 'opacity-100 group-hover:scale-105' : 'opacity-0'
             }`}
             loading="lazy"

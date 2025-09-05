@@ -3,6 +3,25 @@ import { Box, Button, Image, VStack, HStack, Text, IconButton, useToast, Progres
 import { PlusIcon, XMarkIcon, PhotoIcon } from '@heroicons/react/24/outline';
 import { apiUpload, apiPost, apiDelete } from '../../../api';
 import { MediaLibrary } from '../cms/MediaLibrary';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import {
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface ImageUploadProps {
   images: Array<{
@@ -24,12 +43,156 @@ interface ImageUploadProps {
   packageId?: number;
 }
 
+// Sortable Item Component
+interface SortableItemProps {
+  id: string;
+  image: any;
+  index: number;
+  onRemove: (index: number) => void;
+  onSetFeatured: (index: number) => void;
+  onUpdateCaption: (index: number, caption: string) => void;
+}
+
+function SortableItem({ id, image, index, onRemove, onSetFeatured, onUpdateCaption }: SortableItemProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <Box
+      ref={setNodeRef}
+      style={style}
+      border="1px"
+      borderColor="gray.200"
+      borderRadius="md"
+      p={3}
+      position="relative"
+      bg={isDragging ? "gray.50" : "white"}
+      _hover={{ shadow: "sm" }}
+      transition="all 0.2s"
+    >
+      <HStack spacing={3}>
+        <Box
+          {...attributes}
+          {...listeners}
+          cursor="grab"
+          _active={{ cursor: "grabbing" }}
+          p={1}
+          borderRadius="md"
+          _hover={{ bg: "gray.100" }}
+        >
+          <Icon as={PhotoIcon} h={4} w={4} color="gray.400" />
+        </Box>
+
+        <Image
+          src={image.image}
+          alt={image.caption || `Image ${index + 1}`}
+          boxSize="80px"
+          objectFit="cover"
+          borderRadius="md"
+          fallbackSrc="https://via.placeholder.com/80x80?text=Image"
+          onError={(e) => {
+            // Handle blob URL cleanup on error
+            if (image.image.startsWith('blob:')) {
+              URL.revokeObjectURL(image.image);
+            }
+          }}
+        />
+
+        <VStack flex={1} align="start" spacing={2}>
+          <Text
+            fontSize="sm"
+            fontWeight="medium"
+            contentEditable
+            suppressContentEditableWarning
+            onBlur={(e) => onUpdateCaption(index, e.currentTarget.textContent || '')}
+            _hover={{ bg: 'gray.50' }}
+            px={2}
+            py={1}
+            borderRadius="md"
+            minW="200px"
+          >
+            {image.caption || `Image ${index + 1}`}
+          </Text>
+
+          <HStack spacing={2}>
+            <Button
+              size="sm"
+              variant={image.is_featured ? "solid" : "outline"}
+              colorScheme={image.is_featured ? "green" : "gray"}
+              onClick={() => onSetFeatured(index)}
+            >
+              {image.is_featured ? "Featured" : "Set Featured"}
+            </Button>
+
+            <Text fontSize="xs" color="gray.500">
+              Order: {index + 1}
+            </Text>
+          </HStack>
+        </VStack>
+
+        <IconButton
+          aria-label="Remove image"
+          icon={<Icon as={XMarkIcon} />}
+          size="sm"
+          colorScheme="red"
+          variant="ghost"
+          onClick={() => onRemove(index)}
+        />
+      </HStack>
+    </Box>
+  );
+}
+
 const ImageUpload: React.FC<ImageUploadProps> = ({ images, onChange, packageId }) => {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isMediaLibraryOpen, setIsMediaLibraryOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const toast = useToast();
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = images.findIndex((_, index) => `image-${index}` === active.id);
+      const newIndex = images.findIndex((_, index) => `image-${index}` === over.id);
+
+      const reorderedImages = arrayMove(images, oldIndex, newIndex);
+
+      // Update order values
+      const updatedImages = reorderedImages.map((img, index) => ({
+        ...img,
+        order: index
+      }));
+
+      onChange(updatedImages);
+
+      toast({
+        title: 'Images reordered',
+        status: 'success',
+        duration: 2000,
+      });
+    }
+  };
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -282,74 +445,37 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ images, onChange, packageId }
 
       {images.length > 0 && (
         <VStack spacing={3} align="stretch">
-          <Text fontWeight="bold">Uploaded Images:</Text>
-          {images.map((image, index) => (
-            <Box
-              key={index}
-              border="1px"
-              borderColor="gray.200"
-              borderRadius="md"
-              p={3}
-              position="relative"
+          <HStack justify="space-between" align="center">
+            <Text fontWeight="bold">Uploaded Images:</Text>
+            <Text fontSize="sm" color="gray.500">
+              Drag images to reorder them
+            </Text>
+          </HStack>
+
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={images.map((_, index) => `image-${index}`)}
+              strategy={verticalListSortingStrategy}
             >
-              <HStack spacing={3}>
-                <Image
-                  src={image.image}
-                  alt={image.caption || `Image ${index + 1}`}
-                  boxSize="80px"
-                  objectFit="cover"
-                  borderRadius="md"
-                  fallbackSrc="https://via.placeholder.com/80x80?text=Image"
-                  onError={(e) => {
-                    // Handle blob URL cleanup on error
-                    if (image.image.startsWith('blob:')) {
-                      URL.revokeObjectURL(image.image);
-                    }
-                  }}
-                />
-                
-                <VStack flex={1} align="start" spacing={2}>
-                  <Text
-                    fontSize="sm"
-                    fontWeight="medium"
-                    contentEditable
-                    suppressContentEditableWarning
-                    onBlur={(e) => updateCaption(index, e.currentTarget.textContent || '')}
-                    _hover={{ bg: 'gray.50' }}
-                    px={2}
-                    py={1}
-                    borderRadius="md"
-                  >
-                    {image.caption || `Image ${index + 1}`}
-                  </Text>
-                  
-                  <HStack spacing={2}>
-                    <Button
-                      size="sm"
-                      variant={image.is_featured ? "solid" : "outline"}
-                      colorScheme={image.is_featured ? "green" : "gray"}
-                      onClick={() => setFeatured(index)}
-                    >
-                      {image.is_featured ? "Featured" : "Set Featured"}
-                    </Button>
-                    
-                    <Text fontSize="xs" color="gray.500">
-                      Order: {image.order || index}
-                    </Text>
-                  </HStack>
-                </VStack>
-                
-                <IconButton
-                  aria-label="Remove image"
-                  icon={<Icon as={XMarkIcon} />}
-                  size="sm"
-                  colorScheme="red"
-                  variant="ghost"
-                  onClick={() => removeImage(index)}
-                />
-              </HStack>
-            </Box>
-          ))}
+              <VStack spacing={3} align="stretch">
+                {images.map((image, index) => (
+                  <SortableItem
+                    key={`image-${index}`}
+                    id={`image-${index}`}
+                    image={image}
+                    index={index}
+                    onRemove={removeImage}
+                    onSetFeatured={setFeatured}
+                    onUpdateCaption={updateCaption}
+                  />
+                ))}
+              </VStack>
+            </SortableContext>
+          </DndContext>
         </VStack>
       )}
 
