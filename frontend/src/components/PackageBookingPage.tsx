@@ -36,7 +36,7 @@ export function PackageBookingPage() {
   const [showBookingForm, setShowBookingForm] = useState(false);
 
   // Helper function to get translated content based on current language
-  const getTranslatedContent = (field: string, fallback: string = ''): string => {
+  const getTranslatedContent = React.useCallback((field: string, fallback: string = ''): string => {
     if (!pkg) return fallback;
     
     const currentLang = i18n.language;
@@ -49,7 +49,7 @@ export function PackageBookingPage() {
     
     // Fallback to original field
     return (pkg[field as keyof Package] as string) || fallback;
-  };
+  }, [pkg, i18n.language]);
 
   useEffect(() => {
     if (id) {
@@ -338,8 +338,16 @@ export function PackageBookingPage() {
       <PackageBookingForm
         packageId={pkg.id}
         packageName={getTranslatedContent('name', pkg.name)}
-        packagePrice={parseFloat(pkg.price as any)}
+        packagePrice={(() => {
+          const variants: any[] = (pkg as any).variants || [];
+          if (variants.length) {
+            const nums = variants.map(v => parseFloat(String(v.price).replace(/[^0-9.]/g, ''))).filter(n => !isNaN(n));
+            if (nums.length) return Math.min(...nums);
+          }
+          return parseFloat(pkg.price as any);
+        })()}
         packageDurationDays={pkg.duration}
+        isOpen={true}
         onClose={() => setShowBookingForm(false)}
       />
     )}

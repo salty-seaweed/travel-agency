@@ -286,7 +286,8 @@ class PackageViewSet(viewsets.ModelViewSet):
         'destinations__location',
         'inclusions',
         'activities',
-        'images'
+        'images',
+        'variants'
     ).all()
     serializer_class = PackageSerializerI18n
 
@@ -309,11 +310,14 @@ class PackageViewSet(viewsets.ModelViewSet):
             print(f"Request user: {request.user}")
             print(f"Request headers: {dict(request.headers)}")
 
-            # Check for required fields
-            required_fields = ['name', 'description', 'price', 'duration', 'group_size_min', 'group_size_max']
+            # Check for required fields with variants support
+            has_variants_payload = bool(request.data.get('variants_data') or request.data.get('variants'))
+            base_required = ['name', 'description', 'group_size_min', 'group_size_max']
+            legacy_required = [] if has_variants_payload else ['price', 'duration']
+            required_fields = base_required + legacy_required
             missing_fields = []
             for field in required_fields:
-                if field not in request.data or not request.data.get(field):
+                if field not in request.data or request.data.get(field) in (None, '', []):
                     missing_fields.append(field)
 
             if missing_fields:
@@ -325,7 +329,16 @@ class PackageViewSet(viewsets.ModelViewSet):
 
             # Validate price field
             price = request.data.get('price')
-            if price is not None:
+            variants_payload = request.data.get('variants_data') or request.data.get('variants')
+            if variants_payload:
+                try:
+                    for v in variants_payload:
+                        pv = float(v.get('price'))
+                        if pv <= 0:
+                            return Response({'error': 'Variant price must be greater than 0'}, status=status.HTTP_400_BAD_REQUEST)
+                except Exception:
+                    return Response({'error': 'Invalid variant price format'}, status=status.HTTP_400_BAD_REQUEST)
+            elif price is not None:
                 try:
                     price_float = float(price)
                     if price_float <= 0:

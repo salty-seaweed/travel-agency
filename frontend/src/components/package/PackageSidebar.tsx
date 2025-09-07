@@ -32,9 +32,10 @@ import type { Package } from '../../types';
 interface PackageSidebarProps {
   packageData: Package;
   onBookNow: () => void;
+  selectedVariant?: any;
 }
 
-export function PackageSidebar({ packageData, onBookNow }: PackageSidebarProps) {
+export function PackageSidebar({ packageData, onBookNow, selectedVariant }: PackageSidebarProps) {
   const { getWhatsAppUrl } = useWhatsApp();
   const { formatPrice, convertPrice } = useCurrency();
 
@@ -52,12 +53,15 @@ export function PackageSidebar({ packageData, onBookNow }: PackageSidebarProps) 
           <VStack spacing={3}>
             <Text fontSize="sm" color="gray.600" textAlign="center">Starting from</Text>
             <HStack align="baseline" justify="center">
-              {(() => {
-                // Parse prices safely
-                const currentPrice = parseFloat(typeof packageData.price === 'string' ? packageData.price.replace(/[^0-9.]/g, '') : packageData.price);
-                const originalPrice = packageData.original_price && packageData.original_price !== '0' && packageData.original_price !== null
-                  ? parseFloat(typeof packageData.original_price === 'string' ? packageData.original_price.replace(/[^0-9.]/g, '') : packageData.original_price)
-                  : null;
+            {(() => {
+              const currentPrice = selectedVariant
+                ? parseFloat(String(selectedVariant.price))
+                : parseFloat(typeof packageData.price === 'string' ? packageData.price.replace(/[^0-9.]/g, '') : (packageData.price as any));
+              const originalPrice = selectedVariant && selectedVariant.original_price
+                ? parseFloat(String(selectedVariant.original_price))
+                : (packageData.original_price && packageData.original_price !== '0' && packageData.original_price !== null
+                  ? parseFloat(typeof packageData.original_price === 'string' ? packageData.original_price.replace(/[^0-9.]/g, '') : (packageData.original_price as any))
+                  : null);
 
                 return (
                   <>
@@ -74,7 +78,15 @@ export function PackageSidebar({ packageData, onBookNow }: PackageSidebarProps) 
               })()}
             </HStack>
             <Text fontSize="sm" color="gray.600" textAlign="center">
-              per person • {packageData.duration} days
+              {(() => {
+                if (selectedVariant) {
+                  return <>per person • {selectedVariant.duration_days} days</> as any;
+                }
+                const variants: any[] = (packageData as any).variants || [];
+                if (!variants.length) return <>per person • {packageData.duration} days</> as any;
+                const durations = Array.from(new Set(variants.map(v => Number(v.duration_days)).filter((n: any) => !isNaN(n)))).sort((a: number,b: number)=>a-b);
+                return <>per person • {durations[0]}{durations.length > 1 ? `-${durations[durations.length-1]}` : ''} days</> as any;
+              })()}
             </Text>
             {(() => {
               // Calculate discount percentage safely
@@ -113,7 +125,7 @@ export function PackageSidebar({ packageData, onBookNow }: PackageSidebarProps) 
                 <Icon as={CalendarIcon} h={4} w={4} color="purple.500" />
                 <Text color="gray.600">Duration:</Text>
               </HStack>
-              <Text fontWeight="medium">{packageData.duration} days</Text>
+              <Text fontWeight="medium">{selectedVariant ? selectedVariant.duration_days : packageData.duration} days</Text>
             </HStack>
             
             <HStack justify="space-between">
@@ -194,9 +206,25 @@ export function PackageSidebar({ packageData, onBookNow }: PackageSidebarProps) 
           </CardHeader>
           <CardBody>
             {packageData.transportation_details && (
-              <Text color="gray.700" fontSize="sm" mb={3}>
-                {packageData.transportation_details}
-              </Text>
+              <VStack spacing={3} align="stretch" mb={3}>
+                {packageData.transportation_details.split('\n\n').map((section, index) => {
+                  if (!section.trim()) return null;
+                  const lines = section.split('\n');
+                  const title = lines[0];
+                  const content = lines.slice(1).join(' ');
+                  
+                  return (
+                    <Box key={index} p={3} bg="gray.50" borderRadius="md">
+                      <Text fontWeight="semibold" color="blue.600" fontSize="sm" mb={1}>
+                        {title.replace(':', '')}
+                      </Text>
+                      <Text color="gray.700" fontSize="sm" lineHeight="1.5">
+                        {content}
+                      </Text>
+                    </Box>
+                  );
+                })}
+              </VStack>
             )}
             {packageData.airport_transfers && (
               <HStack spacing={2}>

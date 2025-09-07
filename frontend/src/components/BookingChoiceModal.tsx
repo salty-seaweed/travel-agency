@@ -40,9 +40,10 @@ interface BookingChoiceModalProps {
   onClose: () => void;
   package: Package;
   onFormBooking?: () => void;
+  selectedVariant?: any;
 }
 
-export function BookingChoiceModal({ isOpen, onClose, package: pkg, onFormBooking }: BookingChoiceModalProps) {
+export function BookingChoiceModal({ isOpen, onClose, package: pkg, onFormBooking, selectedVariant }: BookingChoiceModalProps) {
   const { t } = useTranslation();
   const toast = useToast();
   const { whatsappNumber } = useWhatsApp();
@@ -61,7 +62,10 @@ export function BookingChoiceModal({ isOpen, onClose, package: pkg, onFormBookin
   };
 
   const handleDirectWhatsApp = () => {
-    whatsappBooking.bookPackageDirect(pkg, whatsappNumber);
+    const payload: any = selectedVariant
+      ? { ...pkg, price: selectedVariant.price, duration: selectedVariant.duration_days }
+      : pkg;
+    whatsappBooking.bookPackageDirect(payload, whatsappNumber);
     onClose();
     toast({
       title: t('bookingModal.whatsappOpened.title', 'WhatsApp opened!'),
@@ -130,7 +134,7 @@ export function BookingChoiceModal({ isOpen, onClose, package: pkg, onFormBookin
                       </div>
                       <div className="flex items-center gap-2">
                         <Icon as={CalendarIcon} className="w-4 h-4 text-green-500" />
-                        <span>{pkg.duration} days</span>
+                        <span>{selectedVariant ? selectedVariant.duration_days : pkg.duration} days</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Icon as={UserGroupIcon} className="w-4 h-4 text-purple-500" />
@@ -140,10 +144,14 @@ export function BookingChoiceModal({ isOpen, onClose, package: pkg, onFormBookin
                         <div className="flex items-center gap-2">
                           <Icon as={CurrencyDollarIcon} className="w-4 h-4 text-yellow-500" />
                           {(() => {
-                            const currentPrice = parseFloat(typeof pkg.price === 'string' ? pkg.price.replace(/[^0-9.]/g, '') : pkg.price);
-                            const originalPrice = pkg.original_price && pkg.original_price !== null && pkg.original_price !== 'null' && pkg.original_price !== '0' && pkg.original_price !== '0.00'
-                              ? parseFloat(pkg.original_price.replace(/[^0-9.]/g, ''))
-                              : null;
+                            const currentPrice = selectedVariant
+                              ? parseFloat(String(selectedVariant.price))
+                              : parseFloat(typeof pkg.price === 'string' ? (pkg.price as any).replace(/[^0-9.]/g, '') : (pkg.price as any));
+                            const originalPrice = selectedVariant && selectedVariant.original_price
+                              ? parseFloat(String(selectedVariant.original_price))
+                              : (pkg.original_price && pkg.original_price !== null && pkg.original_price !== 'null' && pkg.original_price !== '0' && pkg.original_price !== '0.00'
+                                ? parseFloat((pkg.original_price as any).replace(/[^0-9.]/g, ''))
+                                : null);
 
                             return (
                               <div className="flex flex-col">

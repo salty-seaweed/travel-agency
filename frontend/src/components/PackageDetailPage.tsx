@@ -46,11 +46,16 @@ export function PackageDetailPage() {
 
   const { data: packages, isLoading, error } = useFetch<Package>('/packages/');
   const packageData = packages?.find(pkg => pkg.id === parseInt(id || '0'));
+  const [selectedVariantId, setSelectedVariantId] = useState<number | null>(null);
 
   useEffect(() => {
     if (packageData) {
       // Set page title for SEO
       document.title = `${packageData.name} - Travel Agency`;
+      // Preselect default variant if available
+      const variants: any[] = (packageData as any).variants || [];
+      const defaultVariant = variants.find(v => v.is_default) || variants[0];
+      setSelectedVariantId(defaultVariant ? defaultVariant.id : null);
     }
   }, [packageData]);
 
@@ -134,9 +139,35 @@ export function PackageDetailPage() {
       />
       
       <Container maxW="7xl" py={8}>
+        {(() => {
+          // Compute selected variant and a view model merged with selected price/duration
+          const variants: any[] = (packageData as any)?.variants || [];
+          const selectedVariant = selectedVariantId && variants.length
+            ? variants.find(v => v.id === selectedVariantId)
+            : null;
+          const viewPackage: any = selectedVariant
+            ? {
+                ...packageData,
+                price: String(selectedVariant.price),
+                original_price: selectedVariant.original_price ? String(selectedVariant.original_price) : undefined,
+                duration: Number(selectedVariant.duration_days),
+                selected_variant_id: selectedVariant.id,
+              }
+            : packageData;
+          // Store on window for child closures (no re-render deps)
+          (window as any).__currentPackageVariant = selectedVariant;
+          ;
+          return null;
+        })()}
         {/* Header Section */}
         <PackageHeader
-          packageData={packageData}
+          packageData={(() => {
+            const variants: any[] = (packageData as any)?.variants || [];
+            const selectedVariant = selectedVariantId && variants.length ? variants.find(v => v.id === selectedVariantId) : null;
+            return selectedVariant
+              ? ({ ...packageData, price: String(selectedVariant.price), original_price: selectedVariant.original_price ? String(selectedVariant.original_price) : undefined, duration: selectedVariant.duration_days } as any)
+              : (packageData as any);
+          })()}
           onBookNow={handleBookNow}
           onAddToWishlist={handleAddToWishlist}
           onShare={handleShare}
@@ -146,6 +177,24 @@ export function PackageDetailPage() {
         <Grid templateColumns={{ base: '1fr', lg: '2fr 1fr' }} gap={8}>
           {/* Main Content */}
           <VStack spacing={8} align="stretch">
+            {/* Variant Selector */}
+            {Array.isArray((packageData as any).variants) && (packageData as any).variants.length > 0 && (
+              <Box p={6} bg="white" borderRadius="xl" border="1px solid" borderColor="gray.200">
+                <Heading size="md" color="gray.800" mb={4}>Select Duration</Heading>
+                <HStack spacing={3} flexWrap="wrap">
+                  {((packageData as any).variants as any[]).sort((a,b) => a.duration_days - b.duration_days).map(v => (
+                    <Button
+                      key={v.id}
+                      variant={selectedVariantId === v.id ? 'solid' : 'outline'}
+                      colorScheme="purple"
+                      onClick={() => setSelectedVariantId(v.id)}
+                    >
+                      {v.duration_days} days · ${parseFloat(String(v.price)).toFixed(0)}
+                    </Button>
+                  ))}
+                </HStack>
+              </Box>
+            )}
             {/* Image Gallery */}
             {packageData.images && packageData.images.length > 0 && (
               <PackageImageGallery
@@ -245,8 +294,18 @@ export function PackageDetailPage() {
           {/* Sidebar */}
           <GridItem>
             <PackageSidebar
-              packageData={packageData}
+              packageData={(() => {
+                const variants: any[] = (packageData as any)?.variants || [];
+                const selectedVariant = selectedVariantId && variants.length ? variants.find(v => v.id === selectedVariantId) : null;
+                return selectedVariant
+                  ? ({ ...packageData, price: String(selectedVariant.price), original_price: selectedVariant.original_price ? String(selectedVariant.original_price) : undefined, duration: selectedVariant.duration_days } as any)
+                  : (packageData as any);
+              })()}
               onBookNow={handleBookNow}
+              selectedVariant={(() => {
+                const variants: any[] = (packageData as any)?.variants || [];
+                return selectedVariantId && variants.length ? variants.find(v => v.id === selectedVariantId) : null;
+              })()}
             />
           </GridItem>
                  </Grid>
@@ -254,7 +313,17 @@ export function PackageDetailPage() {
 
        {/* Sticky Booking Bar for Mobile */}
        <StickyBookingBar
-         packageData={packageData}
+         packageData={(() => {
+           const variants: any[] = (packageData as any)?.variants || [];
+           const selectedVariant = selectedVariantId && variants.length ? variants.find(v => v.id === selectedVariantId) : null;
+           return selectedVariant
+             ? ({ ...packageData, price: String(selectedVariant.price), original_price: selectedVariant.original_price ? String(selectedVariant.original_price) : undefined, duration: selectedVariant.duration_days } as any)
+             : (packageData as any);
+         })()}
+         selectedVariant={(() => {
+           const variants: any[] = (packageData as any)?.variants || [];
+           return selectedVariantId && variants.length ? variants.find(v => v.id === selectedVariantId) : null;
+         })()}
          onBookNow={handleBookNow}
          onAddToWishlist={handleAddToWishlist}
          onShare={handleShare}
@@ -265,7 +334,17 @@ export function PackageDetailPage() {
       <BookingChoiceModal
         isOpen={isOpen}
         onClose={onClose}
-        package={packageData}
+        package={(() => {
+          const variants: any[] = (packageData as any)?.variants || [];
+          const selectedVariant = selectedVariantId && variants.length ? variants.find(v => v.id === selectedVariantId) : null;
+          return selectedVariant
+            ? ({ ...packageData, price: String(selectedVariant.price), original_price: selectedVariant.original_price ? String(selectedVariant.original_price) : undefined, duration: selectedVariant.duration_days } as any)
+            : (packageData as any);
+        })()}
+        selectedVariant={(() => {
+          const variants: any[] = (packageData as any)?.variants || [];
+          return selectedVariantId && variants.length ? variants.find(v => v.id === selectedVariantId) : null;
+        })()}
         onFormBooking={() => {
           setShowBookingForm(true);
           onClose();
@@ -276,8 +355,20 @@ export function PackageDetailPage() {
         isOpen={showBookingForm}
         packageId={packageData.id}
         packageName={packageData.name}
-        packagePrice={parseFloat(packageData.price as any)}
-        packageDurationDays={packageData.duration}
+        packagePrice={(() => {
+          if (selectedVariantId && (packageData as any).variants) {
+            const v = (packageData as any).variants.find((vv: any) => vv.id === selectedVariantId);
+            if (v) return parseFloat(String(v.price));
+          }
+          return parseFloat(packageData.price as any);
+        })()}
+        packageDurationDays={(() => {
+          if (selectedVariantId && (packageData as any).variants) {
+            const v = (packageData as any).variants.find((vv: any) => vv.id === selectedVariantId);
+            if (v) return Number(v.duration_days);
+          }
+          return packageData.duration;
+        })()}
         onClose={() => setShowBookingForm(false)}
       />
     </ErrorBoundary>

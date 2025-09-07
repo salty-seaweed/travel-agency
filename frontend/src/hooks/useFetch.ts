@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { apiGet } from '../api';
+import { apiPublicGet } from '../api';
 import type { ApiResponse } from '../types';
 
 interface UseFetchOptions {
@@ -23,7 +23,7 @@ export function useFetch<T>(
     setError(null);
 
     try {
-      const response = await apiGet(endpoint);
+      const response = await apiPublicGet(endpoint);
       const apiResponse = response as ApiResponse<T>;
 
       if (apiResponse.results) {

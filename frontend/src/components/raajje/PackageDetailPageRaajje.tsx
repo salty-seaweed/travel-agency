@@ -275,7 +275,7 @@ function RelatedTours({ tours, currentId }: { tours: any[]; currentId: number })
               <LazyImage 
                 src={tour.images[0].image} 
                 alt={tour.name}
-                className="w-20 h-16 object-cover rounded-lg"
+                className="w-20 h-16 object-contain bg-gray-50 rounded-lg"
               />
             )}
             <div className="flex-1">
@@ -319,7 +319,7 @@ function LastMinuteDeals({ tours, currentId }: { tours: any[]; currentId: number
               <LazyImage 
                 src={tour.images[0].image} 
                 alt={tour.name}
-                className="w-16 h-12 object-cover rounded"
+                className="w-16 h-12 object-contain bg-gray-50 rounded"
               />
             )}
             <div className="flex-1">
@@ -378,7 +378,10 @@ export default function PackageDetailPageRaajje() {
     );
   }
 
-  const price = parseFloat(pkg.price);
+  const hasVariants = Array.isArray((pkg as any).variants) && (pkg as any).variants.length > 0;
+  const price = hasVariants
+    ? Math.min(...((pkg as any).variants as any[]).map(v => parseFloat(String(v.price).replace(/[^0-9.]/g, ''))).filter(n => !isNaN(n)))
+    : parseFloat(pkg.price);
   const totalPrice = tickets * price;
 
   const handleBooking = () => {
@@ -407,7 +410,7 @@ export default function PackageDetailPageRaajje() {
               <LazyImage 
                 src={pkg.images[0].image} 
                 alt={pkg.name} 
-                className="w-full h-full object-cover" 
+                className="w-full h-full object-contain bg-black" 
               />
             ) : (
               <div className="w-full h-full bg-gradient-to-r from-blue-600 to-indigo-600" />

@@ -84,9 +84,10 @@ export function PackageForm({ isOpen, onClose, package: pkg, onSave, onPackageSa
       category: pkg.category || '',
       difficulty_level: pkg.difficulty_level || 'easy',
       
-      // Pricing
+      // Pricing (legacy + variants)
       price: pkg.price || '',
       original_price: pkg.original_price || pkg.price || '',
+      variants: (pkg as any).variants || [],
       discount_percentage: (pkg as any).discount_percentage || 0,
       
       // Duration & Group
@@ -163,6 +164,7 @@ export function PackageForm({ isOpen, onClose, package: pkg, onSave, onPackageSa
       price: '',
       original_price: '',
       discount_percentage: 0,
+      variants: [],
       duration: 1,
       group_size: { min: 1, max: 4, recommended: 2 },
 
@@ -210,11 +212,12 @@ export function PackageForm({ isOpen, onClose, package: pkg, onSave, onPackageSa
   };
 
   const isFormValid = () => {
+    const hasVariants = Array.isArray(form.variants) && form.variants.length > 0;
     const validations = {
       name: form.name.trim(),
       description: form.description.trim(),
-      price: form.price && !isNaN(parseFloat(form.price)) && parseFloat(form.price) > 0,
-      duration: form.duration > 0,
+      price: hasVariants || (form.price && !isNaN(parseFloat(form.price)) && parseFloat(form.price) > 0),
+      duration: hasVariants || form.duration > 0,
       groupSize: form.group_size.min > 0 && form.group_size.max >= form.group_size.min,
       destinations: form.destinations.length > 0,
       experiencesOrActivities: (form.experiences?.length > 0 || form.activities?.length > 0)
@@ -261,6 +264,25 @@ export function PackageForm({ isOpen, onClose, package: pkg, onSave, onPackageSa
 
     try {
       // Transform form data to match backend expectations
+      const hasVariants = Array.isArray(form.variants) && form.variants.length > 0;
+
+      // Determine legacy fields even when variants are present (default or cheapest)
+      const pickDefaultVariant = () => {
+        if (!hasVariants) return null;
+        const explicit = form.variants.find((v: any) => v.is_default);
+        if (explicit) return explicit;
+        const numeric = form.variants
+          .map((v: any) => ({ ...v, _p: parseFloat(String(v.price)) }))
+          .filter((v: any) => !isNaN(v._p));
+        if (numeric.length === 0) return null;
+        return numeric.sort((a: any, b: any) => a._p - b._p)[0];
+      };
+      const defaultVariant = pickDefaultVariant();
+
+      const computedLegacyPrice = hasVariants && defaultVariant ? parseFloat(String(defaultVariant.price)) || 0 : parseFloat(form.price) || 0;
+      const computedLegacyDuration = hasVariants && defaultVariant ? Number(defaultVariant.duration_days || defaultVariant.duration || form.duration || 1) : (form.duration || 1);
+      const computedLegacyOriginal = hasVariants && defaultVariant && defaultVariant.original_price !== undefined && defaultVariant.original_price !== null && String(defaultVariant.original_price) !== '' ? parseFloat(String(defaultVariant.original_price)) : (form.original_price ? parseFloat(form.original_price) : null);
+
       const packageData = {
         ...form,
         // Transform group_size object to individual fields
@@ -277,9 +299,9 @@ export function PackageForm({ isOpen, onClose, package: pkg, onSave, onPackageSa
         what_to_bring: Array.isArray(form.what_to_bring) ? form.what_to_bring : [],
         important_notes: Array.isArray(form.important_notes) ? form.important_notes : [],
         
-        // Convert price fields to numbers
-        price: parseFloat(form.price) || 0,
-        original_price: form.original_price ? parseFloat(form.original_price) : null,
+        // Convert price fields to numbers (always include legacy for compatibility)
+        price: computedLegacyPrice,
+        original_price: computedLegacyOriginal,
         discount_percentage: form.discount_percentage ? parseFloat(form.discount_percentage) : null,
         
         // Format dates properly
@@ -325,6 +347,13 @@ export function PackageForm({ isOpen, onClose, package: pkg, onSave, onPackageSa
         group_size: undefined,
         seasonal_pricing: undefined,
         destinations: undefined, // Using destination_data instead
+        variants_data: (form.variants || []).map((v: any) => ({
+          id: v.id,
+          duration_days: v.duration_days || v.duration,
+          price: v.price,
+          original_price: v.original_price,
+          is_default: !!v.is_default,
+        })),
         
         // Include experiences data
         experiences: form.experiences || [],

@@ -14,7 +14,10 @@ import {
   Text,
   Badge,
   Divider,
+  IconButton,
+  Checkbox,
 } from '@chakra-ui/react';
+import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 interface PricingFormProps {
   form: any;
@@ -22,6 +25,11 @@ interface PricingFormProps {
 }
 
 export function PricingForm({ form, updateForm }: PricingFormProps) {
+  // Derived default price view from variants if present
+  const hasVariants = Array.isArray(form.variants) && form.variants.length > 0;
+  const defaultVariant = hasVariants ? (form.variants.find((v: any) => v.is_default) || form.variants.slice().sort((a: any, b: any) => parseFloat(String(a.price)) - parseFloat(String(b.price)))[0]) : null;
+  const effectiveOriginal = hasVariants && defaultVariant?.original_price ? parseFloat(String(defaultVariant.original_price)) : parseFloat(form.original_price) || 0;
+  const effectiveFinal = hasVariants ? parseFloat(String(defaultVariant?.price || 0)) : (parseFloat(form.price) || 0);
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     
@@ -51,10 +59,10 @@ export function PricingForm({ form, updateForm }: PricingFormProps) {
     });
   };
 
-  const originalPrice = parseFloat(form.original_price) || 0;
+  const originalPrice = effectiveOriginal;
   const discountPercent = parseFloat(form.discount_percentage) || 0;
-  const finalPrice = parseFloat(form.price) || 0;
-  const savings = originalPrice - finalPrice;
+  const finalPrice = effectiveFinal;
+  const savings = Math.max(0, originalPrice - finalPrice);
 
   // Ensure final price is never negative
   const validFinalPrice = Math.max(0, finalPrice);
@@ -62,10 +70,105 @@ export function PricingForm({ form, updateForm }: PricingFormProps) {
 
   return (
     <VStack spacing={8} align="stretch">
-      {/* Basic Pricing */}
+      {/* Variants Pricing */}
       <Box>
         <Text fontSize="lg" fontWeight="semibold" color="gray.700" mb={4}>
-          Basic Pricing
+          Duration-based Pricing (Optional)
+        </Text>
+        <Text fontSize="sm" color="gray.600" mb={4}>
+          Add multiple durations with different prices. If you add variants, they will override the basic price and duration.
+        </Text>
+
+        {/* Header */}
+        <Grid templateColumns={{ base: '1fr', md: '1fr 1fr 1fr auto auto' }} gap={4} mb={2} alignItems="center">
+          <Text fontSize="xs" color="gray.500">Duration (days)</Text>
+          <Text fontSize="xs" color="gray.500">Price</Text>
+          <Text fontSize="xs" color="gray.500">Original Price (optional)</Text>
+          <Text fontSize="xs" color="gray.500">Default</Text>
+          <span />
+        </Grid>
+
+        {/* Rows */}
+        <VStack spacing={3} align="stretch">
+          {(form.variants || []).map((v: any, idx: number) => (
+            <Grid key={v.id || idx} templateColumns={{ base: '1fr', md: '1fr 1fr 1fr auto auto' }} gap={4} alignItems="center">
+              <Input
+                type="number"
+                min={1}
+                value={v.duration_days || v.duration || ''}
+                placeholder="e.g., 3"
+                onChange={(e) => {
+                  const variants = [...(form.variants || [])];
+                  variants[idx] = { ...variants[idx], duration_days: Number(e.target.value) };
+                  updateForm({ variants });
+                }}
+              />
+              <Input
+                type="number"
+                min={0}
+                step="0.01"
+                value={v.price || ''}
+                placeholder="0.00"
+                onChange={(e) => {
+                  const variants = [...(form.variants || [])];
+                  variants[idx] = { ...variants[idx], price: e.target.value };
+                  updateForm({ variants });
+                }}
+              />
+              <Input
+                type="number"
+                min={0}
+                step="0.01"
+                value={v.original_price || ''}
+                placeholder="0.00"
+                onChange={(e) => {
+                  const variants = [...(form.variants || [])];
+                  variants[idx] = { ...variants[idx], original_price: e.target.value };
+                  updateForm({ variants });
+                }}
+              />
+              <Checkbox
+                isChecked={!!v.is_default}
+                onChange={(e) => {
+                  const variants = (form.variants || []).map((vv: any, i: number) => ({ ...vv, is_default: i === idx }));
+                  updateForm({ variants });
+                }}
+              >
+                Default
+              </Checkbox>
+              <IconButton
+                aria-label="Remove"
+                icon={<TrashIcon className="h-4 w-4" /> as any}
+                variant="ghost"
+                onClick={() => {
+                  const variants = [...(form.variants || [])];
+                  variants.splice(idx, 1);
+                  updateForm({ variants });
+                }}
+              />
+            </Grid>
+          ))}
+        </VStack>
+
+        <HStack justify="flex-end" mt={3}>
+          <IconButton
+            aria-label="Add Variant"
+            icon={<PlusIcon className="h-4 w-4" /> as any}
+            onClick={() => {
+              const variants = [...(form.variants || [])];
+              variants.push({ duration_days: (variants[variants.length-1]?.duration_days || 1) + 1, price: '', original_price: '', is_default: variants.length === 0 });
+              updateForm({ variants });
+            }}
+          />
+        </HStack>
+      </Box>
+
+      <Divider />
+
+      {/* Basic Pricing (Default Variant) */}
+      <Box>
+        <Text fontSize="lg" fontWeight="semibold" color="gray.700" mb={4}>
+          Default Pricing
         </Text>
         <Grid templateColumns={{ base: '1fr', lg: '1fr 1fr' }} gap={6}>
           <FormControl isRequired>
@@ -78,7 +181,7 @@ export function PricingForm({ form, updateForm }: PricingFormProps) {
               </InputLeftElement>
               <Input
                 name="original_price"
-                value={form.original_price}
+                value={hasVariants ? (defaultVariant?.original_price ?? '') : form.original_price}
                 onChange={handleChange}
                 placeholder="0.00"
                 borderRadius="lg"
@@ -86,7 +189,7 @@ export function PricingForm({ form, updateForm }: PricingFormProps) {
                 type="number"
                 min="0"
                 step="0.01"
-                isInvalid={!form.original_price || parseFloat(form.original_price) <= 0}
+                isInvalid={!hasVariants && (!form.original_price || parseFloat(form.original_price) <= 0)}
               />
             </InputGroup>
           </FormControl>
@@ -117,7 +220,7 @@ export function PricingForm({ form, updateForm }: PricingFormProps) {
 
         <FormControl mt={4}>
           <FormLabel fontWeight="semibold" color="gray.700">
-            Final Price
+            Final Price (auto)
           </FormLabel>
           <InputGroup size="lg">
             <InputLeftElement pointerEvents="none" color="gray.500">
@@ -125,7 +228,7 @@ export function PricingForm({ form, updateForm }: PricingFormProps) {
             </InputLeftElement>
             <Input
               name="price"
-              value={form.price}
+              value={hasVariants ? (defaultVariant?.price ?? '') : form.price}
               onChange={handleChange}
               placeholder="0.00"
               borderRadius="lg"
@@ -134,7 +237,7 @@ export function PricingForm({ form, updateForm }: PricingFormProps) {
               min="0"
               step="0.01"
               bg="gray.50"
-              isReadOnly
+              isReadOnly={!hasVariants}
             />
           </InputGroup>
           <Text fontSize="xs" color="gray.500" mt={1}>

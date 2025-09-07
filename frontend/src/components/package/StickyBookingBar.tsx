@@ -33,6 +33,7 @@ interface StickyBookingBarProps {
   onAddToWishlist: () => void;
   onShare: () => void;
   isWishlisted?: boolean;
+  selectedVariant?: any;
 }
 
 export function StickyBookingBar({
@@ -41,6 +42,7 @@ export function StickyBookingBar({
   onAddToWishlist,
   onShare,
   isWishlisted = false,
+  selectedVariant,
 }: StickyBookingBarProps) {
   const isMobile = useBreakpointValue({ base: true, md: false });
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -84,10 +86,14 @@ export function StickyBookingBar({
           {/* Price */}
           <VStack align="start" spacing={0}>
             {(() => {
-              const currentPrice = parseFloat(typeof packageData.price === 'string' ? packageData.price.replace(/[^0-9.]/g, '') : packageData.price);
-              const originalPrice = packageData.original_price && packageData.original_price !== null && packageData.original_price !== 'null' && packageData.original_price !== '0' && packageData.original_price !== '0.00'
-                ? parseFloat(packageData.original_price.replace(/[^0-9.]/g, ''))
-                : null;
+              const currentPrice = selectedVariant
+                ? parseFloat(String(selectedVariant.price))
+                : parseFloat(typeof packageData.price === 'string' ? packageData.price.replace(/[^0-9.]/g, '') : (packageData.price as any));
+              const originalPrice = selectedVariant && selectedVariant.original_price
+                ? parseFloat(String(selectedVariant.original_price))
+                : (packageData.original_price && packageData.original_price !== null && packageData.original_price !== 'null' && packageData.original_price !== '0' && packageData.original_price !== '0.00'
+                  ? parseFloat(String(packageData.original_price).replace(/[^0-9.]/g, ''))
+                  : null);
 
               return (
                 <>
@@ -99,6 +105,9 @@ export function StickyBookingBar({
                   <Text fontSize="lg" fontWeight="bold" color="purple.600">
                     {formatPrice(currentPrice)}
                   </Text>
+                  {!selectedVariant && (packageData as any).variants && (packageData as any).variants.length > 0 && (
+                    <Text fontSize="9px" color="gray.500" textTransform="uppercase">Starting from</Text>
+                  )}
                   {originalPrice && originalPrice !== currentPrice && (
                     <Text fontSize="xs" color="green.600" fontWeight="semibold">
                       Save {Math.round(((originalPrice - currentPrice) / originalPrice) * 100)}%

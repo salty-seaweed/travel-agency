@@ -59,7 +59,7 @@ export const LazyImage: React.FC<LazyImageProps> = React.memo(({
 
   // Load image when in view
   useEffect(() => {
-    if (!isInView || !src) return;
+    if (!isInView || !src || src.trim() === '') return;
 
     const img = new Image();
     
@@ -163,7 +163,7 @@ export const LazyImage: React.FC<LazyImageProps> = React.memo(({
         />
       )}
       <img
-        src={imageSrc}
+        src={imageSrc || undefined}
         alt={alt}
         style={{
           width: '100%',

@@ -21,6 +21,7 @@ import {
   MapPinIcon
 } from '@heroicons/react/24/outline';
 import { usePackages, useDestinations, useFeaturedExperiences, useWhatsApp, usePageHero } from '../hooks/useQueries';
+import { useImagePreloader } from '../hooks/useImagePreloader';
 import { LoadingSpinner } from './LoadingSpinner';
 import { PackageCard } from './ui/PackageCard';
 import type { Package as ApiPackage } from '../types';
@@ -127,6 +128,18 @@ export function PackagesPage() {
   const { data: destinations } = useDestinations();
   const { data: featuredExperiences } = useFeaturedExperiences();
   const { data: hero } = usePageHero('packages');
+  
+  // Preload images for better performance (disabled to prevent infinite loops)
+  const { isPreloading, preloadProgress } = useImagePreloader({
+    packages: apiPackages,
+    enablePreloading: false, // Disabled to prevent infinite loops with local images
+    onProgress: (progress) => {
+      // Optional: Show preloading progress
+      if (progress === 100) {
+        console.log('Image preloading completed');
+      }
+    }
+  });
   const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');

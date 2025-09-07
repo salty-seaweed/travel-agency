@@ -8,6 +8,7 @@ import { whatsappBooking } from '../../services/whatsapp-booking';
 import { BookingChoiceModal } from '../BookingChoiceModal';
 import { useTranslation } from '../../i18n';
 import { useCurrency } from '../../contexts/CurrencyContext';
+import { SmartLazyImage } from '../SmartLazyImage';
 
 interface PackageCardProps {
   package: Package;
@@ -23,7 +24,7 @@ export function PackageCard({ package: pkg, className = '', loading = false }: P
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
 
   // Helper function to get translated content based on current language
-  const getTranslatedContent = (field: string, fallback: string = ''): string => {
+  const getTranslatedContent = React.useCallback((field: string, fallback: string = ''): string => {
     const currentLang = i18n.language;
     const translatedField = `${field}_${currentLang}` as keyof Package;
     
@@ -34,24 +35,24 @@ export function PackageCard({ package: pkg, className = '', loading = false }: P
     
     // Fallback to original field
     return (pkg[field as keyof Package] as string) || fallback;
-  };
+  }, [pkg, i18n.language]);
 
   // Helper functions to safely access nested properties
-  const getDestinationsString = (): string => {
+  const getDestinationsString = React.useCallback((): string => {
     if (pkg.destinations && pkg.destinations.length > 0) {
       return pkg.destinations.join(', ');
     }
     return t('packageCard.defaultDestination', 'Maldives Paradise');
-  };
+  }, [pkg.destinations, t]);
 
-  const getHighlightsList = (): string[] => {
+  const getHighlightsList = React.useCallback((): string[] => {
     if (pkg.highlights && pkg.highlights.length > 0) {
       return pkg.highlights;
     }
     return [t('packageCard.defaultHighlights.allInclusive', 'All-inclusive'), t('packageCard.defaultHighlights.waterActivities', 'Water activities'), t('packageCard.defaultHighlights.localTours', 'Local tours')];
-  };
+  }, [pkg.highlights, t]);
 
-  const getImageUrl = (): string => {
+  const getImageUrl = React.useCallback((): string => {
     if (pkg.images && pkg.images.length > 0) {
       return pkg.images[0].image;
     }
@@ -62,7 +63,7 @@ export function PackageCard({ package: pkg, className = '', loading = false }: P
       'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=600&h=400&fit=crop&crop=center&auto=format&q=80',
     ];
     return maldivesImages[Math.floor(Math.random() * maldivesImages.length)];
-  };
+  }, [pkg.images]);
 
   const highlights = getHighlightsList();
   const destinationsString = getDestinationsString();
@@ -96,30 +97,24 @@ export function PackageCard({ package: pkg, className = '', loading = false }: P
 
   return (
     <article className={`group bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-500 transform hover:-translate-y-1 border border-gray-100 ${className}`}>
-      {/* Enhanced Image Container with Error Handling */}
-      <div className="relative h-64 overflow-hidden bg-gray-100">
-        {!imageError ? (
-          <img
-            src={imageUrl}
-            alt={`${pkg.name} - ${destinationsString}`}
-            className={`w-full h-full object-contain bg-gray-50 transition-all duration-500 ${
-              imageLoaded ? 'opacity-100 group-hover:scale-105' : 'opacity-0'
-            }`}
-            loading="lazy"
-            onLoad={() => setImageLoaded(true)}
-            onError={() => {
-              setImageError(true);
-              setImageLoaded(true);
-            }}
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-100 to-indigo-100">
-            <div className="text-center">
-              <CameraIcon className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-              <p className="text-gray-500 text-sm">{t('packageCard.imageUnavailable', 'Image unavailable')}</p>
-            </div>
-          </div>
-        )}
+      {/* Smart Image Container */}
+      <div className="relative h-64 overflow-hidden">
+        <SmartLazyImage
+          src={imageUrl}
+          alt={`${pkg.name} - ${destinationsString}`}
+          width="100%"
+          height="100%"
+          objectFit="cover"
+          useCase="card"
+          enableSmartConversion={true}
+          showLoadingSkeleton={true}
+          fallbackSrc={imageUrl} // Use the same image as fallback
+          onLoad={() => setImageLoaded(true)}
+          onError={() => {
+            setImageError(true);
+            setImageLoaded(true);
+          }}
+        />
         
         {/* Simplified overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -128,11 +123,17 @@ export function PackageCard({ package: pkg, className = '', loading = false }: P
         <div className="absolute top-4 right-4">
           <div className="bg-white/95 backdrop-blur-sm rounded-2xl px-4 py-3 shadow-lg">
             {(() => {
-              // Parse prices safely
-              const currentPrice = parseFloat(typeof pkg.price === 'string' ? pkg.price.replace(/[^0-9.]/g, '') : pkg.price);
-              const originalPrice = pkg.original_price && pkg.original_price !== null && pkg.original_price !== 'null' && pkg.original_price !== '0' && pkg.original_price !== '0.00'
-                ? parseFloat((pkg.original_price as string).replace(/[^0-9.]/g, ''))
-                : null;
+              // Determine starting price from variants if available
+              const hasVariants = Array.isArray((pkg as any).variants) && (pkg as any).variants.length > 0;
+              const variantPrices = hasVariants ? (pkg as any).variants.map((v: any) => parseFloat(String(v.price).replace(/[^0-9.]/g, ''))) : [];
+              const variantOriginals = hasVariants ? (pkg as any).variants.map((v: any) => v.original_price ? parseFloat(String(v.original_price).replace(/[^0-9.]/g, '')) : null) : [];
+              const minPrice = hasVariants ? Math.min(...variantPrices.filter(p => !isNaN(p))) : parseFloat(String(pkg.price).replace(/[^0-9.]/g, ''));
+              const currentPrice = minPrice;
+              const originalPrice = hasVariants ? (variantOriginals.filter((o): o is number => typeof o === 'number' && !isNaN(o)).sort((a,b)=>a-b)[0] || null) : (
+                pkg.original_price && pkg.original_price !== null && pkg.original_price !== 'null' && pkg.original_price !== '0' && pkg.original_price !== '0.00'
+                  ? parseFloat((pkg.original_price as string).replace(/[^0-9.]/g, ''))
+                  : null
+              );
               const discountPercent = originalPrice && originalPrice > currentPrice
                 ? Math.round(((originalPrice - currentPrice) / originalPrice) * 100)
                 : 0;
@@ -147,6 +148,9 @@ export function PackageCard({ package: pkg, className = '', loading = false }: P
                   <div className="text-2xl font-bold text-green-600">
                     {formatPrice(currentPrice)}
                   </div>
+                  {hasVariants && (
+                    <div className="text-[10px] text-gray-500 font-medium text-right uppercase tracking-wide">Starting from</div>
+                  )}
                   {discountPercent > 0 && (
                     <div className="text-xs text-green-600 font-semibold text-right">{discountPercent}% OFF</div>
                   )}
@@ -181,7 +185,15 @@ export function PackageCard({ package: pkg, className = '', loading = false }: P
         <div className="grid grid-cols-3 gap-3 mb-4 text-sm text-gray-600">
           <div className="flex items-center gap-2">
             <CalendarIcon className="h-4 w-4 text-blue-500 flex-shrink-0" aria-hidden="true" />
-            <span className="font-medium text-xs">{t('packageCard.duration', '{{count}} days', { count: pkg.duration })}</span>
+            <span className="font-medium text-xs">
+              {(() => {
+                const hasVariants = Array.isArray((pkg as any).variants) && (pkg as any).variants.length > 0;
+                if (!hasVariants) return t('packageCard.duration', '{{count}} days', { count: Number(pkg.duration) as any });
+                const durations = Array.from(new Set((pkg as any).variants.map((v: any) => Number(v.duration_days)).filter((n: any) => !isNaN(n)))).sort((a: number,b: number)=>a-b);
+                if (durations.length === 1) return t('packageCard.duration', '{{count}} days', { count: Number(durations[0]) as any });
+                return `${durations[0]}-${durations[durations.length-1]} days`;
+              })()}
+            </span>
           </div>
           <div className="flex items-center gap-2">
             <UsersIcon className="h-4 w-4 text-purple-500 flex-shrink-0" aria-hidden="true" />

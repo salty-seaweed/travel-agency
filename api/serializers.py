@@ -10,7 +10,7 @@ from .models import (
     TransferContactMethod, TransferBookingStep, TransferBenefit, TransferPricingFactor, TransferContent, FerrySchedule,
     HomepageHero, HomepageFeature, HomepageTestimonial, HomepageStatistic, HomepageCTASection, HomepageSettings, HomepageContent, HomepageImage,
     PageHero, Language, TranslationKey, Translation, CulturalContent, RegionalSettings, LocalizedPage, LocalizedFAQ,
-    AboutPageContent, AboutPageValue, AboutPageStatistic, FeaturedDestination
+    AboutPageContent, AboutPageValue, AboutPageStatistic, FeaturedDestination, PackageVariant
 )
 
 class FlexibleImageField(serializers.ImageField):
@@ -149,7 +149,7 @@ class ExperienceSerializer(serializers.ModelSerializer):
     def validate(self, data):
         """Custom validation for experience data"""
         # Ensure required fields are present (check internal keys)
-        required_internal_fields = ['name', 'description', 'experience_type', 'duration', 'price', 'destination']
+        required_internal_fields = ['name', 'description', 'experience_type', 'duration', 'price']
         for field in required_internal_fields:
             if not data.get(field):
                 raise serializers.ValidationError(f"{field} is required")
@@ -315,12 +315,18 @@ class PackageDestinationSerializer(serializers.ModelSerializer):
         model = PackageDestination
         fields = '__all__'
 
+class PackageVariantSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PackageVariant
+        fields = '__all__'
+
 class PackageSerializerI18n(serializers.ModelSerializer):
     images = PackageImageSerializer(many=True, read_only=True)
     itinerary = PackageItinerarySerializer(many=True, read_only=True)
     inclusions = PackageInclusionSerializer(many=True, read_only=True)
     activities = PackageActivitySerializer(many=True, read_only=True)
     destinations = PackageDestinationSerializer(many=True, read_only=True)
+    variants = PackageVariantSerializer(many=True, read_only=True)
     experiences = serializers.SerializerMethodField(read_only=True)
     # Accept experiences from the admin form and map them to PackageActivity(category='experience')
     experiences_write = serializers.ListField(write_only=True, required=False, source='experiences')
@@ -336,7 +342,14 @@ class PackageSerializerI18n(serializers.ModelSerializer):
         print(f"PackageSerializerI18n.validate data: {data}")
 
         # Validate required fields
-        required_fields = ['name', 'description', 'price', 'duration', 'group_size_min', 'group_size_max']
+        # Allow variants_data to replace top-level price/duration on create/update
+        initial = getattr(self, 'initial_data', {}) or {}
+        variants_payload = initial.get('variants_data') or initial.get('variants') or data.get('variants_data')
+        has_variants_payload = bool(variants_payload)
+
+        base_required_fields = ['name', 'description', 'group_size_min', 'group_size_max']
+        legacy_price_fields = ['price', 'duration']
+        required_fields = base_required_fields + ([] if has_variants_payload else legacy_price_fields)
         errors = {}
 
         for field in required_fields:
@@ -380,6 +393,7 @@ class PackageSerializerI18n(serializers.ModelSerializer):
         itinerary_data = validated_data.pop('itinerary_data', [])
         inclusions_data = validated_data.pop('inclusions_data', [])
         activities_data = validated_data.pop('activities_data', [])
+        variants_data = validated_data.pop('variants_data', [])
         # Accept experiences even if not in validated_data (because 'experiences' is read-only field)
         experiences_data = validated_data.pop('experiences', [])
         if not experiences_data:
@@ -387,7 +401,79 @@ class PackageSerializerI18n(serializers.ModelSerializer):
                 experiences_data = self.initial_data.get('experiences', [])
             except Exception:
                 experiences_data = []
+        # If variants provided, set legacy fields from default/cheapest to keep model valid
+        if variants_data and (('price' not in validated_data) or ('duration' not in validated_data)):
+            try:
+                chosen = None
+                for v in variants_data:
+                    if v.get('is_default'):
+                        chosen = v
+                        break
+                if not chosen and variants_data:
+                    chosen = sorted(
+                        [v for v in variants_data if v.get('price') not in (None, '')],
+                        key=lambda x: float(x.get('price'))
+                    )[0]
+                if chosen:
+                    validated_data.setdefault('price', chosen.get('price'))
+                    validated_data.setdefault('duration', int(chosen.get('duration_days') or chosen.get('duration') or 1))
+                    if chosen.get('original_price') not in (None, '', 'null'):
+                        validated_data.setdefault('original_price', chosen.get('original_price'))
+            except Exception as e:
+                print(f"Failed to set legacy fields from variants pre-create: {e}")
+
         package = super().create(validated_data)
+
+        # Create variants
+        try:
+            provided_variants = variants_data or getattr(self, 'initial_data', {}).get('variants_data') or getattr(self, 'initial_data', {}).get('variants') or []
+        except Exception:
+            provided_variants = []
+
+        created_variants = []
+        if provided_variants:
+            default_index = None
+            for idx, v in enumerate(provided_variants):
+                try:
+                    duration_days = v.get('duration_days') or v.get('duration') or v.get('duration_in_days')
+                    price = v.get('price')
+                    original_price = v.get('original_price')
+                    is_default = bool(v.get('is_default'))
+                    if duration_days is None or price in (None, ''):
+                        continue
+                    variant = PackageVariant.objects.create(
+                        package=package,
+                        duration_days=int(duration_days),
+                        price=price,
+                        original_price=original_price if original_price not in (None, '', 'null') else None,
+                        is_default=is_default,
+                    )
+                    created_variants.append(variant)
+                    if is_default:
+                        default_index = idx
+                except Exception as e:
+                    print(f"Variant creation error: {e}")
+
+            # Ensure exactly one default
+            if created_variants:
+                if default_index is None:
+                    # Pick the lowest price as default
+                    cheapest = min(created_variants, key=lambda x: float(x.price))
+                    PackageVariant.objects.filter(pk__in=[v.pk for v in created_variants]).update(is_default=False)
+                    cheapest.is_default = True
+                    cheapest.save(update_fields=['is_default'])
+        else:
+            # Fallback to legacy single price/duration
+            try:
+                PackageVariant.objects.create(
+                    package=package,
+                    duration_days=int(package.duration or 1),
+                    price=package.price,
+                    original_price=package.original_price,
+                    is_default=True,
+                )
+            except Exception as e:
+                print(f"Default variant creation error: {e}")
 
         # Create PackageDestination objects with robust Location handling
         # Accept either a valid Location ID, a Destination ID (fallback), or raw location fields
@@ -529,12 +615,13 @@ class PackageSerializerI18n(serializers.ModelSerializer):
             )
 
         return package
-    
+
     def update(self, instance, validated_data):
         destination_data = validated_data.pop('destination_data', [])
         itinerary_data = validated_data.pop('itinerary_data', None)
         inclusions_data = validated_data.pop('inclusions_data', None)
         activities_data = validated_data.pop('activities_data', None)
+        variants_data = validated_data.pop('variants_data', None)
         experiences_data = validated_data.pop('experiences', None)
         if experiences_data is None:
             try:
@@ -542,6 +629,74 @@ class PackageSerializerI18n(serializers.ModelSerializer):
             except Exception:
                 experiences_data = None
         package = super().update(instance, validated_data)
+
+        # Handle variants upsert if provided (from validated_data or initial_data)
+        if variants_data is None:
+            try:
+                variants_data = self.initial_data.get('variants_data') or self.initial_data.get('variants')
+            except Exception:
+                variants_data = None
+
+        if variants_data is not None:
+            default_set = False
+            for v in variants_data:
+                try:
+                    vid = v.get('id')
+                    payload = {
+                        'duration_days': int(v.get('duration_days') or v.get('duration') or 0),
+                        'price': v.get('price'),
+                        'original_price': v.get('original_price') if v.get('original_price') not in (None, '', 'null') else None,
+                        'is_default': bool(v.get('is_default')),
+                    }
+                    if not payload['duration_days'] or payload['price'] in (None, ''):
+                        continue
+                    if vid:
+                        try:
+                            variant = PackageVariant.objects.get(pk=vid, package=package)
+                            for key, value in payload.items():
+                                setattr(variant, key, value)
+                            variant.save()
+                        except PackageVariant.DoesNotExist:
+                            PackageVariant.objects.create(package=package, **payload)
+                    else:
+                        PackageVariant.objects.create(package=package, **payload)
+                    if payload['is_default']:
+                        default_set = True
+                except Exception as e:
+                    print(f"Variant upsert error: {e}")
+
+            # Normalize exactly one default and sync legacy fields
+            try:
+                pkg_variants = list(package.variants.all())
+                if pkg_variants:
+                    if not default_set:
+                        cheapest = min(pkg_variants, key=lambda x: float(x.price))
+                        package.variants.update(is_default=False)
+                        cheapest.is_default = True
+                        cheapest.save(update_fields=['is_default'])
+                    else:
+                        defaults = [v for v in pkg_variants if v.is_default]
+                        if len(defaults) > 1:
+                            keep = min(defaults, key=lambda x: float(x.price))
+                            package.variants.exclude(pk=keep.pk).update(is_default=False)
+
+                    # Sync legacy fields on Package to default variant for backward compatibility
+                    default_variant = next((v for v in package.variants.all() if v.is_default), None)
+                    if default_variant:
+                        changes = []
+                        if package.price != default_variant.price:
+                            package.price = default_variant.price
+                            changes.append('price')
+                        if package.duration != default_variant.duration_days:
+                            package.duration = default_variant.duration_days
+                            changes.append('duration')
+                        if (package.original_price or None) != (default_variant.original_price or None):
+                            package.original_price = default_variant.original_price
+                            changes.append('original_price')
+                        if changes:
+                            package.save(update_fields=changes)
+            except Exception as e:
+                print(f"Variant default normalization/sync error: {e}")
         
         # Clear existing destinations and create new ones
         if destination_data:

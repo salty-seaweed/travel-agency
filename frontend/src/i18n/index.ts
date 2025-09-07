@@ -57,7 +57,7 @@ i18n
     },
     lng: getDefaultLanguage(),
     fallbackLng: 'en',
-    debug: import.meta.env.DEV,
+    debug: false, // Disable debug to prevent infinite loops
     
     interpolation: {
       escapeValue: false, // React already escapes values

@@ -24,6 +24,7 @@ import {
   PhotoIcon,
 } from '@heroicons/react/24/outline';
 import { LazyImage } from '../LazyImage';
+import { SmartLazyImage } from '../SmartLazyImage';
 import type { PackageImage } from '../../types';
 
 interface PackageImageGalleryProps {
@@ -91,13 +92,16 @@ export function PackageImageGallery({ images, packageName }: PackageImageGallery
           _hover={{ transform: 'scale(1.02)' }}
           transition="transform 0.2s"
         >
-          <LazyImage
+          <SmartLazyImage
             src={featuredImage.image_url || featuredImage.image}
             alt={`${packageName} - Image ${selectedImageIndex + 1}`}
-            w="full"
-            h="full"
-            objectFit="contain"
-            bg="gray.50"
+            width="100%"
+            height="100%"
+            objectFit="cover"
+            borderRadius="12px"
+            useCase="hero"
+            enableSmartConversion={true}
+            showLoadingSkeleton={true}
             fallbackSrc="/placeholder-image.jpg"
           />
           
@@ -188,13 +192,16 @@ export function PackageImageGallery({ images, packageName }: PackageImageGallery
               transition="all 0.2s"
               onClick={() => handleImageClick(index)}
             >
-              <LazyImage
+              <SmartLazyImage
                 src={image.image_url || image.image}
                 alt={`${packageName} - Thumbnail ${index + 1}`}
-                h="80px"
-                w="full"
-                objectFit="contain"
-                bg="gray.50"
+                width="100%"
+                height="80px"
+                objectFit="cover"
+                borderRadius="6px"
+                useCase="thumbnail"
+                enableSmartConversion={true}
+                showLoadingSkeleton={true}
                 fallbackSrc="/placeholder-image.jpg"
               />
               
@@ -237,12 +244,15 @@ export function PackageImageGallery({ images, packageName }: PackageImageGallery
               onKeyDown={handleKeyDown}
               tabIndex={0}
             >
-              <LazyImage
+              <SmartLazyImage
                 src={featuredImage.image_url || featuredImage.image}
                 alt={`${packageName} - Full size ${selectedImageIndex + 1}`}
-                maxW="full"
-                maxH="full"
+                width="100%"
+                height="100%"
                 objectFit="contain"
+                useCase="original"
+                enableSmartConversion={true}
+                showLoadingSkeleton={true}
                 fallbackSrc="/placeholder-image.jpg"
               />
               

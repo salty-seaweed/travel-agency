@@ -42,6 +42,8 @@ import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
 import { useTranslation } from '../../../i18n';
 import type { Package as ApiPackage } from '../../../types';
 import { useWhatsApp } from '../../../hooks/useQueries';
+import { SmartLazyImage } from '../../SmartLazyImage';
+import { useImagePreloader } from '../../../hooks/useImagePreloader';
 
 interface Props { packages?: ApiPackage[]; }
 
@@ -128,6 +130,12 @@ export const ExperiencesTrendingDeals: React.FC<Props> = ({ packages = [] }) => 
     [packages]
   );
 
+  // Preload images for better performance
+  const { isPreloading } = useImagePreloader({
+    packages: topPackages,
+    enablePreloading: false // Disabled to prevent infinite loops with local images
+  });
+
   const toggleWishlist = (id: number) => {
     setWishlist((prev) => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
   };
@@ -184,15 +192,18 @@ export const ExperiencesTrendingDeals: React.FC<Props> = ({ packages = [] }) => 
                   h="full"
                 >
                   <Box position="relative" h="250px" flexShrink={0}>
-                    <Image
+                    <SmartLazyImage
                       src={pkg.image}
                       alt={pkg.name}
-                      w="full"
-                      h="full"
-                      objectFit="contain"
-                      bg="gray.50"
+                      width="100%"
+                      height="100%"
+                      objectFit="cover"
+                      useCase="card"
+                      enableSmartConversion={true}
+                      showLoadingSkeleton={true}
                     />
-                    <Box position="absolute" top={0} left={0} right={0} bottom={0} bg="blackAlpha.400" />
+                    {/* Subtle overlay for better text readability */}
+                    <Box position="absolute" top={0} left={0} right={0} bottom={0} bg="blackAlpha.200" />
 
                     {/* Package Badges */}
                     <VStack position="absolute" top={4} left={4} align="start" spacing={2}>

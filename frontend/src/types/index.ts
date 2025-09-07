@@ -178,8 +178,17 @@ export interface Amenity extends BaseEntity {
 export interface PackageImage extends BaseEntity {
   package: number;
   image: string;
+  image_url?: string;
   caption?: string;
   is_featured?: boolean;
+}
+
+export interface PackageVariant extends BaseEntity {
+  package: number;
+  duration_days: number;
+  price: string;
+  original_price?: string | null;
+  is_default: boolean;
 }
 
 export interface PackageItinerary extends BaseEntity {
@@ -255,6 +264,7 @@ export interface Package extends BaseEntity {
   price: string;
   original_price?: string;
   duration: number;
+  variants?: PackageVariant[];
   images?: PackageImage[];
   is_featured: boolean;
   start_date?: string;

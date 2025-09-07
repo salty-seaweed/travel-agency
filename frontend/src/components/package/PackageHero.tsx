@@ -42,7 +42,7 @@ export function PackageHero({ package: pkg, onBookNow, onWhatsAppInquiry }: Pack
           <LazyImage 
             src={pkg.images[0].image} 
             alt={pkg.name} 
-            className="w-full h-full object-cover" 
+            className="w-full h-full object-contain bg-black" 
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-r from-blue-600 to-indigo-600" />
@@ -125,7 +125,7 @@ export function PackageHero({ package: pkg, onBookNow, onWhatsAppInquiry }: Pack
                   <UsersIcon className="h-6 w-6" />
                   {pkg.group_size?.min}-{pkg.group_size?.max} people
                 </span>
-                                 <span className="flex items-center gap-3">
+                 <span className="flex items-center gap-3">
                    <MapPinIcon className="h-6 w-6" />
                    {pkg.destinations?.length || 1} islands
                  </span>

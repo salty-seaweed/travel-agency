@@ -77,7 +77,7 @@ export function PackageItinerary({ itinerary }: PackageItineraryProps) {
             const colorScheme = getDayColor(dayNumber);
             
             return (
-              <AccordionItem key={index} border="1px solid" borderColor="gray.200" borderRadius="md" mb={3}>
+              <AccordionItem key={`day-${dayNumber}-${day.title || ''}`} border="1px solid" borderColor="gray.200" borderRadius="md" mb={3}>
                 <AccordionButton
                   py={4}
                   _hover={{ bg: `${colorScheme}.50` }}
@@ -126,7 +126,7 @@ export function PackageItinerary({ itinerary }: PackageItineraryProps) {
                           </HStack>
                           <List spacing={2}>
                             {day.activities.map((activity, aIndex) => (
-                              <ListItem key={aIndex} fontSize="sm" color="gray.600">
+                              <ListItem key={`act-${dayNumber}-${aIndex}`} fontSize="sm" color="gray.600">
                                 <ListIcon as={CheckCircleIcon} color={`${colorScheme}.500`} />
                                 {activity}
                               </ListItem>
@@ -146,7 +146,7 @@ export function PackageItinerary({ itinerary }: PackageItineraryProps) {
                           </HStack>
                           <List spacing={2}>
                             {day.experience_details.map((exp, eIndex) => (
-                              <ListItem key={eIndex} fontSize="sm" color="gray.700">
+                              <ListItem key={`exp-${dayNumber}-${eIndex}`} fontSize="sm" color="gray.700">
                                 <Popover placement="bottom-start" trigger="hover" openDelay={200} closeDelay={100}>
                                   <PopoverTrigger>
                                     <Button variant="ghost" size="sm" p={0} height="auto" _hover={{ bg: 'transparent' }}>
@@ -202,7 +202,7 @@ export function PackageItinerary({ itinerary }: PackageItineraryProps) {
                           </HStack>
                           <List spacing={2}>
                             {day.meals.map((meal, mIndex) => (
-                              <ListItem key={mIndex} fontSize="sm" color="gray.600">
+                              <ListItem key={`meal-${dayNumber}-${mIndex}`} fontSize="sm" color="gray.600">
                                 <ListIcon as={CheckCircleIcon} color="orange.500" />
                                 {meal}
                               </ListItem>

@@ -201,7 +201,11 @@ async function handleNavigation(request) {
     
     // Serve offline page
     const offlinePage = await caches.match('/offline.html');
-    return offlinePage || new Response('Offline', { status: 503 });
+    return offlinePage || new Response('Offline', {
+      status: 503,
+      statusText: 'Service Unavailable',
+      headers: { 'Content-Type': 'text/plain' }
+    });
   }
 }
 

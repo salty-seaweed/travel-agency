@@ -96,7 +96,7 @@ class Experience(models.Model):
     duration = models.CharField(max_length=50, help_text="e.g., '2 hours', 'Full day'")
     price = models.DecimalField(max_digits=10, decimal_places=2)
     currency = models.CharField(max_length=3, default='USD')
-    destination = models.ForeignKey(Destination, on_delete=models.CASCADE, related_name='experiences')
+    destination = models.ForeignKey(Destination, on_delete=models.CASCADE, related_name='experiences', null=True, blank=True)
     image = models.ImageField(upload_to='experiences/', null=True, blank=True)
     is_featured = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
@@ -241,6 +241,23 @@ class Package(models.Model):
     
     def __str__(self):
         return self.name
+
+class PackageVariant(models.Model):
+    package = models.ForeignKey(Package, on_delete=models.CASCADE, related_name='variants')
+    duration_days = models.PositiveIntegerField(help_text="Duration in days")
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    original_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    is_default = models.BooleanField(default=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['duration_days', 'price']
+        unique_together = ['package', 'duration_days']
+
+    def __str__(self):
+        return f"{self.package.name} - {self.duration_days} days"
 
 class PackageItinerary(models.Model):
     package = models.ForeignKey(Package, on_delete=models.CASCADE, related_name='itinerary')
