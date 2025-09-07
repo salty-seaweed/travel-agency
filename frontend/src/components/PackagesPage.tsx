@@ -89,6 +89,7 @@ interface LocalPackage {
   description: string;
   price: number;
   original_price?: string | null;
+  pricing_type?: 'per_person' | 'per_couple' | 'per_room' | 'per_group';
   duration: string;
   destinations: any[];
   highlights: string[];
@@ -108,6 +109,7 @@ const convertApiPackageToCardFormat = (apiPackage: ApiPackage): LocalPackage => 
     description: apiPackage.description,
     price: parseFloat(apiPackage.price),
     original_price: apiPackage.original_price || null,
+    pricing_type: apiPackage.pricing_type || 'per_person',
     duration: apiPackage.duration.toString(),
     destinations: apiPackage.destinations || [],
     highlights: apiPackage.highlights || [],
@@ -742,9 +744,13 @@ Can you help me finalize this package?`;
                                 )}
                               </VStack>
                               <VStack align="end" spacing={0}>
-                                <Text fontSize="sm" color="gray-500">{t('packages.card.totalFor', 'Total for 2')}</Text>
+                                {pkg.pricing_type === 'per_person' && (
+                                  <Text fontSize="sm" color="gray-500">
+                                    {t('packages.card.totalFor', 'Total for 2')}
+                                  </Text>
+                                )}
                                 <Text fontSize="lg" fontWeight="semibold" color="gray-700">
-                                  {formatPrice(discountedPrice * 2)}
+                                  {formatPrice(pkg.pricing_type === 'per_person' ? discountedPrice * 2 : discountedPrice)}
                                 </Text>
                               </VStack>
                             </HStack>

@@ -99,8 +99,8 @@ class PackageDestinationInline(admin.TabularInline):
 
 @admin.register(Package)
 class PackageAdmin(admin.ModelAdmin):
-    list_display = ('name', 'price', 'is_featured', 'start_date', 'end_date')
-    list_filter = ('is_featured', 'category', 'difficulty_level')
+    list_display = ('name', 'price', 'pricing_type', 'is_featured', 'start_date', 'end_date')
+    list_filter = ('is_featured', 'category', 'difficulty_level', 'pricing_type')
     search_fields = ('name', 'description', 'highlights')
     inlines = [PackageDestinationInline]
     fieldsets = (
@@ -108,7 +108,7 @@ class PackageAdmin(admin.ModelAdmin):
             'fields': ('name', 'description', 'detailed_description', 'highlights', 'category', 'difficulty_level')
         }),
         ('Pricing & Duration', {
-            'fields': ('price', 'original_price', 'discount_percentage', 'duration')
+            'fields': ('price', 'original_price', 'discount_percentage', 'pricing_type', 'duration')
         }),
         ('Group Size', {
             'fields': ('group_size_min', 'group_size_max', 'group_size_recommended')

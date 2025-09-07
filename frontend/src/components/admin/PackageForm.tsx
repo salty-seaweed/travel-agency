@@ -87,6 +87,7 @@ export function PackageForm({ isOpen, onClose, package: pkg, onSave, onPackageSa
       // Pricing (legacy + variants)
       price: pkg.price || '',
       original_price: pkg.original_price || pkg.price || '',
+      pricing_type: (pkg as any).pricing_type || 'per_person',
       variants: (pkg as any).variants || [],
       discount_percentage: (pkg as any).discount_percentage || 0,
       
@@ -163,6 +164,7 @@ export function PackageForm({ isOpen, onClose, package: pkg, onSave, onPackageSa
       difficulty_level: 'easy',
       price: '',
       original_price: '',
+      pricing_type: 'per_person',
       discount_percentage: 0,
       variants: [],
       duration: 1,

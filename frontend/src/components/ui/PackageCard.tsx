@@ -138,15 +138,19 @@ export function PackageCard({ package: pkg, className = '', loading = false }: P
                 ? Math.round(((originalPrice - currentPrice) / originalPrice) * 100)
                 : 0;
 
+              // Display the price as stored in database (per_couple packages already have total price)
+              const displayPrice = currentPrice;
+              const displayOriginalPrice = originalPrice;
+
               return (
                 <>
-                  {discountPercent > 0 && originalPrice && (
+                  {discountPercent > 0 && displayOriginalPrice && (
                     <div className="text-sm text-gray-400 line-through mb-1">
-                      {formatPrice(originalPrice)}
+                      {formatPrice(displayOriginalPrice)}
                     </div>
                   )}
                   <div className="text-2xl font-bold text-green-600">
-                    {formatPrice(currentPrice)}
+                    {formatPrice(displayPrice)}
                   </div>
                   {hasVariants && (
                     <div className="text-[10px] text-gray-500 font-medium text-right uppercase tracking-wide">Starting from</div>
@@ -154,7 +158,11 @@ export function PackageCard({ package: pkg, className = '', loading = false }: P
                   {discountPercent > 0 && (
                     <div className="text-xs text-green-600 font-semibold text-right">{discountPercent}% OFF</div>
                   )}
-                  <div className="text-xs text-gray-500 font-medium">{t('packageCard.perPerson', 'per person')}</div>
+                  {pkg.pricing_type === 'per_person' && (
+                    <div className="text-xs text-gray-500 font-medium">
+                      {t('packageCard.perPerson', 'per person')}
+                    </div>
+                  )}
                 </>
               );
             })()}

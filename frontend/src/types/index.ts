@@ -263,6 +263,7 @@ export interface Package extends BaseEntity {
   detailed_description_zh?: string;
   price: string;
   original_price?: string;
+  pricing_type?: 'per_person' | 'per_couple' | 'per_room' | 'per_group';
   duration: number;
   variants?: PackageVariant[];
   images?: PackageImage[];
@@ -360,6 +361,7 @@ export interface PackageFormData {
   detailed_description?: string;
   price: string;
   original_price?: string;
+  pricing_type: 'per_person' | 'per_couple' | 'per_room' | 'per_group';
   duration: number;
   is_featured: boolean;
   start_date?: string;

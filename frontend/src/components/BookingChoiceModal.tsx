@@ -153,19 +153,29 @@ export function BookingChoiceModal({ isOpen, onClose, package: pkg, onFormBookin
                                 ? parseFloat((pkg.original_price as any).replace(/[^0-9.]/g, ''))
                                 : null);
 
+                            // Display the price as stored in database (per_couple packages already have total price)
+                            const displayCurrentPrice = currentPrice;
+                            const displayOriginalPrice = originalPrice;
+
                             return (
                               <div className="flex flex-col">
-                                {originalPrice && originalPrice !== currentPrice && (
+                                {displayOriginalPrice && displayOriginalPrice !== displayCurrentPrice && (
                                   <span className="text-sm text-gray-400 line-through">
-                                    {formatPrice(originalPrice)} per person
+                                    {formatPrice(displayOriginalPrice)} {pkg.pricing_type === 'per_couple' ? 'per couple' : 
+                                                                   pkg.pricing_type === 'per_room' ? 'per room' :
+                                                                   pkg.pricing_type === 'per_group' ? 'per group' :
+                                                                   'per person'}
                                   </span>
                                 )}
                                 <span className="font-semibold">
-                                  {formatPrice(currentPrice)} per person
+                                  {formatPrice(displayCurrentPrice)} {pkg.pricing_type === 'per_couple' ? 'per couple' : 
+                                                               pkg.pricing_type === 'per_room' ? 'per room' :
+                                                               pkg.pricing_type === 'per_group' ? 'per group' :
+                                                               'per person'}
                                 </span>
-                                {originalPrice && originalPrice !== currentPrice && (
+                                {displayOriginalPrice && displayOriginalPrice !== displayCurrentPrice && (
                                   <span className="text-xs text-green-600 font-medium">
-                                    Save {formatPrice(originalPrice - currentPrice)} ({Math.round(((originalPrice - currentPrice) / originalPrice) * 100)}% off)
+                                    Save {formatPrice(displayOriginalPrice - displayCurrentPrice)} ({Math.round(((displayOriginalPrice - displayCurrentPrice) / displayOriginalPrice) * 100)}% off)
                                   </span>
                                 )}
                               </div>

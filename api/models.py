@@ -194,6 +194,19 @@ class Package(models.Model):
     difficulty_level = models.CharField(max_length=20, choices=DIFFICULTY_CHOICES, default='easy')
     highlights = models.TextField(blank=True, help_text="Package highlights, one per line or separated by commas")
     
+    # Pricing information
+    pricing_type = models.CharField(
+        max_length=20,
+        choices=[
+            ('per_person', 'Per Person'),
+            ('per_couple', 'Per Couple'),
+            ('per_room', 'Per Room'),
+            ('per_group', 'Per Group'),
+        ],
+        default='per_person',
+        help_text="How the price is calculated and displayed"
+    )
+    
     # Group size
     group_size_min = models.PositiveIntegerField(default=1)
     group_size_max = models.PositiveIntegerField(default=10)

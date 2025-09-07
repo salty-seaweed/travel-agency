@@ -113,7 +113,12 @@ export function StickyBookingBar({
                       Save {Math.round(((originalPrice - currentPrice) / originalPrice) * 100)}%
                     </Text>
                   )}
-                  <Text fontSize="xs" color="gray.500">per person</Text>
+                  <Text fontSize="xs" color="gray.500">
+                    {packageData.pricing_type === 'per_couple' ? 'per couple' : 
+                     packageData.pricing_type === 'per_room' ? 'per room' :
+                     packageData.pricing_type === 'per_group' ? 'per group' :
+                     'per person'}
+                  </Text>
                 </>
               );
             })()}

@@ -692,7 +692,8 @@ export const usePageHero = (pageKey: string) => {
       const heroes = data.results || data;
       const hero = Array.isArray(heroes) ? heroes[0] : null;
       console.log('usePageHero returning:', hero);
-      return hero;
+      // Return null instead of undefined to prevent React Query error
+      return hero || null;
     },
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,

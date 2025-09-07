@@ -79,13 +79,18 @@ export function PackageSidebar({ packageData, onBookNow, selectedVariant }: Pack
             </HStack>
             <Text fontSize="sm" color="gray.600" textAlign="center">
               {(() => {
+                const pricingText = packageData.pricing_type === 'per_couple' ? 'per couple' : 
+                                   packageData.pricing_type === 'per_room' ? 'per room' :
+                                   packageData.pricing_type === 'per_group' ? 'per group' :
+                                   'per person';
+                
                 if (selectedVariant) {
-                  return <>per person • {selectedVariant.duration_days} days</> as any;
+                  return <>{pricingText} • {selectedVariant.duration_days} days</> as any;
                 }
                 const variants: any[] = (packageData as any).variants || [];
-                if (!variants.length) return <>per person • {packageData.duration} days</> as any;
+                if (!variants.length) return <>{pricingText} • {packageData.duration} days</> as any;
                 const durations = Array.from(new Set(variants.map(v => Number(v.duration_days)).filter((n: any) => !isNaN(n)))).sort((a: number,b: number)=>a-b);
-                return <>per person • {durations[0]}{durations.length > 1 ? `-${durations[durations.length-1]}` : ''} days</> as any;
+                return <>{pricingText} • {durations[0]}{durations.length > 1 ? `-${durations[durations.length-1]}` : ''} days</> as any;
               })()}
             </Text>
             {(() => {

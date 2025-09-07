@@ -16,6 +16,7 @@ import {
   Divider,
   IconButton,
   Checkbox,
+  Select,
 } from '@chakra-ui/react';
 import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 
@@ -242,6 +243,28 @@ export function PricingForm({ form, updateForm }: PricingFormProps) {
           </InputGroup>
           <Text fontSize="xs" color="gray.500" mt={1}>
             Auto-calculated based on original price and discount
+          </Text>
+        </FormControl>
+
+        <FormControl mt={4}>
+          <FormLabel fontWeight="semibold" color="gray.700">
+            Pricing Type *
+          </FormLabel>
+          <Select
+            name="pricing_type"
+            value={form.pricing_type || 'per_person'}
+            onChange={handleChange}
+            size="lg"
+            borderRadius="lg"
+            focusBorderColor="purple.500"
+          >
+            <option value="per_person">Per Person</option>
+            <option value="per_couple">Per Couple</option>
+            <option value="per_room">Per Room</option>
+            <option value="per_group">Per Group</option>
+          </Select>
+          <Text fontSize="xs" color="gray.500" mt={1}>
+            How the price is calculated and displayed to customers
           </Text>
         </FormControl>
 

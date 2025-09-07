@@ -53,6 +53,7 @@ interface LocalPackage {
   description: string;
   price: number;
   original_price?: string | null;
+  pricing_type?: 'per_person' | 'per_couple' | 'per_room' | 'per_group';
   duration: string;
   destinations: any[];
   highlights: string[];
@@ -72,6 +73,7 @@ const convertApiPackageToCardFormat = (apiPackage: ApiPackage): LocalPackage => 
     description: apiPackage.description,
     price: parseFloat(apiPackage.price),
     original_price: apiPackage.original_price || null,
+    pricing_type: apiPackage.pricing_type || 'per_person',
     duration: apiPackage.duration.toString(),
     // Map destinations from PackageDestination relationship
     destinations: Array.isArray(apiPackage.destinations) 
@@ -357,9 +359,13 @@ export const ExperiencesTrendingDeals: React.FC<Props> = ({ packages = [] }) => 
                             )}
                           </VStack>
                           <VStack align="end" spacing={0}>
-                            <Text fontSize="sm" color="gray.500">{t('homepage.trending.totalFor', 'Total for 2')}</Text>
+                            {pkg.pricing_type === 'per_person' && (
+                              <Text fontSize="sm" color="gray.500">
+                                {t('homepage.trending.totalFor', 'Total for 2')}
+                              </Text>
+                            )}
                             <Text fontSize="lg" fontWeight="semibold" color="gray.700">
-                              {formatPrice(currentPrice * 2)}
+                              {formatPrice(pkg.pricing_type === 'per_person' ? currentPrice * 2 : currentPrice)}
                             </Text>
                           </VStack>
                         </HStack>

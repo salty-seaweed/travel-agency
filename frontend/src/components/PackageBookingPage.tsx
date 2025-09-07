@@ -181,7 +181,12 @@ export function PackageBookingPage() {
                 </div>
                 <div className="text-right">
                   <div className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 text-transparent bg-clip-text">${pkg.price}</div>
-                  <div className="text-sm text-gray-500">{t('packageBooking.perPerson', 'per person')}</div>
+                  <div className="text-sm text-gray-500">
+                    {pkg.pricing_type === 'per_couple' ? 'per couple' : 
+                     pkg.pricing_type === 'per_room' ? 'per room' :
+                     pkg.pricing_type === 'per_group' ? 'per group' :
+                     t('packageBooking.perPerson', 'per person')}
+                  </div>
                 </div>
               </div>
             </Card>
