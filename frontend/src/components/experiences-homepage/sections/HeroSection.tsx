@@ -63,12 +63,10 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
   const [filteredDestinations, setFilteredDestinations] = useState<any[]>([]);
 
   const heroImages = useMemo(() => [
-    "/images/optimized/medium/ishan45.webp",
-    "/images/optimized/medium/ishan46.webp", 
-    "/images/optimized/medium/ishan47.webp",
-    "/images/optimized/medium/ishan48.webp",
-    "/images/optimized/medium/ishan49.webp",
-    "/images/optimized/medium/ishan50.webp",
+    "/images/optimized/hero/hero4.webp",
+    "/images/optimized/hero/hero5.webp", 
+    "/images/optimized/hero/ishan69.webp",
+    "/images/optimized/hero/ishan62.webp",
   ], []);
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -157,7 +155,7 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
 
   return (
     <Box position="relative" minH="100vh" overflow="hidden">
-      <Box position="absolute" top={0} left={0} right={0} bottom={0} backgroundImage={`url(${heroImages[currentImageIndex]})`} backgroundSize="cover" backgroundPosition="center" backgroundRepeat="no-repeat" transition="background-image 1s ease-in-out">
+      <Box position="absolute" top={0} left={0} right={0} bottom={0} backgroundImage={`url(${heroImages[currentImageIndex]})`} backgroundSize="cover" backgroundPosition="center" backgroundRepeat="no-repeat" transition="background-image 1s ease-in-out" style={{ imageRendering: 'high-quality' }}>
         <Box position="absolute" top={0} left={0} right={0} bottom={0} bg="blackAlpha.600" />
       </Box>
 
