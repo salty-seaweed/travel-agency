@@ -34,6 +34,7 @@ import { PackageSidebar } from './package/PackageSidebar';
 import { StickyBookingBar } from './package/StickyBookingBar';
 import { BookingChoiceModal } from './BookingChoiceModal';
 import { PackageBookingForm } from './PackageBookingForm';
+import { PackageAboutSection } from './package/PackageAboutSection';
 import type { Package } from '../types';
 
 export function PackageDetailPage() {
@@ -203,17 +204,8 @@ export function PackageDetailPage() {
               />
             )}
 
-            {/* Detailed Description */}
-            {packageData.detailed_description && (
-              <Box p={6} bg="white" borderRadius="xl" border="1px solid" borderColor="gray.200">
-                <Text fontSize="lg" fontWeight="semibold" color="gray.800" mb={4}>
-                  About This Package
-                </Text>
-                <Text color="gray.700" lineHeight="1.8" fontSize="md">
-                  {packageData.detailed_description}
-                </Text>
-              </Box>
-            )}
+            {/* About This Package Section */}
+            <PackageAboutSection packageData={packageData} />
 
             {/* Itinerary Section */}
             {packageData.itinerary && packageData.itinerary.length > 0 && (
