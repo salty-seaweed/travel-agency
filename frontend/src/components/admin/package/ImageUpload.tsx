@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
-import { Box, Button, Image, VStack, HStack, Text, IconButton, useToast, Progress, Icon, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton } from '@chakra-ui/react';
-import { PlusIcon, XMarkIcon, PhotoIcon } from '@heroicons/react/24/outline';
+import { Box, Button, Image, VStack, HStack, Text, IconButton, useToast, Progress, Icon, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton, Select } from '@chakra-ui/react';
+import { PlusIcon, XMarkIcon, PhotoIcon, VideoCameraIcon } from '@heroicons/react/24/outline';
 import { apiUpload, apiPost, apiDelete } from '../../../api';
 import { MediaLibrary } from '../cms/MediaLibrary';
 import {
@@ -23,37 +23,35 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
+interface MediaItem {
+  id?: number;
+  media_type: 'image' | 'video';
+  image?: string;
+  video?: string;
+  video_thumbnail?: string;
+  caption?: string;
+  order?: number;
+  is_featured?: boolean;
+  file?: File; // Store original file for new packages
+}
+
 interface ImageUploadProps {
-  images: Array<{
-    id?: number;
-    image: string;
-    caption?: string;
-    order?: number;
-    is_featured?: boolean;
-    file?: File; // Store original file for new packages
-  }>;
-  onChange: (images: Array<{
-    id?: number;
-    image: string;
-    caption?: string;
-    order?: number;
-    is_featured?: boolean;
-    file?: File; // Store original file for new packages
-  }>) => void;
+  images: Array<MediaItem>;
+  onChange: (images: Array<MediaItem>) => void;
   packageId?: number;
 }
 
 // Sortable Item Component
 interface SortableItemProps {
   id: string;
-  image: any;
+  media: MediaItem;
   index: number;
   onRemove: (index: number) => void;
   onSetFeatured: (index: number) => void;
   onUpdateCaption: (index: number, caption: string) => void;
 }
 
-function SortableItem({ id, image, index, onRemove, onSetFeatured, onUpdateCaption }: SortableItemProps) {
+function SortableItem({ id, media, index, onRemove, onSetFeatured, onUpdateCaption }: SortableItemProps) {
   const {
     attributes,
     listeners,
@@ -95,20 +93,76 @@ function SortableItem({ id, image, index, onRemove, onSetFeatured, onUpdateCapti
           <Icon as={PhotoIcon} h={4} w={4} color="gray.400" />
         </Box>
 
-        <Image
-          src={image.image}
-          alt={image.caption || `Image ${index + 1}`}
-          boxSize="80px"
-          objectFit="cover"
-          borderRadius="md"
-          fallbackSrc="https://via.placeholder.com/80x80?text=Image"
-          onError={(e) => {
-            // Handle blob URL cleanup on error
-            if (image.image.startsWith('blob:')) {
-              URL.revokeObjectURL(image.image);
-            }
-          }}
-        />
+        {/* Media Preview */}
+        <Box position="relative">
+          {media.media_type === 'video' ? (
+            <Box
+              boxSize="80px"
+              borderRadius="md"
+              overflow="hidden"
+              bg="gray.100"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              position="relative"
+            >
+              {media.video_thumbnail || media.video ? (
+                <Image
+                  src={media.video_thumbnail || (media.video && media.video.includes('.') ? media.video.replace(/\.[^/.]+$/, '.jpg') : '')}
+                  alt={media.caption || `Video ${index + 1}`}
+                  boxSize="80px"
+                  objectFit="cover"
+                  borderRadius="md"
+                  fallback={<Icon as={VideoCameraIcon} h={6} w={6} color="gray.400" />}
+                />
+              ) : (
+                <Icon as={VideoCameraIcon} h={6} w={6} color="gray.400" />
+              )}
+              <Box
+                position="absolute"
+                top="50%"
+                left="50%"
+                transform="translate(-50%, -50%)"
+                bg="blackAlpha.600"
+                borderRadius="full"
+                p={1}
+              >
+                <Icon as={VideoCameraIcon} h={3} w={3} color="white" />
+              </Box>
+            </Box>
+          ) : (
+            <Image
+              src={media.image}
+              alt={media.caption || `Image ${index + 1}`}
+              boxSize="80px"
+              objectFit="cover"
+              borderRadius="md"
+              fallbackSrc="https://via.placeholder.com/80x80?text=Image"
+              onError={(e) => {
+                // Handle blob URL cleanup on error
+                if (media.image?.startsWith('blob:')) {
+                  URL.revokeObjectURL(media.image);
+                }
+              }}
+            />
+          )}
+
+          {/* Media Type Badge */}
+          <Box
+            position="absolute"
+            top="-2"
+            right="-2"
+            bg={media.media_type === 'video' ? 'red.500' : 'blue.500'}
+            color="white"
+            fontSize="xs"
+            px={1}
+            py={0.5}
+            borderRadius="sm"
+            fontWeight="bold"
+          >
+            {media.media_type === 'video' ? 'VID' : 'IMG'}
+          </Box>
+        </Box>
 
         <VStack flex={1} align="start" spacing={2}>
           <Text
@@ -123,17 +177,17 @@ function SortableItem({ id, image, index, onRemove, onSetFeatured, onUpdateCapti
             borderRadius="md"
             minW="200px"
           >
-            {image.caption || `Image ${index + 1}`}
+            {media.caption || `${media.media_type === 'video' ? 'Video' : 'Image'} ${index + 1}`}
           </Text>
 
           <HStack spacing={2}>
             <Button
               size="sm"
-              variant={image.is_featured ? "solid" : "outline"}
-              colorScheme={image.is_featured ? "green" : "gray"}
+              variant={media.is_featured ? "solid" : "outline"}
+              colorScheme={media.is_featured ? "green" : "gray"}
               onClick={() => onSetFeatured(index)}
             >
-              {image.is_featured ? "Featured" : "Set Featured"}
+              {media.is_featured ? "Featured" : "Set Featured"}
             </Button>
 
             <Text fontSize="xs" color="gray.500">
@@ -159,6 +213,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ images, onChange, packageId }
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isMediaLibraryOpen, setIsMediaLibraryOpen] = useState(false);
+  const [selectedMediaType, setSelectedMediaType] = useState<'image' | 'video'>('image');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const toast = useToast();
 
@@ -173,8 +228,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ images, onChange, packageId }
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
-      const oldIndex = images.findIndex((_, index) => `image-${index}` === active.id);
-      const newIndex = images.findIndex((_, index) => `image-${index}` === over.id);
+      const oldIndex = images.findIndex((_, index) => `media-${index}` === active.id);
+      const newIndex = images.findIndex((_, index) => `media-${index}` === over.id);
 
       const reorderedImages = arrayMove(images, oldIndex, newIndex);
 
@@ -187,7 +242,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ images, onChange, packageId }
       onChange(updatedImages);
 
       toast({
-        title: 'Images reordered',
+        title: 'Media reordered',
         status: 'success',
         duration: 2000,
       });
@@ -206,20 +261,28 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ images, onChange, packageId }
         const file = files[i];
         const previewUrl = URL.createObjectURL(file);
 
-        newImages.push({
-          image: previewUrl,
-          caption: file.name,
+        const newMedia: MediaItem = {
+          media_type: selectedMediaType,
+          caption: `${selectedMediaType === 'video' ? 'Video' : 'Image'} ${images.length + i + 1}`,
           order: images.length + i,
           is_featured: images.length === 0 && i === 0,
           file: file // Store the file for later upload
-        });
+        };
+
+        if (selectedMediaType === 'image') {
+          newMedia.image = previewUrl;
+        } else {
+          newMedia.video = previewUrl;
+        }
+
+        newImages.push(newMedia);
       }
 
       onChange(newImages);
 
       toast({
-        title: 'Images added',
-        description: 'Images will be uploaded after you save the package.',
+        title: `${selectedMediaType === 'video' ? 'Videos' : 'Images'} added`,
+        description: 'Media will be uploaded after you save the package.',
         status: 'info',
         duration: 3000,
       });
@@ -236,30 +299,43 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ images, onChange, packageId }
 
         // Create FormData for file upload
         const formData = new FormData();
-        formData.append('image', file);
+        formData.append('media_type', selectedMediaType);
 
-        // Use dedicated package image endpoint
+        if (selectedMediaType === 'image') {
+          formData.append('image', file);
+        } else {
+          formData.append('video', file);
+        }
+
+        // Use dedicated package media endpoint
         formData.append('package_id', packageId.toString());
-        formData.append('caption', file.name);
+        formData.append('caption', `${selectedMediaType === 'video' ? 'Video' : 'Image'} ${images.length + 1}`);
         formData.append('order', images.length.toString());
         formData.append('is_featured', images.length === 0 ? 'true' : 'false');
 
         const response = await apiUpload('/package-images/', formData);
 
-        if (response.success) {
-          const newImage = {
-            id: response.data.id,
-            image: response.data.image,
-            caption: response.data.caption || file.name,
-            order: response.data.order || images.length,
-            is_featured: response.data.is_featured || images.length === 0,
+        if (response.success || response.id) {
+          const newMedia: MediaItem = {
+            id: response.id || response.data?.id,
+            media_type: selectedMediaType,
+            caption: response.caption || response.data?.caption || `${selectedMediaType === 'video' ? 'Video' : 'Image'} ${images.length + 1}`,
+            order: response.order || response.data?.order || images.length,
+            is_featured: response.is_featured || response.data?.is_featured || images.length === 0,
             file: file // Store the original file for later use
           };
 
-          onChange([...images, newImage]);
+          if (selectedMediaType === 'image') {
+            newMedia.image = response.image || response.data?.image;
+          } else {
+            newMedia.video = response.video || response.data?.video;
+            newMedia.video_thumbnail = response.video_thumbnail || response.data?.video_thumbnail;
+          }
+
+          onChange([...images, newMedia]);
 
           toast({
-            title: 'Image uploaded successfully',
+            title: `${selectedMediaType === 'video' ? 'Video' : 'Image'} uploaded successfully`,
             status: 'success',
             duration: 3000,
           });
@@ -271,7 +347,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ images, onChange, packageId }
       console.error('Upload error:', error);
       toast({
         title: 'Upload failed',
-        description: 'Failed to upload image. Please try again.',
+        description: `Failed to upload ${selectedMediaType}. Please try again.`,
         status: 'error',
         duration: 5000,
       });
@@ -285,27 +361,30 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ images, onChange, packageId }
   };
 
   const removeImage = async (index: number) => {
-    const imageToRemove = images[index];
+    const mediaToRemove = images[index];
 
     // If we have an ID and packageId, delete from backend
-    if (imageToRemove.id && packageId) {
+    if (mediaToRemove.id && packageId) {
       try {
-        await apiDelete(`/package-images/${imageToRemove.id}/`);
+        await apiDelete(`/package-images/${mediaToRemove.id}/`);
       } catch (error) {
-        console.error('Failed to delete image from backend:', error);
+        console.error('Failed to delete media from backend:', error);
       }
     }
 
-    // Clean up blob URLs for images that haven't been uploaded yet
-    if (imageToRemove.image.startsWith('blob:')) {
-      URL.revokeObjectURL(imageToRemove.image);
+    // Clean up blob URLs for media that haven't been uploaded yet
+    if (mediaToRemove.image && mediaToRemove.image.startsWith('blob:')) {
+      URL.revokeObjectURL(mediaToRemove.image);
+    }
+    if (mediaToRemove.video && mediaToRemove.video.startsWith('blob:')) {
+      URL.revokeObjectURL(mediaToRemove.video);
     }
 
     const newImages = images.filter((_, i) => i !== index);
     onChange(newImages);
 
     toast({
-      title: 'Image removed',
+      title: `${mediaToRemove.media_type === 'video' ? 'Video' : 'Image'} removed`,
       status: 'info',
       duration: 2000,
     });
@@ -399,7 +478,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ images, onChange, packageId }
         <input
           ref={fileInputRef}
           type="file"
-          accept="image/*"
+          accept={selectedMediaType === 'video' ? 'video/*' : 'image/*'}
           multiple
           onChange={handleFileSelect}
           style={{ display: 'none' }}
@@ -408,34 +487,50 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ images, onChange, packageId }
         {!packageId ? (
           <Box p={4} bg="yellow.50" border="1px" borderColor="yellow.200" borderRadius="md">
             <Text fontSize="sm" color="yellow.800">
-              💡 Save the package first to enable image uploads
+              💡 Save the package first to enable media uploads
             </Text>
           </Box>
         ) : (
-          <HStack spacing={2} w="full">
-            <Button
-              leftIcon={<Icon as={PlusIcon} />}
-              onClick={() => fileInputRef.current?.click()}
-              isLoading={uploading}
-              loadingText="Uploading..."
-              colorScheme="blue"
-              variant="outline"
-              flex={1}
-              size="sm"
-            >
-              Upload New
-            </Button>
-            <Button
-              leftIcon={<Icon as={PhotoIcon} />}
-              onClick={() => setIsMediaLibraryOpen(true)}
-              colorScheme="green"
-              variant="outline"
-              flex={1}
-              size="sm"
-            >
-              Select Existing
-            </Button>
-          </HStack>
+          <VStack spacing={3} w="full">
+            {/* Media Type Selector */}
+            <HStack spacing={2} w="full">
+              <Text fontSize="sm" fontWeight="medium" minW="80px">Upload:</Text>
+              <Select
+                value={selectedMediaType}
+                onChange={(e) => setSelectedMediaType(e.target.value as 'image' | 'video')}
+                size="sm"
+                maxW="150px"
+              >
+                <option value="image">Images</option>
+                <option value="video">Videos</option>
+              </Select>
+            </HStack>
+
+            <HStack spacing={2} w="full">
+              <Button
+                leftIcon={<Icon as={selectedMediaType === 'video' ? VideoCameraIcon : PlusIcon} />}
+                onClick={() => fileInputRef.current?.click()}
+                isLoading={uploading}
+                loadingText="Uploading..."
+                colorScheme="blue"
+                variant="outline"
+                flex={1}
+                size="sm"
+              >
+                Upload {selectedMediaType === 'video' ? 'Video' : 'Image'}
+              </Button>
+              <Button
+                leftIcon={<Icon as={PhotoIcon} />}
+                onClick={() => setIsMediaLibraryOpen(true)}
+                colorScheme="green"
+                variant="outline"
+                flex={1}
+                size="sm"
+              >
+                Select Existing
+              </Button>
+            </HStack>
+          </VStack>
         )}
 
         {uploading && (
@@ -446,9 +541,9 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ images, onChange, packageId }
       {images.length > 0 && (
         <VStack spacing={3} align="stretch">
           <HStack justify="space-between" align="center">
-            <Text fontWeight="bold">Uploaded Images:</Text>
+            <Text fontWeight="bold">Uploaded Media:</Text>
             <Text fontSize="sm" color="gray.500">
-              Drag images to reorder them
+              Drag media to reorder them
             </Text>
           </HStack>
 
@@ -458,15 +553,15 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ images, onChange, packageId }
             onDragEnd={handleDragEnd}
           >
             <SortableContext
-              items={images.map((_, index) => `image-${index}`)}
+              items={images.map((_, index) => `media-${index}`)}
               strategy={verticalListSortingStrategy}
             >
               <VStack spacing={3} align="stretch">
-                {images.map((image, index) => (
+                {images.map((media, index) => (
                   <SortableItem
-                    key={`image-${index}`}
-                    id={`image-${index}`}
-                    image={image}
+                    key={`media-${index}`}
+                    id={`media-${index}`}
+                    media={media}
                     index={index}
                     onRemove={removeImage}
                     onSetFeatured={setFeatured}

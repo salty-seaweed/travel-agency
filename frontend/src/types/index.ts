@@ -177,9 +177,13 @@ export interface Amenity extends BaseEntity {
 // Package types
 export interface PackageImage extends BaseEntity {
   package: number;
-  image: string;
+  media_type?: 'image' | 'video';
+  image?: string;
   image_url?: string;
+  video?: string;
+  video_thumbnail?: string;
   caption?: string;
+  order?: number;
   is_featured?: boolean;
 }
 

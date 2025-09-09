@@ -187,28 +187,47 @@ class PropertySerializer(serializers.ModelSerializer):
 
 class PackageImageSerializer(serializers.ModelSerializer):
     image_url = serializers.SerializerMethodField(read_only=True)
+    video_url = serializers.SerializerMethodField(read_only=True)
+    thumbnail_url = serializers.SerializerMethodField(read_only=True)
     package_id = serializers.IntegerField(write_only=True, required=True)
     image_url_field = serializers.URLField(write_only=True, required=False)  # For selecting from media library
+    video_url_field = serializers.URLField(write_only=True, required=False)  # For selecting video from media library
+    thumbnail_url_field = serializers.URLField(write_only=True, required=False)  # For selecting thumbnail from media library
 
     class Meta:
         model = PackageImage
-        fields = ['id', 'package', 'image', 'caption', 'order', 'is_featured', 'image_url', 'package_id', 'image_url_field']
+        fields = [
+            'id', 'package', 'media_type', 'image', 'video', 'video_thumbnail',
+            'caption', 'order', 'is_featured', 'created_at', 'updated_at',
+            'image_url', 'video_url', 'thumbnail_url', 'package_id',
+            'image_url_field', 'video_url_field', 'thumbnail_url_field'
+        ]
         extra_kwargs = {
             'package': {'required': False},  # Make package field not required during creation
             'image': {'required': False},    # Make image optional when using image_url_field
+            'video': {'required': False},    # Make video optional when using video_url_field
+            'video_thumbnail': {'required': False},  # Make thumbnail optional
         }
 
     def create(self, validated_data):
-        """Custom create method to handle package_id and image selection"""
+        """Custom create method to handle package_id, image, and video selection"""
         package_id = validated_data.pop('package_id', None)
         image_url_field = validated_data.pop('image_url_field', None)
+        video_url_field = validated_data.pop('video_url_field', None)
+        thumbnail_url_field = validated_data.pop('thumbnail_url_field', None)
 
         if not package_id:
             raise serializers.ValidationError({'package_id': 'This field is required.'})
 
-        # Ensure either image file or image_url_field is provided
-        if not validated_data.get('image') and not image_url_field:
-            raise serializers.ValidationError({'image': 'Either an image file or image URL must be provided.'})
+        media_type = validated_data.get('media_type', 'image')
+
+        # Validation based on media type
+        if media_type == 'image':
+            if not validated_data.get('image') and not image_url_field:
+                raise serializers.ValidationError({'image': 'Either an image file or image URL must be provided for image media type.'})
+        elif media_type == 'video':
+            if not validated_data.get('video') and not video_url_field:
+                raise serializers.ValidationError({'video': 'Either a video file or video URL must be provided for video media type.'})
 
         try:
             from .models import Package
@@ -219,9 +238,13 @@ class PackageImageSerializer(serializers.ModelSerializer):
         except (ValueError, TypeError):
             raise serializers.ValidationError({'package_id': 'Invalid package ID.'})
 
-        # Store the image_url_field for the view to handle
+        # Store URL fields for the view to handle
         if image_url_field:
             validated_data['_image_url_field'] = image_url_field
+        if video_url_field:
+            validated_data['_video_url_field'] = video_url_field
+        if thumbnail_url_field:
+            validated_data['_thumbnail_url_field'] = thumbnail_url_field
 
         # Ensure proper type conversion for order and is_featured
         if 'order' in validated_data:
@@ -242,6 +265,32 @@ class PackageImageSerializer(serializers.ModelSerializer):
         request = self.context.get('request') if hasattr(self, 'context') else None
         try:
             url = obj.image.url
+        except Exception:
+            return None
+        if request and url and url.startswith('/'):
+            return request.build_absolute_uri(url)
+        return url
+
+    def get_video_url(self, obj):
+        request = self.context.get('request') if hasattr(self, 'context') else None
+        try:
+            url = obj.video.url
+        except Exception:
+            return None
+        if request and url and url.startswith('/'):
+            return request.build_absolute_uri(url)
+        return url
+
+    def get_thumbnail_url(self, obj):
+        request = self.context.get('request') if hasattr(self, 'context') else None
+        try:
+            # Use video thumbnail if available, otherwise fall back to image
+            if obj.video_thumbnail:
+                url = obj.video_thumbnail.url
+            elif obj.image:
+                url = obj.image.url
+            else:
+                return None
         except Exception:
             return None
         if request and url and url.startswith('/'):
@@ -1404,19 +1453,38 @@ class PackageSerializer(serializers.ModelSerializer):
         ]
     
     def get_images(self, obj):
-        """Get package images with URLs"""
-        images = obj.images.all()
+        """Get package images and videos with URLs"""
+        media = obj.images.all()
         request = self.context.get('request')
-        return [
-            {
-                'id': img.id,
-                'image': request.build_absolute_uri(img.image.url) if request else img.image.url,
-                'caption': img.caption,
-                'order': img.order,
-                'is_featured': img.is_featured
+        result = []
+
+        for item in media:
+            media_data = {
+                'id': item.id,
+                'media_type': item.media_type,
+                'caption': item.caption,
+                'order': item.order,
+                'is_featured': item.is_featured,
+                'created_at': item.created_at,
+                'updated_at': item.updated_at
             }
-            for img in images
-        ]
+
+            if item.media_type == 'image':
+                media_data['image'] = request.build_absolute_uri(item.image.url) if request and item.image else (item.image.url if item.image else None)
+                media_data['thumbnail'] = media_data['image']  # For images, thumbnail is the same as the image
+            elif item.media_type == 'video':
+                media_data['video'] = request.build_absolute_uri(item.video.url) if request and item.video else (item.video.url if item.video else None)
+                # Use thumbnail if available, otherwise fall back to video_thumbnail or None
+                if item.video_thumbnail:
+                    media_data['thumbnail'] = request.build_absolute_uri(item.video_thumbnail.url) if request else item.video_thumbnail.url
+                elif hasattr(item, 'thumbnail_url') and item.thumbnail_url:
+                    media_data['thumbnail'] = item.thumbnail_url
+                else:
+                    media_data['thumbnail'] = None
+
+            result.append(media_data)
+
+        return result
 
 
 class PropertySerializerI18n(serializers.ModelSerializer):

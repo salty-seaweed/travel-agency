@@ -10,6 +10,9 @@ class MobileCompatibilityMiddleware:
 
         response = self.get_response(request)
 
+        # Debug logging for media requests
+        if request.path.startswith('/media/'):
+            logger.info(f"Processing media request: {request.path}")
 
         # Add mobile-friendly headers
         response['Access-Control-Allow-Origin'] = '*'
@@ -23,8 +26,8 @@ class MobileCompatibilityMiddleware:
         response['X-Frame-Options'] = 'DENY'
         response['X-XSS-Protection'] = '1; mode=block'
 
-        # Add CSP headers to allow ngrok fonts
-        response['Content-Security-Policy'] = "default-src 'self' https://cdn.ngrok.com 'unsafe-eval' 'unsafe-inline'; font-src 'self' https://assets.ngrok.com data:; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https:;"
+        # Add CSP headers to allow ngrok fonts and media files
+        response['Content-Security-Policy'] = "default-src 'self' https://cdn.ngrok.com 'unsafe-eval' 'unsafe-inline'; font-src 'self' https://assets.ngrok.com data:; img-src 'self' data: https: http://localhost:* http://127.0.0.1:*; style-src 'self' 'unsafe-inline' https:; media-src 'self' http://localhost:* http://127.0.0.1:* https:;"
 
         # Handle preflight requests
         if request.method == 'OPTIONS':

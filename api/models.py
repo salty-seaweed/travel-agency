@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 # Create your models here.
 
@@ -346,14 +347,73 @@ class PackageDestination(models.Model):
         return f"{self.package.name} - {self.location.island} ({self.duration} days)"
 
 class PackageImage(models.Model):
+    MEDIA_TYPES = [
+        ('image', 'Image'),
+        ('video', 'Video'),
+    ]
+
     package = models.ForeignKey(Package, on_delete=models.CASCADE, related_name='images')
-    image = models.ImageField(upload_to='package_images/')
+    media_type = models.CharField(max_length=10, choices=MEDIA_TYPES, default='image')
+
+    # Image fields
+    image = models.ImageField(upload_to='package_images/', null=True, blank=True)
+
+    # Video fields
+    video = models.FileField(upload_to='package_videos/', null=True, blank=True)
+    video_thumbnail = models.ImageField(upload_to='package_video_thumbnails/', null=True, blank=True)
+
+    # Common fields
     caption = models.CharField(max_length=255, blank=True)
     order = models.PositiveIntegerField(default=0)
     is_featured = models.BooleanField(default=False)
-    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['order', 'created_at']
+        verbose_name = 'Package Media'
+        verbose_name_plural = 'Package Media'
+
     def __str__(self):
-        return f"Image for {self.package.name}"
+        media_type_display = self.get_media_type_display()
+        return f"{media_type_display} for {self.package.name}"
+
+    @property
+    def file_url(self):
+        """Get the URL of the media file"""
+        if self.media_type == 'image' and self.image:
+            return self.image.url
+        elif self.media_type == 'video' and self.video:
+            return self.video.url
+        return ''
+
+    @property
+    def thumbnail_url(self):
+        """Get the URL of the thumbnail for display"""
+        if self.media_type == 'image':
+            return self.image.url if self.image else ''
+        elif self.media_type == 'video':
+            return self.video_thumbnail.url if self.video_thumbnail else '/video-placeholder.png'
+        return ''
+
+    def clean(self):
+        """Ensure only appropriate fields are set based on media type"""
+        from django.core.exceptions import ValidationError
+
+        if self.media_type == 'image':
+            if not self.image:
+                raise ValidationError('Image file is required for image media type')
+            if self.video:
+                raise ValidationError('Video file should not be set for image media type')
+        elif self.media_type == 'video':
+            if not self.video:
+                raise ValidationError('Video file is required for video media type')
+            if self.image:
+                raise ValidationError('Image file should not be set for video media type')
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
 
 class Review(models.Model):
     property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='reviews')
