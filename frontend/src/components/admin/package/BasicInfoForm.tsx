@@ -243,22 +243,44 @@ export function BasicInfoForm({ form, updateForm }: BasicInfoFormProps) {
             </FormControl>
           </Grid>
 
-          <FormControl isRequired>
-            <FormLabel fontWeight="semibold" color="gray.700">
-              Duration (Days)
-            </FormLabel>
-            <Input
-              name="duration"
-              value={form.duration}
-              onChange={handleChange}
-              placeholder="1"
-              size="lg"
-              borderRadius="lg"
-              focusBorderColor="purple.500"
-              type="number"
-              min="1"
-            />
-          </FormControl>
+          <Grid templateColumns="1fr 1fr" gap={4}>
+            <FormControl isRequired>
+              <FormLabel fontWeight="semibold" color="gray.700">
+                Duration (Days)
+              </FormLabel>
+              <Input
+                name="duration"
+                value={form.duration}
+                onChange={handleChange}
+                placeholder="1"
+                size="lg"
+                borderRadius="lg"
+                focusBorderColor="purple.500"
+                type="number"
+                min="1"
+              />
+            </FormControl>
+
+            <FormControl>
+              <FormLabel fontWeight="semibold" color="gray.700">
+                Nights
+              </FormLabel>
+              <Input
+                name="nights"
+                value={form.nights || ''}
+                onChange={handleChange}
+                placeholder="0"
+                size="lg"
+                borderRadius="lg"
+                focusBorderColor="purple.500"
+                type="number"
+                min="0"
+              />
+              <Text fontSize="xs" color="gray.500" mt={1}>
+                Number of nights (usually duration - 1)
+              </Text>
+            </FormControl>
+          </Grid>
 
           <FormControl>
             <FormLabel fontWeight="semibold" color="gray.700">

@@ -93,6 +93,7 @@ export function PackageForm({ isOpen, onClose, package: pkg, onSave, onPackageSa
       
       // Duration & Group
       duration: pkg.duration || 1,
+      nights: pkg.nights || 0,
       group_size: {
         min: (pkg as any).group_size_min || 1,
         max: (pkg as any).group_size_max || 4,
@@ -168,6 +169,7 @@ export function PackageForm({ isOpen, onClose, package: pkg, onSave, onPackageSa
       discount_percentage: 0,
       variants: [],
       duration: 1,
+      nights: 0,
       group_size: { min: 1, max: 4, recommended: 2 },
 
       start_date: '',
@@ -306,6 +308,9 @@ export function PackageForm({ isOpen, onClose, package: pkg, onSave, onPackageSa
         original_price: computedLegacyOriginal,
         discount_percentage: form.discount_percentage ? parseFloat(form.discount_percentage) : null,
         
+        // Include nights field
+        nights: form.nights || 0,
+        
         // Format dates properly
         start_date: form.start_date || null,
         end_date: form.end_date || null,
@@ -352,6 +357,7 @@ export function PackageForm({ isOpen, onClose, package: pkg, onSave, onPackageSa
         variants_data: (form.variants || []).map((v: any) => ({
           id: v.id,
           duration_days: v.duration_days || v.duration,
+          nights: v.nights || 0,
           price: v.price,
           original_price: v.original_price,
           is_default: !!v.is_default,

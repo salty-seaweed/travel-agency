@@ -1,0 +1,47 @@
+{
+  "name": "Thread Global Travels",
+  "short_name": "Thread Travels",
+  "description": "Your gateway to the world. Discover amazing destinations and create unforgettable international experiences.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1e40af",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en-US",
+  "dir": "ltr",
+  "categories": ["travel", "lifestyle", "business"],
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Browse Destinations",
+      "short_name": "Destinations",
+      "description": "Explore countries and destinations",
+      "url": "/countries",
+      "icons": [
+        {
+          "src": "/vite.svg",
+          "sizes": "any"
+        }
+      ]
+    },
+    {
+      "name": "View Deals",
+      "short_name": "Deals",
+      "description": "Check out special offers",
+      "url": "/deals",
+      "icons": [
+        {
+          "src": "/vite.svg",
+          "sizes": "any"
+        }
+      ]
+    }
+  ]
+}

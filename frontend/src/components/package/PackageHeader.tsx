@@ -116,6 +116,7 @@ export function PackageHeader({
               <VStack align="start" spacing={0}>
                 <Text fontSize="sm" fontWeight="medium" color="gray.800">
                   {packageData.duration} days
+                  {packageData.nights > 0 && `, ${packageData.nights} nights`}
                 </Text>
                 <Text fontSize="xs" color="gray.500">Duration</Text>
               </VStack>

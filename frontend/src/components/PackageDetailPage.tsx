@@ -157,7 +157,7 @@ export function PackageDetailPage() {
             : packageData;
           // Store on window for child closures (no re-render deps)
           (window as any).__currentPackageVariant = selectedVariant;
-          ;
+          (window as any).__currentPackage = viewPackage;
           return null;
         })()}
         {/* Header Section */}

@@ -186,6 +186,7 @@ class Package(models.Model):
     original_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     discount_percentage = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     duration = models.PositiveIntegerField(default=1)  # Duration in days
+    nights = models.PositiveIntegerField(default=0, help_text="Number of nights (usually duration - 1)")
     is_featured = models.BooleanField(default=False)
     start_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
@@ -259,6 +260,7 @@ class Package(models.Model):
 class PackageVariant(models.Model):
     package = models.ForeignKey(Package, on_delete=models.CASCADE, related_name='variants')
     duration_days = models.PositiveIntegerField(help_text="Duration in days")
+    nights = models.PositiveIntegerField(default=0, help_text="Number of nights (usually duration_days - 1)")
     price = models.DecimalField(max_digits=10, decimal_places=2)
     original_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     is_default = models.BooleanField(default=False)

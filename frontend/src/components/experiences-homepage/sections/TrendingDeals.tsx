@@ -55,6 +55,7 @@ interface LocalPackage {
   original_price?: string | null;
   pricing_type?: 'per_person' | 'per_couple' | 'per_room' | 'per_group';
   duration: string;
+  nights: number;
   destinations: any[];
   highlights: string[];
   included: string[];
@@ -67,6 +68,9 @@ interface LocalPackage {
 }
 
 const convertApiPackageToCardFormat = (apiPackage: ApiPackage): LocalPackage => {
+  // Calculate nights if not provided (usually duration - 1)
+  const calculatedNights = apiPackage.nights || Math.max(0, (apiPackage.duration || 1) - 1);
+  
   return {
     id: apiPackage.id,
     name: apiPackage.name,
@@ -75,6 +79,7 @@ const convertApiPackageToCardFormat = (apiPackage: ApiPackage): LocalPackage => 
     original_price: apiPackage.original_price || null,
     pricing_type: apiPackage.pricing_type || 'per_person',
     duration: apiPackage.duration.toString(),
+    nights: calculatedNights,
     // Map destinations from PackageDestination relationship
     destinations: Array.isArray(apiPackage.destinations) 
       ? apiPackage.destinations.map((dest: any) => dest.island || dest.name || dest).filter(Boolean)
@@ -256,7 +261,12 @@ export const ExperiencesTrendingDeals: React.FC<Props> = ({ packages = [] }) => 
                       <HStack spacing={4} color="gray.200" fontSize="sm">
                         <HStack spacing={1}>
                           <Icon as={ClockIcon} className="w-4 h-4" />
-                          <Text>{parseInt(pkg.duration)} days</Text>
+                          <Text>
+                            {(() => {
+                              const nights = pkg.nights || Math.max(0, (parseInt(pkg.duration) || 1) - 1);
+                              return nights > 0 ? `${parseInt(pkg.duration)} days, ${nights} nights` : `${parseInt(pkg.duration)} days`;
+                            })()}
+                          </Text>
                         </HStack>
                         <HStack spacing={1}>
                           <Icon as={UsersIcon} className="w-4 h-4" />
@@ -359,13 +369,14 @@ export const ExperiencesTrendingDeals: React.FC<Props> = ({ packages = [] }) => 
                             )}
                           </VStack>
                           <VStack align="end" spacing={0}>
-                            {pkg.pricing_type === 'per_person' && (
-                              <Text fontSize="sm" color="gray.500">
-                                {t('homepage.trending.totalFor', 'Total for 2')}
-                              </Text>
-                            )}
+                            <Text fontSize="sm" color="gray.500">
+                              {(() => {
+                                const nights = pkg.nights || Math.max(0, (parseInt(pkg.duration) || 1) - 1);
+                                return nights > 0 ? `${pkg.duration} days, ${nights} nights` : `${pkg.duration} days`;
+                              })()}
+                            </Text>
                             <Text fontSize="lg" fontWeight="semibold" color="gray.700">
-                              {formatPrice(pkg.pricing_type === 'per_person' ? currentPrice * 2 : currentPrice)}
+                              {formatPrice(currentPrice)}
                             </Text>
                           </VStack>
                         </HStack>

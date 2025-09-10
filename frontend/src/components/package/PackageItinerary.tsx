@@ -65,9 +65,21 @@ export function PackageItinerary({ itinerary }: PackageItineraryProps) {
       <CardHeader>
         <HStack justify="space-between" align="center">
           <Heading size="md" color="gray.800">Daily Itinerary</Heading>
-          <Badge colorScheme="purple" variant="subtle" fontSize="sm">
-            {itinerary.length} days
-          </Badge>
+          <HStack spacing={2}>
+            <Badge colorScheme="purple" variant="subtle" fontSize="sm">
+              {itinerary.length} days
+            </Badge>
+            {(() => {
+              // Calculate nights from the package data if available
+              const packageData = (window as any).__currentPackageVariant || (window as any).__currentPackage;
+              const nights = packageData?.nights || (packageData?.duration ? packageData.duration - 1 : 0);
+              return nights > 0 ? (
+                <Badge colorScheme="blue" variant="subtle" fontSize="sm">
+                  {nights} nights
+                </Badge>
+              ) : null;
+            })()}
+          </HStack>
         </HStack>
       </CardHeader>
       <CardBody>
@@ -170,8 +182,8 @@ export function PackageItinerary({ itinerary }: PackageItineraryProps) {
                                     <PopoverBody>
                                       <VStack align="start" spacing={2}>
                                         <Text fontWeight="semibold" color="gray.800">{exp.name}</Text>
-                                        {exp.image && (
-                                          <ChakraImage src={exp.image as any} alt={exp.name} borderRadius="md" w="100%" h="120px" objectFit="cover" />
+                                        {(exp as any).image && (
+                                          <ChakraImage src={(exp as any).image} alt={exp.name} borderRadius="md" w="100%" h="120px" objectFit="cover" />
                                         )}
                                         {exp.description && (
                                           <Text fontSize="sm" color="gray.600">{exp.description}</Text>

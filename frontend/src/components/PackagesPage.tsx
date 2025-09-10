@@ -91,6 +91,7 @@ interface LocalPackage {
   original_price?: string | null;
   pricing_type?: 'per_person' | 'per_couple' | 'per_room' | 'per_group';
   duration: string;
+  nights: number;
   destinations: any[];
   highlights: string[];
   included: string[];
@@ -103,6 +104,9 @@ interface LocalPackage {
 }
 
 const convertApiPackageToCardFormat = (apiPackage: ApiPackage): LocalPackage => {
+  // Calculate nights if not provided (usually duration - 1)
+  const calculatedNights = apiPackage.nights || Math.max(0, (apiPackage.duration || 1) - 1);
+  
   return {
     id: apiPackage.id,
     name: apiPackage.name,
@@ -111,6 +115,7 @@ const convertApiPackageToCardFormat = (apiPackage: ApiPackage): LocalPackage => 
     original_price: apiPackage.original_price || null,
     pricing_type: apiPackage.pricing_type || 'per_person',
     duration: apiPackage.duration.toString(),
+    nights: calculatedNights,
     destinations: apiPackage.destinations || [],
     highlights: apiPackage.highlights || [],
     included: apiPackage.included || [],
@@ -641,7 +646,13 @@ Can you help me finalize this package?`;
                           <HStack spacing={4} color="gray-200" fontSize="sm">
                             <HStack spacing={1}>
                               <Icon as={ClockIcon} className="w-4 h-4" />
-                              <Text>{t('packages.card.days', '{{count}} days', { count: parseInt(pkg.duration) })}</Text>
+                              <Text>
+                                {(() => {
+                                  const nights = pkg.nights || Math.max(0, (parseInt(pkg.duration) || 1) - 1);
+                                  const daysText = t('packages.card.days', '{{count}} days', { count: parseInt(pkg.duration) });
+                                  return nights > 0 ? `${daysText}, ${nights} ${t('packages.card.nights', 'nights')}` : daysText;
+                                })()}
+                              </Text>
                             </HStack>
                             <HStack spacing={1}>
                               <Icon as={UsersIcon} className="w-4 h-4" />
@@ -744,13 +755,17 @@ Can you help me finalize this package?`;
                                 )}
                               </VStack>
                               <VStack align="end" spacing={0}>
-                                {pkg.pricing_type === 'per_person' && (
+                                <Text fontSize="sm" color="gray.500">
+                                  {(() => {
+                                    const nights = pkg.nights || Math.max(0, (parseInt(pkg.duration) || 1) - 1);
+                                    return nights > 0 ? `${pkg.duration} days, ${nights} nights` : `${pkg.duration} days`;
+                                  })()}
+                                </Text>
                                   <Text fontSize="sm" color="gray-500">
-                                    {t('packages.card.totalFor', 'Total for 2')}
                                   </Text>
-                                )}
+                                
                                 <Text fontSize="lg" fontWeight="semibold" color="gray-700">
-                                  {formatPrice(pkg.pricing_type === 'per_person' ? discountedPrice * 2 : discountedPrice)}
+                                  {formatPrice(discountedPrice)}
                                 </Text>
                               </VStack>
                             </HStack>

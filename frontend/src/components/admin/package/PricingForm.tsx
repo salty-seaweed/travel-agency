@@ -81,8 +81,9 @@ export function PricingForm({ form, updateForm }: PricingFormProps) {
         </Text>
 
         {/* Header */}
-        <Grid templateColumns={{ base: '1fr', md: '1fr 1fr 1fr auto auto' }} gap={4} mb={2} alignItems="center">
+        <Grid templateColumns={{ base: '1fr', md: '1fr 1fr 1fr 1fr auto auto' }} gap={4} mb={2} alignItems="center">
           <Text fontSize="xs" color="gray.500">Duration (days)</Text>
+          <Text fontSize="xs" color="gray.500">Nights</Text>
           <Text fontSize="xs" color="gray.500">Price</Text>
           <Text fontSize="xs" color="gray.500">Original Price (optional)</Text>
           <Text fontSize="xs" color="gray.500">Default</Text>
@@ -92,7 +93,7 @@ export function PricingForm({ form, updateForm }: PricingFormProps) {
         {/* Rows */}
         <VStack spacing={3} align="stretch">
           {(form.variants || []).map((v: any, idx: number) => (
-            <Grid key={v.id || idx} templateColumns={{ base: '1fr', md: '1fr 1fr 1fr auto auto' }} gap={4} alignItems="center">
+            <Grid key={v.id || idx} templateColumns={{ base: '1fr', md: '1fr 1fr 1fr 1fr auto auto' }} gap={4} alignItems="center">
               <Input
                 type="number"
                 min={1}
@@ -101,6 +102,17 @@ export function PricingForm({ form, updateForm }: PricingFormProps) {
                 onChange={(e) => {
                   const variants = [...(form.variants || [])];
                   variants[idx] = { ...variants[idx], duration_days: Number(e.target.value) };
+                  updateForm({ variants });
+                }}
+              />
+              <Input
+                type="number"
+                min={0}
+                value={v.nights || ''}
+                placeholder="e.g., 2"
+                onChange={(e) => {
+                  const variants = [...(form.variants || [])];
+                  variants[idx] = { ...variants[idx], nights: Number(e.target.value) };
                   updateForm({ variants });
                 }}
               />
@@ -157,7 +169,7 @@ export function PricingForm({ form, updateForm }: PricingFormProps) {
             icon={<PlusIcon className="h-4 w-4" /> as any}
             onClick={() => {
               const variants = [...(form.variants || [])];
-              variants.push({ duration_days: (variants[variants.length-1]?.duration_days || 1) + 1, price: '', original_price: '', is_default: variants.length === 0 });
+              variants.push({ duration_days: (variants[variants.length-1]?.duration_days || 1) + 1, nights: (variants[variants.length-1]?.nights || 0) + 1, price: '', original_price: '', is_default: variants.length === 0 });
               updateForm({ variants });
             }}
           />

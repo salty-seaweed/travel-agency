@@ -158,11 +158,12 @@ export function PackageCard({ package: pkg, className = '', loading = false }: P
                   {discountPercent > 0 && (
                     <div className="text-xs text-green-600 font-semibold text-right">{discountPercent}% OFF</div>
                   )}
-                  {pkg.pricing_type === 'per_person' && (
-                    <div className="text-xs text-gray-500 font-medium">
-                      {t('packageCard.perPerson', 'per person')}
-                    </div>
-                  )}
+                  <div className="text-xs text-gray-500 font-medium">
+                    {(() => {
+                      const nights = pkg.nights || Math.max(0, (parseInt(String(pkg.duration)) || 1) - 1);
+                      return nights > 0 ? `${String(pkg.duration)} days, ${String(nights)} nights` : `${String(pkg.duration)} days`;
+                    })()}
+                  </div>
                 </>
               );
             })()}
@@ -196,10 +197,19 @@ export function PackageCard({ package: pkg, className = '', loading = false }: P
             <span className="font-medium text-xs">
               {(() => {
                 const hasVariants = Array.isArray((pkg as any).variants) && (pkg as any).variants.length > 0;
-                if (!hasVariants) return t('packageCard.duration', '{{count}} days', { count: Number(pkg.duration) as any });
+                const calculatedNights = pkg.nights || Math.max(0, (parseInt(String(pkg.duration)) || 1) - 1);
+                
+                if (!hasVariants) {
+                  const daysText = t('packageCard.duration', '{{count}} days', { count: Number(pkg.duration) });
+                  return calculatedNights > 0 ? `${daysText}, ${String(calculatedNights)} nights` : daysText;
+                }
                 const durations = Array.from(new Set((pkg as any).variants.map((v: any) => Number(v.duration_days)).filter((n: any) => !isNaN(n)))).sort((a: number,b: number)=>a-b);
-                if (durations.length === 1) return t('packageCard.duration', '{{count}} days', { count: Number(durations[0]) as any });
-                return `${durations[0]}-${durations[durations.length-1]} days`;
+                if (durations.length === 1) {
+                  const daysText = t('packageCard.duration', '{{count}} days', { count: Number(durations[0]) });
+                  return calculatedNights > 0 ? `${daysText}, ${String(calculatedNights)} nights` : daysText;
+                }
+                const daysRange = `${durations[0]}-${durations[durations.length-1]} days`;
+                return calculatedNights > 0 ? `${daysRange}, ${String(calculatedNights)} nights` : daysRange;
               })()}
             </span>
           </div>
