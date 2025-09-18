@@ -1,9 +1,11 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import { Routes, Route, Outlet, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useScrollToTop } from './hooks/useScrollToTop';
 import Layout from './components/Layout';
 import { LoadingSpinner } from './components/LoadingSpinner';
+import { initializeSEOOptimizations } from './utils/seoOptimizations';
+import { PerformanceMonitor } from './components/PerformanceMonitor';
 // import { PageErrorBoundary } from './components/SimpleErrorBoundary';
 
 // Lazy load all route components to reduce initial bundle size
@@ -52,8 +54,14 @@ const RouteLoading = () => (
 function AppContent() {
   useScrollToTop();
 
+  // Initialize SEO optimizations
+  useEffect(() => {
+    initializeSEOOptimizations();
+  }, []);
+
   return (
     <>
+      <PerformanceMonitor />
       <Helmet>
         <title>Thread Travels & Tours - Your Maldives Paradise</title>
         <meta name="description" content="Discover the perfect Maldives getaway with Thread Travels & Tours. Luxury accommodations, exclusive packages, and unforgettable experiences." />

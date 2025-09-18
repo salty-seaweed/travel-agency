@@ -32,6 +32,7 @@ import {
 import { useDestinations, useFeaturedDestinations } from '../../../hooks/useQueries';
 import { useWhatsApp } from '../../../hooks/useQueries';
 import { useTranslation } from '../../../i18n';
+import { EnhancedImagePreloader } from '../../EnhancedImagePreloader';
 
 interface HeroSectionProps {
   homepageContent?: any;
@@ -61,6 +62,7 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
 
   const [showDestinationDropdown, setShowDestinationDropdown] = useState(false);
   const [filteredDestinations, setFilteredDestinations] = useState<any[]>([]);
+  const [imagesLoaded, setImagesLoaded] = useState(false);
 
   const heroImages = useMemo(() => [
     "/images/optimized/hero/hero4.webp",
@@ -72,11 +74,13 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentImageIndex((prev) => (prev + 1) % heroImages.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [heroImages.length]);
+    if (imagesLoaded) {
+      const interval = setInterval(() => {
+        setCurrentImageIndex((prev) => (prev + 1) % heroImages.length);
+      }, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [heroImages.length, imagesLoaded]);
 
   // Filter destinations based on input
   useEffect(() => {
@@ -154,10 +158,30 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
   }, [featuredDestinations, destinations]);
 
   return (
-    <Box position="relative" minH="100vh" overflow="hidden">
-      <Box position="absolute" top={0} left={0} right={0} bottom={0} backgroundImage={`url(${heroImages[currentImageIndex]})`} backgroundSize="cover" backgroundPosition="center" backgroundRepeat="no-repeat" transition="background-image 1s ease-in-out" style={{ imageRendering: 'high-quality' }}>
-        <Box position="absolute" top={0} left={0} right={0} bottom={0} bg="blackAlpha.600" />
-      </Box>
+    <EnhancedImagePreloader
+      images={heroImages}
+      onComplete={() => setImagesLoaded(true)}
+      priority="hero"
+      showProgress={true}
+      fallbackDelay={2000}
+    >
+      <Box position="relative" minH="100vh" overflow="hidden">
+        <Box 
+          position="absolute" 
+          top={0} 
+          left={0} 
+          right={0} 
+          bottom={0} 
+          backgroundImage={imagesLoaded ? `url(${heroImages[currentImageIndex]})` : 'none'}
+          backgroundColor={!imagesLoaded ? 'gray.100' : 'transparent'}
+          backgroundSize="cover" 
+          backgroundPosition="center" 
+          backgroundRepeat="no-repeat" 
+          transition="background-image 1s ease-in-out" 
+          style={{ imageRendering: 'high-quality' }}
+        >
+          <Box position="absolute" top={0} left={0} right={0} bottom={0} bg="blackAlpha.600" />
+        </Box>
 
       <Container maxW="7xl" position="relative" zIndex={2} py={20}>
         <Grid templateColumns={{ base: '1fr', lg: '1fr 1fr' }} gap={12} alignItems="center" minH="80vh">
@@ -324,5 +348,6 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
         </Box>
       </Container>
     </Box>
+    </EnhancedImagePreloader>
   );
 };

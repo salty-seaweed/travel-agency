@@ -22,10 +22,10 @@ export function SEO({
   structuredData 
 }: SEOProps) {
   const { whatsappNumber } = useWhatsApp();
-  const siteName = 'Maldives Travel';
+  const siteName = 'Thread Travels & Tours';
   const fullTitle = `${title} | ${siteName}`;
   const defaultImage = 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=1200&h=630&fit=crop';
-  const defaultUrl = 'https://maldives-travel.com';
+  const defaultUrl = 'https://threadtravels.com';
 
   return (
     <Helmet>
@@ -69,17 +69,17 @@ export function SEO({
 // Predefined SEO configurations for common pages
 export const seoConfigs = {
   home: {
-    title: 'Maldives Travel - Discover Your Paradise',
-    description: 'Book your dream Maldives vacation with our curated selection of properties and travel packages. From luxury resorts to charming properties, find your perfect paradise getaway.',
-    keywords: 'Maldives travel, Maldives vacation, Maldives resorts, Maldives properties, Maldives packages, Maldives booking',
+    title: 'Thread Travels & Tours - Discover Your Paradise',
+    description: 'Book your dream Maldives vacation with Thread Travels & Tours. Curated selection of luxury resorts, travel packages, and authentic experiences in the Maldives.',
+    keywords: 'Maldives travel, Maldives vacation, Maldives resorts, Thread Travels, Maldives packages, Maldives booking',
     type: 'website' as const,
     structuredData: {
       "@context": "https://schema.org",
       "@type": "TravelAgency",
-      "name": "Maldives Travel",
-      "description": "Your trusted partner for Maldives travel experiences",
-      "url": "https://maldives-travel.com",
-      "logo": "https://maldives-travel.com/logo.png",
+      "name": "Thread Travels & Tours",
+      "description": "Your trusted Maldives travel partner for luxury resorts and authentic experiences",
+      "url": "https://threadtravels.com",
+      "logo": "https://threadtravels.com/logo.png",
       "address": {
         "@type": "PostalAddress",
         "addressLocality": "Male",
@@ -87,50 +87,50 @@ export const seoConfigs = {
       },
       "contactPoint": {
         "@type": "ContactPoint",
-        "telephone": "Contact us for phone number",
+        "telephone": "+9607441097",
         "contactType": "customer service"
       }
     }
   },
   
   properties: {
-    title: 'Maldives Properties - Hotels, Resorts & Accommodations',
-    description: 'Browse our hand-picked selection of Maldives properties including luxury resorts, boutique hotels, and local accommodations. Find your perfect accommodation in paradise.',
-    keywords: 'Maldives hotels, Maldives resorts, Maldives properties, Maldives accommodation, Maldives properties',
+    title: 'Thread Travels Properties - Hotels, Resorts & Accommodations',
+    description: 'Browse our hand-picked selection of Maldives properties including luxury resorts, boutique hotels, and local accommodations. Thread Travels curated accommodations.',
+    keywords: 'Maldives hotels, Maldives resorts, Thread Travels properties, Maldives accommodation, luxury resorts',
     type: 'website' as const,
     structuredData: {
       "@context": "https://schema.org",
       "@type": "ItemList",
-      "name": "Maldives Properties",
-      "description": "Curated selection of Maldives accommodations"
+      "name": "Thread Travels Properties",
+      "description": "Curated selection of Maldives accommodations by Thread Travels"
     }
   },
   
   packages: {
-    title: 'Maldives Travel Packages - Complete Vacation Experiences',
-    description: 'Discover our curated Maldives travel packages including island hopping, luxury honeymoons, and adventure tours. All-inclusive experiences tailored for every traveler.',
-    keywords: 'Maldives packages, Maldives tours, Maldives vacation packages, Maldives island hopping, Maldives honeymoon',
+    title: 'Thread Travels Packages - Complete Maldives Experiences',
+    description: 'Discover Thread Travels curated Maldives packages including island hopping, luxury honeymoons, and adventure tours. All-inclusive experiences tailored for every traveler.',
+    keywords: 'Thread Travels packages, Maldives tours, Maldives vacation packages, Maldives island hopping, Maldives honeymoon',
     type: 'website' as const
   },
   
   about: {
-    title: 'About Maldives Travel - Your Trusted Travel Partner',
-    description: 'Learn about Maldives Travel, our story, values, and commitment to creating unforgettable travel experiences in the Maldives.',
-    keywords: 'about Maldives Travel, Maldives travel agency, Maldives travel company, Maldives travel experts',
+    title: 'About Thread Travels & Tours - Your Trusted Travel Partner',
+    description: 'Learn about Thread Travels & Tours, our story, values, and commitment to creating unforgettable travel experiences in the Maldives.',
+    keywords: 'about Thread Travels, Thread Travels agency, Maldives travel company, Maldives travel experts',
     type: 'website' as const
   },
   
   contact: {
-    title: 'Contact Maldives Travel - Get in Touch',
-    description: 'Contact Maldives Travel for personalized travel advice, bookings, and support. We\'re here to help you plan your perfect Maldives adventure.',
-    keywords: 'contact Maldives Travel, Maldives travel contact, Maldives booking support, Maldives travel help',
+    title: 'Contact Thread Travels & Tours - Get in Touch',
+    description: 'Contact Thread Travels & Tours for personalized travel advice, bookings, and support. We\'re here to help you plan your perfect Maldives adventure.',
+    keywords: 'contact Thread Travels, Thread Travels contact, Maldives booking support, Thread Travels help',
     type: 'website' as const
   },
   
   faq: {
-    title: 'Maldives Travel FAQ - Common Questions Answered',
-    description: 'Find answers to frequently asked questions about traveling to the Maldives, booking properties, transportation, and planning your perfect vacation.',
-    keywords: 'Maldives FAQ, Maldives travel questions, Maldives travel guide, Maldives travel tips',
+    title: 'Thread Travels FAQ - Common Questions Answered',
+    description: 'Find answers to frequently asked questions about traveling to the Maldives with Thread Travels, booking properties, transportation, and planning your perfect vacation.',
+    keywords: 'Thread Travels FAQ, Maldives travel questions, Thread Travels guide, Maldives travel tips',
     type: 'website' as const
   }
 };

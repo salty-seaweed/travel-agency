@@ -1,0 +1,21 @@
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://threadtravels.com/sitemap.xml
+
+# Crawl delay (optional - helps prevent server overload)
+Crawl-delay: 1
+
+# Disallow admin and API endpoints from being indexed
+Disallow: /api/
+Disallow: /admin/
+Disallow: /media/uploads/private/
+
+# Allow important directories
+Allow: /packages/
+Allow: /destinations/
+Allow: /about/
+Allow: /contact/
+Allow: /media/package_images/
+Allow: /media/homepage/

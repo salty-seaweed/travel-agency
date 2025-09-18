@@ -21,8 +21,11 @@ import {
 import { useParams, useNavigate } from 'react-router-dom';
 import { useFetch } from '../hooks/useFetch';
 import { SEO } from './SEO';
+import { AdvancedSEO } from './AdvancedSEO';
+import { Breadcrumbs, useBreadcrumbs } from './Breadcrumbs';
 import { ErrorBoundary } from './ErrorBoundary';
 import { LoadingSpinner } from './LoadingSpinner';
+import { generatePackageStructuredData } from '../utils/seoOptimizations';
 import { PackageHeader } from './package/PackageHeader';
 import { PackageImageGallery } from './package/PackageImageGallery';
 import { PackageItinerary } from './package/PackageItinerary';
@@ -48,6 +51,13 @@ export function PackageDetailPage() {
   const { data: packages, isLoading, error } = useFetch<Package>('/packages/');
   const packageData = packages?.find(pkg => pkg.id === parseInt(id || '0'));
   const [selectedVariantId, setSelectedVariantId] = useState<number | null>(null);
+  
+  // Get breadcrumbs for SEO
+  const breadcrumbs = useBreadcrumbs([
+    { name: 'Home', href: '/' },
+    { name: 'Travel Packages', href: '/packages' },
+    { name: packageData?.name || 'Package', href: `/packages/${id}`, isCurrentPage: true }
+  ]);
 
   useEffect(() => {
     if (packageData) {
@@ -131,13 +141,33 @@ export function PackageDetailPage() {
     );
   }
 
+  // Generate structured data for the package
+  const structuredData = packageData ? generatePackageStructuredData(packageData) : null;
+
   return (
-    <ErrorBoundary level="page">
-      <SEO
-        title={`${packageData.name} - Travel Package`}
-        description={packageData.description}
-        image={packageData.images?.[0]?.image}
-      />
+    <>
+      {packageData && (
+        <AdvancedSEO
+          title={`${packageData.name} - Maldives Travel Package`}
+          description={packageData.description || `Discover ${packageData.name} with Thread Travels & Tours. Premium Maldives travel experience with luxury accommodations and authentic adventures.`}
+          image={packageData.images?.[0]?.image}
+          type="product"
+          keywords={`${packageData.name}, Maldives package, Thread Travels, luxury resort, island vacation`}
+          structuredData={structuredData}
+          breadcrumbs={breadcrumbs}
+          price={packageData.price_from ? {
+            amount: packageData.price_from,
+            currency: 'USD',
+            availability: 'InStock'
+          } : undefined}
+        />
+      )}
+      
+      <ErrorBoundary level="page">
+      <Container maxW="7xl" py={4}>
+        {/* Breadcrumbs */}
+        <Breadcrumbs />
+      </Container>
       
       <Container maxW="7xl" py={8}>
         {(() => {
@@ -364,5 +394,6 @@ export function PackageDetailPage() {
         onClose={() => setShowBookingForm(false)}
       />
     </ErrorBoundary>
+    </>
   );
 } 
