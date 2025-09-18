@@ -178,7 +178,7 @@ export const EnhancedFAQ: React.FC<EnhancedFAQProps> = ({
 export const threadTravelsFAQs: FAQItem[] = [
   {
     question: "What destinations do you offer in the Maldives?",
-    answer: "We offer packages to various atolls and islands across the Maldives, including popular destinations like Male, Hulhule, and many resort islands. Our curated selection includes luxury resorts, local island experiences, and adventure packages.",
+    answer: "We offer budget-friendly packages to various atolls and islands across the Maldives, including popular destinations like Male, Hulhule, and many resort islands. Our curated selection focuses on affordable guesthouses, local island experiences, and multi-island adventure packages.",
     category: "Destinations"
   },
   {
@@ -188,7 +188,7 @@ export const threadTravelsFAQs: FAQItem[] = [
   },
   {
     question: "What is included in your travel packages?",
-    answer: "Our packages typically include accommodation, meals (as specified), airport transfers, and various activities. Each package clearly lists what's included and excluded. We also offer customizable packages to meet your specific needs.",
+    answer: "Our budget-friendly packages typically include accommodation in affordable guesthouses or mid-range resorts, airport transfers, and selected activities. Each package clearly lists what's included and excluded to help you make informed decisions. We focus on value-driven experiences without compromising on quality.",
     category: "Packages"
   },
   {

@@ -70,14 +70,14 @@ export function SEO({
 export const seoConfigs = {
   home: {
     title: 'Thread Travels & Tours - Discover Your Paradise',
-    description: 'Book your dream Maldives vacation with Thread Travels & Tours. Curated selection of luxury resorts, travel packages, and authentic experiences in the Maldives.',
-    keywords: 'Maldives travel, Maldives vacation, Maldives resorts, Thread Travels, Maldives packages, Maldives booking',
+    description: 'Discover budget-friendly Maldives travel with Thread Travels & Tours. Island packages and multi-island adventures that let you experience paradise without breaking the bank.',
+    keywords: 'Maldives travel, Maldives vacation, budget Maldives, Thread Travels, island packages, multi-island adventures, affordable Maldives',
     type: 'website' as const,
     structuredData: {
       "@context": "https://schema.org",
       "@type": "TravelAgency",
       "name": "Thread Travels & Tours",
-      "description": "Your trusted Maldives travel partner for luxury resorts and authentic experiences",
+      "description": "Your trusted Maldives travel partner for budget-friendly island packages and multi-island adventures",
       "url": "https://threadtravels.com",
       "logo": "https://threadtravels.com/logo.png",
       "address": {
@@ -95,8 +95,8 @@ export const seoConfigs = {
   
   properties: {
     title: 'Thread Travels Properties - Hotels, Resorts & Accommodations',
-    description: 'Browse our hand-picked selection of Maldives properties including luxury resorts, boutique hotels, and local accommodations. Thread Travels curated accommodations.',
-    keywords: 'Maldives hotels, Maldives resorts, Thread Travels properties, Maldives accommodation, luxury resorts',
+    description: 'Browse our curated selection of Maldives accommodations from budget guesthouses to mid-range resorts. Thread Travels finds the best value options for your island adventures.',
+    keywords: 'Maldives hotels, budget Maldives accommodation, Thread Travels properties, Maldives guesthouses, affordable Maldives resorts',
     type: 'website' as const,
     structuredData: {
       "@context": "https://schema.org",
@@ -108,8 +108,8 @@ export const seoConfigs = {
   
   packages: {
     title: 'Thread Travels Packages - Complete Maldives Experiences',
-    description: 'Discover Thread Travels curated Maldives packages including island hopping, luxury honeymoons, and adventure tours. All-inclusive experiences tailored for every traveler.',
-    keywords: 'Thread Travels packages, Maldives tours, Maldives vacation packages, Maldives island hopping, Maldives honeymoon',
+    description: 'Discover Thread Travels budget-friendly Maldives packages including island hopping adventures and multi-island experiences. Affordable paradise exploration for every traveler.',
+    keywords: 'Thread Travels packages, budget Maldives tours, Maldives vacation packages, island hopping, multi-island adventures, affordable Maldives',
     type: 'website' as const
   },
   

@@ -149,10 +149,10 @@ export function PackageDetailPage() {
       {packageData && (
         <AdvancedSEO
           title={`${packageData.name} - Maldives Travel Package`}
-          description={packageData.description || `Discover ${packageData.name} with Thread Travels & Tours. Premium Maldives travel experience with luxury accommodations and authentic adventures.`}
+          description={packageData.description || `Discover ${packageData.name} with Thread Travels & Tours. Budget-friendly Maldives travel experience with island packages and multi-island adventures.`}
           image={packageData.images?.[0]?.image}
           type="product"
-          keywords={`${packageData.name}, Maldives package, Thread Travels, luxury resort, island vacation`}
+          keywords={`${packageData.name}, Maldives package, Thread Travels, budget Maldives, island adventure, affordable paradise`}
           structuredData={structuredData}
           breadcrumbs={breadcrumbs}
           price={packageData.price_from ? {

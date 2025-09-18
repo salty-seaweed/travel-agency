@@ -89,7 +89,7 @@ export const addOrganizationStructuredData = () => {
       "https://www.facebook.com/threadtravels",
       "https://www.instagram.com/threadtravels"
     ],
-    "description": "Thread Travels & Tours is your trusted Maldives travel partner, offering curated luxury resort experiences and authentic local adventures.",
+    "description": "Thread Travels & Tours is your trusted Maldives travel partner, offering budget-friendly island packages and multi-island adventures that let you experience paradise without breaking the bank.",
     "foundingDate": "2020",
     "numberOfEmployees": "10-50",
     "priceRange": "$$-$$$",

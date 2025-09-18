@@ -234,8 +234,8 @@ export const AdvancedSEO: React.FC<AdvancedSEOProps> = ({
 export const advancedSeoConfigs = {
   home: {
     title: 'Thread Travels & Tours - Discover Your Paradise',
-    description: 'Book your dream Maldives vacation with Thread Travels & Tours. Curated selection of luxury resorts, travel packages, and authentic experiences in the Maldives.',
-    keywords: 'Maldives travel, Maldives vacation, Maldives resorts, Thread Travels, Maldives packages, luxury resorts, island hopping',
+    description: 'Discover budget-friendly Maldives travel with Thread Travels & Tours. Island packages and multi-island adventures that let you experience paradise without breaking the bank.',
+    keywords: 'Maldives travel, Maldives vacation, budget Maldives, Thread Travels, island packages, multi-island adventures, affordable Maldives',
     type: 'website' as const,
     structuredData: {
       "@context": "https://schema.org",
@@ -252,8 +252,8 @@ export const advancedSeoConfigs = {
   
   packages: {
     title: 'Maldives Travel Packages - Complete Experiences',
-    description: 'Discover Thread Travels curated Maldives packages including island hopping, luxury honeymoons, and adventure tours. All-inclusive experiences tailored for every traveler.',
-    keywords: 'Thread Travels packages, Maldives tours, Maldives vacation packages, island hopping, honeymoon packages',
+    description: 'Discover Thread Travels budget-friendly Maldives packages including island hopping adventures and multi-island experiences. Affordable paradise exploration for every traveler.',
+    keywords: 'Thread Travels packages, budget Maldives tours, Maldives vacation packages, island hopping, multi-island adventures, affordable Maldives',
     type: 'website' as const,
     structuredData: {
       "@context": "https://schema.org",
