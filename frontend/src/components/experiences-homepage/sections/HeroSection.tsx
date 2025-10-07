@@ -202,40 +202,61 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
           <Box position="absolute" top={0} left={0} right={0} bottom={0} bg="blackAlpha.600" />
         </Box>
 
-        <Container maxW="7xl" position="relative" zIndex={2} py={12}>
-        <Grid templateColumns={{ base: '1fr', lg: '1fr 1fr' }} gap={8} alignItems="center" minH="60vh">
-          <GridItem>
-            <VStack spacing={4} align="start" textAlign="left">
-                  <Heading size="2xl" className="text-3xl md:text-4xl font-bold text-white">{t('homepage.hero.title')}</Heading>
+      <Container maxW="7xl" position="relative" zIndex={2} py={12}>
+        <VStack spacing={8} alignItems="center" minH="60vh" justify="center">
+          {/* Hero Title and CTAs */}
+          <VStack spacing={4} textAlign="center" maxW="3xl">
+            <Heading size="2xl" className="text-4xl md:text-5xl font-bold text-white">
+              {t('homepage.hero.title')}
+            </Heading>
 
-              <HStack spacing={2} pt={2}>
-                <Button colorScheme="whatsapp" size="sm" onClick={handleWhatsAppClick}>WhatsApp</Button>
-                <Link to="/contact">
-                  <Button variant="outline" colorScheme="whiteAlpha" size="sm">Contact</Button>
-                </Link>
-              </HStack>
-            </VStack>
-          </GridItem>
+            <HStack spacing={3} pt={2}>
+              <Button colorScheme="whatsapp" size="md" onClick={handleWhatsAppClick}>
+                WhatsApp
+              </Button>
+              <Link to="/contact">
+                <Button variant="outline" colorScheme="whiteAlpha" size="md">
+                  Contact
+                </Button>
+              </Link>
+            </HStack>
+          </VStack>
 
-          <GridItem>
-            <Card bg={cardBg} border="1px solid" borderColor={borderColor} shadow="2xl" borderRadius="xl" overflow="hidden">
-              <CardBody p={6}>
-                <VStack spacing={4}>
-                  <VStack spacing={1} textAlign="center">
-                    <Heading size="md" color={textColor}>{t('homepage.search.title')}</Heading>
-                    <Text fontSize="sm" color={mutedTextColor}>{t('homepage.search.subtitle')}</Text>
-                  </VStack>
-
-                  <VStack spacing={4} w="full">
-                    <Box position="relative" w="full">
-                      <InputGroup>
-                        <InputLeftElement><Icon as={MapPinIcon} color="gray.400" /></InputLeftElement>
+          {/* Horizontal Search Bar - Bookmundi Style */}
+          <Box w="full" maxW="5xl">
+            <Card 
+              bg={cardBg} 
+              border="1px solid" 
+              borderColor={borderColor} 
+              shadow="2xl" 
+              borderRadius="2xl" 
+              overflow="visible"
+            >
+              <CardBody p={4}>
+                <Grid 
+                  templateColumns={{ base: '1fr', md: 'repeat(4, 1fr)' }} 
+                  gap={3}
+                  alignItems="end"
+                >
+                  {/* Destination Field */}
+                  <GridItem position="relative">
+                    <VStack align="start" spacing={1}>
+                      <Text fontSize="xs" fontWeight="semibold" color={textColor} px={1}>
+                        Destination
+                      </Text>
+                      <InputGroup size="lg">
+                        <InputLeftElement>
+                          <Icon as={MapPinIcon} color="gray.400" h={5} w={5} />
+                        </InputLeftElement>
                         <Input 
-                          placeholder={t('homepage.search.destinationPlaceholder', 'Which island or atoll?')} 
+                          placeholder={t('homepage.search.destinationPlaceholder', 'Which island?')} 
                           value={searchData.destination} 
                           onChange={(e) => setSearchData(prev => ({ ...prev, destination: e.target.value }))} 
-                          size="lg" 
                           borderRadius="lg"
+                          border="none"
+                          bg="gray.50"
+                          _hover={{ bg: "gray.100" }}
+                          _focus={{ bg: "white", boxShadow: "0 0 0 1px #0ea5e9" }}
                           onFocus={() => setShowDestinationDropdown(true)}
                         />
                       </InputGroup>
@@ -250,10 +271,10 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
                           borderColor="gray.200" 
                           borderRadius="lg" 
                           mt={1} 
-                          zIndex={10}
+                          zIndex={20}
                           maxH="200px"
                           overflowY="auto"
-                          shadow="lg"
+                          shadow="xl"
                         >
                           {filteredDestinations.map((destination) => (
                             <Box 
@@ -264,59 +285,94 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
                               _hover={{ bg: "gray.50" }}
                               onClick={() => handleDestinationSelect(destination)}
                             >
-                              <Text fontWeight="medium">{destination.name}</Text>
-                              <Text fontSize="sm" color="gray.500">{destination.island}, {destination.atoll}</Text>
+                              <Text fontWeight="medium" fontSize="sm">{destination.name}</Text>
+                              <Text fontSize="xs" color="gray.500">{destination.island}, {destination.atoll}</Text>
                             </Box>
                           ))}
                         </Box>
                       )}
-                    </Box>
+                    </VStack>
+                  </GridItem>
 
-                    <InputGroup>
-                      <InputLeftElement><Icon as={CalendarIcon} color="gray.400" /></InputLeftElement>
-                      <Input 
-                        placeholder={t('homepage.search.datePlaceholder', 'When are you going? (Optional)')} 
-                        value={searchData.dates} 
-                        onChange={(e) => setSearchData(prev => ({ ...prev, dates: e.target.value }))} 
-                        size="lg" 
-                        borderRadius="lg" 
-                      />
-                    </InputGroup>
+                  {/* Dates Field */}
+                  <GridItem>
+                    <VStack align="start" spacing={1}>
+                      <Text fontSize="xs" fontWeight="semibold" color={textColor} px={1}>
+                        Dates
+                      </Text>
+                      <InputGroup size="lg">
+                        <InputLeftElement>
+                          <Icon as={CalendarIcon} color="gray.400" h={5} w={5} />
+                        </InputLeftElement>
+                        <Input 
+                          placeholder={t('homepage.search.datePlaceholder', 'When?')} 
+                          value={searchData.dates} 
+                          onChange={(e) => setSearchData(prev => ({ ...prev, dates: e.target.value }))} 
+                          borderRadius="lg"
+                          border="none"
+                          bg="gray.50"
+                          _hover={{ bg: "gray.100" }}
+                          _focus={{ bg: "white", boxShadow: "0 0 0 1px #0ea5e9" }}
+                        />
+                      </InputGroup>
+                    </VStack>
+                  </GridItem>
 
-                    <InputGroup>
-                      <InputLeftElement><Icon as={UserGroupIcon} color="gray.400" /></InputLeftElement>
-                      <Select 
-                        placeholder={t('homepage.search.travelers', 'Travelers')} 
-                        value={searchData.travelers} 
-                        onChange={(e) => setSearchData(prev => ({ ...prev, travelers: e.target.value }))} 
-                        size="lg" 
-                        borderRadius="lg"
-                        paddingLeft="2.5rem"
-                      >
-                        <option value="1">{t('homepage.search.travelers_one', '1 Traveler')}</option>
-                        <option value="2">{t('homepage.search.travelers_two', '2 Travelers')}</option>
-                        <option value="3">{t('homepage.search.travelers_three', '3 Travelers')}</option>
-                        <option value="4">{t('homepage.search.travelers_four', '4 Travelers')}</option>
-                        <option value="5+">{t('homepage.search.travelers_five_plus', '5+ Travelers')}</option>
-                      </Select>
-                    </InputGroup>
+                  {/* Travelers Field */}
+                  <GridItem>
+                    <VStack align="start" spacing={1}>
+                      <Text fontSize="xs" fontWeight="semibold" color={textColor} px={1}>
+                        Travelers
+                      </Text>
+                      <InputGroup size="lg">
+                        <InputLeftElement>
+                          <Icon as={UserGroupIcon} color="gray.400" h={5} w={5} />
+                        </InputLeftElement>
+                        <Select 
+                          placeholder={t('homepage.search.travelers', 'How many?')} 
+                          value={searchData.travelers} 
+                          onChange={(e) => setSearchData(prev => ({ ...prev, travelers: e.target.value }))} 
+                          borderRadius="lg"
+                          border="none"
+                          bg="gray.50"
+                          paddingLeft="2.5rem"
+                          _hover={{ bg: "gray.100" }}
+                          _focus={{ bg: "white", boxShadow: "0 0 0 1px #0ea5e9" }}
+                        >
+                          <option value="1">{t('homepage.search.travelers_one', '1 Traveler')}</option>
+                          <option value="2">{t('homepage.search.travelers_two', '2 Travelers')}</option>
+                          <option value="3">{t('homepage.search.travelers_three', '3 Travelers')}</option>
+                          <option value="4">{t('homepage.search.travelers_four', '4 Travelers')}</option>
+                          <option value="5+">{t('homepage.search.travelers_five_plus', '5+ Travelers')}</option>
+                        </Select>
+                      </InputGroup>
+                    </VStack>
+                  </GridItem>
 
+                  {/* Search Button */}
+                  <GridItem>
                     <Button 
-                      colorScheme="blue" 
+                      bgGradient="linear(to-r, sky.500, blue.500)"
+                      _hover={{ bgGradient: "linear(to-r, sky.600, blue.600)" }}
+                      color="white"
                       size="lg" 
-                      w="full" 
+                      w="full"
+                      h="50px"
                       onClick={handleCreateCustomExperience}
-                      leftIcon={<Icon as={SparklesIcon} />}
+                      borderRadius="lg"
+                      fontWeight="semibold"
+                      boxShadow="md"
+                      _active={{ transform: "scale(0.98)" }}
                     >
-                      {t('homepage.search.startPlanning', 'Start Planning My Trip')}
+                      {t('homepage.search.startPlanning', 'Search')}
                     </Button>
-                  </VStack>
-                </VStack>
+                  </GridItem>
+                </Grid>
               </CardBody>
             </Card>
-          </GridItem>
-        </Grid>
-        </Container>
+          </Box>
+        </VStack>
+      </Container>
         </Box>
       )}
       {/* Popular Destinations Section - Hidden as requested */}

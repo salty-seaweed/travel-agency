@@ -16,6 +16,7 @@ import {
 import { useCustomerAuth } from '../hooks/useCustomerAuth';
 import { useWhatsApp } from '../hooks/useQueries';
 import { Button } from './ui/Button';
+import logo from '../assets/logo.svg';
 
 interface MobileNavigationProps {
   className?: string;
@@ -92,7 +93,7 @@ export function MobileNavigation({ className = '' }: MobileNavigationProps) {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <div className="w-10 h-10 rounded-lg flex items-center justify-center">
-              <img src="/vite.svg" alt="Thread Travels Logo" className="w-full h-full object-contain" />
+              <img src={logo} alt="Thread Travels Logo" className="w-full h-full object-contain" />
             </div>
             <div className="flex flex-col items-start">
               <span className="font-bold text-gray-900 leading-tight text-base">Thread Travels</span>
