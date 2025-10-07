@@ -91,12 +91,12 @@ export function MobileNavigation({ className = '' }: MobileNavigationProps) {
         <div className="flex items-center justify-between px-4 py-3">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">T</span>
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center">
+              <img src="/vite.svg" alt="Thread Travels Logo" className="w-full h-full object-contain" />
             </div>
             <div className="flex flex-col items-start">
-              <span className="font-semibold text-gray-900 leading-tight">Thread Travels</span>
-              <span className="text-xs text-gray-600 uppercase tracking-wide leading-tight m-0 p-0">Travel & Tours Maldives</span>
+              <span className="font-bold text-gray-900 leading-tight text-base">Thread Travels</span>
+              <span className="text-xs text-gray-600 uppercase tracking-wide leading-tight font-medium">Travels & Tours Maldives</span>
             </div>
           </Link>
 

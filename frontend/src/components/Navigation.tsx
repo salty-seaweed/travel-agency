@@ -386,11 +386,10 @@ export const Navigation = React.memo(() => {
               <Box
                 w="12"
                 h="12"
-                borderRadius="2xl"
+                borderRadius="xl"
                 display="flex"
                 alignItems="center"
                 justifyContent="center"
-                boxShadow="xl"
                 mr={2}
               >
                 <img 
@@ -402,22 +401,22 @@ export const Navigation = React.memo(() => {
               <VStack align="start" spacing={0}>
                 <Text 
                   fontSize="xl" 
-                  fontWeight="extrabold" 
-                  bgGradient="linear(to-r, blue.600, purple.600)" 
-                  bgClip="text"
-                  lineHeight="0.9"
-                  letterSpacing="tight"
+                  fontWeight="700" 
+                  color="gray.900"
+                  lineHeight="1.1"
+                  letterSpacing="-0.02em"
                 >
                   Thread Travels
                 </Text>
                 <Text 
-                  fontSize="sm" 
-                  color="gray.700" 
-                  fontWeight="semibold"
-                  letterSpacing="wide"
+                  fontSize="xs" 
+                  color="gray.600" 
+                  fontWeight="500"
+                  letterSpacing="0.01em"
                   textTransform="uppercase"
+                  lineHeight="1.2"
                 >
-                  & Tours
+                  Travels & Tours Maldives
                 </Text>
               </VStack>
             </Flex>
