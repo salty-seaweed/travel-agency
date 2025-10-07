@@ -22,6 +22,7 @@ import {
   Image,
   SimpleGrid,
   useToast,
+  Spinner,
 } from '@chakra-ui/react';
 import {
   MapPinIcon,
@@ -64,12 +65,16 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
   const [filteredDestinations, setFilteredDestinations] = useState<any[]>([]);
   const [imagesLoaded, setImagesLoaded] = useState(false);
 
+  // Support both images and GIFs for hero banner
   const heroImages = useMemo(() => [
     "/images/optimized/hero/hero4.webp",
     "/images/optimized/hero/hero5.webp", 
     "/images/optimized/hero/ishan69.webp",
     "/images/optimized/hero/ishan62.webp",
   ], []);
+  
+  // Check if any hero images are GIFs - GIFs will autoplay
+  const isGif = (url: string) => url.toLowerCase().endsWith('.gif');
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -147,7 +152,7 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
     // Fallback to regular destinations if no featured destinations configured
     if (destinations && destinations.length > 0) {
       return destinations.slice(0, 4).map(dest => ({
-        name: dest.name || dest.localized_name || 'Unknown Destination',
+        name: dest.name || 'Unknown Destination',
         image: dest.image || `/images/optimized/medium/ishan${Math.floor(Math.random() * 20) + 51}.webp`,
         packages: dest.package_count || 0
       }));
@@ -165,7 +170,22 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
       showProgress={true}
       fallbackDelay={2000}
     >
-      <Box position="relative" minH="100vh" overflow="hidden">
+      {!imagesLoaded ? (
+        <Box 
+          position="relative" 
+          minH="100vh" 
+          display="flex" 
+          alignItems="center" 
+          justifyContent="center"
+          bg="gray.900"
+        >
+          <VStack spacing={4}>
+            <Spinner size="xl" color="white" thickness="4px" />
+            <Text color="white" fontSize="lg">Loading...</Text>
+          </VStack>
+        </Box>
+      ) : (
+        <Box position="relative" minH="100vh" overflow="hidden">
         <Box 
           position="absolute" 
           top={0} 
@@ -177,31 +197,21 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
           backgroundSize="cover" 
           backgroundPosition="center" 
           backgroundRepeat="no-repeat" 
-          transition="background-image 1s ease-in-out" 
-          style={{ imageRendering: 'high-quality' }}
+          transition="background-image 1s ease-in-out"
         >
           <Box position="absolute" top={0} left={0} right={0} bottom={0} bg="blackAlpha.600" />
         </Box>
 
-      <Container maxW="7xl" position="relative" zIndex={2} py={20}>
-        <Grid templateColumns={{ base: '1fr', lg: '1fr 1fr' }} gap={12} alignItems="center" minH="80vh">
+        <Container maxW="7xl" position="relative" zIndex={2} py={12}>
+        <Grid templateColumns={{ base: '1fr', lg: '1fr 1fr' }} gap={8} alignItems="center" minH="60vh">
           <GridItem>
-            <VStack spacing={8} align="start" textAlign="left">
-                  <Badge 
-                    className="bg-white/20 backdrop-blur-md text-white px-6 py-2 rounded-full text-sm font-bold border border-white/30"
-                  >
-                    <Icon as={SparklesIcon} className="w-4 h-4 mr-2" />
-                    {t('homepage.hero.badge', 'Your Dream Maldives Vacation Awaits')}
-                  </Badge>
-                  
-                  <Heading size="2xl" className="text-5xl md:text-6xl font-bold text-white">{t('homepage.hero.title')}</Heading>
-                  
-                  <Text className="text-xl text-blue-200 max-w-4xl mx-auto leading-relaxed">{t('homepage.hero.subtitle')}</Text>
+            <VStack spacing={4} align="start" textAlign="left">
+                  <Heading size="2xl" className="text-3xl md:text-4xl font-bold text-white">{t('homepage.hero.title')}</Heading>
 
-              <HStack spacing={4} pt={2}>
-                <Button colorScheme="whatsapp" size="md" onClick={handleWhatsAppClick}>{t('homepage.cta.chatWhatsApp')}</Button>
+              <HStack spacing={2} pt={2}>
+                <Button colorScheme="whatsapp" size="sm" onClick={handleWhatsAppClick}>WhatsApp</Button>
                 <Link to="/contact">
-                  <Button variant="outline" colorScheme="whiteAlpha" size="md">{t('homepage.cta.contactUs', 'Contact Now')}</Button>
+                  <Button variant="outline" colorScheme="whiteAlpha" size="sm">Contact</Button>
                 </Link>
               </HStack>
             </VStack>
@@ -209,11 +219,11 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
 
           <GridItem>
             <Card bg={cardBg} border="1px solid" borderColor={borderColor} shadow="2xl" borderRadius="xl" overflow="hidden">
-              <CardBody p={8}>
-                <VStack spacing={6}>
-                  <VStack spacing={2} textAlign="center">
-                    <Heading size="lg" color={textColor}>{t('homepage.search.title')}</Heading>
-                    <Text color={mutedTextColor}>{t('homepage.search.subtitle')}</Text>
+              <CardBody p={6}>
+                <VStack spacing={4}>
+                  <VStack spacing={1} textAlign="center">
+                    <Heading size="md" color={textColor}>{t('homepage.search.title')}</Heading>
+                    <Text fontSize="sm" color={mutedTextColor}>{t('homepage.search.subtitle')}</Text>
                   </VStack>
 
                   <VStack spacing={4} w="full">
@@ -281,6 +291,7 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
                         onChange={(e) => setSearchData(prev => ({ ...prev, travelers: e.target.value }))} 
                         size="lg" 
                         borderRadius="lg"
+                        paddingLeft="2.5rem"
                       >
                         <option value="1">{t('homepage.search.travelers_one', '1 Traveler')}</option>
                         <option value="2">{t('homepage.search.travelers_two', '2 Travelers')}</option>
@@ -305,49 +316,11 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
             </Card>
           </GridItem>
         </Grid>
-
-        <Box mt={16}>
-          <VStack spacing={8}>
-            <VStack spacing={2} textAlign="center">
-              <Text color="white" fontSize="lg" fontWeight="medium">{t('homepage.destinations.popularTitle', 'Popular Maldives Destinations')}</Text>
-              <Text color="gray.300" fontSize="sm">{t('homepage.destinations.popularSubtitle', 'Most sought-after islands and atolls for your perfect getaway')}</Text>
-            </VStack>
-
-            {trendingDestinations.length > 0 ? (
-              <SimpleGrid columns={{ base: 2, md: 4 }} spacing={6} w="full">
-                {trendingDestinations.map((destination) => (
-                  <Card 
-                    key={destination.name} 
-                    bg="whiteAlpha.900" 
-                    backdropFilter="blur(10px)" 
-                    border="1px solid" 
-                    borderColor="whiteAlpha.200" 
-                    overflow="hidden" 
-                    cursor="pointer" 
-                    transition="all 0.3s" 
-                    _hover={{ transform: 'translateY(-4px)', shadow: 'xl' }}
-                    onClick={() => handlePopularDestinationClick(destination)}
-                  >
-                    <Box position="relative" h="120px">
-                      <Image src={destination.image} alt={destination.name} w="full" h="full" objectFit="cover" />
-                      <Box position="absolute" top={0} left={0} right={0} bottom={0} bg="blackAlpha.400" />
-                      <VStack position="absolute" top={0} left={0} right={0} bottom={0} justify="center" spacing={1}>
-                        <Text color="white" fontWeight="bold" fontSize="lg">{destination.name}</Text>
-                      </VStack>
-                    </Box>
-                  </Card>
-                ))}
-              </SimpleGrid>
-            ) : (
-              <VStack spacing={4} textAlign="center">
-                <Text color="gray.300" fontSize="sm">{t('homepage.destinations.empty', 'No destinations available at the moment.')}</Text>
-                <Text color="gray.400" fontSize="xs">{t('homepage.destinations.emptyHelp', 'Please check back later or contact us for more information.')}</Text>
-              </VStack>
-            )}
-          </VStack>
+        </Container>
         </Box>
-      </Container>
-    </Box>
+      )}
+      {/* Popular Destinations Section - Hidden as requested */}
+      {/* Trending destinations can be re-enabled later if needed */}
     </EnhancedImagePreloader>
   );
 };

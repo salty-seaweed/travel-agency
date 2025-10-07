@@ -5,10 +5,10 @@ import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
 import { Button, Icon, HStack, Text } from '@chakra-ui/react';
 import type { Package } from '../../types';
 import { whatsappBooking } from '../../services/whatsapp-booking';
-import { BookingChoiceModal } from '../BookingChoiceModal';
 import { useTranslation } from '../../i18n';
 import { useCurrency } from '../../contexts/CurrencyContext';
 import { SmartLazyImage } from '../SmartLazyImage';
+import { useNavigate } from 'react-router-dom';
 
 interface PackageCardProps {
   package: Package;
@@ -19,9 +19,9 @@ interface PackageCardProps {
 export function PackageCard({ package: pkg, className = '', loading = false }: PackageCardProps) {
   const { t, i18n } = useTranslation();
   const { formatPrice } = useCurrency();
+  const navigate = useNavigate();
   const [imageLoaded, setImageLoaded] = React.useState(false);
   const [imageError, setImageError] = React.useState(false);
-  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
 
   // Helper function to get translated content based on current language
   const getTranslatedContent = React.useCallback((field: string, fallback: string = ''): string => {
@@ -97,7 +97,7 @@ export function PackageCard({ package: pkg, className = '', loading = false }: P
 
   return (
     <article className={`group bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-500 transform hover:-translate-y-1 border border-gray-100 ${className}`}>
-      {/* Smart Image Container */}
+      {/* Smart Image Container - Clean with no text overlays */}
       <div className="relative h-64 overflow-hidden">
         <SmartLazyImage
           src={imageUrl}
@@ -116,84 +116,25 @@ export function PackageCard({ package: pkg, className = '', loading = false }: P
           }}
         />
         
-        {/* Simplified overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-        
-        {/* Price Badge */}
-        <div className="absolute top-4 right-4">
-          <div className="bg-white/95 backdrop-blur-sm rounded-2xl px-4 py-3 shadow-lg">
-            {(() => {
-              // Determine starting price from variants if available
-              const hasVariants = Array.isArray((pkg as any).variants) && (pkg as any).variants.length > 0;
-              const variantPrices = hasVariants ? (pkg as any).variants.map((v: any) => parseFloat(String(v.price).replace(/[^0-9.]/g, ''))) : [];
-              const variantOriginals = hasVariants ? (pkg as any).variants.map((v: any) => v.original_price ? parseFloat(String(v.original_price).replace(/[^0-9.]/g, '')) : null) : [];
-              const minPrice = hasVariants ? Math.min(...variantPrices.filter(p => !isNaN(p))) : parseFloat(String(pkg.price).replace(/[^0-9.]/g, ''));
-              const currentPrice = minPrice;
-              const originalPrice = hasVariants ? (variantOriginals.filter((o): o is number => typeof o === 'number' && !isNaN(o)).sort((a,b)=>a-b)[0] || null) : (
-                pkg.original_price && pkg.original_price !== null && pkg.original_price !== 'null' && pkg.original_price !== '0' && pkg.original_price !== '0.00'
-                  ? parseFloat((pkg.original_price as string).replace(/[^0-9.]/g, ''))
-                  : null
-              );
-              const discountPercent = originalPrice && originalPrice > currentPrice
-                ? Math.round(((originalPrice - currentPrice) / originalPrice) * 100)
-                : 0;
-
-              // Display the price as stored in database (per_couple packages already have total price)
-              const displayPrice = currentPrice;
-              const displayOriginalPrice = originalPrice;
-
-              return (
-                <>
-                  {discountPercent > 0 && displayOriginalPrice && (
-                    <div className="text-sm text-gray-400 line-through mb-1">
-                      {formatPrice(displayOriginalPrice)}
-                    </div>
-                  )}
-                  <div className="text-2xl font-bold text-green-600">
-                    {formatPrice(displayPrice)}
-                  </div>
-                  {hasVariants && (
-                    <div className="text-[10px] text-gray-500 font-medium text-right uppercase tracking-wide">Starting from</div>
-                  )}
-                  {discountPercent > 0 && (
-                    <div className="text-xs text-green-600 font-semibold text-right">{discountPercent}% OFF</div>
-                  )}
-                  <div className="text-xs text-gray-500 font-medium">
-                    {(() => {
-                      const nights = pkg.nights || Math.max(0, (parseInt(String(pkg.duration)) || 1) - 1);
-                      return nights > 0 ? `${String(pkg.duration)} days, ${String(nights)} nights` : `${String(pkg.duration)} days`;
-                    })()}
-                  </div>
-                </>
-              );
-            })()}
-          </div>
-        </div>
-        
-        {pkg.is_featured && (
-          <div className="absolute top-4 left-4">
-            <span className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg">
-              ⭐ {t('packageCard.featured', 'Featured')}
-            </span>
-          </div>
-        )}
+        {/* Subtle hover overlay only */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
       </div>
       
-      {/* Enhanced Content with Better Information Hierarchy */}
-      <div className="p-6 flex flex-col min-h-0">
-        {/* Title and Location */}
-        <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-1 group-hover:text-blue-600 transition-colors duration-300">
+      {/* Content Area - Package name moved under photo */}
+      <div className="p-5 flex flex-col min-h-0">
+        {/* Title - First thing under photo */}
+        <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-sky-600 transition-colors duration-300">
           {getTranslatedContent('name', pkg.name)}
         </h3>
-        <div className="flex items-center text-gray-600 mb-4">
-          <MapPinIcon className="h-4 w-4 mr-2 flex-shrink-0 text-blue-500" aria-hidden="true" />
+        <div className="flex items-center text-gray-600 mb-3">
+          <MapPinIcon className="h-4 w-4 mr-1.5 flex-shrink-0 text-sky-500" aria-hidden="true" />
           <span className="text-sm font-medium line-clamp-1">{destinationsString}</span>
         </div>
         
         {/* Package Details */}
-        <div className="grid grid-cols-3 gap-3 mb-4 text-sm text-gray-600">
-          <div className="flex items-center gap-2">
-            <CalendarIcon className="h-4 w-4 text-blue-500 flex-shrink-0" aria-hidden="true" />
+        <div className="grid grid-cols-3 gap-2 mb-3 text-sm text-gray-600">
+          <div className="flex items-center gap-1.5">
+            <CalendarIcon className="h-4 w-4 text-sky-500 flex-shrink-0" aria-hidden="true" />
             <span className="font-medium text-xs">
               {(() => {
                 const hasVariants = Array.isArray((pkg as any).variants) && (pkg as any).variants.length > 0;
@@ -213,40 +154,85 @@ export function PackageCard({ package: pkg, className = '', loading = false }: P
               })()}
             </span>
           </div>
-          <div className="flex items-center gap-2">
-            <UsersIcon className="h-4 w-4 text-purple-500 flex-shrink-0" aria-hidden="true" />
+          <div className="flex items-center gap-1.5">
+            <UsersIcon className="h-4 w-4 text-teal-500 flex-shrink-0" aria-hidden="true" />
             <span className="font-medium text-xs">{t('packageCard.maxTravelers', 'Up to {{count}}', { count: pkg.maxTravelers })}</span>
           </div>
-          <div className="flex items-center gap-2">
-            <MapPinIcon className="h-4 w-4 text-green-500 flex-shrink-0" aria-hidden="true" />
+          <div className="flex items-center gap-1.5">
+            <MapPinIcon className="h-4 w-4 text-emerald-500 flex-shrink-0" aria-hidden="true" />
             <span className="font-medium text-xs">{t('packageCard.islands', '{{count}} islands', { count: pkg.destinations?.length || 1 })}</span>
           </div>
         </div>
         
-        {/* Highlights - Limited to prevent overflow */}
-        <div className="mb-4">
-          <div className="flex flex-wrap gap-1">
+        {/* Price Display - Single mention */}
+        <div className="mb-3">
+          {(() => {
+            // Determine starting price from variants if available
+            const hasVariants = Array.isArray((pkg as any).variants) && (pkg as any).variants.length > 0;
+            const variantPrices = hasVariants ? (pkg as any).variants.map((v: any) => parseFloat(String(v.price).replace(/[^0-9.]/g, ''))) : [];
+            const variantOriginals = hasVariants ? (pkg as any).variants.map((v: any) => v.original_price ? parseFloat(String(v.original_price).replace(/[^0-9.]/g, '')) : null) : [];
+            const minPrice = hasVariants ? Math.min(...variantPrices.filter(p => !isNaN(p))) : parseFloat(String(pkg.price).replace(/[^0-9.]/g, ''));
+            const currentPrice = minPrice;
+            const originalPrice = hasVariants ? (variantOriginals.filter((o): o is number => typeof o === 'number' && !isNaN(o)).sort((a,b)=>a-b)[0] || null) : (
+              pkg.original_price && pkg.original_price !== null && pkg.original_price !== 'null' && pkg.original_price !== '0' && pkg.original_price !== '0.00'
+                ? parseFloat((pkg.original_price as string).replace(/[^0-9.]/g, ''))
+                : null
+            );
+            const discountPercent = originalPrice && originalPrice > currentPrice
+              ? Math.round(((originalPrice - currentPrice) / originalPrice) * 100)
+              : 0;
+
+            // Display the price as stored in database
+            const displayPrice = currentPrice;
+            const displayOriginalPrice = originalPrice;
+
+            return (
+              <div className="flex items-baseline gap-2 flex-wrap">
+                <span className="text-2xl font-bold text-emerald-600">
+                  {formatPrice(displayPrice)}
+                </span>
+                {discountPercent > 0 && displayOriginalPrice && (
+                  <>
+                    <span className="text-sm text-gray-400 line-through">
+                      {formatPrice(displayOriginalPrice)}
+                    </span>
+                    <span className="text-xs text-emerald-600 font-semibold bg-emerald-50 px-2 py-0.5 rounded">
+                      {discountPercent}% OFF
+                    </span>
+                  </>
+                )}
+                {hasVariants && (
+                  <span className="text-xs text-gray-500">from</span>
+                )}
+              </div>
+            );
+          })()}
+        </div>
+        
+        {/* Highlights - Subtle design */}
+        <div className="mb-3">
+          <div className="flex flex-wrap gap-1.5">
             {highlights.slice(0, 2).map((highlight, index) => (
               <span 
                 key={index}
-                className="bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 px-2 py-1 rounded-lg text-xs font-semibold border border-blue-100"
+                className="bg-sky-50 text-sky-700 px-2 py-1 rounded-md text-xs font-medium border border-sky-100"
               >
                 {highlight}
               </span>
             ))}
             {highlights.length > 2 && (
-              <span className="bg-gradient-to-r from-gray-50 to-gray-100 text-gray-600 px-2 py-1 rounded-lg text-xs font-semibold border border-gray-200">
+              <span className="bg-gray-50 text-gray-600 px-2 py-1 rounded-md text-xs font-medium border border-gray-200">
                 {t('packageCard.moreHighlights', '+{{count}} more', { count: highlights.length - 2 })}
               </span>
             )}
           </div>
         </div>
         
-        {/* Enhanced Action Buttons - Always visible at bottom */}
-        <div className="flex flex-col sm:flex-row gap-3 mt-auto pt-2">
+        {/* Action Buttons - Modern, clean design */}
+        <div className="flex flex-col sm:flex-row gap-2 mt-auto pt-2">
           <Link
             to={`/packages/${pkg.id}`}
-            className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-xl text-sm font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 text-center flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-offset-2"
+            className="flex-1 bg-gradient-to-r from-sky-500 to-blue-500 text-white py-2.5 px-3 rounded-lg text-sm font-medium hover:from-sky-600 hover:to-blue-600 transition-all duration-300 text-center flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-offset-1"
             aria-label={`View details for ${pkg.name} package`}
           >
             <CameraIcon className="h-4 w-4" aria-hidden="true" />
@@ -254,26 +240,26 @@ export function PackageCard({ package: pkg, className = '', loading = false }: P
             <ArrowRightIcon className="h-4 w-4" aria-hidden="true" />
           </Link>
           <Button
-            onClick={() => setIsBookingModalOpen(true)}
-            bgGradient="linear(to-r, green.600, emerald.600)"
+            onClick={() => navigate(`/packages/${pkg.id}/book`)}
+            bgGradient="linear(to-r, emerald.500, teal.500)"
             color="white"
-            py={3}
-            px={4}
-            borderRadius="xl"
+            py={2.5}
+            px={3}
+            borderRadius="lg"
             fontSize="sm"
-            fontWeight="semibold"
-            boxShadow="lg"
+            fontWeight="medium"
+            boxShadow="md"
             _hover={{
-              bgGradient: 'linear(to-r, green.700, emerald.700)',
-              boxShadow: 'xl',
+              bgGradient: 'linear(to-r, emerald.600, teal.600)',
+              boxShadow: 'lg',
               transform: 'scale(1.05)',
             }}
             transition="all 0.3s ease"
             _focus={{
               outline: 'none',
-              ring: 4,
-              ringColor: 'green.300',
-              ringOffset: 2,
+              ring: 2,
+              ringColor: 'emerald.400',
+              ringOffset: 1,
             }}
             aria-label={`Book ${pkg.name} package`}
             w={{ base: 'full', sm: 'auto' }}
@@ -285,13 +271,6 @@ export function PackageCard({ package: pkg, className = '', loading = false }: P
           </Button>
         </div>
       </div>
-      
-      {/* Booking Choice Modal */}
-      <BookingChoiceModal
-        isOpen={isBookingModalOpen}
-        onClose={() => setIsBookingModalOpen(false)}
-        package={pkg}
-      />
     </article>
   );
 }

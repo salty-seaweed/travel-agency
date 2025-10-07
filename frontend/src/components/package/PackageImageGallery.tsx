@@ -43,6 +43,18 @@ export function PackageImageGallery({ images, packageName }: PackageImageGallery
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const isMobile = useBreakpointValue({ base: true, md: false });
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+
+  // Auto-slideshow - switch images every 4 seconds
+  useEffect(() => {
+    if (!isAutoPlaying || images.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setSelectedImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+    }, 4000); // Change image every 4 seconds
+
+    return () => clearInterval(interval);
+  }, [isAutoPlaying, images.length]);
 
   if (!images || images.length === 0) {
     return (
@@ -66,6 +78,7 @@ export function PackageImageGallery({ images, packageName }: PackageImageGallery
 
   const handleImageClick = (index: number) => {
     setSelectedImageIndex(index);
+    setIsAutoPlaying(false); // Pause auto-play when user manually selects
     if (isMobile) {
       onOpen();
     }
@@ -76,10 +89,12 @@ export function PackageImageGallery({ images, packageName }: PackageImageGallery
 
   const handlePrevious = () => {
     setSelectedImageIndex((prev) => (prev === 0 ? mediaCount - 1 : prev - 1));
+    setIsAutoPlaying(false); // Pause auto-play on manual navigation
   };
 
   const handleNext = () => {
     setSelectedImageIndex((prev) => (prev === mediaCount - 1 ? 0 : prev + 1));
+    setIsAutoPlaying(false); // Pause auto-play on manual navigation
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -294,7 +309,6 @@ export function PackageImageGallery({ images, packageName }: PackageImageGallery
               <SmartLazyImage
                 src={featuredMedia.image_url || featuredMedia.image}
                 alt={`${packageName} - Image ${selectedImageIndex + 1}`}
-                title={featuredMedia.caption || `${packageName} - Image ${selectedImageIndex + 1}`}
                 width="100%"
                 height="100%"
                 objectFit="contain"
@@ -466,7 +480,6 @@ export function PackageImageGallery({ images, packageName }: PackageImageGallery
                   <SmartLazyImage
                     src={media.image_url || media.image}
                     alt={`${packageName} - Thumbnail ${index + 1}`}
-                    title={media.caption || `${packageName} - Image ${index + 1}`}
                     width="100%"
                     height="100%"
                     objectFit="contain"
@@ -570,7 +583,6 @@ export function PackageImageGallery({ images, packageName }: PackageImageGallery
                   <SmartLazyImage
                     src={featuredMedia.image_url || featuredMedia.image}
                     alt={`${packageName} - Full size ${selectedImageIndex + 1}`}
-                    title={featuredMedia.caption || `${packageName} - Full size ${selectedImageIndex + 1}`}
                     width="100%"
                     height="100%"
                     objectFit="contain"

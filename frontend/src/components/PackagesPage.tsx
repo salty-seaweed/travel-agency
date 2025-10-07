@@ -610,86 +610,27 @@ Can you help me finalize this package?`;
                           h="full" 
                           objectFit="cover" 
                         />
-                        <Box position="absolute" top={0} left={0} right={0} bottom={0} bg="blackAlpha.400" />
-                        
-                        {/* Package Badges */}
-                        <VStack position="absolute" top={4} left={4} align="start" spacing={2}>
-                          {pkg.featured && (
-                            <Badge colorScheme="yellow" variant="solid" px={3} py={1}>
-                              <Icon as={StarIcon} className="w-3 h-3 mr-1" />
-                              {t('packages.card.featured', 'Featured')}
-                            </Badge>
-                          )}
-                          <Badge colorScheme="blue" variant="solid" px={3} py={1}>
-                            {pkg.category}
-                          </Badge>
-                          {discountPercentage > 0 && (
-                            <Badge colorScheme="green" variant="solid" px={3} py={1}>
-                              {t('packages.card.discount', '{{percentage}}% OFF', { percentage: discountPercentage })}
-                            </Badge>
-                          )}
-                        </VStack>
-
-                        {/* Rating */}
-                        <HStack position="absolute" top={4} right={4} bg="blackAlpha.700" px={2} py={1} borderRadius="md">
-                          <Icon as={StarIcon} className="w-4 h-4 text-yellow-400" />
-                          <Text color="white" fontSize="sm" fontWeight="semibold">{pkg.rating}</Text>
-                          <Text color="gray-300" fontSize="sm">({pkg.reviewCount})</Text>
-                        </HStack>
-
-                        {/* Package Info Overlay */}
-                        <VStack position="absolute" bottom={0} left={0} right={0} p={4} 
-                                bg="linear-gradient(transparent, rgba(0,0,0,0.8))" spacing={2}>
-                          <Text color="white" fontWeight="bold" fontSize="lg" textAlign="center">
-                            {pkg.name}
-                          </Text>
-                          <HStack spacing={4} color="gray-200" fontSize="sm">
-                            <HStack spacing={1}>
-                              <Icon as={ClockIcon} className="w-4 h-4" />
-                              <Text>
-                                {(() => {
-                                  const nights = pkg.nights || Math.max(0, (parseInt(pkg.duration) || 1) - 1);
-                                  const daysText = t('packages.card.days', '{{count}} days', { count: parseInt(pkg.duration) });
-                                  return nights > 0 ? `${daysText}, ${nights} ${t('packages.card.nights', 'nights')}` : daysText;
-                                })()}
-                              </Text>
-                            </HStack>
-                            <HStack spacing={1}>
-                              <Icon as={UsersIcon} className="w-4 h-4" />
-                              <Text>{t('packages.card.upTo', 'Up to {{count}}', { count: pkg.maxTravelers })}</Text>
-                            </HStack>
-                          </HStack>
-                        </VStack>
                       </Box>
 
-                      <CardBody p={6} display="flex" flexDirection="column" flex={1}>
-                        <VStack spacing={4} align="stretch" flex={1}>
-                          <Text color="gray-600" noOfLines={3}>
+                      <CardBody p={5} display="flex" flexDirection="column" flex={1}>
+                        <VStack spacing={3} align="stretch" flex={1}>
+                          {/* Package name first */}
+                          <Heading size="md" color="gray.900" noOfLines={2}>
+                            {pkg.name}
+                          </Heading>
+                          <Text color="gray.600" fontSize="sm" noOfLines={2}>
                             {pkg.description}
                           </Text>
 
-                          {/* Destinations */}
+                          {/* Destinations - Simplified */}
                           {pkg.destinations.length > 0 && (
-                            <VStack align="start" spacing={2}>
-                              <Text fontWeight="semibold" fontSize="sm" color="gray-700">{t('packages.card.destinations', 'Destinations:')}</Text>
-                              <Wrap>
-                                {pkg.destinations.slice(0, 3).map((dest, index) => (
-                                  <WrapItem key={index}>
-                                    <Badge colorScheme="green" variant="subtle">
-                                      <Icon as={MapPinIcon} className="w-3 h-3 mr-1" />
-                                      {dest}
-                                    </Badge>
-                                  </WrapItem>
-                                ))}
-                                {pkg.destinations.length > 3 && (
-                                  <WrapItem>
-                                    <Badge colorScheme="gray" variant="subtle">
-                                      {t('packages.card.more', '+{{count}} more', { count: pkg.destinations.length - 3 })}
-                                    </Badge>
-                                  </WrapItem>
-                                )}
-                              </Wrap>
-                            </VStack>
+                            <HStack spacing={1} fontSize="sm" color="gray.600">
+                              <Icon as={MapPinIcon} className="w-4 h-4" color="sky.500" />
+                              <Text noOfLines={1}>
+                                {pkg.destinations.slice(0, 2).join(', ')}
+                                {pkg.destinations.length > 2 && ` +${pkg.destinations.length - 2}`}
+                              </Text>
+                            </HStack>
                           )}
 
                           {/* Highlights */}

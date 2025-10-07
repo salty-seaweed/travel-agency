@@ -102,125 +102,91 @@ export const Navigation = React.memo(() => {
         position="sticky"
         top={0}
         zIndex={50}
-        backdropFilter={isScrolled ? 'blur(20px)' : 'blur(10px)'}
+        backdropFilter="blur(12px)"
         borderBottom="1px solid"
-        borderColor="gray.200"
-        boxShadow={isScrolled ? '2xl' : 'lg'}
-        transition="all 0.3s ease"
-        bgGradient={isScrolled ? 'linear(to-r, white, gray.50)' : 'linear(to-r, white, blue.50)'}
+        borderColor={isScrolled ? "gray.200" : "gray.100"}
+        boxShadow={isScrolled ? 'md' : 'sm'}
+        transition="all 0.2s ease"
+        bg={isScrolled ? 'white' : 'whiteAlpha.900'}
         style={{ paddingLeft: '0', paddingRight: '45px' }}
       >
         <Container maxW="7xl" px={{ base: 4, sm: 6, lg: 8 }}>
-          <Flex justify="space-between" align="center" h={{ base: '4rem', md: '5rem' }}>
-            {/* Logo */}
+          <Flex justify="space-between" align="center" h={{ base: '3.5rem', md: '4rem' }}>
+            {/* Logo - Normal size with full text */}
             <Flex align="center" flexShrink={0}>
-              <Box pr={0} mr={{ base: 0, md: '30px' }} ml={{ base: 0, md: '-50px' }}>
-                <Link to="/">
-                  <Flex align="center" _hover={{ transform: 'scale(1.05)' }} transition="all 0.3s ease">
+              <Link to="/">
+                <Flex align="center" gap={2} _hover={{ opacity: 0.8 }} transition="all 0.2s ease">
                   <Box
-                    w={{ base: '10', md: '12' }}
-                    h={{ base: '10', md: '12' }}
-                    borderRadius="2xl"
+                    w={{ base: '12', md: '14' }}
+                    h={{ base: '12', md: '14' }}
+                    borderRadius="xl"
                     display="flex"
                     alignItems="center"
                     justifyContent="center"
-                    boxShadow="xl"
-                    _hover={{ boxShadow: '2xl' }}
-                    transition="all 0.5s ease"
-                    position="relative"
-                    overflow="hidden"
+                    flexShrink={0}
                   >
                     <img 
                       src={logo} 
                       alt="Thread Travels Logo" 
                       style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                     />
-                    <Box
-                      position="absolute"
-                      inset={0}
-                      bg="whiteAlpha.200"
-                      borderRadius="2xl"
-                      _hover={{ bg: 'whiteAlpha.300' }}
-                      transition="all 0.5s ease"
-                    />
-                    <Box
-                      position="absolute"
-                      top="-1"
-                      right="-1"
-                      w="3"
-                      h="3"
-                      bg="yellow.400"
-                      borderRadius="full"
-                      animation="pulse 2s infinite"
-                    />
                   </Box>
-                  <VStack align="start" ml={1} spacing={0}>
+                  <VStack align="start" spacing={0} display={{ base: 'none', sm: 'flex' }}>
                     <Text
-                      fontSize={{ base: "lg", md: "2xl", lg: "3xl" }}
-                      fontWeight="bold"
-                      bgGradient="linear(to-r, blue.600, purple.600)"
-                      bgClip="text"
-                      lineHeight="0.9"
-                      letterSpacing="tight"
+                      fontSize={{ base: "xl", md: "2xl" }}
+                      fontWeight="700"
+                      color="gray.900"
+                      lineHeight="1.1"
+                      letterSpacing="-0.02em"
                     >
                       Thread Travels
                     </Text>
                     <Text
                       fontSize={{ base: "xs", md: "sm" }}
-                      color="gray.700"
-                      fontWeight="semibold"
-                      lineHeight="1"
-                      letterSpacing="wide"
+                      color="gray.600"
+                      fontWeight="500"
+                      lineHeight="1.2"
+                      letterSpacing="0.01em"
                       textTransform="uppercase"
-                      ml={1}
                     >
-                      TRAVEL & TOURS MALDIVES
+                      Travels & Tours Maldives
                     </Text>
                   </VStack>
-                  </Flex>
-                </Link>
-              </Box>
+                </Flex>
+              </Link>
             </Flex>
 
-            {/* Desktop Navigation */}
-            <HStack spacing={3} display={{ base: 'none', lg: 'flex' }}>
+            {/* Desktop Navigation - Clean, no icons */}
+            <HStack spacing={1} display={{ base: 'none', lg: 'flex' }}>
               {navigation.map((item) => (
                 <Link key={item.name} to={item.href}>
                   <Button
-                    variant={item.featured ? 'solid' : isActive(item.href) ? 'outline' : 'ghost'}
-                    colorScheme={item.featured ? 'orange' : isActive(item.href) ? 'blue' : 'gray'}
-                    size="md"
-                    px={6}
-                    py={3}
-                    borderRadius="2xl"
+                    variant="ghost"
+                    size="sm"
+                    px={4}
+                    py={2}
+                    borderRadius="lg"
                     fontWeight="medium"
                     fontSize="sm"
-                    bg={item.featured ? 'blue.500' : isActive(item.href) ? 'blue.50' : 'transparent'}
-                    color={item.featured ? 'white' : isActive(item.href) ? 'blue.600' : 'gray.600'}
-                    border={isActive(item.href) ? '1px solid' : 'none'}
-                    borderColor={isActive(item.href) ? 'blue.200' : undefined}
+                    color={isActive(item.href) ? 'sky.600' : 'gray.700'}
+                    bg={isActive(item.href) ? 'sky.50' : 'transparent'}
                     _hover={{
-                      transform: 'scale(1.02)',
-                      boxShadow: 'sm',
-                      bg: item.featured ? 'blue.600' : isActive(item.href) ? 'blue.100' : 'gray.50',
+                      bg: isActive(item.href) ? 'sky.100' : 'gray.100',
+                      color: isActive(item.href) ? 'sky.700' : 'gray.900',
                     }}
-                    transition="all 0.3s ease"
+                    transition="all 0.2s ease"
                     position="relative"
                   >
-
-                    <HStack spacing={2}>
-                      <Icon as={item.icon} h="4" w="4" />
-                      <Text>{item.name}</Text>
-                    </HStack>
-                    {isActive(item.href) && !item.featured && (
+                    <Text>{item.name}</Text>
+                    {isActive(item.href) && (
                       <Box
                         position="absolute"
-                        bottom="0"
+                        bottom="-2px"
                         left="50%"
                         transform="translateX(-50%)"
-                        w="1"
-                        h="1"
-                        bg="blue.600"
+                        w="20px"
+                        h="2px"
+                        bg="sky.600"
                         borderRadius="full"
                       />
                     )}
@@ -365,24 +331,24 @@ export const Navigation = React.memo(() => {
                     className="hidden md:flex"
                   />
 
-                  {/* Book Now Button */}
+                  {/* Book Now Button - Simplified */}
                   <Button
-                    bgGradient="linear(to-r, blue.600, indigo.600)"
+                    bgGradient="linear(to-r, sky.500, blue.500)"
                     color="white"
-                    size="md"
-                    px={8}
-                    py={3}
-                    borderRadius="2xl"
-                    fontWeight="semibold"
+                    size="sm"
+                    px={6}
+                    py={2}
+                    borderRadius="lg"
+                    fontWeight="medium"
                     fontSize="sm"
                     as={Link}
                     to="/packages"
                     _hover={{
-                      bgGradient: 'linear(to-r, blue.700, indigo.700)',
-                      transform: 'scale(1.05)',
-                      boxShadow: 'xl',
+                      bgGradient: 'linear(to-r, sky.600, blue.600)',
+                      transform: 'translateY(-1px)',
+                      boxShadow: 'md',
                     }}
-                    transition="all 0.3s ease"
+                    transition="all 0.2s ease"
                   >
                     {t('ui.buttons.bookNow')}
                   </Button>
@@ -586,9 +552,9 @@ export const Navigation = React.memo(() => {
                     Login
                   </Button> */}
                   <Button
-                    bgGradient="linear(to-r, blue.600, indigo.600)"
+                    bgGradient="linear(to-r, sky.500, blue.500)"
                     _hover={{
-                      bgGradient: 'linear(to-r, blue.700, indigo.700)',
+                      bgGradient: 'linear(to-r, sky.600, blue.600)',
                     }}
                     color="white"
                     size="lg"

@@ -71,8 +71,8 @@ export function PackageDetailPage() {
   }, [packageData]);
 
   const handleBookNow = () => {
-    // Ensure the modal opens without jumping to top
-    onOpen();
+    // Skip modal - go directly to booking form
+    setShowBookingForm(true);
   };
 
   const handleAddToWishlist = () => {
@@ -352,26 +352,7 @@ export function PackageDetailPage() {
          isWishlisted={isWishlisted}
        />
 
-       {/* Booking Modal */}
-      <BookingChoiceModal
-        isOpen={isOpen}
-        onClose={onClose}
-        package={(() => {
-          const variants: any[] = (packageData as any)?.variants || [];
-          const selectedVariant = selectedVariantId && variants.length ? variants.find(v => v.id === selectedVariantId) : null;
-          return selectedVariant
-            ? ({ ...packageData, price: String(selectedVariant.price), original_price: selectedVariant.original_price ? String(selectedVariant.original_price) : undefined, duration: selectedVariant.duration_days } as any)
-            : (packageData as any);
-        })()}
-        selectedVariant={(() => {
-          const variants: any[] = (packageData as any)?.variants || [];
-          return selectedVariantId && variants.length ? variants.find(v => v.id === selectedVariantId) : null;
-        })()}
-        onFormBooking={() => {
-          setShowBookingForm(true);
-          onClose();
-        }}
-      />
+       {/* Booking Modal - Removed, now goes directly to form */}
 
       <PackageBookingForm
         isOpen={showBookingForm}

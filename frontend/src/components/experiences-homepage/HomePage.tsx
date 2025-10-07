@@ -193,12 +193,12 @@ export const ExperiencesHomePage = React.memo(() => {
           </Suspense>
         )}
 
-        {/* Newsletter Section */}
-        {loadedSections.has('newsletter') && (
+        {/* Newsletter Section - Hidden as requested (Maldives deals and insider tips) */}
+        {/* {loadedSections.has('newsletter') && (
           <Suspense fallback={<SectionSkeleton height="200px" />}>
             <ExperiencesNewsletterSection />
           </Suspense>
-        )}
+        )} */}
       </Box>
     </>
   );

@@ -209,101 +209,27 @@ export const ExperiencesTrendingDeals: React.FC<Props> = ({ packages = [] }) => 
                       enableSmartConversion={true}
                       showLoadingSkeleton={true}
                     />
-                    {/* Subtle overlay for better text readability */}
-                    <Box position="absolute" top={0} left={0} right={0} bottom={0} bg="blackAlpha.200" />
-
-                    {/* Package Badges */}
-                    <VStack position="absolute" top={4} left={4} align="start" spacing={2}>
-                      {pkg.featured && (
-                        <Badge colorScheme="yellow" variant="solid" px={3} py={1}>
-                          <Icon as={StarIcon} className="w-3 h-3 mr-1" />
-                          Featured
-                        </Badge>
-                      )}
-                      <Badge colorScheme="blue" variant="solid" px={3} py={1}>
-                        {pkg.category}
-                      </Badge>
-                      {discountPercent > 0 && (
-                        <Badge colorScheme="green" variant="solid" px={3} py={1}>
-                          {discountPercent}% OFF
-                        </Badge>
-                      )}
-                    </VStack>
-
-                    {/* Wishlist Button */}
-                    <Box 
-                      position="absolute" 
-                      top={4} 
-                      right={4} 
-                      bg={wished ? 'red.500' : 'whiteAlpha.900'} 
-                      borderRadius="full" 
-                      p={2} 
-                      cursor="pointer" 
-                      zIndex={2} 
-                      onClick={(e) => { e.stopPropagation(); toggleWishlist(pkg.id); }}
-                    >
-                      <Icon as={HeartIcon} className={wished ? 'w-4 h-4 text-white' : 'w-4 h-4 text-gray-600'} />
-                    </Box>
-
-                    {/* Rating */}
-                    <HStack position="absolute" top={4} right={4} bg="blackAlpha.700" px={2} py={1} borderRadius="md">
-                      <Icon as={StarSolidIcon} className="w-4 h-4 text-yellow-400" />
-                      <Text color="white" fontSize="sm" fontWeight="semibold">{pkg.rating}</Text>
-                      <Text color="gray.300" fontSize="sm">({pkg.reviewCount})</Text>
-                    </HStack>
-
-                    {/* Package Info Overlay */}
-                    <VStack position="absolute" bottom={0} left={0} right={0} p={4}
-                            bg="linear-gradient(transparent, rgba(0,0,0,0.8))" spacing={2}>
-                      <Text color="white" fontWeight="bold" fontSize="lg" textAlign="center">
-                        {pkg.name}
-                      </Text>
-                      <HStack spacing={4} color="gray.200" fontSize="sm">
-                        <HStack spacing={1}>
-                          <Icon as={ClockIcon} className="w-4 h-4" />
-                          <Text>
-                            {(() => {
-                              const nights = pkg.nights || Math.max(0, (parseInt(pkg.duration) || 1) - 1);
-                              return nights > 0 ? `${parseInt(pkg.duration)} days, ${nights} nights` : `${parseInt(pkg.duration)} days`;
-                            })()}
-                          </Text>
-                        </HStack>
-                        <HStack spacing={1}>
-                          <Icon as={UsersIcon} className="w-4 h-4" />
-                          <Text>Up to {pkg.maxTravelers}</Text>
-                        </HStack>
-                      </HStack>
-                    </VStack>
                   </Box>
 
-                  <CardBody p={6} display="flex" flexDirection="column" flex={1}>
-                    <VStack spacing={4} align="stretch" flex={1}>
-                      <Text color="gray.600" noOfLines={3}>
+                  <CardBody p={5} display="flex" flexDirection="column" flex={1}>
+                    <VStack spacing={3} align="stretch" flex={1}>
+                      {/* Package name first */}
+                      <Heading size="md" color="gray.900" noOfLines={2}>
+                        {pkg.name}
+                      </Heading>
+                      <Text color="gray.600" fontSize="sm" noOfLines={2}>
                         {pkg.description}
                       </Text>
 
-                      {/* Destinations */}
+                      {/* Destinations - Simplified */}
                       {Array.isArray(pkg.destinations) && pkg.destinations.length > 0 && (
-                        <VStack align="start" spacing={2}>
-                          <Text fontWeight="semibold" fontSize="sm" color="gray.700">Destinations:</Text>
-                          <Wrap>
-                            {pkg.destinations.slice(0, 3).map((dest, index) => (
-                              <WrapItem key={index}>
-                                <Badge colorScheme="green" variant="subtle">
-                                  <Icon as={MapPinIcon} className="w-3 h-3 mr-1" />
-                                  {dest.name || dest}
-                                </Badge>
-                              </WrapItem>
-                            ))}
-                            {pkg.destinations.length > 3 && (
-                              <WrapItem>
-                                <Badge colorScheme="gray" variant="subtle">
-                                  +{pkg.destinations.length - 3} {t('homepage.activities.more', 'more')}
-                                </Badge>
-                              </WrapItem>
-                            )}
-                          </Wrap>
-                        </VStack>
+                        <HStack spacing={1} fontSize="sm" color="gray.600">
+                          <Icon as={MapPinIcon} className="w-4 h-4" color="sky.500" />
+                          <Text noOfLines={1}>
+                            {pkg.destinations.slice(0, 2).map((d: any) => d.name || d).join(', ')}
+                            {pkg.destinations.length > 2 && ` +${pkg.destinations.length - 2}`}
+                          </Text>
+                        </HStack>
                       )}
 
                       {/* Highlights */}
@@ -381,10 +307,13 @@ export const ExperiencesTrendingDeals: React.FC<Props> = ({ packages = [] }) => 
                           </VStack>
                         </HStack>
 
-                        <HStack spacing={3} w="full">
+                        <HStack spacing={2} w="full">
                           <Button
-                            colorScheme="green"
+                            bgGradient="linear(to-r, emerald.500, teal.500)"
+                            _hover={{ bgGradient: 'linear(to-r, emerald.600, teal.600)' }}
+                            color="white"
                             flex={1}
+                            size="sm"
                             onClick={() => handleWhatsAppBooking(pkg)}
                             leftIcon={<Icon as={HeartIcon} />}
                           >
@@ -392,7 +321,8 @@ export const ExperiencesTrendingDeals: React.FC<Props> = ({ packages = [] }) => 
                           </Button>
                           <Button
                             variant="outline"
-                            colorScheme="blue"
+                            colorScheme="gray"
+                            size="sm"
                             onClick={() => navigate(`/packages/${pkg.id}`)}
                           >
                             {t('homepage.trending.details', 'Details')}

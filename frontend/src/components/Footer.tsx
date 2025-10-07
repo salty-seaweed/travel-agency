@@ -54,8 +54,27 @@ export function Footer() {
   };
 
   return (
-    <Box bg={bgColor} color={textColor} py={12}>
-      <Container maxW="7xl">
+    <Box 
+      bg={bgColor} 
+      color={textColor} 
+      py={12}
+      position="relative"
+      overflow="hidden"
+    >
+      {/* Background Image with transparency */}
+      <Box
+        position="absolute"
+        top={0}
+        left={0}
+        right={0}
+        bottom={0}
+        backgroundImage="url('/images/optimized/hero/hero4.webp')"
+        backgroundSize="cover"
+        backgroundPosition="center"
+        opacity={0.05}
+        zIndex={0}
+      />
+      <Container maxW="7xl" position="relative" zIndex={1}>
         <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={8} mb={8}>
           {/* Company Info */}
           <VStack align="start" spacing={4}>
