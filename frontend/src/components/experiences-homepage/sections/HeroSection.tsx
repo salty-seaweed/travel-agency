@@ -71,6 +71,7 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
     "/images/optimized/hero/hero5.webp", 
     "/images/optimized/hero/ishan69.webp",
     "/images/optimized/hero/ishan62.webp",
+    "/images/optimized/hero/sunset.jpg",
   ], []);
   
   // Check if any hero images are GIFs - GIFs will autoplay
@@ -78,6 +79,7 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
+  // Auto-rotate images only after all are loaded
   useEffect(() => {
     if (imagesLoaded) {
       const interval = setInterval(() => {
@@ -192,8 +194,7 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
           left={0} 
           right={0} 
           bottom={0} 
-          backgroundImage={imagesLoaded ? `url(${heroImages[currentImageIndex]})` : 'none'}
-          backgroundColor={!imagesLoaded ? 'gray.100' : 'transparent'}
+          backgroundImage={`url(${heroImages[currentImageIndex]})`}
           backgroundSize="cover" 
           backgroundPosition="center" 
           backgroundRepeat="no-repeat" 

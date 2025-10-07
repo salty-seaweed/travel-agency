@@ -91,13 +91,13 @@ export function MobileNavigation({ className = '' }: MobileNavigationProps) {
       <header className={`fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200 transition-all duration-300 ${isScrolled ? 'shadow-lg' : ''} ${className}`}>
         <div className="flex items-center justify-between px-4 py-3">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center">
+          <Link to="/" className="flex items-center gap-2">
+            <div className="w-11 h-11 rounded-lg flex items-center justify-center flex-shrink-0">
               <img src={logo} alt="Thread Travels Logo" className="w-full h-full object-contain" />
             </div>
-            <div className="flex flex-col items-start">
-              <span className="font-bold text-gray-900 leading-tight text-base">Thread Travels</span>
-              <span className="text-xs text-gray-600 uppercase tracking-wide leading-tight font-medium">Travels & Tours Maldives</span>
+            <div className="flex flex-col items-start justify-center">
+              <span className="font-bold text-gray-900 leading-tight text-base tracking-tight">Thread Travels</span>
+              <span className="text-[10px] text-gray-600 uppercase tracking-wide leading-none font-medium whitespace-nowrap">Travels & Tours Maldives</span>
             </div>
           </Link>
 
