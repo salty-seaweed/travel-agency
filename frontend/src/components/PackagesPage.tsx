@@ -1064,6 +1064,20 @@ Can you help me finalize this package?`;
           </VStack>
         </Container>
       </section>
+
+      {/* Comparison Tool */}
+      <ComparisonTool
+        packages={comparePackages}
+        onRemove={(id) => {
+          const filtered = comparePackages.filter(p => p.id !== id);
+          localStorage.setItem('compare_packages', JSON.stringify(filtered));
+          window.dispatchEvent(new Event('storage'));
+        }}
+        onClear={() => {
+          localStorage.removeItem('compare_packages');
+          window.dispatchEvent(new Event('storage'));
+        }}
+      />
     </Box>
   );
 }
