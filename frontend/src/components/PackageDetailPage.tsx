@@ -70,7 +70,7 @@ export function PackageDetailPage() {
       
       // Track recently viewed packages
       const recentlyViewed = JSON.parse(localStorage.getItem('recently_viewed_packages') || '[]');
-      const packageData =  {
+      const packageInfo = {
         id: packageData.id,
         name: packageData.name,
         image: packageData.images && packageData.images.length > 0 ? packageData.images[0].image : '',
@@ -80,8 +80,8 @@ export function PackageDetailPage() {
       };
       
       // Remove if already exists and add to beginning
-      const filtered = recentlyViewed.filter((p: any) => p.id !== packageData.id);
-      const updated = [packageData, ...filtered].slice(0, 8); // Keep max 8
+      const filtered = recentlyViewed.filter((p: any) => p.id !== packageInfo.id);
+      const updated = [packageInfo, ...filtered].slice(0, 8); // Keep max 8
       localStorage.setItem('recently_viewed_packages', JSON.stringify(updated));
     }
   }, [packageData]);
