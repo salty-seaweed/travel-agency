@@ -24,6 +24,7 @@ import { usePackages, useDestinations, useFeaturedExperiences, useWhatsApp, useP
 import { useImagePreloader } from '../hooks/useImagePreloader';
 import { LoadingSpinner } from './LoadingSpinner';
 import { PackageCard } from './ui/PackageCard';
+import { ComparisonTool } from './ComparisonTool';
 import type { Package as ApiPackage } from '../types';
 import { getWhatsAppUrl } from '../config';
 import { useTranslation } from '../i18n';
@@ -157,9 +158,24 @@ export function PackagesPage() {
   const [sortBy, setSortBy] = useState('featured');
   const [showFilters, setShowFilters] = useState(false);
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+  const [showSearchSuggestions, setShowSearchSuggestions] = useState(false);
+  const [searchSuggestions, setSearchSuggestions] = useState<any[]>([]);
+  const [comparePackages, setComparePackages] = useState<any[]>([]);
   const toast = useToast();
   const hasProcessedCustomBuilder = useRef(false);
   const { getWhatsAppUrl } = useWhatsApp();
+
+  // Listen for comparison updates
+  useEffect(() => {
+    const updateComparison = () => {
+      const stored = JSON.parse(localStorage.getItem('compare_packages') || '[]');
+      setComparePackages(stored);
+    };
+    
+    updateComparison();
+    window.addEventListener('storage', updateComparison);
+    return () => window.removeEventListener('storage', updateComparison);
+  }, []);
 
   // Custom Package Builder State
   const [customPackage, setCustomPackage] = useState({
@@ -441,18 +457,73 @@ Can you help me finalize this package?`;
               <CardBody>
                 <VStack spacing={3}>
                   <HStack spacing={3} w="full" flexDir={{ base: "column", md: "row" }}>
-                    <InputGroup>
-                      <InputLeftElement>
-                        <Icon as={MagnifyingGlassIcon} color="gray.400" />
-                      </InputLeftElement>
-                      <Input 
-                        placeholder={t('packages.search.placeholder', 'Search packages, custom experiences, or destinations...')} 
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        size="md"
-                        borderRadius="lg"
-                      />
-                    </InputGroup>
+                    <Box position="relative" flex={1} w="full">
+                      <InputGroup>
+                        <InputLeftElement>
+                          <Icon as={MagnifyingGlassIcon} color="gray.400" />
+                        </InputLeftElement>
+                        <Input 
+                          placeholder={t('packages.search.placeholder', 'Search packages, custom experiences, or destinations...')} 
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          onFocus={() => searchTerm.length > 2 && setShowSearchSuggestions(true)}
+                          onBlur={() => setTimeout(() => setShowSearchSuggestions(false), 200)}
+                          size="md"
+                          borderRadius="lg"
+                        />
+                      </InputGroup>
+                      
+                      {/* Search Autocomplete Dropdown */}
+                      {showSearchSuggestions && searchSuggestions.length > 0 && (
+                        <Box
+                          position="absolute"
+                          top="100%"
+                          left={0}
+                          right={0}
+                          bg="white"
+                          border="1px solid"
+                          borderColor="gray.200"
+                          borderRadius="lg"
+                          mt={1}
+                          zIndex={20}
+                          maxH="300px"
+                          overflowY="auto"
+                          shadow="xl"
+                        >
+                          {searchSuggestions.map((suggestion) => (
+                            <HStack
+                              key={suggestion.id}
+                              p={3}
+                              cursor="pointer"
+                              _hover={{ bg: "gray.50" }}
+                              onClick={() => {
+                                navigate(`/packages/${suggestion.id}`);
+                                setShowSearchSuggestions(false);
+                              }}
+                              spacing={3}
+                            >
+                              {suggestion.image && (
+                                <Image 
+                                  src={suggestion.image} 
+                                  h="50px" 
+                                  w="70px" 
+                                  objectFit="cover" 
+                                  borderRadius="md"
+                                />
+                              )}
+                              <VStack align="start" spacing={0} flex={1}>
+                                <Text fontWeight="medium" fontSize="sm" noOfLines={1}>
+                                  {suggestion.name}
+                                </Text>
+                                <Text fontSize="xs" color="emerald.600" fontWeight="bold">
+                                  {formatPrice(parseFloat(suggestion.price))}
+                                </Text>
+                              </VStack>
+                            </HStack>
+                          ))}
+                        </Box>
+                      )}
+                    </Box>
                     
                     <Select 
                       value={selectedDestination} 
@@ -760,12 +831,12 @@ Can you help me finalize this package?`;
       </section>
 
       {/* Custom Package Builder Section */}
-      <section id="custom-package-builder" className="py-16 bg-gradient-to-br from-purple-50 to-indigo-50">
+      <section id="custom-package-builder" className="py-16 bg-gradient-to-br from-sky-50 to-blue-50">
         <Container maxW="7xl">
           <VStack spacing={12}>
             {/* Section Header */}
             <VStack spacing={4} textAlign="center">
-              <Badge colorScheme="purple" variant="solid" px={4} py={2} borderRadius="full" fontSize="sm" fontWeight="semibold">
+              <Badge colorScheme="teal" variant="solid" px={4} py={2} borderRadius="full" fontSize="sm" fontWeight="semibold">
                 <Icon as={SparklesIcon} className="w-4 h-4 mr-2" />
                 {t('packages.builder.badge', 'Custom Package Builder')}
               </Badge>
@@ -791,7 +862,7 @@ Can you help me finalize this package?`;
                     </HStack>
                     <Progress 
                       value={customPackage.destination ? 25 : 0} 
-                      colorScheme="purple" 
+                      colorScheme="sky" 
                       borderRadius="full" 
                       h={2}
                     />

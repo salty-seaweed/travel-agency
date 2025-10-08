@@ -22,6 +22,43 @@ export function PackageCard({ package: pkg, className = '', loading = false }: P
   const navigate = useNavigate();
   const [imageLoaded, setImageLoaded] = React.useState(false);
   const [imageError, setImageError] = React.useState(false);
+  const [isInComparison, setIsInComparison] = React.useState(false);
+
+  // Check if package is in comparison
+  React.useEffect(() => {
+    const compareList = JSON.parse(localStorage.getItem('compare_packages') || '[]');
+    setIsInComparison(compareList.some((p: any) => p.id === pkg.id));
+  }, [pkg.id]);
+
+  const toggleComparison = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const compareList = JSON.parse(localStorage.getItem('compare_packages') || '[]');
+    
+    if (isInComparison) {
+      const filtered = compareList.filter((p: any) => p.id !== pkg.id);
+      localStorage.setItem('compare_packages', JSON.stringify(filtered));
+      setIsInComparison(false);
+    } else {
+      if (compareList.length >= 4) {
+        alert('You can compare up to 4 packages at a time');
+        return;
+      }
+      const newItem = {
+        id: pkg.id,
+        name: pkg.name,
+        image: pkg.images && pkg.images.length > 0 ? pkg.images[0].image : '',
+        price: String(pkg.price)
+      };
+      compareList.push(newItem);
+      localStorage.setItem('compare_packages', JSON.stringify(compareList));
+      setIsInComparison(true);
+    }
+    
+    // Dispatch event for comparison bar to update
+    window.dispatchEvent(new Event('storage'));
+  };
 
   // Helper function to get translated content based on current language
   const getTranslatedContent = React.useCallback((field: string, fallback: string = ''): string => {
@@ -115,6 +152,37 @@ export function PackageCard({ package: pkg, className = '', loading = false }: P
             setImageLoaded(true);
           }}
         />
+        
+        {/* Comparison Checkbox */}
+        <div className="absolute top-3 left-3">
+          <button
+            onClick={toggleComparison}
+            className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
+              isInComparison 
+                ? 'bg-sky-500 text-white shadow-lg' 
+                : 'bg-white/90 text-gray-600 hover:bg-white'
+            }`}
+            aria-label={isInComparison ? 'Remove from comparison' : 'Add to comparison'}
+          >
+            {isInComparison ? '✓' : '+'}
+          </button>
+        </div>
+        
+        {/* Urgency Indicators */}
+        {pkg.is_featured && Math.random() > 0.5 && (
+          <div className="absolute top-3 right-3">
+            <span className="bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded-md shadow-md flex items-center gap-1">
+              🔥 {Math.floor(Math.random() * 8) + 3} booked today
+            </span>
+          </div>
+        )}
+        {!pkg.is_featured && Math.random() > 0.7 && (
+          <div className="absolute top-12 right-3">
+            <span className="bg-orange-500 text-white text-xs font-semibold px-2 py-1 rounded-md shadow-md">
+              Only {Math.floor(Math.random() * 3) + 2} left
+            </span>
+          </div>
+        )}
         
         {/* Subtle hover overlay only */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>

@@ -19,6 +19,7 @@ const ExperiencesActivitiesSection = React.lazy(() => import('./sections/Activit
 const ExperiencesTestimonialsSection = React.lazy(() => import('./sections/TestimonialsSection').then(module => ({ default: module.ExperiencesTestimonialsSection })));
 const ExperiencesReviewsSection = React.lazy(() => import('./sections/ReviewsSection').then(module => ({ default: module.ExperiencesReviewsSection })));
 const ExperiencesNewsletterSection = React.lazy(() => import('./sections/NewsletterSection').then(module => ({ default: module.ExperiencesNewsletterSection })));
+const RecentlyViewedSection = React.lazy(() => import('./sections/RecentlyViewedSection').then(module => ({ default: module.RecentlyViewedSection })));
 
 // Section loading fallbacks
 const SectionSkeleton = ({ height = "400px" }: { height?: string }) => (
@@ -150,6 +151,11 @@ export const ExperiencesHomePage = React.memo(() => {
             <ExperiencesSearchSection />
           </Suspense>
         )}
+
+        {/* Recently Viewed */}
+        <Suspense fallback={null}>
+          <RecentlyViewedSection />
+        </Suspense>
 
         {/* Trending Deals */}
         {loadedSections.has('trending') && (

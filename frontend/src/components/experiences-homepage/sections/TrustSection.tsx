@@ -38,10 +38,10 @@ export const ExperiencesTrustSection: React.FC<Props> = ({ homepageContent }) =>
   const mutedTextColor = useColorModeValue('gray.600', 'gray.300');
 
   const trustFeatures = [
-    { icon: ShieldCheckIcon, title: t('trust.features.secure', 'Secure Payments'), description: t('trust.features.secureDesc', 'Your bookings are protected with secure payment processing.'), color: 'green' },
-    { icon: GlobeAltIcon, title: t('trust.features.local', 'Local Expertise'), description: t('trust.features.localDesc', 'Curated Maldives experiences with verified local partners.'), color: 'blue' },
-    { icon: UserGroupIcon, title: t('trust.features.support', 'Personal Support'), description: t('trust.features.supportDesc', 'Friendly help from real humans—before, during, and after your trip.'), color: 'purple' },
-    { icon: StarIcon, title: t('trust.features.reviews', 'Great Reviews'), description: t('trust.features.reviewsDesc', 'We strive for excellence on every trip we organize.'), color: 'yellow' },
+    { icon: ShieldCheckIcon, title: t('trust.features.secure', 'Secure Payments'), description: t('trust.features.secureDesc', 'Your bookings are protected with secure payment processing.'), color: 'emerald' },
+    { icon: GlobeAltIcon, title: t('trust.features.local', 'Local Expertise'), description: t('trust.features.localDesc', 'Curated Maldives experiences with verified local partners.'), color: 'sky' },
+    { icon: UserGroupIcon, title: t('trust.features.support', 'Personal Support'), description: t('trust.features.supportDesc', 'Friendly help from real humans—before, during, and after your trip.'), color: 'teal' },
+    { icon: StarIcon, title: t('trust.features.reviews', 'Great Reviews'), description: t('trust.features.reviewsDesc', 'We strive for excellence on every trip we organize.'), color: 'amber' },
   ];
 
   const whyChooseUs = [

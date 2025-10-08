@@ -170,6 +170,35 @@ export function Footer() {
 
         <Divider borderColor="gray.500" my={8} />
 
+        {/* Trust Badges */}
+        <VStack spacing={4} mb={8}>
+          <HStack spacing={6} justify="center" flexWrap="wrap" opacity={0.8}>
+            <HStack spacing={2}>
+              <Icon as={GlobeAltIcon} w={5} h={5} color="emerald.400" />
+              <Text fontSize="sm" fontWeight="medium">Licensed Agency</Text>
+            </HStack>
+            <Text color="gray.500">|</Text>
+            <HStack spacing={2}>
+              <Text fontSize="lg">🔒</Text>
+              <Text fontSize="sm" fontWeight="medium">SSL Secure</Text>
+            </HStack>
+            <Text color="gray.500">|</Text>
+            <HStack spacing={2}>
+              <Text fontSize="lg">✓</Text>
+              <Text fontSize="sm" fontWeight="medium">Verified Business</Text>
+            </HStack>
+            <Text color="gray.500">|</Text>
+            <HStack spacing={2}>
+              <Text fontSize="lg">💳</Text>
+              <Text fontSize="sm" fontWeight="medium">Secure Payments</Text>
+            </HStack>
+          </HStack>
+          
+          <Text fontSize="xs" color="gray.400" textAlign="center">
+            Licensed Maldives Travel Agency • Member of MATATO • 24/7 Customer Support
+          </Text>
+        </VStack>
+
         <VStack spacing={4}>
           <HStack spacing={6} flexWrap="wrap" justify="center">
             <Link to="/terms">

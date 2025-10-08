@@ -159,7 +159,7 @@ export const CMSPageRenderer: React.FC<CMSPageRendererProps> = ({ slug, pageId }
             <Container maxW="full" px={0}>
               {/* Hero Section */}
               <Box
-                bgGradient="linear(to-r, blue.600, purple.600)"
+                bgGradient="linear(to-r, sky.600, blue.600)"
                 color="white"
                 py={20}
                 textAlign="center"

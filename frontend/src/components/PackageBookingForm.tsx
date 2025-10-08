@@ -16,8 +16,12 @@ import {
   Select,
   FormControl,
   FormLabel,
+  FormHelperText,
+  FormErrorMessage,
   useToast,
+  Icon,
 } from '@chakra-ui/react';
+import { CheckCircleIcon } from '@heroicons/react/24/outline';
 import { LoadingSpinner } from './LoadingSpinner';
 import { useNotification } from '../hooks';
 import { useWhatsApp } from '../hooks/useQueries';
@@ -44,10 +48,48 @@ export function PackageBookingForm({ packageId, packageName, packagePrice, packa
     duration_days: packageDurationDays || 1,
     special_requests: ''
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: name === 'number_of_guests' || name === 'duration_days' ? Number(value) : value }));
+    
+    // Real-time validation
+    if (touched[name]) {
+      validateField(name, value);
+    }
+  };
+
+  const handleBlur = (fieldName: string) => {
+    setTouched(prev => ({ ...prev, [fieldName]: true }));
+    validateField(fieldName, formData[fieldName as keyof typeof formData]);
+  };
+
+  const validateField = (fieldName: string, value: any) => {
+    let error = '';
+    
+    switch (fieldName) {
+      case 'customer_name':
+        if (!value || value.trim().length < 2) {
+          error = 'Please enter your full name (at least 2 characters)';
+        }
+        break;
+      case 'customer_email':
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!value || !emailRegex.test(value)) {
+          error = 'Please enter a valid email address (e.g., name@example.com)';
+        }
+        break;
+      case 'customer_phone':
+        const phoneRegex = /^[\d\s\+\-\(\)]+$/;
+        if (!value || !phoneRegex.test(value) || value.length < 10) {
+          error = 'Please enter a valid phone number with country code (e.g., +960 123 4567)';
+        }
+        break;
+    }
+    
+    setErrors(prev => ({...prev, [fieldName]: error }));
   };
 
   const getMinDate = () => {
@@ -114,37 +156,61 @@ export function PackageBookingForm({ packageId, packageName, packagePrice, packa
               {/* Guest Info */}
               <VStack spacing={4} w="full">
                 <HStack spacing={4} w="full">
-                  <FormControl isRequired>
+                  <FormControl isRequired isInvalid={!!errors.customer_name && touched.customer_name}>
                     <FormLabel>Full Name</FormLabel>
                     <Input
                       name="customer_name"
                       value={formData.customer_name}
                       onChange={handleInputChange}
-                      placeholder="Enter your full name"
+                      onBlur={() => handleBlur('customer_name')}
+                      placeholder="John Doe"
                     />
+                    <FormErrorMessage>{errors.customer_name}</FormErrorMessage>
+                    {!errors.customer_name && touched.customer_name && formData.customer_name && (
+                      <FormHelperText color="emerald.600">
+                        <Icon as={CheckCircleIcon} w={3} h={3} display="inline" mr={1} />
+                        Looks good!
+                      </FormHelperText>
+                    )}
                   </FormControl>
-                  <FormControl isRequired>
+                  <FormControl isRequired isInvalid={!!errors.customer_email && touched.customer_email}>
                     <FormLabel>Email</FormLabel>
                     <Input
                       type="email"
                       name="customer_email"
                       value={formData.customer_email}
                       onChange={handleInputChange}
-                      placeholder="Enter your email"
+                      onBlur={() => handleBlur('customer_email')}
+                      placeholder="your@email.com"
                     />
+                    <FormErrorMessage fontSize="xs">{errors.customer_email}</FormErrorMessage>
+                    {!errors.customer_email && touched.customer_email && formData.customer_email && (
+                      <FormHelperText color="emerald.600" fontSize="xs">
+                        <Icon as={CheckCircleIcon} w={3} h={3} display="inline" mr={1} />
+                        We'll send confirmation here
+                      </FormHelperText>
+                    )}
                   </FormControl>
                 </HStack>
 
                 <HStack spacing={4} w="full">
-                  <FormControl isRequired>
+                  <FormControl isRequired isInvalid={!!errors.customer_phone && touched.customer_phone}>
                     <FormLabel>Phone</FormLabel>
                     <Input
                       type="tel"
                       name="customer_phone"
                       value={formData.customer_phone}
                       onChange={handleInputChange}
-                      placeholder="Enter your phone number"
+                      onBlur={() => handleBlur('customer_phone')}
+                      placeholder="+960 123 4567"
                     />
+                    <FormErrorMessage fontSize="xs">{errors.customer_phone}</FormErrorMessage>
+                    {!errors.customer_phone && touched.customer_phone && formData.customer_phone && (
+                      <FormHelperText color="emerald.600" fontSize="xs">
+                        <Icon as={CheckCircleIcon} w={3} h={3} display="inline" mr={1} />
+                        Valid format
+                      </FormHelperText>
+                    )}
                   </FormControl>
                   <FormControl isRequired>
                     <FormLabel>Number of Guests</FormLabel>

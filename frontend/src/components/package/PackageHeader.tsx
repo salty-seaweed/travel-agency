@@ -189,12 +189,17 @@ export function PackageHeader({
           
           <HStack spacing={3} w="full">
             <Button
-              colorScheme="purple"
+              bgGradient="linear(to-r, emerald.500, teal.500)"
+              _hover={{ 
+                bgGradient: "linear(to-r, emerald.600, teal.600)",
+                transform: 'translateY(-2px)', 
+                boxShadow: 'lg' 
+              }}
+              color="white"
               size="lg"
               flex={1}
               leftIcon={<Icon as={PhoneIcon} />}
               onClick={handleBookNow}
-              _hover={{ transform: 'translateY(-2px)', boxShadow: 'lg' }}
               transition="all 0.2s"
             >
               Book Now

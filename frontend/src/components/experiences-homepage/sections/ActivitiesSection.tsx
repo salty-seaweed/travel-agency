@@ -103,7 +103,7 @@ export const ExperiencesActivitiesSection: React.FC<ExperiencesActivitiesSection
       <Container maxW="7xl">
         <VStack spacing={12}>
           <VStack spacing={4}>
-            <Badge colorScheme="purple" variant="solid" px={4} py={2} borderRadius="full" fontSize="sm" fontWeight="semibold">
+            <Badge colorScheme="teal" variant="solid" px={4} py={2} borderRadius="full" fontSize="sm" fontWeight="semibold">
               <Icon as={SparklesIcon} className="w-4 h-4 mr-2" />
               {t('homepage.activities.badge', 'Custom Experiences')}
             </Badge>
@@ -247,7 +247,7 @@ export const ExperiencesActivitiesSection: React.FC<ExperiencesActivitiesSection
 
           <VStack spacing={4}>
             <Button
-              colorScheme="purple"
+              colorScheme="sky"
               size="lg"
               onClick={handleViewAllExperiences}
               rightIcon={<Icon as={ArrowRightIcon} />}

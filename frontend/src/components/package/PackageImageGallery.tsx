@@ -404,7 +404,7 @@ export function PackageImageGallery({ images, packageName }: PackageImageGallery
               borderRadius="md"
               overflow="hidden"
               border={selectedImageIndex === index ? "3px solid" : "1px solid"}
-              borderColor={selectedImageIndex === index ? "purple.500" : "gray.200"}
+              borderColor={selectedImageIndex === index ? "sky.500" : "gray.200"}
               _hover={{ transform: 'scale(1.05)' }}
               transition="all 0.2s"
               onClick={() => handleImageClick(index)}

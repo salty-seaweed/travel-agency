@@ -176,6 +176,8 @@ export const Navigation = React.memo(() => {
                     }}
                     transition="all 0.2s ease"
                     position="relative"
+                    aria-label={`Navigate to ${item.name} page`}
+                    aria-current={isActive(item.href) ? 'page' : undefined}
                   >
                     <Text>{item.name}</Text>
                     {isActive(item.href) && (
@@ -349,6 +351,7 @@ export const Navigation = React.memo(() => {
                       boxShadow: 'md',
                     }}
                     transition="all 0.2s ease"
+                    aria-label="Browse and book travel packages"
                   >
                     {t('ui.buttons.bookNow')}
                   </Button>
@@ -428,8 +431,7 @@ export const Navigation = React.memo(() => {
               {navigation.map((item) => (
                 <Link key={item.name} to={item.href} onClick={onClose}>
                   <Button
-                    variant={item.featured ? 'solid' : isActive(item.href) ? 'outline' : 'ghost'}
-                    colorScheme={item.featured ? 'orange' : isActive(item.href) ? 'blue' : 'gray'}
+                    variant="ghost"
                     size="lg"
                     w="full"
                     justifyContent="flex-start"
@@ -438,29 +440,16 @@ export const Navigation = React.memo(() => {
                     borderRadius="xl"
                     fontWeight="semibold"
                     fontSize="md"
-                    bg={item.featured ? 'orange.500' : isActive(item.href) ? 'blue.50' : 'transparent'}
-                    color={item.featured ? 'white' : isActive(item.href) ? 'blue.700' : 'gray.700'}
-                    border={isActive(item.href) ? '2px solid' : 'none'}
-                    borderColor={isActive(item.href) ? 'blue.200' : undefined}
+                    color={isActive(item.href) ? 'sky.700' : 'gray.700'}
+                    bg={isActive(item.href) ? 'sky.50' : 'transparent'}
                     _hover={{
-                      bg: item.featured ? 'orange.600' : isActive(item.href) ? 'blue.100' : 'gray.100',
+                      bg: isActive(item.href) ? 'sky.100' : 'gray.100',
                     }}
-                    transition="all 0.3s ease"
+                    transition="all 0.2s ease"
+                    aria-label={`Navigate to ${item.name} page`}
+                    aria-current={isActive(item.href) ? 'page' : undefined}
                   >
-                    <HStack spacing={4} w="full">
-                      <Icon as={item.icon} h="5" w="5" />
-                      <Text>{item.name}</Text>
-                      {item.featured && (
-                        <Box
-                          w="3"
-                          h="3"
-                          bg="red.500"
-                          borderRadius="full"
-                          animation="pulse 2s infinite"
-                          ml="auto"
-                        />
-                      )}
-                    </HStack>
+                    <Text>{item.name}</Text>
                   </Button>
                 </Link>
               ))}

@@ -48,7 +48,7 @@ export function PackageSidebar({ packageData, onBookNow, selectedVariant }: Pack
   return (
     <VStack spacing={6} align="stretch" position="sticky" top={4}>
       {/* Pricing Card */}
-      <Card bg="purple.50" borderColor="purple.200">
+      <Card bg="sky.50" borderColor="sky.200">
         <CardBody>
           <VStack spacing={3}>
             <Text fontSize="sm" color="gray.600" textAlign="center">Starting from</Text>

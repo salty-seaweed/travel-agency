@@ -212,11 +212,21 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
             </Heading>
 
             <HStack spacing={3} pt={2}>
-              <Button colorScheme="whatsapp" size="md" onClick={handleWhatsAppClick}>
+              <Button 
+                colorScheme="whatsapp" 
+                size="md" 
+                onClick={handleWhatsAppClick}
+                aria-label="Chat with us on WhatsApp for travel planning assistance"
+              >
                 WhatsApp
               </Button>
               <Link to="/contact">
-                <Button variant="outline" colorScheme="whiteAlpha" size="md">
+                <Button 
+                  variant="outline" 
+                  colorScheme="whiteAlpha" 
+                  size="md"
+                  aria-label="Go to contact page to send us a message"
+                >
                   Contact
                 </Button>
               </Link>
@@ -364,6 +374,7 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
                       fontWeight="semibold"
                       boxShadow="md"
                       _active={{ transform: "scale(0.98)" }}
+                      aria-label="Search for packages matching your destination, dates, and traveler count"
                     >
                       {t('homepage.search.startPlanning', 'Search')}
                     </Button>

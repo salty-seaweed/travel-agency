@@ -67,6 +67,22 @@ export function PackageDetailPage() {
       const variants: any[] = (packageData as any).variants || [];
       const defaultVariant = variants.find(v => v.is_default) || variants[0];
       setSelectedVariantId(defaultVariant ? defaultVariant.id : null);
+      
+      // Track recently viewed packages
+      const recentlyViewed = JSON.parse(localStorage.getItem('recently_viewed_packages') || '[]');
+      const packageData =  {
+        id: packageData.id,
+        name: packageData.name,
+        image: packageData.images && packageData.images.length > 0 ? packageData.images[0].image : '',
+        price: String(packageData.price),
+        duration: packageData.duration,
+        viewedAt: Date.now()
+      };
+      
+      // Remove if already exists and add to beginning
+      const filtered = recentlyViewed.filter((p: any) => p.id !== packageData.id);
+      const updated = [packageData, ...filtered].slice(0, 8); // Keep max 8
+      localStorage.setItem('recently_viewed_packages', JSON.stringify(updated));
     }
   }, [packageData]);
 
@@ -217,7 +233,7 @@ export function PackageDetailPage() {
                     <Button
                       key={v.id}
                       variant={selectedVariantId === v.id ? 'solid' : 'outline'}
-                      colorScheme="purple"
+                      colorScheme="sky"
                       onClick={() => setSelectedVariantId(v.id)}
                     >
                       {v.duration_days} days · ${parseFloat(String(v.price)).toFixed(0)}
