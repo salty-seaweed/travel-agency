@@ -27,8 +27,8 @@ export function Footer() {
   const { getWhatsAppUrl } = useWhatsApp();
   const { data: settings } = useHomepageData();
   
-  const bgColor = useColorModeValue('gray.800', 'gray.800');
-  const textColor = useColorModeValue('gray.300', 'gray.300');
+  const bgColor = useColorModeValue('gray.700', 'gray.700');
+  const textColor = useColorModeValue('gray.200', 'gray.200');
   const headingColor = useColorModeValue('white', 'white');
   const linkHoverColor = useColorModeValue('sky.400', 'sky.300');
 
@@ -71,7 +71,7 @@ export function Footer() {
         backgroundImage="url('/images/optimized/hero/hero4.webp')"
         backgroundSize="cover"
         backgroundPosition="center"
-        opacity={0.05}
+        opacity={0.08}
         zIndex={0}
       />
       <Container maxW="7xl" position="relative" zIndex={1}>
@@ -168,7 +168,7 @@ export function Footer() {
           </VStack>
         </SimpleGrid>
 
-        <Divider borderColor="gray.600" my={8} />
+        <Divider borderColor="gray.500" my={8} />
 
         <VStack spacing={4}>
           <HStack spacing={6} flexWrap="wrap" justify="center">
