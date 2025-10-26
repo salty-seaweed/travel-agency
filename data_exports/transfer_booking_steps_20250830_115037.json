@@ -1,0 +1,78 @@
+[
+{
+  "model": "api.transferbookingstep",
+  "pk": 1,
+  "fields": {
+    "step_number": 1,
+    "title": "Pre-Arrival Booking",
+    "description": "Arrange your transfer before arriving in the Maldives",
+    "icon": "ShieldCheckIcon",
+    "details": [
+      "Contact us at least 48 hours before arrival",
+      "Provide flight details and arrival time",
+      "Confirm resort/hotel destination",
+      "Receive transfer confirmation",
+      "Save emergency contact numbers"
+    ],
+    "tips": "Early booking ensures availability and better rates",
+    "is_active": true
+  }
+},
+{
+  "model": "api.transferbookingstep",
+  "pk": 2,
+  "fields": {
+    "step_number": 2,
+    "title": "Airport Arrival",
+    "description": "What to expect when you arrive at Male International Airport",
+    "icon": "MapPinIcon",
+    "details": [
+      "Clear immigration and customs",
+      "Collect luggage from baggage claim",
+      "Look for our representative with signboard",
+      "Proceed to transfer counter if needed",
+      "Wait for transfer vehicle/boat"
+    ],
+    "tips": "Our team will be waiting with your name on a signboard",
+    "is_active": true
+  }
+},
+{
+  "model": "api.transferbookingstep",
+  "pk": 3,
+  "fields": {
+    "step_number": 3,
+    "title": "Transfer Process",
+    "description": "The actual transfer journey to your destination",
+    "icon": "SparklesIcon",
+    "details": [
+      "Board the designated transfer vehicle",
+      "Safety briefing and life jacket fitting",
+      "Comfortable journey with refreshments",
+      "Arrival at your destination",
+      "Assistance with luggage"
+    ],
+    "tips": "All transfers include safety equipment and professional crew",
+    "is_active": true
+  }
+},
+{
+  "model": "api.transferbookingstep",
+  "pk": 4,
+  "fields": {
+    "step_number": 4,
+    "title": "Return Transfer",
+    "description": "Arranging your departure transfer",
+    "icon": "ClockIcon",
+    "details": [
+      "Confirm departure time with resort",
+      "Coordinate with flight departure time",
+      "Pack and prepare for departure",
+      "Board return transfer vehicle",
+      "Arrive at airport with sufficient time"
+    ],
+    "tips": "Allow extra time for weather delays and security checks",
+    "is_active": true
+  }
+}
+]

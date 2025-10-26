@@ -1,0 +1,168 @@
+import { useState, useEffect } from 'react';
+import { StarIcon } from '@heroicons/react/24/solid';
+import { StarIcon as StarOutlineIcon } from '@heroicons/react/24/outline';
+import { Card } from './index';
+
+interface GoogleReview {
+  id: string;
+  author_name: string;
+  author_url: string;
+  profile_photo_url: string;
+  rating: number;
+  relative_time_description: string;
+  text: string;
+  time: number;
+  translated: boolean;
+}
+
+interface GoogleReviewsProps {
+  placeId?: string;
+  maxReviews?: number;
+  showHeader?: boolean;
+  className?: string;
+  compact?: boolean;
+}
+
+export function GoogleReviews({ 
+  placeId = 'YOUR_GOOGLE_PLACE_ID', 
+  maxReviews = 6, 
+  showHeader = true,
+  className = '',
+  compact = false
+}: GoogleReviewsProps) {
+  const [reviews, setReviews] = useState<GoogleReview[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [averageRating, setAverageRating] = useState(0);
+  const [totalReviews, setTotalReviews] = useState(0);
+
+  // TODO: Replace with actual Google Places API integration
+  // For now, show a message that reviews are coming soon
+  const mockReviews: GoogleReview[] = [];
+
+  useEffect(() => {
+    // TODO: Implement real Google Places API call
+    const fetchReviews = async () => {
+      try {
+        setLoading(true);
+        // In production, replace this with actual Google Places API call
+        // const response = await fetch(`/api/google-reviews?placeId=${placeId}`);
+        // const data = await response.json();
+        
+        // For now, show no reviews until real API is implemented
+        setReviews([]);
+        setAverageRating(0);
+        setTotalReviews(0);
+        
+      } catch (err) {
+        setError('Failed to load reviews');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReviews();
+  }, [placeId, maxReviews]);
+
+  const renderStars = (rating: number) => {
+    return Array.from({ length: 5 }, (_, i) => (
+      <span key={i}>
+        {i < rating ? (
+          <StarIcon className="h-4 w-4 text-yellow-400" />
+        ) : (
+          <StarOutlineIcon className="h-4 w-4 text-gray-300" />
+        )}
+      </span>
+    ));
+  };
+
+  // Render reviews
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-red-600">{error}</p>
+      </div>
+    );
+  }
+
+  if (reviews.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-600 text-lg">Reviews coming soon!</p>
+        <p className="text-gray-500 text-sm mt-2">We're working on integrating real customer reviews</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`space-y-6 ${className}`}>
+      {showHeader && (
+        <div className="text-center">
+          <div className="flex items-center justify-center space-x-2 mb-2">
+            {renderStars(Math.round(averageRating))}
+            <span className="text-lg font-semibold text-gray-900">
+              {averageRating.toFixed(1)}
+            </span>
+            <span className="text-gray-500">({totalReviews} reviews)</span>
+          </div>
+          <h2 className={`font-bold text-gray-900 mb-2 ${compact ? 'text-xl' : 'text-2xl'}`}>
+            What Our Customers Say
+          </h2>
+          <p className="text-gray-600">
+            Real reviews from travelers who booked through Thread Travels
+          </p>
+        </div>
+      )}
+
+      <div className={`grid gap-6 ${compact ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
+        {reviews.map((review) => (
+          <Card key={review.id} className={compact ? "p-4" : "p-6"}>
+            <div className="flex items-start space-x-3 mb-4">
+              <img
+                src={review.profile_photo_url}
+                alt={review.author_name}
+                className={compact ? "w-8 h-8 rounded-full" : "w-10 h-10 rounded-full"}
+              />
+              <div className="flex-1">
+                <h4 className={`font-semibold text-gray-900 ${compact ? 'text-sm' : ''}`}>{review.author_name}</h4>
+                <div className="flex items-center space-x-1">
+                  {renderStars(review.rating)}
+                  <span className="text-xs text-gray-500 ml-2">
+                    {review.relative_time_description}
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            <p className={`text-gray-700 leading-relaxed ${compact ? 'text-xs' : 'text-sm'}`}>
+              "{compact && review.text.length > 120 ? review.text.substring(0, 120) + '...' : review.text}"
+            </p>
+          </Card>
+        ))}
+      </div>
+
+      {!compact && (
+        <div className="text-center">
+          <a
+            href="https://g.page/thread-travels-maldives/review"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+          >
+            Leave a Review
+          </a>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default GoogleReviews; 

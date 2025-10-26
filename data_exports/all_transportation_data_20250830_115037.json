@@ -1,0 +1,1191 @@
+{
+  "export_info": {
+    "timestamp": "20250830_115037",
+    "total_records": 86,
+    "models_exported": 10
+  },
+  "data": [
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA7530>",
+      "id": 1,
+      "name": "Speedboat Transfers",
+      "description": "Fast and efficient transfers for nearby islands and resorts",
+      "icon": "SparklesIcon",
+      "gradient": "from-blue-500 to-indigo-600",
+      "features": [
+        "15-60 minutes travel time",
+        "Available 24/7 for resort guests",
+        "Comfortable seating with shade",
+        "Life jackets provided",
+        "Direct transfers from airport",
+        "Suitable for all weather conditions"
+      ],
+      "pricing_range": "From $50 to $300 per person",
+      "best_for": "Resort transfers, nearby islands",
+      "pros": [
+        "Fastest option for nearby destinations",
+        "Flexible scheduling",
+        "Direct service"
+      ],
+      "cons": [
+        "Limited to nearby islands",
+        "Weather dependent",
+        "Can be expensive"
+      ],
+      "is_active": true,
+      "order": 1
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA7E30>",
+      "id": 2,
+      "name": "Public Ferry Services",
+      "description": "Budget-friendly transportation between local islands",
+      "icon": "GlobeAltIcon",
+      "gradient": "from-green-500 to-emerald-600",
+      "features": [
+        "Scheduled departures",
+        "Very affordable rates",
+        "Local island connections",
+        "Regular schedules",
+        "Authentic local experience",
+        "Luggage space available"
+      ],
+      "pricing_range": "From $2 to $15 per person",
+      "best_for": "Budget travelers, local island hopping",
+      "pros": [
+        "Most affordable option",
+        "Regular schedules",
+        "Local experience"
+      ],
+      "cons": [
+        "Limited schedules",
+        "Longer travel times",
+        "Basic amenities"
+      ],
+      "is_active": true,
+      "order": 2
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA7EF0>",
+      "id": 3,
+      "name": "Seaplane Transfers",
+      "description": "Luxury aerial transfers to remote resorts and islands",
+      "icon": "UserGroupIcon",
+      "gradient": "from-purple-500 to-pink-600",
+      "features": [
+        "Breathtaking aerial views",
+        "Fast transfers to remote locations",
+        "Luxury experience",
+        "Professional pilots",
+        "Baggage included",
+        "Resort coordination"
+      ],
+      "pricing_range": "From $200 to $500 per person",
+      "best_for": "Luxury resorts, remote islands",
+      "pros": [
+        "Stunning views",
+        "Fast to remote locations",
+        "Luxury experience"
+      ],
+      "cons": [
+        "Most expensive option",
+        "Weather dependent",
+        "Limited luggage"
+      ],
+      "is_active": true,
+      "order": 3
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA6A50>",
+      "id": 4,
+      "name": "Domestic Flights",
+      "description": "Domestic air travel between atolls and major islands",
+      "icon": "ShieldCheckIcon",
+      "gradient": "from-orange-500 to-red-600",
+      "features": [
+        "Inter-atoll connections",
+        "Regular scheduled flights",
+        "Air-conditioned comfort",
+        "Professional service",
+        "Reliable schedules",
+        "Baggage allowance"
+      ],
+      "pricing_range": "From $80 to $200 per person",
+      "best_for": "Inter-atoll travel, major islands",
+      "pros": [
+        "Reliable schedules",
+        "Comfortable travel",
+        "Good for long distances"
+      ],
+      "cons": [
+        "Limited destinations",
+        "Additional transfer needed",
+        "Weather dependent"
+      ],
+      "is_active": true,
+      "order": 4
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA5760>",
+      "id": 1,
+      "atoll_name": "Male Atoll",
+      "description": "The most accessible atoll with the highest concentration of resorts",
+      "icon": "SparklesIcon",
+      "gradient": "from-blue-500 to-indigo-600",
+      "is_active": true,
+      "order": 1
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA60F0>",
+      "id": 2,
+      "atoll_name": "Baa Atoll",
+      "description": "UNESCO Biosphere Reserve with luxury resorts and pristine nature",
+      "icon": "GlobeAltIcon",
+      "gradient": "from-green-500 to-emerald-600",
+      "is_active": true,
+      "order": 2
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA6C60>",
+      "id": 3,
+      "atoll_name": "Ari Atoll",
+      "description": "Famous for diving and water sports with diverse accommodation options",
+      "icon": "StarIcon",
+      "gradient": "from-purple-500 to-pink-600",
+      "is_active": true,
+      "order": 3
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA7200>",
+      "id": 4,
+      "atoll_name": "Lhaviyani Atoll",
+      "description": "Known for its crystal clear waters and excellent diving spots",
+      "icon": "CheckCircleIcon",
+      "gradient": "from-orange-500 to-red-600",
+      "is_active": true,
+      "order": 4
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA5A90>",
+      "id": 5,
+      "atoll_name": "Vaavu Atoll",
+      "description": "Remote atoll with pristine reefs and limited development",
+      "icon": "MapPinIcon",
+      "gradient": "from-teal-500 to-cyan-600",
+      "is_active": true,
+      "order": 5
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA6300>",
+      "id": 6,
+      "atoll_name": "Meemu Atoll",
+      "description": "Traditional Maldivian culture with beautiful beaches",
+      "icon": "GlobeAltIcon",
+      "gradient": "from-yellow-500 to-orange-600",
+      "is_active": true,
+      "order": 6
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DBF110>",
+      "id": 1,
+      "atoll_id": 1,
+      "resort_name": "Adaaran Hudhuranfushi",
+      "price": "130.00",
+      "duration": "45 minutes",
+      "transfer_type": "speedboat",
+      "is_active": true,
+      "order": 1
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA4D70>",
+      "id": 2,
+      "atoll_id": 1,
+      "resort_name": "Adaaran Rannalhi",
+      "price": "180.00",
+      "duration": "60 minutes",
+      "transfer_type": "speedboat",
+      "is_active": true,
+      "order": 2
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DBEEA0>",
+      "id": 3,
+      "atoll_id": 1,
+      "resort_name": "Adaaran Vadoo",
+      "price": "80.00",
+      "duration": "25 minutes",
+      "transfer_type": "speedboat",
+      "is_active": true,
+      "order": 3
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DBF0B0>",
+      "id": 4,
+      "atoll_id": 1,
+      "resort_name": "Anantara Veli",
+      "price": "115.00",
+      "duration": "40 minutes",
+      "transfer_type": "speedboat",
+      "is_active": true,
+      "order": 4
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DBF200>",
+      "id": 5,
+      "atoll_id": 1,
+      "resort_name": "Sheraton Full Moon",
+      "price": "55.00",
+      "duration": "15 minutes",
+      "transfer_type": "speedboat",
+      "is_active": true,
+      "order": 5
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DBF020>",
+      "id": 6,
+      "atoll_id": 1,
+      "resort_name": "Kurumba Maldives",
+      "price": "58.00",
+      "duration": "15 minutes",
+      "transfer_type": "speedboat",
+      "is_active": true,
+      "order": 6
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DBF050>",
+      "id": 7,
+      "atoll_id": 1,
+      "resort_name": "Paradise Island",
+      "price": "70.00",
+      "duration": "20 minutes",
+      "transfer_type": "speedboat",
+      "is_active": true,
+      "order": 7
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DBEF90>",
+      "id": 8,
+      "atoll_id": 1,
+      "resort_name": "Velassaru",
+      "price": "90.00",
+      "duration": "30 minutes",
+      "transfer_type": "speedboat",
+      "is_active": true,
+      "order": 8
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DBEA20>",
+      "id": 13,
+      "atoll_id": 1,
+      "resort_name": "Hulhumale Ferry",
+      "price": "2.00",
+      "duration": "20 minutes",
+      "transfer_type": "ferry",
+      "is_active": true,
+      "order": 9
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DBE750>",
+      "id": 14,
+      "atoll_id": 1,
+      "resort_name": "Maafushi Ferry",
+      "price": "5.00",
+      "duration": "90 minutes",
+      "transfer_type": "ferry",
+      "is_active": true,
+      "order": 10
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DBFA10>",
+      "id": 15,
+      "atoll_id": 1,
+      "resort_name": "Gulhi Ferry",
+      "price": "4.00",
+      "duration": "75 minutes",
+      "transfer_type": "ferry",
+      "is_active": true,
+      "order": 11
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DBE150>",
+      "id": 9,
+      "atoll_id": 2,
+      "resort_name": "Dusit Thani Maldives",
+      "price": "150.00",
+      "duration": "2 hours 40 minutes",
+      "transfer_type": "seaplane",
+      "is_active": true,
+      "order": 1
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DBE720>",
+      "id": 10,
+      "atoll_id": 2,
+      "resort_name": "Four Seasons Landaa Giraavaru",
+      "price": "180.00",
+      "duration": "2 hours 40 minutes",
+      "transfer_type": "seaplane",
+      "is_active": true,
+      "order": 2
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DB0E00>",
+      "id": 11,
+      "atoll_id": 2,
+      "resort_name": "Soneva Fushi",
+      "price": "104.00",
+      "duration": "2 hours 40 minutes",
+      "transfer_type": "seaplane",
+      "is_active": true,
+      "order": 3
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DB1580>",
+      "id": 12,
+      "atoll_id": 2,
+      "resort_name": "The Nautilus Maldives",
+      "price": "180.00",
+      "duration": "2 hours 40 minutes",
+      "transfer_type": "seaplane",
+      "is_active": true,
+      "order": 4
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DB35C0>",
+      "id": 16,
+      "atoll_id": 2,
+      "resort_name": "Eydhafushi Ferry",
+      "price": "8.00",
+      "duration": "4 hours",
+      "transfer_type": "ferry",
+      "is_active": true,
+      "order": 5
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DB2AB0>",
+      "id": 17,
+      "atoll_id": 2,
+      "resort_name": "Thulhaadhoo Ferry",
+      "price": "7.00",
+      "duration": "3.5 hours",
+      "transfer_type": "ferry",
+      "is_active": true,
+      "order": 6
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DB1B80>",
+      "id": 18,
+      "atoll_id": 3,
+      "resort_name": "Conrad Maldives Rangali Island",
+      "price": "220.00",
+      "duration": "2 hours 15 minutes",
+      "transfer_type": "seaplane",
+      "is_active": true,
+      "order": 1
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DB2E70>",
+      "id": 19,
+      "atoll_id": 3,
+      "resort_name": "W Maldives",
+      "price": "200.00",
+      "duration": "2 hours",
+      "transfer_type": "seaplane",
+      "is_active": true,
+      "order": 2
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DB1CA0>",
+      "id": 20,
+      "atoll_id": 3,
+      "resort_name": "Lily Beach Resort",
+      "price": "180.00",
+      "duration": "1 hour 45 minutes",
+      "transfer_type": "seaplane",
+      "is_active": true,
+      "order": 3
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DB2540>",
+      "id": 21,
+      "atoll_id": 3,
+      "resort_name": "Mirihi Island Resort",
+      "price": "160.00",
+      "duration": "1 hour 30 minutes",
+      "transfer_type": "seaplane",
+      "is_active": true,
+      "order": 4
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DB1010>",
+      "id": 22,
+      "atoll_id": 3,
+      "resort_name": "Maamigili Ferry",
+      "price": "10.00",
+      "duration": "5 hours",
+      "transfer_type": "ferry",
+      "is_active": true,
+      "order": 5
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DB3FB0>",
+      "id": 23,
+      "atoll_id": 3,
+      "resort_name": "Mahibadhoo Ferry",
+      "price": "9.00",
+      "duration": "4.5 hours",
+      "transfer_type": "ferry",
+      "is_active": true,
+      "order": 6
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DB0B90>",
+      "id": 24,
+      "atoll_id": 4,
+      "resort_name": "Kuredu Island Resort",
+      "price": "140.00",
+      "duration": "1 hour 30 minutes",
+      "transfer_type": "seaplane",
+      "is_active": true,
+      "order": 1
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DB2CF0>",
+      "id": 25,
+      "atoll_id": 4,
+      "resort_name": "Komandoo Island Resort",
+      "price": "150.00",
+      "duration": "1 hour 45 minutes",
+      "transfer_type": "seaplane",
+      "is_active": true,
+      "order": 2
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DB3A10>",
+      "id": 26,
+      "atoll_id": 4,
+      "resort_name": "Kunfunadhoo Ferry",
+      "price": "6.00",
+      "duration": "3 hours",
+      "transfer_type": "ferry",
+      "is_active": true,
+      "order": 3
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DB3BC0>",
+      "id": 27,
+      "atoll_id": 5,
+      "resort_name": "Alimatha Ferry",
+      "price": "12.00",
+      "duration": "6 hours",
+      "transfer_type": "ferry",
+      "is_active": true,
+      "order": 1
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DB0740>",
+      "id": 28,
+      "atoll_id": 5,
+      "resort_name": "Fulidhoo Ferry",
+      "price": "11.00",
+      "duration": "5.5 hours",
+      "transfer_type": "ferry",
+      "is_active": true,
+      "order": 2
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DB2E40>",
+      "id": 29,
+      "atoll_id": 6,
+      "resort_name": "Muli Ferry",
+      "price": "13.00",
+      "duration": "6.5 hours",
+      "transfer_type": "ferry",
+      "is_active": true,
+      "order": 1
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DB0200>",
+      "id": 30,
+      "atoll_id": 6,
+      "resort_name": "Veyvah Ferry",
+      "price": "14.00",
+      "duration": "7 hours",
+      "transfer_type": "ferry",
+      "is_active": true,
+      "order": 2
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA4620>",
+      "id": 2,
+      "question": "Is there transfer service available at the international airport on arrival to book?",
+      "answer": "No, everything needs to be pre-arranged before your arrival. However, if you are staying in Male or Hulhumale city, you can grab a taxi from the airport.",
+      "category": "Booking",
+      "icon": "ClockIcon",
+      "is_active": true,
+      "order": 2
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DB24B0>",
+      "id": 7,
+      "question": "Do I need to book transfers in advance?",
+      "answer": "Yes, all transfers should be booked at least 48 hours in advance, especially for seaplanes and speedboats. Ferry tickets can be purchased on the day of travel.",
+      "category": "Booking",
+      "icon": "ShieldCheckIcon",
+      "is_active": true,
+      "order": 7
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA6420>",
+      "id": 1,
+      "question": "How to get to Maldives islands?",
+      "answer": "To reach any island in the Maldives, you will require either a speedboat transfer or a domestic flight. The choice depends on your destination and budget.",
+      "category": "General",
+      "icon": "MapPinIcon",
+      "is_active": true,
+      "order": 1
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA7F20>",
+      "id": 6,
+      "question": "How much luggage can I bring on transfers?",
+      "answer": "Speedboats allow 20kg per person, seaplanes have a 20kg limit, domestic flights allow 15kg, and ferries have no strict limit but space is limited.",
+      "category": "Luggage",
+      "icon": "InformationCircleIcon",
+      "is_active": true,
+      "order": 6
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA47D0>",
+      "id": 4,
+      "question": "Why is the Maldives transfer so expensive?",
+      "answer": "Because of the small populations and dispersity, it's very difficult to organize daily schedules on different times for an island. Additionally, speedboats consume a lot of fuel.",
+      "category": "Pricing",
+      "icon": "CurrencyDollarIcon",
+      "is_active": true,
+      "order": 4
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA5E80>",
+      "id": 3,
+      "question": "Is it safe to travel by sea?",
+      "answer": "I can tell you it's safer than flights. You will have floating life jackets on speedboats, but during stormy weather, it is not recommended to travel by very small boats.",
+      "category": "Safety",
+      "icon": "CheckCircleIcon",
+      "is_active": true,
+      "order": 3
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA7DA0>",
+      "id": 5,
+      "question": "What are the ferry schedules?",
+      "answer": "Public ferries typically operate from 6:00 AM to 6:00 PM with departures every 1-2 hours. Schedules vary by route and may be affected by weather conditions.",
+      "category": "Schedules",
+      "icon": "ClockIcon",
+      "is_active": true,
+      "order": 5
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA5130>",
+      "id": 8,
+      "question": "What happens if my transfer is cancelled due to weather?",
+      "answer": "In case of weather-related cancellations, we will reschedule your transfer at no additional cost. We monitor weather conditions and provide updates.",
+      "category": "Weather",
+      "icon": "ExclamationTriangleIcon",
+      "is_active": true,
+      "order": 8
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA69C0>",
+      "id": 1,
+      "method": "WhatsApp",
+      "icon": "ChatBubbleLeftRightIcon",
+      "color": "green",
+      "contact": "+960 777-7777",
+      "description": "Fastest response time, available 24/7",
+      "response_time": "Within 5 minutes",
+      "is_active": true,
+      "order": 1
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA7230>",
+      "id": 2,
+      "method": "Phone",
+      "icon": "PhoneIcon",
+      "color": "blue",
+      "contact": "+960 777-7777",
+      "description": "Direct conversation with our team",
+      "response_time": "Immediate",
+      "is_active": true,
+      "order": 2
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA67E0>",
+      "id": 3,
+      "method": "Email",
+      "icon": "EnvelopeIcon",
+      "color": "purple",
+      "contact": "transfers@threadtravels.com",
+      "description": "Detailed inquiries and documentation",
+      "response_time": "Within 2 hours",
+      "is_active": true,
+      "order": 3
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA4470>",
+      "id": 1,
+      "step_number": 1,
+      "title": "Pre-Arrival Booking",
+      "description": "Arrange your transfer before arriving in the Maldives",
+      "icon": "ShieldCheckIcon",
+      "details": [
+        "Contact us at least 48 hours before arrival",
+        "Provide flight details and arrival time",
+        "Confirm resort/hotel destination",
+        "Receive transfer confirmation",
+        "Save emergency contact numbers"
+      ],
+      "tips": "Early booking ensures availability and better rates",
+      "is_active": true
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA4D10>",
+      "id": 2,
+      "step_number": 2,
+      "title": "Airport Arrival",
+      "description": "What to expect when you arrive at Male International Airport",
+      "icon": "MapPinIcon",
+      "details": [
+        "Clear immigration and customs",
+        "Collect luggage from baggage claim",
+        "Look for our representative with signboard",
+        "Proceed to transfer counter if needed",
+        "Wait for transfer vehicle/boat"
+      ],
+      "tips": "Our team will be waiting with your name on a signboard",
+      "is_active": true
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA4B60>",
+      "id": 3,
+      "step_number": 3,
+      "title": "Transfer Process",
+      "description": "The actual transfer journey to your destination",
+      "icon": "SparklesIcon",
+      "details": [
+        "Board the designated transfer vehicle",
+        "Safety briefing and life jacket fitting",
+        "Comfortable journey with refreshments",
+        "Arrival at your destination",
+        "Assistance with luggage"
+      ],
+      "tips": "All transfers include safety equipment and professional crew",
+      "is_active": true
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA6D50>",
+      "id": 4,
+      "step_number": 4,
+      "title": "Return Transfer",
+      "description": "Arranging your departure transfer",
+      "icon": "ClockIcon",
+      "details": [
+        "Confirm departure time with resort",
+        "Coordinate with flight departure time",
+        "Pack and prepare for departure",
+        "Board return transfer vehicle",
+        "Arrive at airport with sufficient time"
+      ],
+      "tips": "Allow extra time for weather delays and security checks",
+      "is_active": true
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DBC410>",
+      "id": 1,
+      "benefit": "24/7 Support",
+      "description": "Round-the-clock assistance for all your transfer needs",
+      "icon": "ClockIcon",
+      "color": "blue",
+      "is_active": true,
+      "order": 1
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA43B0>",
+      "id": 2,
+      "benefit": "Competitive Rates",
+      "description": "Best prices guaranteed with transparent pricing",
+      "icon": "ShieldCheckIcon",
+      "color": "green",
+      "is_active": true,
+      "order": 2
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DBC350>",
+      "id": 3,
+      "benefit": "Flexible Options",
+      "description": "Multiple transfer types and scheduling options",
+      "icon": "SparklesIcon",
+      "color": "purple",
+      "is_active": true,
+      "order": 3
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DBC590>",
+      "id": 4,
+      "benefit": "Safety Assured",
+      "description": "Licensed operators with full safety equipment",
+      "icon": "CheckCircleIcon",
+      "color": "orange",
+      "is_active": true,
+      "order": 4
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DB3C20>",
+      "id": 1,
+      "factor": "Distance",
+      "description": "Longer distances generally cost more",
+      "icon": "MapPinIcon",
+      "impact": "High",
+      "examples": [
+        "Male to nearby islands: $50-80",
+        "Male to Baa Atoll: $150-200",
+        "Male to Ari Atoll: $200-300"
+      ],
+      "is_active": true,
+      "order": 1
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DB16D0>",
+      "id": 2,
+      "factor": "Transfer Type",
+      "description": "Different transportation methods have different costs",
+      "icon": "SparklesIcon",
+      "impact": "High",
+      "examples": [
+        "Speedboat: $50-300",
+        "Seaplane: $200-500",
+        "Ferry: $2-25"
+      ],
+      "is_active": true,
+      "order": 2
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DB3530>",
+      "id": 3,
+      "factor": "Season",
+      "description": "Peak season may have higher rates",
+      "icon": "StarIcon",
+      "impact": "Medium",
+      "examples": [
+        "Peak season (Dec-Apr): +10-20%",
+        "Off-season (May-Nov): Standard rates",
+        "Holiday periods: +15-25%"
+      ],
+      "is_active": true,
+      "order": 3
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DB39B0>",
+      "id": 4,
+      "factor": "Group Size",
+      "description": "Larger groups may qualify for discounts or require special arrangements",
+      "icon": "UserGroupIcon",
+      "impact": "Medium",
+      "examples": [
+        "Individual travelers: Standard rates",
+        "Groups 4-8: 5-10% discount",
+        "Groups 8+: Custom pricing"
+      ],
+      "is_active": true,
+      "order": 4
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DB3E90>",
+      "id": 5,
+      "factor": "Time of Day",
+      "description": "Early morning or late evening transfers may have different rates",
+      "icon": "ClockIcon",
+      "impact": "Low",
+      "examples": [
+        "Regular hours (6AM-6PM): Standard rates",
+        "After hours: +15-25%",
+        "Emergency transfers: +50%"
+      ],
+      "is_active": true,
+      "order": 5
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA53D0>",
+      "id": 1,
+      "section": "hero",
+      "title": "Maldives Transportation & Transfers",
+      "subtitle": "Your complete guide to getting around the Maldives",
+      "description": "From speedboat transfers to seaplane flights, we provide comprehensive transportation services to make your island hopping seamless and memorable.",
+      "badge_text": "Maldives Transportation Guide",
+      "badge_icon": "SparklesIcon",
+      "is_active": true,
+      "order": 1,
+      "created_at": "2025-08-17 10:31:09.725000+00:00",
+      "updated_at": "2025-08-17 10:31:09.726000+00:00"
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA6270>",
+      "id": 2,
+      "section": "transfer_types",
+      "title": "Types of Transfers in Maldives",
+      "subtitle": "Transportation Options",
+      "description": "From budget-friendly ferries to luxury seaplane transfers, discover the perfect transportation option for your Maldives adventure.",
+      "badge_text": "Transportation Options",
+      "badge_icon": "SparklesIcon",
+      "is_active": true,
+      "order": 2,
+      "created_at": "2025-08-17 10:31:09.729000+00:00",
+      "updated_at": "2025-08-17 10:31:09.729000+00:00"
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA5610>",
+      "id": 3,
+      "section": "atoll_transfers",
+      "title": "Atoll Transfer Information",
+      "subtitle": "Atoll Transfer Guide",
+      "description": "Comprehensive transfer information for major atolls in the Maldives. Find the perfect transfer option for your chosen destination.",
+      "badge_text": "Atoll Transfer Guide",
+      "badge_icon": "MapPinIcon",
+      "is_active": true,
+      "order": 3,
+      "created_at": "2025-08-17 10:31:09.731000+00:00",
+      "updated_at": "2025-08-17 10:31:09.731000+00:00"
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA49E0>",
+      "id": 4,
+      "section": "transfer_guide",
+      "title": "How to Arrange Your Transfer",
+      "subtitle": "Complete Transfer Guide",
+      "description": "A step-by-step guide to arranging and using transfers in the Maldives. From pre-booking to arrival, we cover everything you need to know.",
+      "badge_text": "Complete Transfer Guide",
+      "badge_icon": "InformationCircleIcon",
+      "is_active": true,
+      "order": 4,
+      "created_at": "2025-08-17 10:31:09.733000+00:00",
+      "updated_at": "2025-08-17 10:31:09.733000+00:00"
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA5FA0>",
+      "id": 5,
+      "section": "pricing",
+      "title": "Transfer Pricing & Costs",
+      "subtitle": "Transfer Pricing Guide",
+      "description": "Transparent pricing information for all types of transfers in the Maldives. Understand the costs and factors that influence transfer pricing.",
+      "badge_text": "Transfer Pricing Guide",
+      "badge_icon": "CurrencyDollarIcon",
+      "is_active": true,
+      "order": 5,
+      "created_at": "2025-08-17 10:31:09.736000+00:00",
+      "updated_at": "2025-08-17 10:31:09.736000+00:00"
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA6600>",
+      "id": 6,
+      "section": "faq",
+      "title": "Transfer FAQ",
+      "subtitle": "Frequently Asked Questions",
+      "description": "Find answers to the most common questions about transfers in the Maldives. Everything you need to know about getting around the islands.",
+      "badge_text": "Frequently Asked Questions",
+      "badge_icon": "InformationCircleIcon",
+      "is_active": true,
+      "order": 6,
+      "created_at": "2025-08-17 10:31:09.743000+00:00",
+      "updated_at": "2025-08-17 10:31:09.743000+00:00"
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA6000>",
+      "id": 7,
+      "section": "booking",
+      "title": "Ready to Book Your Transfer?",
+      "subtitle": "Book Your Transfer",
+      "description": "Secure your Maldives transfer with Thread Travels. Our simple booking process ensures a smooth and reliable transportation experience.",
+      "badge_text": "Book Your Transfer",
+      "badge_icon": "SparklesIcon",
+      "is_active": true,
+      "order": 7,
+      "created_at": "2025-08-17 10:31:09.747000+00:00",
+      "updated_at": "2025-08-17 10:31:09.747000+00:00"
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA51C0>",
+      "id": 15,
+      "route_name": "Gulhi to Male",
+      "departure_time": "16:00:00",
+      "arrival_time": "17:15:00",
+      "duration": "75 minutes",
+      "price": "4.00",
+      "days_of_week": [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday"
+      ],
+      "is_active": true,
+      "notes": "Return ferry from Gulhi",
+      "order": 15
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA47A0>",
+      "id": 13,
+      "route_name": "Hulhumale to Male",
+      "departure_time": "18:00:00",
+      "arrival_time": "18:20:00",
+      "duration": "20 minutes",
+      "price": "2.00",
+      "days_of_week": [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday"
+      ],
+      "is_active": true,
+      "notes": "Return ferry from Hulhumale",
+      "order": 13
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA4F50>",
+      "id": 14,
+      "route_name": "Maafushi to Male",
+      "departure_time": "15:00:00",
+      "arrival_time": "16:30:00",
+      "duration": "90 minutes",
+      "price": "5.00",
+      "days_of_week": [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday"
+      ],
+      "is_active": true,
+      "notes": "Return ferry from Maafushi",
+      "order": 14
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA7E00>",
+      "id": 9,
+      "route_name": "Male to Alimatha (Vaavu Atoll)",
+      "departure_time": "06:00:00",
+      "arrival_time": "12:00:00",
+      "duration": "6 hours",
+      "price": "12.00",
+      "days_of_week": [
+        "Monday",
+        "Thursday"
+      ],
+      "is_active": true,
+      "notes": "Twice per week to Vaavu Atoll",
+      "order": 9
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA4770>",
+      "id": 4,
+      "route_name": "Male to Eydhafushi (Baa Atoll)",
+      "departure_time": "07:00:00",
+      "arrival_time": "11:00:00",
+      "duration": "4 hours",
+      "price": "8.00",
+      "days_of_week": [
+        "Monday",
+        "Wednesday",
+        "Friday"
+      ],
+      "is_active": true,
+      "notes": "Three times per week to Baa Atoll",
+      "order": 4
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA42F0>",
+      "id": 10,
+      "route_name": "Male to Fulidhoo (Vaavu Atoll)",
+      "departure_time": "06:30:00",
+      "arrival_time": "12:00:00",
+      "duration": "5.5 hours",
+      "price": "11.00",
+      "days_of_week": [
+        "Tuesday",
+        "Friday"
+      ],
+      "is_active": true,
+      "notes": "Twice per week to Vaavu Atoll",
+      "order": 10
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA6DE0>",
+      "id": 3,
+      "route_name": "Male to Gulhi",
+      "departure_time": "08:30:00",
+      "arrival_time": "09:45:00",
+      "duration": "75 minutes",
+      "price": "4.00",
+      "days_of_week": [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday"
+      ],
+      "is_active": true,
+      "notes": "Regular ferry to Gulhi island",
+      "order": 3
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA4710>",
+      "id": 1,
+      "route_name": "Male to Hulhumale",
+      "departure_time": "06:00:00",
+      "arrival_time": "06:20:00",
+      "duration": "20 minutes",
+      "price": "2.00",
+      "days_of_week": [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday"
+      ],
+      "is_active": true,
+      "notes": "Regular ferry service to Hulhumale",
+      "order": 1
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA4B30>",
+      "id": 8,
+      "route_name": "Male to Kunfunadhoo (Lhaviyani Atoll)",
+      "departure_time": "08:00:00",
+      "arrival_time": "11:00:00",
+      "duration": "3 hours",
+      "price": "6.00",
+      "days_of_week": [
+        "Monday",
+        "Wednesday",
+        "Friday"
+      ],
+      "is_active": true,
+      "notes": "Three times per week to Lhaviyani Atoll",
+      "order": 8
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA5250>",
+      "id": 2,
+      "route_name": "Male to Maafushi",
+      "departure_time": "09:00:00",
+      "arrival_time": "10:30:00",
+      "duration": "90 minutes",
+      "price": "5.00",
+      "days_of_week": [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday"
+      ],
+      "is_active": true,
+      "notes": "Daily ferry to Maafushi island",
+      "order": 2
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA4290>",
+      "id": 6,
+      "route_name": "Male to Maamigili (Ari Atoll)",
+      "departure_time": "06:30:00",
+      "arrival_time": "11:30:00",
+      "duration": "5 hours",
+      "price": "10.00",
+      "days_of_week": [
+        "Monday",
+        "Wednesday",
+        "Friday"
+      ],
+      "is_active": true,
+      "notes": "Three times per week to Ari Atoll",
+      "order": 6
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA58B0>",
+      "id": 7,
+      "route_name": "Male to Mahibadhoo (Ari Atoll)",
+      "departure_time": "07:00:00",
+      "arrival_time": "11:30:00",
+      "duration": "4.5 hours",
+      "price": "9.00",
+      "days_of_week": [
+        "Tuesday",
+        "Thursday",
+        "Saturday"
+      ],
+      "is_active": true,
+      "notes": "Three times per week to Ari Atoll",
+      "order": 7
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA4CB0>",
+      "id": 11,
+      "route_name": "Male to Muli (Meemu Atoll)",
+      "departure_time": "05:30:00",
+      "arrival_time": "12:00:00",
+      "duration": "6.5 hours",
+      "price": "13.00",
+      "days_of_week": [
+        "Monday",
+        "Wednesday"
+      ],
+      "is_active": true,
+      "notes": "Twice per week to Meemu Atoll",
+      "order": 11
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA5EE0>",
+      "id": 5,
+      "route_name": "Male to Thulhaadhoo (Baa Atoll)",
+      "departure_time": "07:30:00",
+      "arrival_time": "11:00:00",
+      "duration": "3.5 hours",
+      "price": "7.00",
+      "days_of_week": [
+        "Tuesday",
+        "Thursday",
+        "Saturday"
+      ],
+      "is_active": true,
+      "notes": "Three times per week to Baa Atoll",
+      "order": 5
+    },
+    {
+      "_state": "<django.db.models.base.ModelState object at 0x000001F115DA7320>",
+      "id": 12,
+      "route_name": "Male to Veyvah (Meemu Atoll)",
+      "departure_time": "05:00:00",
+      "arrival_time": "12:00:00",
+      "duration": "7 hours",
+      "price": "14.00",
+      "days_of_week": [
+        "Tuesday",
+        "Thursday"
+      ],
+      "is_active": true,
+      "notes": "Twice per week to Meemu Atoll",
+      "order": 12
+    }
+  ]
+}

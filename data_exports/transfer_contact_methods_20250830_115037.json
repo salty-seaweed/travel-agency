@@ -1,0 +1,44 @@
+[
+{
+  "model": "api.transfercontactmethod",
+  "pk": 1,
+  "fields": {
+    "method": "WhatsApp",
+    "icon": "ChatBubbleLeftRightIcon",
+    "color": "green",
+    "contact": "+960 777-7777",
+    "description": "Fastest response time, available 24/7",
+    "response_time": "Within 5 minutes",
+    "is_active": true,
+    "order": 1
+  }
+},
+{
+  "model": "api.transfercontactmethod",
+  "pk": 2,
+  "fields": {
+    "method": "Phone",
+    "icon": "PhoneIcon",
+    "color": "blue",
+    "contact": "+960 777-7777",
+    "description": "Direct conversation with our team",
+    "response_time": "Immediate",
+    "is_active": true,
+    "order": 2
+  }
+},
+{
+  "model": "api.transfercontactmethod",
+  "pk": 3,
+  "fields": {
+    "method": "Email",
+    "icon": "EnvelopeIcon",
+    "color": "purple",
+    "contact": "transfers@threadtravels.com",
+    "description": "Detailed inquiries and documentation",
+    "response_time": "Within 2 hours",
+    "is_active": true,
+    "order": 3
+  }
+}
+]

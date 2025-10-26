@@ -1,0 +1,50 @@
+[
+{
+  "model": "api.transferbenefit",
+  "pk": 1,
+  "fields": {
+    "benefit": "24/7 Support",
+    "description": "Round-the-clock assistance for all your transfer needs",
+    "icon": "ClockIcon",
+    "color": "blue",
+    "is_active": true,
+    "order": 1
+  }
+},
+{
+  "model": "api.transferbenefit",
+  "pk": 2,
+  "fields": {
+    "benefit": "Competitive Rates",
+    "description": "Best prices guaranteed with transparent pricing",
+    "icon": "ShieldCheckIcon",
+    "color": "green",
+    "is_active": true,
+    "order": 2
+  }
+},
+{
+  "model": "api.transferbenefit",
+  "pk": 3,
+  "fields": {
+    "benefit": "Flexible Options",
+    "description": "Multiple transfer types and scheduling options",
+    "icon": "SparklesIcon",
+    "color": "purple",
+    "is_active": true,
+    "order": 3
+  }
+},
+{
+  "model": "api.transferbenefit",
+  "pk": 4,
+  "fields": {
+    "benefit": "Safety Assured",
+    "description": "Licensed operators with full safety equipment",
+    "icon": "CheckCircleIcon",
+    "color": "orange",
+    "is_active": true,
+    "order": 4
+  }
+}
+]

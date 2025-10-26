@@ -1,0 +1,343 @@
+/* Simple Booking Form Styles */
+
+.simple-booking-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  z-index: 1000;
+  padding: 2rem 1rem;
+  overflow-y: auto;
+}
+
+.simple-booking-modal {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.08);
+  max-width: 600px;
+  width: 100%;
+  max-height: calc(100vh - 4rem);
+  overflow-y: auto;
+  animation: simple-booking-modal-enter 0.3s ease-out;
+  margin: auto 0;
+}
+
+@keyframes simple-booking-modal-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.simple-booking-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.simple-booking-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.simple-booking-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 8px;
+  color: #64748b;
+  transition: all 0.2s ease;
+}
+
+.simple-booking-close:hover {
+  background: #f1f5f9;
+  color: #374151;
+}
+
+.simple-booking-close-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.simple-booking-content {
+  padding: 2rem;
+}
+
+.simple-booking-resort-info {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border: 1px solid #e2e8f0;
+}
+
+.simple-booking-resort-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+}
+
+.simple-booking-resort-location {
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.simple-booking-form {
+  margin-bottom: 2rem;
+}
+
+.simple-booking-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.simple-booking-field-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.simple-booking-label {
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.simple-booking-input,
+.simple-booking-select,
+.simple-booking-textarea {
+  padding: 0.75rem 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  background: white;
+  font-family: inherit;
+}
+
+.simple-booking-input:focus,
+.simple-booking-select:focus,
+.simple-booking-textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.simple-booking-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.simple-booking-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.simple-booking-button {
+  flex: 1;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.simple-booking-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.simple-booking-button-whatsapp {
+  background: #10b981;
+  color: white;
+}
+
+.simple-booking-button-whatsapp:hover:not(:disabled) {
+  background: #059669;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.simple-booking-button-submit {
+  background: #3b82f6;
+  color: white;
+}
+
+.simple-booking-button-submit:hover:not(:disabled) {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.simple-booking-contact {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid #e2e8f0;
+}
+
+.simple-booking-contact-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 1rem;
+}
+
+.simple-booking-contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.simple-booking-contact-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.simple-booking-contact-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #94a3b8;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .simple-booking-overlay {
+    padding: 1rem 0.5rem;
+  }
+
+  .simple-booking-modal {
+    margin: 0 0.5rem;
+    max-height: calc(100vh - 2rem);
+    border-radius: 12px;
+  }
+
+  .simple-booking-content {
+    padding: 1.5rem;
+  }
+
+  .simple-booking-form-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .simple-booking-actions {
+    flex-direction: column;
+  }
+
+  .simple-booking-button {
+    width: 100%;
+    min-height: 48px;
+  }
+
+  .simple-booking-header {
+    padding: 1rem 1.5rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .simple-booking-overlay {
+    padding: 0.75rem 0.25rem;
+  }
+
+  .simple-booking-modal {
+    margin: 0 0.25rem;
+    max-height: calc(100vh - 1.5rem);
+  }
+
+  .simple-booking-content {
+    padding: 1.25rem;
+  }
+
+  .simple-booking-form-grid {
+    gap: 0.625rem;
+  }
+
+  .simple-booking-header {
+    padding: 0.875rem 1.25rem;
+  }
+
+  .simple-booking-resort-info,
+  .simple-booking-contact {
+    padding: 0.875rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .simple-booking-overlay {
+    padding: 0.5rem;
+  }
+
+  .simple-booking-modal {
+    margin: 0;
+    border-radius: 0;
+    max-height: 100vh;
+  }
+
+  .simple-booking-header {
+    padding: 1rem;
+  }
+
+  .simple-booking-content {
+    padding: 1rem;
+  }
+
+  .simple-booking-resort-info,
+  .simple-booking-contact {
+    padding: 1rem;
+  }
+
+  .simple-booking-button {
+    min-height: 44px;
+    padding: 0.75rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .simple-booking-overlay {
+    padding: 0.25rem;
+  }
+
+  .simple-booking-header {
+    padding: 0.75rem;
+  }
+
+  .simple-booking-content {
+    padding: 0.75rem;
+  }
+
+  .simple-booking-resort-info,
+  .simple-booking-contact {
+    padding: 0.75rem;
+  }
+
+  .simple-booking-button {
+    padding: 0.625rem;
+    font-size: 0.9rem;
+  }
+}

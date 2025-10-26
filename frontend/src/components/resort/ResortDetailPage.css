@@ -1,0 +1,663 @@
+/* Resort Detail Page Styles - Tree and Salt Inspired */
+
+.resort-detail-container {
+  min-height: 100vh;
+  background: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+}
+
+
+/* Main Content */
+.resort-detail-main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.resort-detail-content-wrapper {
+  background: #ffffff;
+}
+
+/* Hero Section */
+.resort-detail-hero-section {
+  padding: 3rem 0 2rem 0;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 3rem;
+}
+
+.resort-detail-hero-content {
+  max-width: 800px;
+}
+
+.resort-detail-title {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 1.5rem;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+}
+
+.resort-detail-subtitle {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.resort-detail-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.resort-detail-star {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #d1d5db;
+  flex-shrink: 0;
+}
+
+.resort-detail-star-filled {
+  color: #fbbf24;
+}
+
+.resort-detail-rating-text {
+  color: #6b7280;
+  font-weight: 500;
+  font-size: 1.125rem;
+}
+
+.resort-detail-location {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #6b7280;
+  font-size: 1.125rem;
+  font-weight: 500;
+}
+
+.resort-detail-location-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+}
+
+/* Gallery Section */
+.resort-detail-gallery-section {
+  margin-bottom: 4rem;
+}
+
+.resort-detail-gallery {
+  width: 100%;
+}
+
+.resort-detail-gallery-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 0.5rem;
+  height: 500px;
+  margin-bottom: 1rem;
+}
+
+.resort-detail-gallery-item {
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.resort-detail-gallery-main {
+  grid-row: span 2;
+}
+
+.resort-detail-gallery-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.resort-detail-gallery-image:hover {
+  transform: scale(1.05);
+}
+
+.resort-detail-gallery-more {
+  text-align: center;
+  padding: 1rem;
+  background: #f9fafb;
+  border-radius: 12px;
+  color: #6b7280;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.resort-detail-gallery-more:hover {
+  background: #f3f4f6;
+}
+
+/* Mobile Touch Improvements */
+@media (max-width: 768px) {
+  .resort-detail-booking-button,
+  .resort-detail-gallery-more {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+}
+
+/* Info Section */
+.resort-detail-info-section {
+  margin-bottom: 4rem;
+}
+
+.resort-detail-info-content {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 4rem;
+  align-items: start;
+}
+
+.resort-detail-main-info h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+}
+
+.resort-detail-description {
+  color: #4b5563;
+  font-size: 1.125rem;
+  line-height: 1.7;
+  margin-bottom: 1.5rem;
+}
+
+.resort-detail-detailed-description {
+  color: #6b7280;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+/* Features Section */
+.resort-detail-features {
+  margin-bottom: 3rem;
+}
+
+.resort-detail-features h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 1.5rem;
+}
+
+.resort-detail-features-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.resort-detail-feature-item {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.resort-detail-feature-label {
+  font-weight: 600;
+  color: #374151;
+}
+
+.resort-detail-feature-value {
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+/* Accommodation Section */
+.resort-detail-accommodation-section {
+  margin-bottom: 2rem;
+}
+
+.resort-detail-accommodation-section h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 2rem;
+}
+
+.resort-detail-accommodation-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.resort-detail-accommodation-item {
+  text-align: center;
+  background: #f9fafb;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.2s ease;
+}
+
+.resort-detail-accommodation-item:hover {
+  transform: translateY(-2px);
+}
+
+.resort-detail-accommodation-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  background: #e5e7eb;
+}
+
+.resort-detail-accommodation-name {
+  padding: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+/* Sidebar */
+.resort-detail-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.resort-detail-booking-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.resort-detail-booking-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 1rem;
+}
+
+.resort-detail-booking-description {
+  color: #6b7280;
+  font-size: 0.95rem;
+  margin-bottom: 2rem;
+  line-height: 1.5;
+}
+
+.resort-detail-booking-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.resort-detail-booking-button {
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.resort-detail-booking-button-primary {
+  background: #1f2937;
+  color: white;
+}
+
+.resort-detail-booking-button-primary:hover {
+  background: #111827;
+  transform: translateY(-1px);
+}
+
+.resort-detail-booking-button-whatsapp {
+  background: #10b981;
+  color: white;
+}
+
+.resort-detail-booking-button-whatsapp:hover {
+  background: #059669;
+  transform: translateY(-1px);
+}
+
+.resort-detail-booking-features {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #f3f4f6;
+}
+
+.resort-detail-booking-feature {
+  display: flex;
+  align-items: center;
+  color: #6b7280;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.resort-detail-booking-feature-icon {
+  width: 1rem;
+  height: 1rem;
+  margin-right: 0.75rem;
+  color: #10b981;
+  flex-shrink: 0;
+}
+
+
+/* No Image State */
+.resort-detail-no-image {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 3rem 2rem;
+  text-align: center;
+}
+
+.resort-detail-no-image-content h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 1rem;
+}
+
+.resort-detail-no-image-content p {
+  color: #6b7280;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* Loading and Error States */
+.resort-detail-loading {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f9fafb;
+}
+
+.resort-detail-error {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f9fafb;
+  padding: 2rem;
+}
+
+.resort-detail-error-content {
+  text-align: center;
+  max-width: 500px;
+}
+
+.resort-detail-error-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 1rem;
+}
+
+.resort-detail-error-description {
+  color: #6b7280;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+.resort-detail-error-button {
+  background: #1f2937;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+
+.resort-detail-error-button:hover {
+  background: #111827;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .resort-detail-main {
+    padding: 0 1.5rem;
+  }
+
+  .resort-detail-info-content {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+
+  .resort-detail-sidebar {
+    order: -1;
+  }
+
+  .resort-detail-gallery-grid {
+    height: 400px;
+  }
+}
+
+@media (max-width: 768px) {
+  .resort-detail-main {
+    padding: 0 1rem;
+  }
+
+  .resort-detail-title {
+    font-size: 2.5rem;
+  }
+
+  .resort-detail-gallery-grid {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    height: 400px;
+  }
+
+  .resort-detail-gallery-main {
+    grid-column: span 2;
+    grid-row: span 2;
+  }
+
+  .resort-detail-booking-card {
+    padding: 1.5rem;
+  }
+
+
+  .resort-detail-hero-section {
+    padding: 2rem 0 1.5rem 0;
+    margin-bottom: 2rem;
+  }
+
+  .resort-detail-gallery-section {
+    margin-bottom: 2rem;
+  }
+
+  .resort-detail-info-section {
+    margin-bottom: 2rem;
+  }
+
+  .resort-detail-description {
+    font-size: 1.05rem;
+  }
+
+  .resort-detail-detailed-description {
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .resort-detail-main {
+    padding: 0 0.75rem;
+  }
+
+  .resort-detail-title {
+    font-size: 2rem;
+  }
+
+  .resort-detail-gallery-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(4, 1fr);
+    height: 300px;
+  }
+
+  .resort-detail-gallery-main {
+    grid-column: span 1;
+    grid-row: span 2;
+  }
+
+  .resort-detail-gallery-item:not(.resort-detail-gallery-main) {
+    grid-row: span 1;
+  }
+
+  .resort-detail-feature-item {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .resort-detail-accommodation-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .resort-detail-booking-buttons {
+    gap: 0.5rem;
+  }
+
+  .resort-detail-booking-button {
+    padding: 0.875rem 1rem;
+    font-size: 0.95rem;
+  }
+
+  .resort-detail-hero-section {
+    padding: 1.75rem 0 1.25rem 0;
+    margin-bottom: 1.75rem;
+  }
+
+  .resort-detail-gallery-section {
+    margin-bottom: 1.75rem;
+  }
+
+  .resort-detail-info-section {
+    margin-bottom: 1.75rem;
+  }
+
+  .resort-detail-description {
+    font-size: 1rem;
+  }
+
+  .resort-detail-detailed-description {
+    font-size: 0.95rem;
+  }
+
+  .resort-detail-features h3,
+  .resort-detail-accommodation-section h3 {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .resort-detail-main {
+    padding: 0 0.75rem;
+  }
+
+  .resort-detail-title {
+    font-size: 1.75rem;
+  }
+
+  .resort-detail-hero-section {
+    padding: 1.5rem 0 1rem 0;
+    margin-bottom: 1.5rem;
+  }
+
+  .resort-detail-gallery-section {
+    margin-bottom: 2rem;
+  }
+
+  .resort-detail-gallery-grid {
+    height: 250px;
+  }
+
+  .resort-detail-info-section {
+    margin-bottom: 2rem;
+  }
+
+  .resort-detail-booking-card {
+    padding: 1rem;
+    margin: 0 -0.75rem;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+
+  .resort-detail-accommodation-item {
+    margin: 0 -0.75rem;
+  }
+
+  .resort-detail-description {
+    font-size: 0.95rem;
+  }
+
+  .resort-detail-detailed-description {
+    font-size: 0.9rem;
+  }
+
+  .resort-detail-features h3,
+  .resort-detail-accommodation-section h3 {
+    font-size: 1.125rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .resort-detail-main {
+    padding: 0 0.5rem;
+  }
+
+  .resort-detail-title {
+    font-size: 1.5rem;
+  }
+
+  .resort-detail-gallery-grid {
+    height: 200px;
+  }
+
+  .resort-detail-booking-card {
+    padding: 0.75rem;
+    margin: 0 -0.5rem;
+  }
+
+  .resort-detail-booking-button {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  .resort-detail-description {
+    font-size: 0.9rem;
+  }
+
+  .resort-detail-detailed-description {
+    font-size: 0.85rem;
+  }
+
+  .resort-detail-features h3,
+  .resort-detail-accommodation-section h3 {
+    font-size: 1rem;
+  }
+
+  .resort-detail-hero-section {
+    padding: 1rem 0 0.75rem 0;
+    margin-bottom: 1rem;
+  }
+
+  .resort-detail-gallery-section {
+    margin-bottom: 1rem;
+  }
+
+  .resort-detail-info-section {
+    margin-bottom: 1rem;
+  }
+}

@@ -1,0 +1,130 @@
+[
+{
+  "model": "api.transfertype",
+  "pk": 1,
+  "fields": {
+    "name": "Speedboat Transfers",
+    "description": "Fast and efficient transfers for nearby islands and resorts",
+    "icon": "SparklesIcon",
+    "gradient": "from-blue-500 to-indigo-600",
+    "features": [
+      "15-60 minutes travel time",
+      "Available 24/7 for resort guests",
+      "Comfortable seating with shade",
+      "Life jackets provided",
+      "Direct transfers from airport",
+      "Suitable for all weather conditions"
+    ],
+    "pricing_range": "From $50 to $300 per person",
+    "best_for": "Resort transfers, nearby islands",
+    "pros": [
+      "Fastest option for nearby destinations",
+      "Flexible scheduling",
+      "Direct service"
+    ],
+    "cons": [
+      "Limited to nearby islands",
+      "Weather dependent",
+      "Can be expensive"
+    ],
+    "is_active": true,
+    "order": 1
+  }
+},
+{
+  "model": "api.transfertype",
+  "pk": 2,
+  "fields": {
+    "name": "Public Ferry Services",
+    "description": "Budget-friendly transportation between local islands",
+    "icon": "GlobeAltIcon",
+    "gradient": "from-green-500 to-emerald-600",
+    "features": [
+      "Scheduled departures",
+      "Very affordable rates",
+      "Local island connections",
+      "Regular schedules",
+      "Authentic local experience",
+      "Luggage space available"
+    ],
+    "pricing_range": "From $2 to $15 per person",
+    "best_for": "Budget travelers, local island hopping",
+    "pros": [
+      "Most affordable option",
+      "Regular schedules",
+      "Local experience"
+    ],
+    "cons": [
+      "Limited schedules",
+      "Longer travel times",
+      "Basic amenities"
+    ],
+    "is_active": true,
+    "order": 2
+  }
+},
+{
+  "model": "api.transfertype",
+  "pk": 3,
+  "fields": {
+    "name": "Seaplane Transfers",
+    "description": "Luxury aerial transfers to remote resorts and islands",
+    "icon": "UserGroupIcon",
+    "gradient": "from-purple-500 to-pink-600",
+    "features": [
+      "Breathtaking aerial views",
+      "Fast transfers to remote locations",
+      "Luxury experience",
+      "Professional pilots",
+      "Baggage included",
+      "Resort coordination"
+    ],
+    "pricing_range": "From $200 to $500 per person",
+    "best_for": "Luxury resorts, remote islands",
+    "pros": [
+      "Stunning views",
+      "Fast to remote locations",
+      "Luxury experience"
+    ],
+    "cons": [
+      "Most expensive option",
+      "Weather dependent",
+      "Limited luggage"
+    ],
+    "is_active": true,
+    "order": 3
+  }
+},
+{
+  "model": "api.transfertype",
+  "pk": 4,
+  "fields": {
+    "name": "Domestic Flights",
+    "description": "Domestic air travel between atolls and major islands",
+    "icon": "ShieldCheckIcon",
+    "gradient": "from-orange-500 to-red-600",
+    "features": [
+      "Inter-atoll connections",
+      "Regular scheduled flights",
+      "Air-conditioned comfort",
+      "Professional service",
+      "Reliable schedules",
+      "Baggage allowance"
+    ],
+    "pricing_range": "From $80 to $200 per person",
+    "best_for": "Inter-atoll travel, major islands",
+    "pros": [
+      "Reliable schedules",
+      "Comfortable travel",
+      "Good for long distances"
+    ],
+    "cons": [
+      "Limited destinations",
+      "Additional transfer needed",
+      "Weather dependent"
+    ],
+    "is_active": true,
+    "order": 4
+  }
+}
+]

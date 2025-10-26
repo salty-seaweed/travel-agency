@@ -1,0 +1,169 @@
+# 🚫 EXCLUDE ALL OF THESE FROM DOCKER BUILD CONTEXT 🚫
+
+# === VERSION CONTROL ===
+.git/
+.gitignore
+.github/
+
+# === PYTHON ===
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+dist/
+build/
+*.egg
+pip-log.txt
+pip-delete-this-directory.txt
+
+# === DJANGO ===
+staticfiles/
+media/
+db.sqlite3
+*.log
+logs/
+*.pid
+*.lock
+
+# === ENVIRONMENT FILES ===
+.env*
+!.env.example
+
+# === IDE & EDITORS ===
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# === OPERATING SYSTEMS ===
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# === NODE.JS ===
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+package-lock.json
+yarn.lock
+
+# === FRONTEND BUILD ARTIFACTS ===
+frontend/build/
+frontend/dist/
+frontend/.next/
+frontend/.nuxt/
+frontend/.cache/
+frontend/public/sw.js
+frontend/public/workbox-*.js
+
+# === DOCKER ===
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# === RAILWAY ===
+railway.json
+railway.toml
+nixpacks.toml
+railway_*.py
+railway_*.sh
+
+# === DOCUMENTATION ===
+*.md
+!README.md
+docs/
+*.pdf
+*.docx
+
+# === TESTS ===
+test_*.py
+*_test.py
+tests/
+.pytest_cache/
+.coverage.*
+coverage.xml
+nosetests.xml
+
+# === DEVELOPMENT FILES ===
+.env.local
+.env.development
+.env.test
+.env.production
+debug.log
+
+# === TEMPORARY FILES ===
+*.tmp
+*.temp
+.cache/
+.tmp/
+temp/
+*.bak
+*.backup
+
+# === DATA EXPORTS & BACKUPS ===
+data_exports/
+*.sql
+*.dump
+*.gz
+*.zip
+*.tar
+backup_*/
+
+# === LOGS ===
+*.log
+logs/
+log/
+*.log.*
+
+# === DATABASE ===
+*.db
+*.sqlite
+*.sqlite3
+
+# === MISC ===
+.cache/
+.tmp/
+.temp/
+.vscode-test/
+.history/
+.ionide/
+.nyc_output/
+*.tgz
+*.tar.gz
+
+# === SPECIFIC LARGE DIRECTORIES ===
+**/node_modules/
+**/build/
+**/dist/
+**/static/
+**/media/
+**/uploads/
+**/cache/
+**/temp/
+**/tmp/
+
+# === PYTHON VIRTUAL ENVIRONMENTS ===
+venv/
+env/
+ENV/
+.venv/
+.env/
+
+# === JUPYTER NOTEBOOKS ===
+.ipynb_checkpoints/
+*.ipynb

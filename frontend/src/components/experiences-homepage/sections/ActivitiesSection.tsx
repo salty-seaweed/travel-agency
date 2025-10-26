@@ -1,0 +1,265 @@
+import React from 'react';
+import {
+  Box,
+  VStack,
+  HStack,
+  Text,
+  Button,
+  Container,
+  Heading,
+  Icon,
+  useColorModeValue,
+  SimpleGrid,
+  Card,
+  CardBody,
+  Badge,
+  Image,
+  Wrap,
+  WrapItem,
+} from '@chakra-ui/react';
+import {
+  MapPinIcon,
+  ArrowRightIcon,
+  GlobeAltIcon,
+  CameraIcon,
+  HeartIcon,
+  SparklesIcon,
+  ClockIcon,
+  CurrencyDollarIcon,
+  UsersIcon,
+} from '@heroicons/react/24/outline';
+import { useTranslation } from '../../../i18n';
+import { useNavigate } from 'react-router-dom';
+import { useFeaturedExperiences, useWhatsApp } from '../../../hooks/useQueries';
+
+interface ExperiencesActivitiesSectionProps {
+  homepageContent?: any;
+}
+
+export const ExperiencesActivitiesSection: React.FC<ExperiencesActivitiesSectionProps> = ({
+  homepageContent
+}) => {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  
+  const bgColor = useColorModeValue('gray.50', 'gray.900');
+  const cardBg = useColorModeValue('white', 'gray.800');
+  const borderColor = useColorModeValue('gray.200', 'gray.700');
+  const textColor = useColorModeValue('gray.800', 'white');
+  const mutedTextColor = useColorModeValue('gray.600', 'gray.300');
+
+  const { data: experiences, isLoading } = useFeaturedExperiences();
+  const { getWhatsAppUrl } = useWhatsApp();
+
+  const handleViewAllExperiences = () => {
+    navigate('/packages');
+  };
+
+  const handleExperienceClick = (experience: any) => {
+    // Navigate to packages page with the selected experience pre-selected
+    const params = new URLSearchParams();
+    params.set('custom_builder', 'true');
+    params.set('selected_experience', experience.id.toString());
+    params.set('experience_name', experience.name);
+    navigate(`/packages?${params.toString()}`);
+  };
+
+  const getExperienceIcon = (type: string) => {
+    switch (type) {
+      case 'water_sports': return GlobeAltIcon;
+      case 'cultural': return CameraIcon;
+      case 'adventure': return HeartIcon;
+      case 'wellness': return SparklesIcon;
+      case 'food': return CameraIcon;
+      case 'photography': return CameraIcon;
+      case 'fishing': return GlobeAltIcon;
+      case 'diving': return GlobeAltIcon;
+      case 'sailing': return GlobeAltIcon;
+      case 'spa': return SparklesIcon;
+      default: return SparklesIcon;
+    }
+  };
+
+  const getExperienceColor = (type: string) => {
+    switch (type) {
+      case 'water_sports': return 'blue';
+      case 'cultural': return 'purple';
+      case 'adventure': return 'red';
+      case 'wellness': return 'green';
+      case 'food': return 'orange';
+      case 'photography': return 'pink';
+      case 'fishing': return 'teal';
+      case 'diving': return 'cyan';
+      case 'sailing': return 'blue';
+      case 'spa': return 'purple';
+      default: return 'gray';
+    }
+  };
+
+  const displayExperiences = experiences && experiences.length > 0 ? experiences.slice(0, 6) : [];
+
+  return (
+    <Box bg={bgColor} py={16}>
+      <Container maxW="7xl">
+        <VStack spacing={12}>
+          <VStack spacing={4}>
+            <Badge colorScheme="teal" variant="solid" px={4} py={2} borderRadius="full" fontSize="sm" fontWeight="semibold">
+              <Icon as={SparklesIcon} className="w-4 h-4 mr-2" />
+              {t('homepage.activities.badge', 'Custom Experiences')}
+            </Badge>
+            <Heading size="xl" fontWeight="bold">
+              {t('homepage.activities.title', 'Build Your Custom Package')}
+            </Heading>
+            <Text fontSize="lg" color="gray.600" maxW="2xl">
+              {t('homepage.activities.subtitle', 'Choose from these experiences to build your own custom Maldives package. Mix and match activities to create your perfect trip.')}
+            </Text>
+          </VStack>
+
+          <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={8} w="full">
+            {displayExperiences.map((experience: any) => {
+              const IconComponent = getExperienceIcon(experience.experience_type);
+              const colorScheme = getExperienceColor(experience.experience_type);
+              
+              return (
+                <Card 
+                  key={experience.id} 
+                  bg={cardBg} 
+                  border="1px solid" 
+                  borderColor={borderColor} 
+                  shadow="md"
+                  borderRadius="xl"
+                  overflow="hidden"
+                  transition="all 0.3s" 
+                  _hover={{ transform: 'translateY(-4px)', shadow: 'xl', borderColor: `${colorScheme}.300` }}
+                  cursor="pointer"
+                  onClick={() => handleExperienceClick(experience)}
+                >
+                  <Box position="relative" h="200px">
+                    <Image
+                      src={experience.image || `/images/optimized/medium/ishan${experience.id + 50}.webp`}
+                      alt={experience.name}
+                      w="full"
+                      h="full"
+                      objectFit="cover"
+                    />
+                    <Box position="absolute" top={0} left={0} right={0} bottom={0} bg="blackAlpha.400" />
+                    
+                    {/* Experience Badge */}
+                    <Badge 
+                      position="absolute" 
+                      top={4} 
+                      left={4} 
+                      colorScheme={colorScheme} 
+                      variant="solid" 
+                      px={3} 
+                      py={1}
+                    >
+                      {experience.experience_type.replace('_', ' ')}
+                    </Badge>
+
+                    {/* Price */}
+                    <VStack 
+                      position="absolute" 
+                      top={4} 
+                      right={4} 
+                      bg="whiteAlpha.900" 
+                      px={3} 
+                      py={2} 
+                      borderRadius="lg"
+                      spacing={0}
+                    >
+                      <Text fontSize="lg" fontWeight="bold" color={`${colorScheme}.600`}>
+                        ${experience.price}
+                      </Text>
+                      <Text fontSize="xs" color="gray.500">{t('homepage.activities.perPerson', 'per person')}</Text>
+                    </VStack>
+
+                    {/* Experience Info Overlay */}
+                    <VStack 
+                      position="absolute" 
+                      bottom={0} 
+                      left={0} 
+                      right={0} 
+                      p={4}
+                      bg="linear-gradient(transparent, rgba(0,0,0,0.8))" 
+                      spacing={2}
+                    >
+                      <Text color="white" fontWeight="bold" fontSize="lg" textAlign="center">
+                        {experience.name}
+                      </Text>
+                      <HStack spacing={4} color="gray.200" fontSize="sm">
+                        <HStack spacing={1}>
+                          <Icon as={ClockIcon} className="w-4 h-4" />
+                          <Text>{experience.duration}</Text>
+                        </HStack>
+                        <HStack spacing={1}>
+                          <Icon as={UsersIcon} className="w-4 h-4" />
+                          <Text>Up to {experience.max_participants}</Text>
+                        </HStack>
+                      </HStack>
+                    </VStack>
+                  </Box>
+
+                  <CardBody p={6}>
+                    <VStack spacing={4} align="stretch">
+                      <Text fontSize="sm" color="gray.600" lineHeight="1.5">
+                        {experience.description}
+                      </Text>
+
+                      {/* Difficulty Level */}
+                      <HStack justify="space-between">
+                        <Text fontSize="sm" color="gray.500">
+                          {t('homepage.activities.difficulty', 'Difficulty')}: <Badge colorScheme={colorScheme} variant="subtle" fontSize="xs">
+                            {experience.difficulty_level}
+                          </Badge>
+                        </Text>
+                        <Icon as={IconComponent} className={`w-5 h-5 text-${colorScheme}-500`} />
+                      </HStack>
+
+                      {/* Includes */}
+                      {experience.includes && experience.includes.length > 0 && (
+                        <VStack align="start" spacing={2}>
+                          <Text fontSize="sm" fontWeight="semibold" color="gray.700">{t('homepage.activities.includes', 'Includes:')}</Text>
+                          <Wrap>
+                            {experience.includes.slice(0, 3).map((item: string, index: number) => (
+                              <WrapItem key={index}>
+                                <Badge colorScheme="green" variant="subtle" fontSize="xs">
+                                  {item}
+                                </Badge>
+                              </WrapItem>
+                            ))}
+                            {experience.includes.length > 3 && (
+                              <WrapItem>
+                                <Badge colorScheme="gray" variant="subtle" fontSize="xs">
+                                  +{experience.includes.length - 3} {t('homepage.activities.more', 'more')}
+                                </Badge>
+                              </WrapItem>
+                            )}
+                          </Wrap>
+                        </VStack>
+                      )}
+                    </VStack>
+                  </CardBody>
+                </Card>
+              );
+            })}
+          </SimpleGrid>
+
+          <VStack spacing={4}>
+            <Button
+              colorScheme="sky"
+              size="lg"
+              onClick={handleViewAllExperiences}
+              rightIcon={<Icon as={ArrowRightIcon} />}
+            >
+              {t('homepage.activities.viewAll', 'View All Custom Experiences')}
+            </Button>
+            <Text fontSize="sm" color="gray.500" textAlign="center">
+              {t('homepage.activities.helper', 'Click on any experience to get more details via WhatsApp')}
+            </Text>
+          </VStack>
+        </VStack>
+      </Container>
+    </Box>
+  );
+};

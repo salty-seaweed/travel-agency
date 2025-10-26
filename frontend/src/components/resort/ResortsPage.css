@@ -1,0 +1,368 @@
+/* Resorts Page Styles - Tree and Salt Inspired */
+
+.resorts-page-container {
+  min-height: 100vh;
+  background: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+}
+
+.resorts-page-error {
+  min-height: 100vh;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.resorts-page-error-content {
+  text-align: center;
+  max-width: 500px;
+}
+
+.resorts-page-error-icon {
+  width: 6rem;
+  height: 6rem;
+  background: #fef2f2;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+}
+
+.resorts-page-error-icon-svg {
+  width: 3rem;
+  height: 3rem;
+  color: #dc2626;
+}
+
+.resorts-page-error-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.resorts-page-error-description {
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+}
+
+.resorts-page-error-button {
+  background: #3b82f6;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.resorts-page-error-button:hover {
+  background: #2563eb;
+}
+
+/* Hero Section */
+.resorts-page-hero {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  padding: 4rem 0;
+}
+
+.resorts-page-hero-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  text-align: center;
+}
+
+.resorts-page-hero-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 1rem;
+  line-height: 1.2;
+}
+
+.resorts-page-hero-description {
+  font-size: 1.125rem;
+  color: #64748b;
+  max-width: 42rem;
+  margin: 0 auto 2rem;
+  line-height: 1.6;
+}
+
+.resorts-page-hero-count {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #475569;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  display: inline-block;
+  backdrop-filter: blur(10px);
+}
+
+/* Filters */
+.resorts-page-filters {
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.resorts-page-filters-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.resorts-page-filters-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.resorts-page-filters-buttons::-webkit-scrollbar {
+  display: none;
+}
+
+.resorts-page-filter-button {
+  padding: 0.5rem 1.5rem;
+  border-radius: 25px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  color: #64748b;
+}
+
+.resorts-page-filter-button:hover {
+  background: #f1f5f9;
+  color: #374151;
+}
+
+.resorts-page-filter-button.active {
+  background: #3b82f6;
+  color: white;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+}
+
+/* Content */
+.resorts-page-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+}
+
+.resorts-page-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem 0;
+}
+
+.resorts-page-empty {
+  text-align: center;
+  padding: 3rem 0;
+}
+
+.resorts-page-empty-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.resorts-page-empty-description {
+  color: #6b7280;
+}
+
+.resorts-page-pagination {
+  margin-top: 3rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .resorts-page-hero-content,
+  .resorts-page-filters-content,
+  .resorts-page-content {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .resorts-page-hero {
+    padding: 3rem 0;
+  }
+  
+  .resorts-page-hero-title {
+    font-size: 2rem;
+    line-height: 1.2;
+  }
+  
+  .resorts-page-hero-description {
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+  
+  .resorts-page-content {
+    padding: 2rem 1rem;
+  }
+  
+  .resorts-page-filters-buttons {
+    justify-content: flex-start;
+    padding: 0.75rem 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .resorts-page-filter-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+  }
+  
+  .resorts-page-hero-content {
+    padding: 0 1rem;
+  }
+  
+  .resorts-page-filters-content {
+    padding: 0 1rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .resorts-page-hero {
+    padding: 2.5rem 0;
+  }
+  
+  .resorts-page-hero-title {
+    font-size: 1.875rem;
+    line-height: 1.2;
+  }
+  
+  .resorts-page-hero-description {
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+  
+  .resorts-page-content {
+    padding: 1.75rem 0.75rem;
+  }
+  
+  .resorts-page-filters-buttons {
+    gap: 0.5rem;
+    padding: 0.625rem 0;
+  }
+  
+  .resorts-page-filter-button {
+    padding: 0.45rem 0.875rem;
+    font-size: 0.8rem;
+  }
+  
+  .resorts-page-hero-content {
+    padding: 0 0.75rem;
+  }
+  
+  .resorts-page-filters-content {
+    padding: 0 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .resorts-page-hero {
+    padding: 2rem 0;
+  }
+  
+  .resorts-page-hero-title {
+    font-size: 1.75rem;
+    line-height: 1.3;
+  }
+  
+  .resorts-page-hero-description {
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+  
+  .resorts-page-content {
+    padding: 1.5rem 0.75rem;
+  }
+  
+  .resorts-page-filters-buttons {
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+  }
+  
+  .resorts-page-filter-button {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+  }
+  
+  .resorts-page-hero-content {
+    padding: 0 0.75rem;
+  }
+  
+  .resorts-page-filters-content {
+    padding: 0 0.75rem;
+  }
+  
+  .resorts-page-hero-count {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 360px) {
+  .resorts-page-hero {
+    padding: 1.5rem 0;
+  }
+  
+  .resorts-page-hero-title {
+    font-size: 1.5rem;
+    line-height: 1.3;
+  }
+  
+  .resorts-page-hero-description {
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+  
+  .resorts-page-content {
+    padding: 1rem 0.5rem;
+  }
+  
+  .resorts-page-hero-content {
+    padding: 0 0.5rem;
+  }
+  
+  .resorts-page-filters-content {
+    padding: 0 0.5rem;
+  }
+  
+  .resorts-page-filter-button {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.7rem;
+  }
+  
+  .resorts-page-filters-buttons {
+    gap: 0.5rem;
+    padding: 0.375rem 0;
+  }
+}

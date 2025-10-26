@@ -1,0 +1,128 @@
+[
+  {
+    "model": "api_outbound.continent",
+    "pk": 1,
+    "fields": {
+      "name": "Asia",
+      "code": "ASI",
+      "display_order": 1
+    }
+  },
+  {
+    "model": "api_outbound.continent",
+    "pk": 2,
+    "fields": {
+      "name": "Europe",
+      "code": "EUR",
+      "display_order": 2
+    }
+  },
+  {
+    "model": "api_outbound.continent",
+    "pk": 3,
+    "fields": {
+      "name": "Africa",
+      "code": "AFR",
+      "display_order": 3
+    }
+  },
+  {
+    "model": "api_outbound.continent",
+    "pk": 4,
+    "fields": {
+      "name": "North America",
+      "code": "NAM",
+      "display_order": 4
+    }
+  },
+  {
+    "model": "api_outbound.continent",
+    "pk": 5,
+    "fields": {
+      "name": "South America",
+      "code": "SAM",
+      "display_order": 5
+    }
+  },
+  {
+    "model": "api_outbound.continent",
+    "pk": 6,
+    "fields": {
+      "name": "Oceania",
+      "code": "OCE",
+      "display_order": 6
+    }
+  },
+  {
+    "model": "api_outbound.activitycategory",
+    "pk": 1,
+    "fields": {
+      "name": "Adventure & Sport",
+      "slug": "adventure-sport",
+      "description": "Thrilling outdoor activities and sports",
+      "icon": "mountain",
+      "display_order": 1,
+      "is_active": true
+    }
+  },
+  {
+    "model": "api_outbound.activitycategory",
+    "pk": 2,
+    "fields": {
+      "name": "Culture & History",
+      "slug": "culture-history",
+      "description": "Historical sites and cultural experiences",
+      "icon": "landmark",
+      "display_order": 2,
+      "is_active": true
+    }
+  },
+  {
+    "model": "api_outbound.activitycategory",
+    "pk": 3,
+    "fields": {
+      "name": "Food & Wine",
+      "slug": "food-wine",
+      "description": "Culinary experiences and wine tasting",
+      "icon": "utensils",
+      "display_order": 3,
+      "is_active": true
+    }
+  },
+  {
+    "model": "api_outbound.activitycategory",
+    "pk": 4,
+    "fields": {
+      "name": "Nature & Wildlife",
+      "slug": "nature-wildlife",
+      "description": "Natural landscapes and wildlife encounters",
+      "icon": "tree",
+      "display_order": 4,
+      "is_active": true
+    }
+  },
+  {
+    "model": "api_outbound.activitycategory",
+    "pk": 5,
+    "fields": {
+      "name": "Beach & Relaxation",
+      "slug": "beach-relaxation",
+      "description": "Beach activities and relaxation experiences",
+      "icon": "umbrella-beach",
+      "display_order": 5,
+      "is_active": true
+    }
+  },
+  {
+    "model": "api_outbound.activitycategory",
+    "pk": 6,
+    "fields": {
+      "name": "City & Sightseeing",
+      "slug": "city-sightseeing",
+      "description": "Urban exploration and city tours",
+      "icon": "city",
+      "display_order": 6,
+      "is_active": true
+    }
+  }
+]

@@ -1,0 +1,9 @@
+export { ExperiencesHomePage } from './HomePage';
+export { ExperiencesHeroSection } from './sections/HeroSection';
+export { ExperiencesSearchSection } from './sections/SearchSection';
+export { ExperiencesTrendingDeals } from './sections/TrendingDeals';
+export { ExperiencesTrustSection } from './sections/TrustSection';
+export { ExperiencesDestinationsSection } from './sections/DestinationsSection';
+export { ExperiencesActivitiesSection } from './sections/ActivitiesSection';
+export { ExperiencesTestimonialsSection } from './sections/TestimonialsSection';
+export { ExperiencesNewsletterSection } from './sections/NewsletterSection';
