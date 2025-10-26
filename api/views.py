@@ -2986,7 +2986,7 @@ class ResortViewSet(viewsets.ModelViewSet):
     """ViewSet for managing resorts"""
     queryset = Resort.objects.filter(is_active=True).select_related('location', 'language').prefetch_related('images', 'reviews', 'amenities')
     serializer_class = ResortSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [AllowAny]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['category', 'star_rating', 'atoll', 'is_featured', 'is_adults_only', 'is_family_friendly', 'is_honeymoon_special']
     search_fields = ['name', 'description', 'atoll', 'island_name', 'meta_keywords']
@@ -3050,7 +3050,7 @@ class ResortImageViewSet(viewsets.ModelViewSet):
     """ViewSet for managing resort images"""
     queryset = ResortImage.objects.filter(is_active=True).select_related('resort')
     serializer_class = ResortImageSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [AllowAny]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['resort', 'image_type', 'is_featured']
     ordering_fields = ['order', 'created_at']
@@ -3061,7 +3061,7 @@ class ResortReviewViewSet(viewsets.ModelViewSet):
     """ViewSet for managing resort reviews"""
     queryset = ResortReview.objects.filter(is_approved=True).select_related('resort')
     serializer_class = ResortReviewSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [AllowAny]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['resort', 'rating', 'is_featured', 'is_verified']
     ordering_fields = ['created_at', 'rating']
@@ -3087,7 +3087,7 @@ class ResortAmenityViewSet(viewsets.ModelViewSet):
     """ViewSet for managing resort amenities"""
     queryset = ResortAmenity.objects.filter(is_active=True)
     serializer_class = ResortAmenitySerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [AllowAny]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['category', 'is_active']
     search_fields = ['name', 'description']
