@@ -1804,7 +1804,7 @@ class ResortListSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'name', 'description', 'category', 'star_rating', 'atoll', 'island_name',
             'price_per_night_from', 'price_per_night_to', 'currency', 'is_featured', 'is_active',
-            'is_adults_only', 'is_family_friendly', 'is_honeymoon_special', 'is_eco_friendly',
+            'is_packaged', 'is_adults_only', 'is_family_friendly', 'is_honeymoon_special', 'is_eco_friendly',
             'has_house_reef', 'has_private_beach', 'transfer_type', 'transfer_duration',
             'hero_image_url', 'full_location', 'price_range', 'average_rating', 'review_count',
             'display_order', 'created_at'

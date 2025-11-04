@@ -247,6 +247,21 @@ class Resort(models.Model):
     is_packaged = models.BooleanField(default=False, help_text="If true, shows simple booking form. If false, shows multi-step booking form.")
     has_private_beach = models.BooleanField(default=True)
     
+    # Country/Region Restrictions (for packaged resorts only)
+    # List of ISO 3166-1 alpha-2 country codes (e.g., ['US', 'GB', 'CA'])
+    # If empty, resort is visible to all countries when is_packaged=True
+    # If populated, resort is only visible to users from these countries
+    allowed_countries = models.JSONField(
+        default=list, 
+        blank=True, 
+        help_text="ISO 3166-1 alpha-2 country codes (e.g., ['US', 'GB', 'CA']). Only applies to packaged resorts. Empty list means visible to all countries."
+    )
+    restricted_regions = models.JSONField(
+        default=list, 
+        blank=True, 
+        help_text="Region names for additional filtering (e.g., ['Europe', 'North America']). Optional, works with allowed_countries."
+    )
+    
     # Media and Images
     hero_image = models.ImageField(upload_to='resorts/hero/', blank=True, null=True)
     gallery_images = models.JSONField(default=list, blank=True, help_text="List of image URLs")

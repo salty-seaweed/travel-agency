@@ -328,7 +328,7 @@ class ResortReviewInline(admin.TabularInline):
 @admin.register(Resort)
 class ResortAdmin(admin.ModelAdmin):
     list_display = ('name', 'category', 'star_rating', 'atoll', 'island_name', 'price_per_night_from', 'is_featured', 'is_active')
-    list_filter = ('category', 'star_rating', 'is_featured', 'is_active', 'is_adults_only', 'is_family_friendly', 'is_honeymoon_special', 'atoll')
+    list_filter = ('category', 'star_rating', 'is_featured', 'is_active', 'is_packaged', 'is_adults_only', 'is_family_friendly', 'is_honeymoon_special', 'atoll')
     search_fields = ('name', 'description', 'atoll', 'island_name', 'meta_keywords')
     list_editable = ('is_featured', 'is_active')
     readonly_fields = ('created_at', 'updated_at', 'full_location', 'price_range', 'total_villa_count')
@@ -359,7 +359,12 @@ class ResortAdmin(admin.ModelAdmin):
             'fields': ('transfer_type', 'transfer_duration', 'transfer_cost')
         }),
         ('Special Features', {
-            'fields': ('is_adults_only', 'is_family_friendly', 'is_honeymoon_special', 'is_eco_friendly', 'is_private_island', 'has_house_reef', 'has_private_beach')
+            'fields': ('is_adults_only', 'is_family_friendly', 'is_honeymoon_special', 'is_eco_friendly', 'is_private_island', 'has_house_reef', 'has_private_beach', 'is_packaged')
+        }),
+        ('Country/Region Restrictions', {
+            'fields': ('allowed_countries', 'restricted_regions'),
+            'description': 'These restrictions only apply to packaged resorts (is_packaged=True). Leave allowed_countries empty to show the resort to all countries. Use ISO 3166-1 alpha-2 country codes (e.g., ["US", "GB", "CA"]).',
+            'classes': ('collapse',)
         }),
         ('Media', {
             'fields': ('hero_image', 'gallery_images', 'virtual_tour_url', 'drone_video_url')

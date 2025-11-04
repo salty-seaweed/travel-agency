@@ -67,7 +67,71 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
 from django.db import transaction
+from django.db.models import Q
 import json
+from .utils import get_user_country, is_country_allowed
+
+
+def filter_resorts_by_country(queryset, request):
+    """
+    Filter resorts queryset based on country restrictions for packaged resorts.
+    
+    Rules:
+    - Non-packaged resorts: always visible
+    - Packaged resorts with empty allowed_countries: visible to all
+    - Packaged resorts with allowed_countries: only visible to users from those countries
+    
+    Args:
+        queryset: Resort queryset to filter
+        request: Django request object
+        
+    Returns:
+        Filtered queryset
+    """
+    from .models import Resort
+    from django.conf import settings
+    
+    user_country = get_user_country(request)
+    
+    # Check database backend - PostgreSQL supports JSONB operators, SQLite uses different syntax
+    is_postgres = 'postgresql' in settings.DATABASES['default']['ENGINE'].lower()
+    
+    if is_postgres and user_country:
+        # Use PostgreSQL JSONB operators for efficient filtering
+        table_name = Resort._meta.db_table
+        queryset = queryset.extra(
+            where=[
+                f"""
+                (
+                    {table_name}.is_packaged = false OR
+                    ({table_name}.is_packaged = true AND ({table_name}.allowed_countries = '[]'::jsonb OR {table_name}.allowed_countries::text = 'null')) OR
+                    ({table_name}.is_packaged = true AND {table_name}.allowed_countries @> %s::jsonb)
+                )
+                """
+            ],
+            params=[f'["{user_country}"]']
+        )
+    else:
+        # For SQLite or when no country detected, use Django ORM filters
+        # This is less efficient but works across all database backends
+        q_objects = Q(is_packaged=False)  # Non-packaged: always visible
+        q_objects |= Q(is_packaged=True, allowed_countries=[])  # Packaged with no restrictions
+        
+        if user_country and not is_postgres:
+            # For SQLite, filter in Python (less efficient but works)
+            # Get all matching resorts and filter by country in Python
+            resorts_with_restrictions = list(
+                queryset.filter(is_packaged=True).exclude(allowed_countries=[])
+            )
+            filtered_ids = [
+                r.id for r in resorts_with_restrictions
+                if r.allowed_countries and user_country.upper() in [c.upper() for c in r.allowed_countries]
+            ]
+            q_objects |= Q(is_packaged=True, id__in=filtered_ids)
+        
+        queryset = queryset.filter(q_objects)
+    
+    return queryset
 
 # Create your views here.
 
@@ -3043,6 +3107,9 @@ class ResortViewSet(viewsets.ModelViewSet):
         if eco_friendly == 'true':
             queryset = queryset.filter(is_eco_friendly=True)
         
+        # Apply country/region filtering for packaged resorts
+        queryset = filter_resorts_by_country(queryset, self.request)
+        
         return queryset
 
 
@@ -3109,6 +3176,9 @@ def resorts_by_category(request):
                 is_active=True
             ).select_related('location', 'language').prefetch_related('images', 'reviews')
             
+            # Apply country filtering for packaged resorts
+            resorts = filter_resorts_by_country(resorts, request)
+            
             serializer = ResortListSerializer(resorts, many=True, context={'request': request})
             result[category_key] = {
                 'name': category_name,
@@ -3136,6 +3206,9 @@ def resorts_by_atoll(request):
                     is_active=True
                 ).select_related('location', 'language').prefetch_related('images', 'reviews')
                 
+                # Apply country filtering for packaged resorts
+                resorts = filter_resorts_by_country(resorts, request)
+                
                 serializer = ResortListSerializer(resorts, many=True, context={'request': request})
                 result[atoll] = {
                     'resorts': serializer.data,
@@ -3156,6 +3229,9 @@ def featured_resorts(request):
             is_featured=True,
             is_active=True
         ).select_related('location', 'language').prefetch_related('images', 'reviews')
+        
+        # Apply country filtering for packaged resorts
+        resorts = filter_resorts_by_country(resorts, request)
         
         serializer = ResortListSerializer(resorts, many=True, context={'request': request})
         return Response(serializer.data)
