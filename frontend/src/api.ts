@@ -332,6 +332,7 @@ export async function getResorts(filters?: {
   is_featured?: boolean;
   page?: number;
   page_size?: number;
+  country?: string;
 }): Promise<PaginatedResponse<Resort>> {
   const params = new URLSearchParams();
   
@@ -350,30 +351,34 @@ export async function getResorts(filters?: {
   return response;
 }
 
-export async function getResort(id: number): Promise<Resort> {
-  const response = await apiRequest(`/resorts/${id}/`);
+export async function getResort(id: number, country?: string): Promise<Resort> {
+  const endpoint = country ? `/resorts/${id}/?country=${country}` : `/resorts/${id}/`;
+  const response = await apiRequest(endpoint);
   return response;
 }
 
-export async function getResortsByCategory(): Promise<Record<string, {
+export async function getResortsByCategory(country?: string): Promise<Record<string, {
   name: string;
   resorts: Resort[];
   count: number;
 }>> {
-  const response = await apiRequest(`/resorts/by-category/`);
+  const endpoint = country ? `/resorts/by-category/?country=${country}` : `/resorts/by-category/`;
+  const response = await apiRequest(endpoint);
   return response;
 }
 
-export async function getResortsByAtoll(): Promise<Record<string, {
+export async function getResortsByAtoll(country?: string): Promise<Record<string, {
   resorts: Resort[];
   count: number;
 }>> {
-  const response = await apiRequest(`/resorts/by-atoll/`);
+  const endpoint = country ? `/resorts/by-atoll/?country=${country}` : `/resorts/by-atoll/`;
+  const response = await apiRequest(endpoint);
   return response;
 }
 
-export async function getFeaturedResorts(): Promise<Resort[]> {
-  const response = await apiRequest(`/resorts/featured/`);
+export async function getFeaturedResorts(country?: string): Promise<Resort[]> {
+  const endpoint = country ? `/resorts/featured/?country=${country}` : `/resorts/featured/`;
+  const response = await apiRequest(endpoint);
   return response;
 }
 

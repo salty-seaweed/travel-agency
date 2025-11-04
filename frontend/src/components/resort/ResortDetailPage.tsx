@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { StarIcon, MapPinIcon, ChevronLeftIcon, PhoneIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import { useResort, useResortImages } from '../../hooks/useResorts';
+import { useUserCountry } from '../../hooks/useUserCountry';
 import { LoadingSpinner } from '../LoadingSpinner';
 import { LazyImage } from '../LazyImage';
 import { ResortBookingForm } from './ResortBookingForm';
@@ -15,9 +16,10 @@ export function ResortDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const resortId = id ? parseInt(id) : 0;
+  const userCountry = useUserCountry();
   const { whatsappNumber } = useWhatsApp();
   
-  const { resort, loading: resortLoading, error: resortError } = useResort(resortId);
+  const { resort, loading: resortLoading, error: resortError } = useResort(resortId, userCountry || undefined);
   const { images, loading: imagesLoading } = useResortImages(resortId);
   
   const [currentImageIndex, setCurrentImageIndex] = useState(0);

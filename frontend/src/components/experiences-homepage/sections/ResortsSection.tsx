@@ -5,9 +5,12 @@ import { LazyImage } from '../../LazyImage';
 import { LoadingSpinner } from '../../LoadingSpinner';
 import { useTranslation } from '../../../i18n';
 import { Resort } from '../../../types';
+import { useUserCountry } from '../../../hooks/useUserCountry';
+import { getFeaturedResorts, getResorts } from '../../../api';
 
 export const ExperiencesResortsSection: React.FC = () => {
   const { t } = useTranslation();
+  const userCountry = useUserCountry();
   const [resorts, setResorts] = useState<Resort[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -19,24 +22,24 @@ export const ExperiencesResortsSection: React.FC = () => {
   useEffect(() => {
     const fetchResorts = async () => {
       try {
-        console.log('Fetching resorts...');
+        console.log('Fetching resorts...', { userCountry });
         setLoading(true);
-        const response = await fetch('/api/resorts/?limit=6&is_featured=true');
-        console.log('Featured resorts response:', response.status);
-        if (response.ok) {
-          const data = await response.json();
+        
+        try {
+          const data = await getFeaturedResorts(userCountry || undefined);
           console.log('Featured resorts data:', data);
-          setResorts(data.results || []);
-        } else {
+          // Limit to 6 resorts for homepage display
+          const limitedData = Array.isArray(data) ? data.slice(0, 6) : [];
+          setResorts(limitedData);
+        } catch (featuredError) {
           // Fallback to any resorts if no featured ones
           console.log('Trying fallback resorts...');
-          const fallbackResponse = await fetch('/api/resorts/?limit=6');
-          console.log('Fallback resorts response:', fallbackResponse.status);
-          if (fallbackResponse.ok) {
-            const fallbackData = await fallbackResponse.json();
-            console.log('Fallback resorts data:', fallbackData);
-            setResorts(fallbackData.results || []);
-          }
+          const fallbackData = await getResorts({ 
+            page_size: 6,
+            country: userCountry || undefined 
+          });
+          console.log('Fallback resorts data:', fallbackData);
+          setResorts(fallbackData.results || []);
         }
       } catch (err) {
         console.error('Error fetching resorts:', err);
@@ -47,7 +50,7 @@ export const ExperiencesResortsSection: React.FC = () => {
     };
 
     fetchResorts();
-  }, []);
+  }, [userCountry]);
 
   if (loading) {
     return (

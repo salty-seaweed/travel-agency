@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useResorts } from '../../hooks/useResorts';
+import { useUserCountry } from '../../hooks/useUserCountry';
 import { ResortFilters as ResortFiltersType } from '../../types';
 import { LoadingSpinner } from '../LoadingSpinner';
 import { ResortList } from './ResortList';
@@ -8,9 +9,10 @@ import './ResortsPage.css';
 
 export function ResortsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const userCountry = useUserCountry();
   const [filters, setFilters] = useState<ResortFiltersType>({});
 
-  // Initialize filters from URL params
+  // Initialize filters from URL params and user country
   useEffect(() => {
     const urlFilters: ResortFiltersType = {};
     
@@ -24,9 +26,14 @@ export function ResortsPage() {
     if (starRating) urlFilters.star_rating = parseInt(starRating);
     if (atoll) urlFilters.atoll = atoll;
     if (search) urlFilters.search = search;
+    
+    // Add country from geolocation/query param (query param takes precedence in hook)
+    if (userCountry) {
+      urlFilters.country = userCountry;
+    }
 
     setFilters(urlFilters);
-  }, [searchParams]);
+  }, [searchParams, userCountry]);
 
   // Update URL when filters change
   const updateURL = (newFilters: ResortFiltersType) => {

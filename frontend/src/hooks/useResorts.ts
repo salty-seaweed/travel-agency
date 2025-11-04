@@ -72,7 +72,7 @@ export function useResorts(filters?: ResortFilters) {
 }
 
 // Hook for fetching a single resort
-export function useResort(id: number) {
+export function useResort(id: number, country?: string) {
   const [resort, setResort] = useState<Resort | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -81,14 +81,14 @@ export function useResort(id: number) {
     try {
       setLoading(true);
       setError(null);
-      const data = await getResort(id);
+      const data = await getResort(id, country);
       setResort(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch resort');
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, country]);
 
   useEffect(() => {
     if (id) {
@@ -105,7 +105,7 @@ export function useResort(id: number) {
 }
 
 // Hook for fetching resorts by category
-export function useResortsByCategory() {
+export function useResortsByCategory(country?: string) {
   const [resortsByCategory, setResortsByCategory] = useState<Record<string, {
     name: string;
     resorts: Resort[];
@@ -118,14 +118,14 @@ export function useResortsByCategory() {
     try {
       setLoading(true);
       setError(null);
-      const data = await getResortsByCategory();
+      const data = await getResortsByCategory(country);
       setResortsByCategory(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch resorts by category');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [country]);
 
   useEffect(() => {
     fetchResortsByCategory();
@@ -140,7 +140,7 @@ export function useResortsByCategory() {
 }
 
 // Hook for fetching resorts by atoll
-export function useResortsByAtoll() {
+export function useResortsByAtoll(country?: string) {
   const [resortsByAtoll, setResortsByAtoll] = useState<Record<string, {
     resorts: Resort[];
     count: number;
@@ -152,14 +152,14 @@ export function useResortsByAtoll() {
     try {
       setLoading(true);
       setError(null);
-      const data = await getResortsByAtoll();
+      const data = await getResortsByAtoll(country);
       setResortsByAtoll(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch resorts by atoll');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [country]);
 
   useEffect(() => {
     fetchResortsByAtoll();
@@ -174,7 +174,7 @@ export function useResortsByAtoll() {
 }
 
 // Hook for fetching featured resorts
-export function useFeaturedResorts() {
+export function useFeaturedResorts(country?: string) {
   const [resorts, setResorts] = useState<Resort[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -183,14 +183,14 @@ export function useFeaturedResorts() {
     try {
       setLoading(true);
       setError(null);
-      const data = await getFeaturedResorts();
+      const data = await getFeaturedResorts(country);
       setResorts(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch featured resorts');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [country]);
 
   useEffect(() => {
     fetchFeaturedResorts();

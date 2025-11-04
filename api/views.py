@@ -80,6 +80,7 @@ def filter_resorts_by_country(queryset, request):
     - Non-packaged resorts: always visible
     - Packaged resorts with empty allowed_countries: visible to all
     - Packaged resorts with allowed_countries: only visible to users from those countries
+    - If no country detected, packaged resorts with restrictions are hidden (conservative)
     
     Args:
         queryset: Resort queryset to filter
@@ -96,39 +97,66 @@ def filter_resorts_by_country(queryset, request):
     # Check database backend - PostgreSQL supports JSONB operators, SQLite uses different syntax
     is_postgres = 'postgresql' in settings.DATABASES['default']['ENGINE'].lower()
     
-    if is_postgres and user_country:
+    if is_postgres:
         # Use PostgreSQL JSONB operators for efficient filtering
         table_name = Resort._meta.db_table
-        queryset = queryset.extra(
-            where=[
-                f"""
-                (
-                    {table_name}.is_packaged = false OR
-                    ({table_name}.is_packaged = true AND ({table_name}.allowed_countries = '[]'::jsonb OR {table_name}.allowed_countries::text = 'null')) OR
-                    ({table_name}.is_packaged = true AND {table_name}.allowed_countries @> %s::jsonb)
-                )
-                """
-            ],
-            params=[f'["{user_country}"]']
-        )
+        
+        if user_country:
+            # User country is known - show non-packaged, unrestricted packaged, and matching restricted packaged
+            # Use json.dumps to ensure proper JSON formatting for the array parameter
+            json_param = json.dumps([user_country])
+            queryset = queryset.extra(
+                where=[
+                    f"""
+                    (
+                        {table_name}.is_packaged = false OR
+                        ({table_name}.is_packaged = true AND ({table_name}.allowed_countries = '[]'::jsonb OR {table_name}.allowed_countries::text = 'null')) OR
+                        ({table_name}.is_packaged = true AND {table_name}.allowed_countries @> %s::jsonb)
+                    )
+                    """
+                ],
+                params=[json_param]
+            )
+        else:
+            # No country detected - show non-packaged and unrestricted packaged only
+            queryset = queryset.extra(
+                where=[
+                    f"""
+                    (
+                        {table_name}.is_packaged = false OR
+                        ({table_name}.is_packaged = true AND ({table_name}.allowed_countries = '[]'::jsonb OR {table_name}.allowed_countries::text = 'null'))
+                    )
+                    """
+                ]
+            )
     else:
-        # For SQLite or when no country detected, use Django ORM filters
-        # This is less efficient but works across all database backends
+        # For SQLite, use Django ORM filters with Python filtering for country matching
+        # Build Q objects for filtering
         q_objects = Q(is_packaged=False)  # Non-packaged: always visible
         q_objects |= Q(is_packaged=True, allowed_countries=[])  # Packaged with no restrictions
         
-        if user_country and not is_postgres:
-            # For SQLite, filter in Python (less efficient but works)
-            # Get all matching resorts and filter by country in Python
-            resorts_with_restrictions = list(
-                queryset.filter(is_packaged=True).exclude(allowed_countries=[])
+        if user_country:
+            # Get all packaged resorts with restrictions from the base queryset
+            # We need to evaluate this before other filters to get correct results
+            all_resorts = Resort.objects.filter(is_active=True)
+            packaged_with_restrictions = all_resorts.filter(
+                is_packaged=True
+            ).exclude(
+                Q(allowed_countries=[]) | Q(allowed_countries__isnull=True)
             )
-            filtered_ids = [
-                r.id for r in resorts_with_restrictions
-                if r.allowed_countries and user_country.upper() in [c.upper() for c in r.allowed_countries]
+            
+            # Filter by country in Python
+            matching_ids = [
+                r.id for r in packaged_with_restrictions
+                if r.allowed_countries 
+                and isinstance(r.allowed_countries, list)
+                and user_country.upper() in [str(c).upper() for c in r.allowed_countries]
             ]
-            q_objects |= Q(is_packaged=True, id__in=filtered_ids)
+            
+            if matching_ids:
+                q_objects |= Q(is_packaged=True, id__in=matching_ids)
         
+        # Apply the Q filter to the queryset
         queryset = queryset.filter(q_objects)
     
     return queryset

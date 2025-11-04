@@ -806,6 +806,7 @@ export interface ResortFilters {
   eco_friendly?: boolean;
   search?: string;
   is_featured?: boolean;
+  country?: string;
 }
 
 // Resort component prop types
