@@ -60,10 +60,39 @@ class Command(BaseCommand):
             'Water Pavilion with Slide': 'water-pavilion-with-slide-aerial-view.jpg',
             'Water Villa with Pool and Slide': 'water-villa-with-pool-and-slide-bedroom-2.jpg',
             
-            # Kurumba - One special case
-            'Beachfront Deluxe Bungalow': 'Beachfront%20Deluxe%20Bungalow.jpeg',
+            # Cinnamon Dhonveli - Two entries with different naming
+            'Overwater Suite': 'Over%20Water%20Suite.jpg',  # DB has "Overwater Suite" but file is "Over Water Suite.jpg"
             
-            # Holiday Inn - Mix of extensions
+            # Dhigufaru - Special naming
+            'Bodhanfulhu Pool Water Villa': 'Pool%20Water%20Villa.jpg',  # Uses generic name
+            
+            # Holiday Inn - Different names entirely
+            'Beach House': 'Standard%20Rooms.avif',  # Reusing standard image
+            'Seaview Villa': 'Standard%20Rooms.avif',  # Reusing standard image
+            'Overwater Villa': 'Suite.avif',  # Reusing suite image
+            
+            # Kuramathi - Numbered files
+            'Beach Villa': '00-beach-villas.jpg',
+            'Beach Villa with Jacuzzi': '01-beach-villas-with-jacuzzi.jpg',
+            'Water Villa': '00-beach-villas.jpg',  # Fallback
+            'Superior Beach Villa with Jacuzzi': '02-superior-beach-villas-with-jacuzzi.jpg',
+            'Deluxe Beach Villa with Jacuzzi': '03-deluxe-beach-villas-with-jacuzzi.jpg',
+            'Two Bedroom Beach House': '04-two-bedroom-beach-houses.jpg',
+            'Water Villa with Jacuzzi': '05-water-villas-with-jacuzzi.jpg',
+            'Deluxe Water Villa': '06-deluxe-water-villas.jpg',
+            'Water Villa with Pool': '07-water-villas-with-pool.jpg',
+            'Sunset Pool Villa': '08-sunset-pool-villas.jpg',
+            'Honeymoon Pool Villa': '10-honeymoon-pool-villas.jpg',
+            'Thundi Water Villa with Pool': 'Thundi%20Water%20Villas%20with%20Pool.jpg',
+            
+            # Kurumba - Special cases
+            'Beachfront Deluxe Bungalow': 'Beachfront%20Deluxe%20Bungalow.jpeg',
+            'Royal Kurumba Residence': 'Two%20Bedroom%20Kurumba%20Residence.png',  # Reusing 2BR image
+            
+            # Velassaru - Name mismatch
+            'Deluxe Bungalow': 'Deluxe-Villa.webp',  # DB says Bungalow but file is Villa
+            
+            # Standard Room mapping for Holiday Inn
             'Standard Room': 'Standard%20Rooms.avif',
             'Two and Three Bedroom Villa': 'Two%20and%20Three%20Bedroom%20Villa.jpg',
         }
