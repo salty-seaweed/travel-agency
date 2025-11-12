@@ -11,8 +11,68 @@ from api.models import Resort
 class Command(BaseCommand):
     help = 'Add room type image URLs to amenities for all 18 resorts'
 
+    def get_image_filename_map(self):
+        """Map room type names to actual image filenames that don't match"""
+        return {
+            # Sun Siyam Iru Fushi - Different naming convention
+            'Horizon Water Villa with Pool': 'horizon-water-villa-with-pool-aerial-view.jpg',
+            'Celebrity Retreat': 'irufushi_-celeb_retreat_0009.jpg',
+            'Infinity Water Villa': 'irufushi_infinity_water_villa_0471.jpg',
+            
+            # Sun Siyam Iru Veli - Different naming
+            'Beach Suite with Pool': 'beach-suite-with-pool.jpg',
+            'Dolphin Suite': 'iruveli_dolphin_suite_0543.jpg',
+            'Family Suite with Pool': 'iruveli_family_suite_with_pool_0035.jpg',
+            'Grand Beach Suite': 'iruveli_grand_beach_suite_1.jpg',
+            'Grand Ocean Suite': 'iruveli_grand_ocean_suite_0152.jpg',
+            'King Ocean Suite': 'iruveli_king_ocean_suite_0523.jpg',
+            'Ocean Suite with Pool': 'iruveli_ocean_suite_with_pool_1.jpg',
+            'Sun Aqua Sultan Suite': 'sun-aqua-sultan-suite.jpg',
+            
+            # Sun Siyam Olhuveli - Different naming
+            '2BR Beach Residence with Pool': '2br-beach-residence-with-pool.jpg',
+            'Beach Villa': 'olhuveli_beachvilla_0044.jpg',
+            'Deluxe Beach Villa': 'deluxe-beach-villa-bedroom-1.jpg',
+            'Deluxe Water Villa': 'deluxe-water-villa.jpg',
+            'Grand Beach Suite with Pool': 'grand-beach-suite-with-pool-view.jpg',
+            'Prestige Jacuzzi Water Villa': 'olhuveli-prestige-jacuzzi-water-villa-deck-2.jpg',
+            'Romantic Beach Villa with Pool': 'romantic_beach_villa_with_pool.jpg',
+            'Romantic Water Villa with Pool': 'romantic_water_villa_with_pool.jpg',
+            'Two Bedroom Beach Suite': 'two-bed-room-beach-suite2.jpg',
+            'Water Villa': 'olhuveli-water-villa-bedroom-4.jpg',
+            
+            # Sun Siyam Vilu Reef - Different naming
+            'Beach Villa': 'vilu_reef_beach_villa_0064.jpg',
+            'Aqua Villa': 'vilu_reef_aqua_villa_0124.jpg',
+            'Jacuzzi Deluxe Beach Villa': 'vilu_reef_jacuzzi_deluxe_beach_villa_0116-1.jpg',
+            'Reef Villa': 'vilu_reef_reef_villa_0233.jpg',
+            'Sun Aqua Pool Villa': 'vilu_reef_sun_aqua_pool_villa_0078.jpg',
+            'Sunset Reef Villa': 'vilu_reef_sunset-_reef_villa_0122.jpg',
+            
+            # Sun Siyam World - Different naming  
+            'Beach Suite with Pool': 'beach-suite-with-pool-view.jpg',
+            'Grand Beach Residence with Pool': 'grand-beach-residence-with-pool-8.jpg',
+            'Lagoon Villa with Pool Slide': 'lagoon-villa-with-pool-slide-pool-view.jpg',
+            'Pool Beach Villa': 'pool-beach-villa-bedroom-1.jpg',
+            'Sunset Pool Beach Villa': 'sunset-pool-beach-villa.jpg',
+            'Two Bedroom Lagoon Villa with Pool and Slide': 'two-bedroom-lagoon-villa-with-pool-and-slide-aerial-2.jpg',
+            'Two Bedroom Pool Beach Villa': 'two-bedroom-pool-beach-villa-pool-view.jpg',
+            'Water Pavilion with Slide': 'water-pavilion-with-slide-aerial-view.jpg',
+            'Water Villa with Pool and Slide': 'water-villa-with-pool-and-slide-bedroom-2.jpg',
+            
+            # Kurumba - One special case
+            'Beachfront Deluxe Bungalow': 'Beachfront%20Deluxe%20Bungalow.jpeg',
+            
+            # Holiday Inn - Mix of extensions
+            'Standard Room': 'Standard%20Rooms.avif',
+            'Two and Three Bedroom Villa': 'Two%20and%20Three%20Bedroom%20Villa.jpg',
+        }
+
     def handle(self, *args, **options):
         base_url = 'https://threadtravels.com'
+        
+        # Get custom filename mappings
+        filename_map = self.get_image_filename_map()
         
         # Map: Resort Name -> (Folder Name, Default Extension)
         resorts_data = {
@@ -46,8 +106,8 @@ class Command(BaseCommand):
                 'Garden Pool Villa': '.png',
                 'Two Bedroom Kurumba Residence': '.png',
             },
-            'Kuramathi Maldives': {
-                # Most are .jpg, but some specific ones might differ
+            'Holiday Inn Resort Kandooma Maldives': {
+                'Two and Three Bedroom Villa': '.jpg',
             },
         }
         
@@ -59,14 +119,20 @@ class Command(BaseCommand):
                 room_types = resort.room_types.all()
                 
                 for room_type in room_types:
-                    # Check for special case extension
-                    ext = default_ext
-                    if resort_name in special_cases and room_type.name in special_cases[resort_name]:
-                        ext = special_cases[resort_name][room_type.name]
+                    # Check if there's a custom filename mapping
+                    if room_type.name in filename_map:
+                        image_filename = filename_map[room_type.name]
+                    else:
+                        # Check for special case extension
+                        ext = default_ext
+                        if resort_name in special_cases and room_type.name in special_cases[resort_name]:
+                            ext = special_cases[resort_name][room_type.name]
+                        
+                        # Build standard image filename
+                        image_filename = room_type.name.replace(' ', '%20') + ext
                     
-                    # Build image URL
-                    image_name = room_type.name.replace(' ', '_')
-                    image_url = f'{base_url}/images/Resort%20Accomodation%20types%20images/{folder_name.replace(" ", "%20")}/{image_name.replace("_", "%20")}{ext}'
+                    # Build full image URL
+                    image_url = f'{base_url}/images/Resort%20Accomodation%20types%20images/{folder_name.replace(" ", "%20")}/{image_filename}'
                     
                     if not room_type.amenities:
                         room_type.amenities = []
