@@ -88,12 +88,17 @@ This will:
 - Create 70 new room types
 - Set all to `is_room_type=true` and `hide_price=true`
 
-### Step 3: Add Card Images to Gallery
+### Step 3: Add Card Images and Hero Banners to Gallery
 ```bash
 railway run python manage.py add_card_images_to_gallery
 ```
 
-This adds the Card Image URL to each resort's `gallery_images` field.
+This adds 3 images to each resort's `gallery_images` field:
+1. Card Image (for resort cards)
+2. Resort Hero Banner 1 (for gallery display)
+3. Resort Hero Banner 2 (for gallery display)
+
+Now covers all 18 resorts with correct file extensions for each.
 
 ### Step 4: Add Room Type Image URLs
 ```bash
@@ -123,7 +128,7 @@ After deployment:
 1. **No Image Uploads to Railway:** Images are referenced directly from the frontend URL to avoid ephemeral filesystem issues.
 
 2. **Image URL Strategy:** 
-   - Card images: In `gallery_images` JSON field
+   - Card images + Hero Banners: In `gallery_images` JSON field
    - Room type images: In `amenities` JSON field with `__IMAGE_URL__:` prefix
    - Serializers handle extraction and filtering
 

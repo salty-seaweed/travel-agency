@@ -1,5 +1,5 @@
 """
-Add room type image URLs to a new field.
+Add room type image URLs to amenities field.
 Since we can't easily change ImageField to URLField, we'll add URLs to amenities with a special prefix.
 
 Run with: python manage.py add_room_type_image_urls
@@ -9,40 +9,60 @@ from api.models import Resort
 
 
 class Command(BaseCommand):
-    help = 'Add room type image URLs to amenities'
+    help = 'Add room type image URLs to amenities for all 18 resorts'
 
     def handle(self, *args, **options):
         base_url = 'https://threadtravels.com'
         
+        # Map: Resort Name -> (Folder Name, Default Extension)
         resorts_data = {
-            'Hard Rock Hotel Maldives': 'Hard Rock Maldives',
-            'OZEN Reserve Bolifushi': 'Ozen Reserve Bolifushi',
-            'SAii Lagoon Maldives': 'Saii Lagoon Maldives',
-            'Sun Siyam Iru Fushi': 'Sun Siyam Iru Fushi',
-            'Sun Siyam Iru Veli': 'Sun Siyam Iru Veli',
-            'Sun Siyam Olhuveli': 'Sun Siyam Olhuveli',
-            'Sun Siyam Vilu Reef': 'Sun Siyam Vilu Reef',
-            'Sun Siyam World': 'Sun Siyam World',
+            'Hard Rock Hotel Maldives': ('Hard Rock Maldives', '.jpg'),
+            'OZEN Reserve Bolifushi': ('Ozen Reserve Bolifushi', '.webp'),
+            'SAii Lagoon Maldives': ('Saii Lagoon Maldives', '.webp'),
+            'Sun Siyam Iru Fushi': ('Sun Siyam Iru Fushi', '.jpg'),
+            'Sun Siyam Iru Veli': ('Sun Siyam Iru Veli', '.jpg'),
+            'Sun Siyam Olhuveli': ('Sun Siyam Olhuveli', '.jpg'),
+            'Sun Siyam Vilu Reef': ('Sun Siyam Vilu Reef', '.jpg'),
+            'Sun Siyam World': ('Sun Siyam World', '.jpg'),
+            'Cinnamon Velifushi Maldives': ('Cinnamon Velifushi Maldives', '.jpg'),
+            'Cinnamon Hakuraa Huraa Maldives': ('Cinnamon Hakuraa Huraa Maldives', '.jpg'),
+            'Cinnamon Dhonveli Maldives': ('Cinnamon Dhonveli Maldives', '.jpg'),
+            'Ellaidhoo Maldives by Cinnamon': ('Ellaidhoo Maldives by Cinnamon', '.jpg'),
+            'Velassaru Maldives': ('Velassaru Maldives', '.webp'),
+            'Kuramathi Maldives': ('Kuramathi Maldives', '.jpg'),
+            'Kurumba Maldives': ('Kurumba Maldives', '.jpg'),
+            'Dhigufaru Island Resort': ('Dhigufaru Island Resort', '.jpg'),
+            'Villa Nautica Paradise Island': ('Villa Nautica Paradise Island', '.jpg'),
+            'Holiday Inn Resort Kandooma Maldives': ('Holiday Inn Resort Kandooma Maldives', '.avif'),
+        }
+        
+        # Special cases for specific room types with different extensions
+        special_cases = {
+            'SAii Lagoon Maldives': {
+                '2-Bedroom Family Beach Room with Pool': '.jpg',
+            },
+            'Kurumba Maldives': {
+                'Deluxe Pool Villa': '.png',
+                'Garden Pool Villa': '.png',
+                'Two Bedroom Kurumba Residence': '.png',
+            },
+            'Kuramathi Maldives': {
+                # Most are .jpg, but some specific ones might differ
+            },
         }
         
         total = 0
         
-        for resort_name, folder_name in resorts_data.items():
+        for resort_name, (folder_name, default_ext) in resorts_data.items():
             try:
                 resort = Resort.objects.get(name=resort_name)
                 room_types = resort.room_types.all()
                 
                 for room_type in room_types:
-                    # Determine extension
-                    if 'Ozen' in folder_name:
-                        ext = '.webp' if room_type.name != 'Earth Pool Pavilion 2BR' else '.webp'
-                    elif 'Saii' in folder_name:
-                        if '2-Bedroom Family Beach Room with Pool' in room_type.name:
-                            ext = '.jpg'
-                        else:
-                            ext = '.webp'
-                    else:
-                        ext = '.jpg'
+                    # Check for special case extension
+                    ext = default_ext
+                    if resort_name in special_cases and room_type.name in special_cases[resort_name]:
+                        ext = special_cases[resort_name][room_type.name]
                     
                     # Build image URL
                     image_name = room_type.name.replace(' ', '_')
@@ -63,5 +83,5 @@ class Command(BaseCommand):
             except Resort.DoesNotExist:
                 self.stdout.write(self.style.ERROR(f'✗ {resort_name} not found'))
         
-        self.stdout.write(self.style.SUCCESS(f'\n✅ Done! Updated {total} room types'))
+        self.stdout.write(self.style.SUCCESS(f'\n✅ Done! Updated {total} room types across 18 resorts'))
 
