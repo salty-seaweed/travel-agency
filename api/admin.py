@@ -4,7 +4,7 @@ from .models import (
     Page, PageBlock, MediaAsset, Menu, MenuItem, Redirect, PageVersion, PageReview, CommentThread, Comment,
     TransferType, AtollTransfer, ResortTransfer, TransferFAQ, TransferContactMethod, 
     TransferBookingStep, TransferBenefit, TransferPricingFactor, TransferContent,
-    PageHero, Resort, ResortImage, ResortReview, ResortAmenity
+    PageHero, Resort, ResortImage, ResortReview, ResortAmenity, ResortRoomType
 )
 
 @admin.register(PropertyType)
@@ -325,6 +325,22 @@ class ResortReviewInline(admin.TabularInline):
     fields = ('guest_name', 'rating', 'title', 'comment', 'is_approved', 'is_featured')
     readonly_fields = ('created_at',)
 
+class ResortRoomTypeInline(admin.TabularInline):
+    model = ResortRoomType
+    extra = 1
+    fields = (
+        'name',
+        'image',
+        'price_per_night',
+        'currency',
+        'occupancy_adults',
+        'occupancy_children',
+        'order',
+        'is_active',
+    )
+    ordering = ('order', 'name')
+    show_change_link = True
+
 @admin.register(Resort)
 class ResortAdmin(admin.ModelAdmin):
     list_display = ('name', 'category', 'star_rating', 'atoll', 'island_name', 'price_per_night_from', 'is_featured', 'is_active')
@@ -332,7 +348,7 @@ class ResortAdmin(admin.ModelAdmin):
     search_fields = ('name', 'description', 'atoll', 'island_name', 'meta_keywords')
     list_editable = ('is_featured', 'is_active')
     readonly_fields = ('created_at', 'updated_at', 'full_location', 'price_range', 'total_villa_count')
-    inlines = [ResortImageInline, ResortReviewInline]
+    inlines = [ResortRoomTypeInline, ResortImageInline, ResortReviewInline]
     fieldsets = (
         ('Basic Information', {
             'fields': ('name', 'description', 'detailed_description', 'category', 'star_rating')
@@ -359,7 +375,7 @@ class ResortAdmin(admin.ModelAdmin):
             'fields': ('transfer_type', 'transfer_duration', 'transfer_cost')
         }),
         ('Special Features', {
-            'fields': ('is_adults_only', 'is_family_friendly', 'is_honeymoon_special', 'is_eco_friendly', 'is_private_island', 'has_house_reef', 'has_private_beach', 'is_packaged')
+            'fields': ('is_adults_only', 'is_family_friendly', 'is_honeymoon_special', 'is_eco_friendly', 'is_private_island', 'has_house_reef', 'has_private_beach', 'is_packaged', 'is_room_type')
         }),
         ('Country/Region Restrictions', {
             'fields': ('allowed_countries', 'restricted_regions'),
@@ -386,6 +402,22 @@ class ResortAdmin(admin.ModelAdmin):
     
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('location', 'language')
+
+@admin.register(ResortRoomType)
+class ResortRoomTypeAdmin(admin.ModelAdmin):
+    list_display = (
+        'name',
+        'resort',
+        'price_per_night',
+        'currency',
+        'occupancy_adults',
+        'occupancy_children',
+        'order',
+        'is_active',
+    )
+    list_filter = ('resort', 'is_active', 'currency')
+    search_fields = ('name', 'resort__name', 'description')
+    ordering = ('resort', 'order', 'name')
 
 @admin.register(ResortImage)
 class ResortImageAdmin(admin.ModelAdmin):

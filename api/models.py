@@ -245,6 +245,7 @@ class Resort(models.Model):
     is_private_island = models.BooleanField(default=False)
     has_house_reef = models.BooleanField(default=False)
     is_packaged = models.BooleanField(default=False, help_text="If true, shows simple booking form. If false, shows multi-step booking form.")
+    is_room_type = models.BooleanField(default=False, help_text="If true, booking flow requires room type selection with tiered pricing.")
     has_private_beach = models.BooleanField(default=True)
     
     # Country/Region Restrictions (for packaged resorts only)
@@ -350,6 +351,46 @@ class Resort(models.Model):
                 destination.save(update_fields=['property_count'])
             except Destination.DoesNotExist:
                 pass
+
+class ResortRoomType(models.Model):
+    """Model representing room categories with tiered pricing for resorts."""
+    resort = models.ForeignKey(Resort, on_delete=models.CASCADE, related_name='room_types')
+    name = models.CharField(max_length=150)
+    slug = models.SlugField(max_length=160, blank=True, help_text="Optional identifier for linking with external systems.")
+    description = models.TextField(blank=True)
+    price_per_night = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    currency = models.CharField(max_length=3, default='USD')
+    occupancy_adults = models.PositiveSmallIntegerField(default=2, help_text="Recommended number of adults.")
+    occupancy_children = models.PositiveSmallIntegerField(default=0, help_text="Recommended number of children.")
+    bed_configuration = models.CharField(max_length=120, blank=True, help_text="e.g., 1 King Bed, 2 Queen Beds")
+    amenities = models.JSONField(default=list, blank=True, help_text="Highlights specific to this room type.")
+    image = models.ImageField(upload_to='resorts/room-types/', null=True, blank=True)
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    hide_price = models.BooleanField(default=False, help_text="If true, price will be hidden on frontend and in WhatsApp messages")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['resort', 'order', 'name']
+        verbose_name = 'Resort Room Type'
+        verbose_name_plural = 'Resort Room Types'
+        unique_together = ('resort', 'name')
+
+    def __str__(self):
+        return f"{self.resort.name} - {self.name}"
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            from django.utils.text import slugify
+            base_slug = slugify(self.name)
+            slug_candidate = base_slug
+            suffix = 1
+            while ResortRoomType.objects.filter(resort=self.resort, slug=slug_candidate).exclude(pk=self.pk).exists():
+                suffix += 1
+                slug_candidate = f"{base_slug}-{suffix}"
+            self.slug = slug_candidate
+        super().save(*args, **kwargs)
 
 class ResortImage(models.Model):
     """Model for resort images and media"""

@@ -18,6 +18,7 @@ const PackageDetailPage = React.lazy(() => import('./components/PackageDetailPag
 // Resort components
 const ResortsPage = React.lazy(() => import('./components/resort/ResortsPage').then(module => ({ default: module.ResortsPage })));
 const ResortDetailPage = React.lazy(() => import('./components/resort/ResortDetailPage').then(module => ({ default: module.ResortDetailPage })));
+const ResortRoomBookingPage = React.lazy(() => import('./components/resort/ResortRoomBookingPage').then(module => ({ default: module.ResortRoomBookingPage })));
 
 const PackageBookingPage = React.lazy(() => import('./components/PackageBookingPage').then(module => ({ default: module.PackageBookingPage })));
 const BookingForm = React.lazy(() => import('./components/BookingForm').then(module => ({ default: module.BookingForm })));
@@ -121,6 +122,11 @@ function AppContent() {
           <Route path="resorts/:id" element={
             <Suspense fallback={<RouteLoading />}>
               <ResortDetailPage />
+            </Suspense>
+          } />
+          <Route path="resorts/:id/book" element={
+            <Suspense fallback={<RouteLoading />}>
+              <ResortRoomBookingPage />
             </Suspense>
           } />
           <Route path="contact" element={

@@ -6,7 +6,7 @@ from .views import (
     HomepageStatisticViewSet, HomepageCTASectionViewSet, HomepageSettingsViewSet,
     HomepageContentViewSet, HomepageManagementViewSet, HomepageImageViewSet,
     AboutPageContentViewSet, AboutPageValueViewSet, AboutPageStatisticViewSet,
-    FeaturedDestinationViewSet, ResortViewSet, ResortImageViewSet, ResortReviewViewSet, ResortAmenityViewSet,
+    FeaturedDestinationViewSet, ResortViewSet, ResortRoomTypeViewSet, ResortImageViewSet, ResortReviewViewSet, ResortAmenityViewSet,
     resorts_by_category, resorts_by_atoll, featured_resorts
 )
 
@@ -76,6 +76,7 @@ router.register(r'featured-destinations', FeaturedDestinationViewSet)
 
 # Resort Management URLs
 router.register(r'resorts', ResortViewSet)
+router.register(r'resort-room-types', ResortRoomTypeViewSet)
 router.register(r'resort-images', ResortImageViewSet)
 router.register(r'resort-reviews', ResortReviewViewSet)
 router.register(r'resort-amenities', ResortAmenityViewSet)

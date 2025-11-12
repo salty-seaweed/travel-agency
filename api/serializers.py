@@ -11,7 +11,7 @@ from .models import (
     HomepageHero, HomepageFeature, HomepageTestimonial, HomepageStatistic, HomepageCTASection, HomepageSettings, HomepageContent, HomepageImage,
     PageHero, Language, TranslationKey, Translation, CulturalContent, RegionalSettings, LocalizedPage, LocalizedFAQ,
     AboutPageContent, AboutPageValue, AboutPageStatistic, FeaturedDestination, PackageVariant,
-    Resort, ResortImage, ResortReview, ResortAmenity
+    Resort, ResortImage, ResortReview, ResortAmenity, ResortRoomType
 )
 
 class FlexibleImageField(serializers.ImageField):
@@ -1696,6 +1696,47 @@ class ResortReviewSerializer(serializers.ModelSerializer):
         read_only_fields = ('created_at', 'updated_at')
 
 
+class ResortRoomTypeSerializer(serializers.ModelSerializer):
+    """Serializer for resort room types with pricing tiers."""
+    image_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ResortRoomType
+        fields = (
+            'id',
+            'resort',
+            'name',
+            'slug',
+            'description',
+            'price_per_night',
+            'currency',
+            'occupancy_adults',
+            'occupancy_children',
+            'bed_configuration',
+            'amenities',
+            'image',
+            'image_url',
+            'order',
+            'is_active',
+            'hide_price',
+            'created_at',
+            'updated_at',
+        )
+        read_only_fields = ('created_at', 'updated_at')
+
+    def get_image_url(self, obj):
+        if obj.image:
+            request = self.context.get('request')
+            try:
+                url = obj.image.url
+            except Exception:
+                return None
+            if request and url and url.startswith('/'):
+                return request.build_absolute_uri(url)
+            return url
+        return None
+
+
 class ResortSerializer(serializers.ModelSerializer):
     """Serializer for resorts"""
     images = ResortImageSerializer(many=True, read_only=True)
@@ -1709,6 +1750,7 @@ class ResortSerializer(serializers.ModelSerializer):
     hero_image_url = serializers.SerializerMethodField()
     average_rating = serializers.SerializerMethodField()
     review_count = serializers.SerializerMethodField()
+    room_types = ResortRoomTypeSerializer(many=True, read_only=True)
     
     class Meta:
         model = Resort
@@ -1804,7 +1846,7 @@ class ResortListSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'name', 'description', 'category', 'star_rating', 'atoll', 'island_name',
             'price_per_night_from', 'price_per_night_to', 'currency', 'is_featured', 'is_active',
-            'is_packaged', 'is_adults_only', 'is_family_friendly', 'is_honeymoon_special', 'is_eco_friendly',
+            'is_packaged', 'is_room_type', 'is_adults_only', 'is_family_friendly', 'is_honeymoon_special', 'is_eco_friendly',
             'has_house_reef', 'has_private_beach', 'transfer_type', 'transfer_duration',
             'hero_image_url', 'full_location', 'price_range', 'average_rating', 'review_count',
             'display_order', 'created_at'

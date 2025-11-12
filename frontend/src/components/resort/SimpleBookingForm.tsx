@@ -23,10 +23,12 @@ export function SimpleBookingForm({ resort, isOpen, onClose }: SimpleBookingForm
     name: '',
     email: '',
     phone: '',
+    nationality: '',
     checkIn: '',
     checkOut: '',
     adults: 2,
     children: 0,
+    rooms: 1,
     specialRequests: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -58,6 +60,10 @@ export function SimpleBookingForm({ resort, isOpen, onClose }: SimpleBookingForm
       showError(t('simpleBooking.error.phoneRequired', 'Phone is required'));
       return false;
     }
+    if (!formData.nationality.trim()) {
+      showError(t('simpleBooking.error.nationalityRequired', 'Nationality is required'));
+      return false;
+    }
     if (!formData.checkIn) {
       showError(t('simpleBooking.error.checkInRequired', 'Check-in date is required'));
       return false;
@@ -68,6 +74,10 @@ export function SimpleBookingForm({ resort, isOpen, onClose }: SimpleBookingForm
     }
     if (new Date(formData.checkOut) <= new Date(formData.checkIn)) {
       showError(t('simpleBooking.error.invalidDates', 'Check-out date must be after check-in date'));
+      return false;
+    }
+    if (!formData.rooms || formData.rooms < 1) {
+      showError('Please tell us how many rooms you need.');
       return false;
     }
     return true;
@@ -103,6 +113,8 @@ ${packageDetails.additional_benefits && packageDetails.additional_benefits.lengt
 • Name: ${formData.name}
 • Email: ${formData.email}
 • Phone: ${formData.phone}
+• Nationality: ${formData.nationality}
+• Rooms: ${formData.rooms}
 • Check-in: ${formData.checkIn}
 • Check-out: ${formData.checkOut}
 • Guests: ${formData.adults} adults, ${formData.children} children
@@ -116,6 +128,8 @@ ${formData.specialRequests ? `📝 *Additional Message:*\n${formData.specialRequ
 • Name: ${formData.name}
 • Email: ${formData.email}
 • Phone: ${formData.phone}
+• Nationality: ${formData.nationality}
+• Rooms: ${formData.rooms}
 
 📅 *Travel Dates:*
 • Check-in: ${formData.checkIn}
@@ -244,6 +258,20 @@ ${formData.specialRequests ? `💬 *Special Requests:*\n${formData.specialReques
 
               <div className="simple-booking-field-group">
                 <label className="simple-booking-label">
+                  {t('simpleBooking.form.nationality', 'Nationality')} *
+                </label>
+                <input
+                  type="text"
+                  value={formData.nationality}
+                  onChange={(e) => handleInputChange('nationality', e.target.value)}
+                  className="simple-booking-input"
+                  placeholder={t('simpleBooking.form.nationalityPlaceholder', 'Where are you travelling from?')}
+                  required
+                />
+              </div>
+
+              <div className="simple-booking-field-group">
+                <label className="simple-booking-label">
                   {t('simpleBooking.form.checkIn', 'Check-in Date')} *
                 </label>
                 <input
@@ -296,6 +324,22 @@ ${formData.specialRequests ? `💬 *Special Requests:*\n${formData.specialReques
                   className="simple-booking-select"
                 >
                   {Array.from({ length: 10 }, (_, i) => i).map(num => (
+                    <option key={num} value={num}>{num}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="simple-booking-field-group">
+                <label className="simple-booking-label">
+                  {t('simpleBooking.form.rooms', 'Number of Rooms')} *
+                </label>
+                <select
+                  value={formData.rooms}
+                  onChange={(e) => handleInputChange('rooms', parseInt(e.target.value))}
+                  className="simple-booking-select"
+                  required
+                >
+                  {Array.from({ length: 10 }, (_, i) => i + 1).map(num => (
                     <option key={num} value={num}>{num}</option>
                   ))}
                 </select>

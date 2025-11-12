@@ -608,6 +608,24 @@ export interface ResortReview extends BaseEntity {
   is_featured: boolean;
 }
 
+export interface ResortRoomType extends BaseEntity {
+  resort: number;
+  name: string;
+  slug?: string;
+  description?: string;
+  price_per_night?: string;
+  currency: string;
+  occupancy_adults: number;
+  occupancy_children: number;
+  bed_configuration?: string;
+  amenities: string[];
+  image?: string;
+  image_url?: string;
+  order: number;
+  is_active: boolean;
+  hide_price?: boolean;
+}
+
 export interface Resort extends BaseEntity {
   name: string;
   description: string;
@@ -674,6 +692,7 @@ export interface Resort extends BaseEntity {
   has_house_reef: boolean;
   has_private_beach: boolean;
   is_packaged: boolean;
+  is_room_type: boolean;
   
   // Media and Images
   hero_image?: string;
@@ -682,6 +701,7 @@ export interface Resort extends BaseEntity {
   virtual_tour_url?: string;
   drone_video_url?: string;
   images?: ResortImage[];
+  room_types?: ResortRoomType[];
   
   // SEO and Marketing
   meta_title?: string;

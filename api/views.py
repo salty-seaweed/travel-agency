@@ -22,7 +22,7 @@ from .models import (
     HomepageCTASection, HomepageSettings, HomepageContent, HomepageImage, PageHero,
     Language, Translation, TranslationKey, CulturalContent, RegionalSettings, LocalizedPage, LocalizedFAQ,
     AboutPageContent, AboutPageValue, AboutPageStatistic, FeaturedDestination,
-    Resort, ResortImage, ResortReview, ResortAmenity
+    Resort, ResortImage, ResortReview, ResortAmenity, ResortRoomType
 )
 from .serializers import (
     PropertyTypeSerializer, AmenitySerializer, LocationSerializer, DestinationSerializer, ExperienceSerializer,
@@ -44,7 +44,7 @@ from .serializers import (
     LanguageDetectionSerializer, AboutPageContentSerializer, AboutPageValueSerializer, 
     AboutPageStatisticSerializer, AboutPageDataSerializer, FeaturedDestinationSerializer,
     ResortSerializer, ResortListSerializer, ResortDetailSerializer, ResortImageSerializer, 
-    ResortReviewSerializer, ResortAmenitySerializer
+    ResortReviewSerializer, ResortAmenitySerializer, ResortRoomTypeSerializer
 )
 from rest_framework.decorators import permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
@@ -3076,7 +3076,7 @@ def health_check(request):
 # Resort ViewSets
 class ResortViewSet(viewsets.ModelViewSet):
     """ViewSet for managing resorts"""
-    queryset = Resort.objects.filter(is_active=True).select_related('location', 'language').prefetch_related('images', 'reviews', 'amenities')
+    queryset = Resort.objects.filter(is_active=True).select_related('location', 'language').prefetch_related('room_types', 'images', 'reviews', 'amenities')
     serializer_class = ResortSerializer
     permission_classes = [AllowAny]
     filter_backends = [DjangoFilterBackend]
@@ -3139,6 +3139,17 @@ class ResortViewSet(viewsets.ModelViewSet):
         queryset = filter_resorts_by_country(queryset, self.request)
         
         return queryset
+
+
+class ResortRoomTypeViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing resort room types."""
+    queryset = ResortRoomType.objects.select_related('resort')
+    serializer_class = ResortRoomTypeSerializer
+    permission_classes = [AllowAny]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['resort', 'is_active']
+    ordering_fields = ['order', 'price_per_night', 'name']
+    ordering = ['resort', 'order', 'name']
 
 
 class ResortImageViewSet(viewsets.ModelViewSet):

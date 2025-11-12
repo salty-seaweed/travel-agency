@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { StarIcon, MapPinIcon, ChevronLeftIcon, PhoneIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
+import { MapPinIcon } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import { useResort, useResortImages } from '../../hooks/useResorts';
 import { useUserCountry } from '../../hooks/useUserCountry';
 import { LoadingSpinner } from '../LoadingSpinner';
 import { LazyImage } from '../LazyImage';
-import { ResortBookingForm } from './ResortBookingForm';
 import { SimpleBookingForm } from './SimpleBookingForm';
 import { useWhatsApp } from '../../hooks/useQueries';
 import { whatsappBooking } from '../../services/whatsapp-booking';
 import './ResortDetailPage.css';
+import type { ResortRoomType } from '../../types';
 
 export function ResortDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -25,6 +25,113 @@ export function ResortDetailPage() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showAllImages, setShowAllImages] = useState(false);
   const [showBookingForm, setShowBookingForm] = useState(false);
+  const [roomSelections, setRoomSelections] = useState<Record<number, number>>({});
+
+  const activeRoomTypes = useMemo(() => {
+    if (!resort?.room_types) return [];
+    return resort.room_types.filter((roomType: ResortRoomType) => roomType && roomType.is_active);
+  }, [resort?.room_types]);
+
+  useEffect(() => {
+    if (!resort?.is_room_type) {
+      setRoomSelections({});
+      return;
+    }
+    if (activeRoomTypes.length === 0) {
+      setRoomSelections({});
+      return;
+    }
+    setRoomSelections(prev => {
+      const next = { ...prev };
+      let changed = false;
+      const validIds = new Set(activeRoomTypes.map(roomType => roomType.id));
+      Object.keys(next).forEach(key => {
+        const numericKey = Number(key);
+        if (!validIds.has(numericKey)) {
+          delete next[numericKey];
+          changed = true;
+        }
+      });
+      if (Object.keys(next).length === 0) {
+        next[activeRoomTypes[0].id] = 1;
+        changed = true;
+      }
+      return changed ? next : prev;
+    });
+  }, [resort?.is_room_type, activeRoomTypes]);
+
+  const totalSelectedRooms = useMemo(
+    () => Object.values(roomSelections).reduce((total, qty) => total + qty, 0),
+    [roomSelections]
+  );
+
+  const formatRoomPrice = (roomType: ResortRoomType) => {
+    // If hide_price is true, show contact message
+    if (roomType.hide_price) {
+      return 'Contact us for pricing';
+    }
+    
+    if (!roomType.price_per_night) {
+      return 'Contact us for pricing';
+    }
+    const currencyCode = (roomType.currency || resort.currency || 'USD').toUpperCase();
+    const amount = Number(roomType.price_per_night);
+    if (!Number.isNaN(amount)) {
+      try {
+        const formatted = new Intl.NumberFormat(undefined, {
+          style: 'currency',
+          currency: currencyCode,
+          maximumFractionDigits: 0,
+        }).format(amount);
+        return `Starting from ${formatted}`;
+      } catch {
+        return `Starting from ${currencyCode} ${amount.toLocaleString()}`;
+      }
+    }
+    return `Starting from ${currencyCode} ${roomType.price_per_night}`;
+  };
+
+  const navigateToBookingPage = (roomTypeId?: number | null) => {
+    if (resort.is_room_type) {
+      let selections = roomSelections;
+      if ((!selections || Object.keys(selections).length === 0) && activeRoomTypes.length > 0) {
+        selections = { [roomTypeId ?? activeRoomTypes[0].id]: 1 };
+        setRoomSelections(selections);
+      } else if (roomTypeId && (!selections[roomTypeId] || selections[roomTypeId] < 1)) {
+        selections = { ...selections, [roomTypeId]: 1 };
+        setRoomSelections(selections);
+      }
+      navigate(`/resorts/${resort.id}/book`, {
+        state: {
+          roomSelections: selections,
+        },
+      });
+      return;
+    }
+    setShowBookingForm(true);
+  };
+
+  const handleRoomQuantityChange = (roomTypeId: number, quantity: number) => {
+    const safeQuantity = Math.max(0, Math.min(quantity, 5));
+    setRoomSelections(prev => {
+      const next = { ...prev };
+      if (safeQuantity > 0) {
+        next[roomTypeId] = safeQuantity;
+      } else {
+        delete next[roomTypeId];
+      }
+      return next;
+    });
+  };
+
+  const handleQuickBook = (roomTypeId: number) => {
+    setRoomSelections(prev => {
+      const next = { ...prev };
+      next[roomTypeId] = next[roomTypeId] ? next[roomTypeId] : 1;
+      return next;
+    });
+    navigateToBookingPage(roomTypeId);
+  };
 
   if (resortLoading || imagesLoading) {
     return (
@@ -50,6 +157,10 @@ export function ResortDetailPage() {
 
   const allImages = [
     ...(resort.hero_image_url ? [{ url: resort.hero_image_url, type: 'hero' }] : []),
+    ...(Array.isArray(resort.gallery_images) ? resort.gallery_images.map((url: string) => ({ 
+      url, 
+      type: 'gallery' 
+    })) : []),
     ...(Array.isArray(images) ? images.map(img => ({ 
       url: img.image_url || img.image || '', 
       type: img.image_type || 'gallery' 
@@ -65,7 +176,7 @@ export function ResortDetailPage() {
   };
 
   const handleBookNow = () => {
-    setShowBookingForm(true);
+    navigateToBookingPage();
   };
 
   const handleWhatsAppBooking = () => {
@@ -80,6 +191,12 @@ Please help me with availability and booking process. Thank you!`;
       whatsappBooking.openWhatsApp(message, whatsappNumber);
     }
   };
+
+  const primaryBookingLabel = resort.is_room_type
+    ? totalSelectedRooms > 0
+      ? `Book ${totalSelectedRooms} Room${totalSelectedRooms === 1 ? '' : 's'}`
+      : 'Book Now (Select Rooms)'
+    : 'Book Now';
 
   return (
     <div className="resort-detail-container">
@@ -167,52 +284,184 @@ Please help me with availability and booking process. Thank you!`;
                   </div>
                 )}
 
-                {/* Accommodation Options */}
-                <div className="resort-detail-accommodation-section">
-                  <h3>Accommodation Options</h3>
-                  <div className="resort-detail-accommodation-grid">
-                    {resort.beach_villas && resort.beach_villas > 0 && (
-                      <div className="resort-detail-accommodation-item">
-                        <LazyImage
-                          src="/images/accommodations/beach-villa.jpg"
-                          alt="Beach Villa"
-                          className="resort-detail-accommodation-image"
-                        />
-                        <p className="resort-detail-accommodation-name">Beach Villa</p>
+                {/* Room Types */}
+                {resort.is_room_type && (
+                  <div className="resort-detail-room-types-section">
+                    <div className="resort-detail-room-types-header">
+                      <h3>Room Types & Pricing</h3>
+                      <div className="resort-detail-room-types-selected">
+                        {totalSelectedRooms > 0 ? (
+                          <>
+                            <span className="resort-detail-room-types-selected-label">Selected:</span>
+                            <span className="resort-detail-room-types-selected-name">
+                              {totalSelectedRooms} room{totalSelectedRooms === 1 ? '' : 's'} chosen
+                            </span>
+                          </>
+                        ) : (
+                          <span className="resort-detail-room-types-selected-name">
+                            Choose your preferred room type below.
+                          </span>
+                        )}
                       </div>
-                    )}
-                    {resort.overwater_villas && resort.overwater_villas > 0 && (
-                      <div className="resort-detail-accommodation-item">
-                        <LazyImage
-                          src="/images/accommodations/overwater-villa.jpg"
-                          alt="Overwater Villa"
-                          className="resort-detail-accommodation-image"
-                        />
-                        <p className="resort-detail-accommodation-name">Overwater Villa</p>
+                    </div>
+                    {activeRoomTypes.length > 0 ? (
+                      <div className="resort-detail-room-types-grid">
+                        {activeRoomTypes.map((roomType) => {
+                          const quantity = roomSelections[roomType.id] ?? 0;
+                          const occupancyChunks = [
+                            `${roomType.occupancy_adults} adult${roomType.occupancy_adults !== 1 ? 's' : ''}`,
+                            ...(roomType.occupancy_children > 0
+                              ? [`${roomType.occupancy_children} child${roomType.occupancy_children !== 1 ? 'ren' : ''}`]
+                              : []),
+                          ];
+                          const amenitiesList = Array.isArray(roomType.amenities) ? roomType.amenities : [];
+                          const displayedAmenities = amenitiesList.slice(0, 5);
+                          const totalAmenities = amenitiesList.length;
+
+                          return (
+                            <div
+                              key={roomType.id}
+                              className={`resort-detail-room-type-card${quantity > 0 ? ' resort-detail-room-type-card-selected' : ''}`}
+                            >
+                              <div className="resort-detail-room-type-media">
+                                {roomType.image_url || roomType.image ? (
+                                  <LazyImage
+                                    src={roomType.image_url || roomType.image || ''}
+                                    alt={`${roomType.name} - ${resort.name}`}
+                                    className="resort-detail-room-type-image"
+                                  />
+                                ) : (
+                                  <div className="resort-detail-room-type-image-placeholder">
+                                    <span>{roomType.name}</span>
+                                  </div>
+                                )}
+                              </div>
+
+                              <div className="resort-detail-room-type-body">
+                                <div className="resort-detail-room-type-content">
+                                  <div className="resort-detail-room-type-heading">
+                                    <h4>{roomType.name}</h4>
+                                    {roomType.bed_configuration && (
+                                      <span className="resort-detail-room-type-bed">{roomType.bed_configuration}</span>
+                                    )}
+                                  </div>
+
+                                  {roomType.description && (
+                                    <p className="resort-detail-room-type-description">{roomType.description}</p>
+                                  )}
+
+                                  <div className="resort-detail-room-type-occupancy">
+                                    <span>{occupancyChunks.join(' • ')}</span>
+                                  </div>
+
+                                  {displayedAmenities.length > 0 && (
+                                    <div className="resort-detail-room-type-amenities">
+                                      <ul className="resort-detail-room-type-amenities-list">
+                                        {displayedAmenities.map((amenity, index) => (
+                                          <li key={`${roomType.id}-amenity-${index}`}>
+                                            {amenity}
+                                          </li>
+                                        ))}
+                                      </ul>
+                                      {totalAmenities > displayedAmenities.length && (
+                                        <span className="resort-detail-room-type-amenity-more">
+                                          +{totalAmenities - displayedAmenities.length} more amenities
+                                        </span>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+
+                                <div className="resort-detail-room-type-price">
+                                  {formatRoomPrice(roomType)}
+                                </div>
+                              </div>
+
+                              <div className="resort-detail-room-type-actions">
+                                <div className="resort-room-type-quantity">
+                                  <label htmlFor={`resort-room-type-${roomType.id}-qty`}>Rooms</label>
+                                  <select
+                                    id={`resort-room-type-${roomType.id}-qty`}
+                                    value={quantity}
+                                    onChange={(event) =>
+                                      handleRoomQuantityChange(roomType.id, parseInt(event.target.value, 10))
+                                    }
+                                  >
+                                    {Array.from({ length: 6 }, (_, idx) => idx).map(num => (
+                                      <option key={num} value={num}>{num}</option>
+                                    ))}
+                                  </select>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => handleQuickBook(roomType.id)}
+                                  className="resort-detail-room-type-action-button resort-detail-room-type-book-button"
+                                >
+                                  Book this room
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
-                    )}
-                    {resort.water_villas && resort.water_villas > 0 && (
-                      <div className="resort-detail-accommodation-item">
-                        <LazyImage
-                          src="/images/accommodations/water-villa.jpg"
-                          alt="Water Villa"
-                          className="resort-detail-accommodation-image"
-                        />
-                        <p className="resort-detail-accommodation-name">Water Villa</p>
-                      </div>
-                    )}
-                    {resort.garden_villas && resort.garden_villas > 0 && (
-                      <div className="resort-detail-accommodation-item">
-                        <LazyImage
-                          src="/images/accommodations/garden-villa.jpg"
-                          alt="Garden Villa"
-                          className="resort-detail-accommodation-image"
-                        />
-                        <p className="resort-detail-accommodation-name">Garden Villa</p>
+                    ) : (
+                      <div className="resort-detail-room-types-empty">
+                        <p>
+                          Room-specific pricing will be available soon. Please contact us to receive tailored rates for your stay.
+                        </p>
                       </div>
                     )}
                   </div>
-                </div>
+                )}
+
+                {/* Accommodation Options */}
+                {!resort.is_room_type && (
+                  <div className="resort-detail-accommodation-section">
+                    <h3>Accommodation Options</h3>
+                    <div className="resort-detail-accommodation-grid">
+                      {resort.beach_villas && resort.beach_villas > 0 && (
+                        <div className="resort-detail-accommodation-item">
+                          <LazyImage
+                            src="/images/accommodations/beach-villa.jpg"
+                            alt="Beach Villa"
+                            className="resort-detail-accommodation-image"
+                          />
+                          <p className="resort-detail-accommodation-name">Beach Villa</p>
+                        </div>
+                      )}
+                      {resort.overwater_villas && resort.overwater_villas > 0 && (
+                        <div className="resort-detail-accommodation-item">
+                          <LazyImage
+                            src="/images/accommodations/overwater-villa.jpg"
+                            alt="Overwater Villa"
+                            className="resort-detail-accommodation-image"
+                          />
+                          <p className="resort-detail-accommodation-name">Overwater Villa</p>
+                        </div>
+                      )}
+                      {resort.water_villas && resort.water_villas > 0 && (
+                        <div className="resort-detail-accommodation-item">
+                          <LazyImage
+                            src="/images/accommodations/water-villa.jpg"
+                            alt="Water Villa"
+                            className="resort-detail-accommodation-image"
+                          />
+                          <p className="resort-detail-accommodation-name">Water Villa</p>
+                        </div>
+                      )}
+                      {resort.garden_villas && resort.garden_villas > 0 && (
+                        <div className="resort-detail-accommodation-item">
+                          <LazyImage
+                            src="/images/accommodations/garden-villa.jpg"
+                            alt="Garden Villa"
+                            className="resort-detail-accommodation-image"
+                          />
+                          <p className="resort-detail-accommodation-name">Garden Villa</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Sidebar */}
@@ -220,7 +469,9 @@ Please help me with availability and booking process. Thank you!`;
                 <div className="resort-detail-booking-card">
                   <h3 className="resort-detail-booking-title">Ready to book?</h3>
                   <p className="resort-detail-booking-description">
-                    Contact us for personalized rates and availability
+                    {resort.is_room_type
+                      ? 'Select your preferred room type to view tailored pricing and complete your booking request.'
+                      : 'Contact us for personalized rates and availability'}
                   </p>
 
                   <div className="resort-detail-booking-buttons">
@@ -234,7 +485,7 @@ Please help me with availability and booking process. Thank you!`;
                       onClick={handleBookNow}
                       className="resort-detail-booking-button resort-detail-booking-button-primary"
                     >
-                      Book Now
+                      {primaryBookingLabel}
                     </button>
                   </div>
 
@@ -267,7 +518,7 @@ Please help me with availability and booking process. Thank you!`;
       </main>
 
       {/* Booking Form Modal */}
-      {showBookingForm && (
+      {showBookingForm && !resort.is_room_type && (
         <SimpleBookingForm
           resort={resort}
           isOpen={showBookingForm}
