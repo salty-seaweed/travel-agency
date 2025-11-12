@@ -1725,6 +1725,13 @@ class ResortRoomTypeSerializer(serializers.ModelSerializer):
         read_only_fields = ('created_at', 'updated_at')
 
     def get_image_url(self, obj):
+        # First try to get image URL from amenities (frontend URL - works in production)
+        if obj.amenities and isinstance(obj.amenities, list):
+            for amenity in obj.amenities:
+                if isinstance(amenity, str) and amenity.startswith('__IMAGE_URL__:'):
+                    return amenity.replace('__IMAGE_URL__:', '')
+        
+        # Fall back to uploaded image
         if obj.image:
             request = self.context.get('request')
             try:
@@ -1758,12 +1765,21 @@ class ResortSerializer(serializers.ModelSerializer):
         read_only_fields = ('created_at', 'updated_at', 'full_location', 'price_range', 'total_villa_count')
     
     def get_hero_image_url(self, obj):
-        # First try the resort's hero_image field
+        # First try gallery_images for Card Image (frontend URL - works in production)
+        if obj.gallery_images and isinstance(obj.gallery_images, list):
+            for img_url in obj.gallery_images:
+                if 'Card' in img_url or 'card' in img_url:
+                    return img_url
+        
+        # Try the resort's hero_image field
         if obj.hero_image:
-            request = self.context.get('request')
-            if request:
-                return request.build_absolute_uri(obj.hero_image.url)
-            return obj.hero_image.url
+            try:
+                request = self.context.get('request')
+                if request:
+                    return request.build_absolute_uri(obj.hero_image.url)
+                return obj.hero_image.url
+            except:
+                pass
         
         # If no hero_image, get from ResortImages
         # Priority: featured hero image > any featured image > first hero image > first image
@@ -1853,12 +1869,21 @@ class ResortListSerializer(serializers.ModelSerializer):
         ]
     
     def get_hero_image_url(self, obj):
-        # First try the resort's hero_image field
+        # First try gallery_images for Card Image (frontend URL - works in production)
+        if obj.gallery_images and isinstance(obj.gallery_images, list):
+            for img_url in obj.gallery_images:
+                if 'Card' in img_url or 'card' in img_url:
+                    return img_url
+        
+        # Try the resort's hero_image field
         if obj.hero_image:
-            request = self.context.get('request')
-            if request:
-                return request.build_absolute_uri(obj.hero_image.url)
-            return obj.hero_image.url
+            try:
+                request = self.context.get('request')
+                if request:
+                    return request.build_absolute_uri(obj.hero_image.url)
+                return obj.hero_image.url
+            except:
+                pass
         
         # If no hero_image, get from ResortImages
         # Priority: featured hero image > any featured image > first hero image > first image
