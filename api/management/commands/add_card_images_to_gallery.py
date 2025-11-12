@@ -12,8 +12,7 @@ class Command(BaseCommand):
     help = 'Add Card Image and Hero Banner URLs to gallery_images'
 
     def handle(self, *args, **options):
-        # Use relative path (no domain) so it works in both dev and production
-        base_url = ''
+        base_url = 'https://threadtravels.com'
         
         # Map: Resort Name -> (Folder Name, Card Extension, Hero Banner 1 Extension, Hero Banner 2 Extension)
         resorts_data = {

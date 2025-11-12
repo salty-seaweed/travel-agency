@@ -98,8 +98,7 @@ class Command(BaseCommand):
         }
 
     def handle(self, *args, **options):
-        # Use relative path (no domain) so it works in both dev and production
-        base_url = ''
+        base_url = 'https://threadtravels.com'
         
         # Get custom filename mappings
         filename_map = self.get_image_filename_map()
