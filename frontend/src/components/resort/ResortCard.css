@@ -27,13 +27,20 @@
   height: 16rem;
   overflow: hidden;
   background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .resort-card-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
   transition: transform 0.3s ease;
+  display: block;
+  min-width: 100%;
+  min-height: 100%;
 }
 
 .resort-card:hover .resort-card-image {

@@ -141,9 +141,8 @@ export const LazyImage: React.FC<LazyImageProps> = React.memo(({
   return (
     <Box
       ref={combinedRef}
-      width={width}
-      height={height}
-      borderRadius={borderRadius}
+      width="100%"
+      height="100%"
       position="relative"
       overflow="hidden"
     >
@@ -168,9 +167,11 @@ export const LazyImage: React.FC<LazyImageProps> = React.memo(({
           width: '100%',
           height: '100%',
           objectFit,
+          objectPosition: 'center',
           borderRadius,
           opacity: isLoaded ? 1 : 0,
           transition: 'opacity 0.3s ease-in-out',
+          display: 'block',
           ...style,
         }}
         loading={priority ? 'eager' : 'lazy'}
