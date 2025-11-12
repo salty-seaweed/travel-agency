@@ -32,6 +32,16 @@ class Command(BaseCommand):
             action='store_true',
             help='Skip images that are already uploaded',
         )
+        parser.add_argument(
+            '--test-urls',
+            action='store_true',
+            help='Test mode: only print URLs without uploading',
+        )
+        parser.add_argument(
+            '--verbose',
+            action='store_true',
+            help='Verbose mode: show all URL attempts',
+        )
 
     def handle(self, *args, **options):
         self.stdout.write(self.style.SUCCESS('=' * 80))
@@ -40,6 +50,11 @@ class Command(BaseCommand):
         
         base_url = options['base_url'].rstrip('/')
         skip_existing = options['skip_existing']
+        self.test_mode = options['test_urls']
+        self.verbose = options['verbose']
+        
+        if self.test_mode:
+            self.stdout.write(self.style.WARNING('TEST MODE: Will only print URLs, not upload'))
         
         # Get all resorts that need images
         resorts = Resort.objects.filter(is_room_type=True)
@@ -67,43 +82,40 @@ class Command(BaseCommand):
             
             # Upload hero image (Card Image)
             if not resort.hero_image or not skip_existing:
-                card_image_url = f'{base_url}/images/Resort Accomodation types images/{quote(folder_name)}/Card Image.jpg'
-                success = self.upload_image_from_url(
-                    card_image_url,
-                    resort,
-                    'hero_image',
-                    'Card_Image.jpg'
-                )
-                if success:
-                    total_uploaded += 1
-                    self.stdout.write(self.style.SUCCESS(f'  ✓ Uploaded hero image'))
-                else:
-                    # Try .png extension
-                    card_image_url = f'{base_url}/images/Resort Accomodation types images/{quote(folder_name)}/Card Image.png'
-                    success = self.upload_image_from_url(
-                        card_image_url,
-                        resort,
-                        'hero_image',
-                        'Card_Image.png'
-                    )
-                    if success:
-                        total_uploaded += 1
-                        self.stdout.write(self.style.SUCCESS(f'  ✓ Uploaded hero image'))
-                    else:
-                        # Try .webp extension
-                        card_image_url = f'{base_url}/images/Resort Accomodation types images/{quote(folder_name)}/Card Image.webp'
+                self.stdout.write(f'  Uploading hero image...')
+                
+                # Try different URL formats and extensions
+                url_formats = [
+                    # Without encoding (spaces as %20)
+                    f'{base_url}/images/Resort%20Accomodation%20types%20images/{folder_name.replace(" ", "%20")}/Card%20Image',
+                    # With full quote encoding
+                    f'{base_url}/images/Resort Accomodation types images/{quote(folder_name)}/Card Image',
+                    # Without any encoding (if server handles it)
+                    f'{base_url}/images/Resort Accomodation types images/{folder_name}/Card Image',
+                ]
+                
+                extensions = ['.jpg', '.png', '.webp', '.jpeg']
+                success = False
+                
+                for url_format in url_formats:
+                    for ext in extensions:
+                        card_image_url = url_format + ext
                         success = self.upload_image_from_url(
                             card_image_url,
                             resort,
                             'hero_image',
-                            'Card_Image.webp'
+                            f'Card_Image{ext}'
                         )
                         if success:
                             total_uploaded += 1
-                            self.stdout.write(self.style.SUCCESS(f'  ✓ Uploaded hero image'))
-                        else:
-                            total_failed += 1
-                            self.stdout.write(self.style.ERROR(f'  ✗ Failed to upload hero image'))
+                            self.stdout.write(self.style.SUCCESS(f'  ✓ Uploaded hero image from: {card_image_url}'))
+                            break
+                    if success:
+                        break
+                
+                if not success:
+                    total_failed += 1
+                    self.stdout.write(self.style.ERROR(f'  ✗ Failed to upload hero image for {resort.name}'))
             else:
                 total_skipped += 1
                 self.stdout.write(self.style.WARNING(f'  ⊘ Skipped hero image (already exists)'))
@@ -123,18 +135,32 @@ class Command(BaseCommand):
                 uploaded = False
                 for pattern in image_patterns:
                     for ext in ['.jpg', '.jpeg', '.png', '.webp']:
-                        image_url = f'{base_url}/images/Resort Accomodation types images/{quote(folder_name)}/{quote(pattern)}{ext}'
-                        success = self.upload_image_from_url(
-                            image_url,
-                            room_type,
-                            'image',
-                            f'{pattern}{ext}'
-                        )
-                        if success:
-                            total_uploaded += 1
-                            self.stdout.write(self.style.SUCCESS(f'    ✓ {room_type.name}'))
-                            uploaded = True
+                        # Try different URL encoding formats
+                        url_formats = [
+                            # Spaces as %20
+                            f'{base_url}/images/Resort%20Accomodation%20types%20images/{folder_name.replace(" ", "%20")}/{pattern.replace(" ", "%20")}{ext}',
+                            # Full quote encoding
+                            f'{base_url}/images/Resort Accomodation types images/{quote(folder_name)}/{quote(pattern)}{ext}',
+                            # No encoding
+                            f'{base_url}/images/Resort Accomodation types images/{folder_name}/{pattern}{ext}',
+                        ]
+                        
+                        for image_url in url_formats:
+                            success = self.upload_image_from_url(
+                                image_url,
+                                room_type,
+                                'image',
+                                f'{pattern.replace(" ", "_")}{ext}'
+                            )
+                            if success:
+                                total_uploaded += 1
+                                self.stdout.write(self.style.SUCCESS(f'    ✓ {room_type.name}'))
+                                uploaded = True
+                                break
+                        
+                        if uploaded:
                             break
+                    
                     if uploaded:
                         break
                 
@@ -155,6 +181,18 @@ class Command(BaseCommand):
     def upload_image_from_url(self, url, obj, field_name, filename):
         """Download image from URL and upload to Django model field"""
         try:
+            if self.verbose:
+                self.stdout.write(f'      Trying: {url}')
+            
+            # In test mode, just check if URL is accessible
+            if self.test_mode:
+                response = requests.head(url, timeout=10)
+                if response.status_code == 200:
+                    self.stdout.write(self.style.SUCCESS(f'      ✓ Found: {url}'))
+                    return True
+                return False
+            
+            # Try the URL as-is first
             response = requests.get(url, timeout=30)
             if response.status_code == 200:
                 # Get the field
@@ -168,9 +206,14 @@ class Command(BaseCommand):
                 )
                 return True
             else:
+                # If failed, log the error for debugging
+                if self.verbose and response.status_code != 404:
+                    self.stdout.write(self.style.WARNING(f'      HTTP {response.status_code}: {url}'))
                 return False
         except Exception as e:
-            # Silently fail and try next pattern
+            # Log exception for debugging
+            if self.verbose:
+                self.stdout.write(self.style.WARNING(f'      Error: {str(e)[:50]}'))
             return False
 
     def get_folder_name(self, resort_name):
