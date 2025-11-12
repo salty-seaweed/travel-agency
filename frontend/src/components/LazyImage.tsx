@@ -144,8 +144,6 @@ export const LazyImage: React.FC<LazyImageProps> = React.memo(({
       width={width}
       height={height}
       borderRadius={borderRadius}
-      className={className}
-      style={style}
       position="relative"
       overflow="hidden"
     >
@@ -165,6 +163,7 @@ export const LazyImage: React.FC<LazyImageProps> = React.memo(({
       <img
         src={imageSrc || undefined}
         alt={alt}
+        className={className}
         style={{
           width: '100%',
           height: '100%',
@@ -172,6 +171,7 @@ export const LazyImage: React.FC<LazyImageProps> = React.memo(({
           borderRadius,
           opacity: isLoaded ? 1 : 0,
           transition: 'opacity 0.3s ease-in-out',
+          ...style,
         }}
         loading={priority ? 'eager' : 'lazy'}
         decoding="async"
