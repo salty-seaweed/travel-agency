@@ -1742,6 +1742,19 @@ class ResortRoomTypeSerializer(serializers.ModelSerializer):
                 return request.build_absolute_uri(url)
             return url
         return None
+    
+    def to_representation(self, instance):
+        """Override to filter out __IMAGE_URL__ from amenities"""
+        data = super().to_representation(instance)
+        
+        # Filter out __IMAGE_URL__ entries from amenities
+        if data.get('amenities') and isinstance(data['amenities'], list):
+            data['amenities'] = [
+                amenity for amenity in data['amenities']
+                if not (isinstance(amenity, str) and amenity.startswith('__IMAGE_URL__:'))
+            ]
+        
+        return data
 
 
 class ResortSerializer(serializers.ModelSerializer):
