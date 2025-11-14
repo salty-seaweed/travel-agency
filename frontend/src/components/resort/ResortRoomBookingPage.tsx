@@ -218,6 +218,10 @@ export function ResortRoomBookingPage() {
   };
 
   const formatRoomPrice = (roomType: ResortRoomType) => {
+    // Hide price if hide_price is true
+    if (roomType.hide_price) {
+      return 'Contact us for pricing';
+    }
     if (!roomType.price_per_night) {
       return 'Starting from Contact us';
     }
@@ -245,10 +249,11 @@ export function ResortRoomBookingPage() {
         ? `, ${formData.children} child${formData.children !== 1 ? 'ren' : ''}`
         : '';
     const roomBreakdown = selectedRooms
-      .map(
-        (roomType) =>
-          `• ${roomSelections[roomType.id]} x ${roomType.name} (${formatRoomPrice(roomType)})`,
-      )
+      .map((roomType) => {
+        // Don't show price in WhatsApp message if hide_price is true
+        const priceText = roomType.hide_price ? '' : ` (${formatRoomPrice(roomType)})`;
+        return `• ${roomSelections[roomType.id]} x ${roomType.name}${priceText}`;
+      })
       .join('\n');
 
     return `🏨 *${resort?.name} Room Booking Request*
