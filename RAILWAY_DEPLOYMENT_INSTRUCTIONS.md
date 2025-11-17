@@ -6,16 +6,16 @@
 - Your project linked (`railway link`)
 - **Frontend deployed** with images in `/images/Resort Accomodation types images/`
 
-## Step 1: Deploy Frontend First (IMPORTANT!)
+## Step 0: Deploy Frontend First (CRITICAL!)
 
-Before running the backend scripts, make sure your frontend is deployed with all the resort images in:
+Before running ANY backend scripts, make sure your frontend is deployed with all the resort images in:
 ```
 frontend/public/images/Resort Accomodation types images/
 ```
 
-These images will be served as static files and used by the upload script.
+These images MUST be accessible at `https://threadtravels.com/images/Resort%20Accomodation%20types%20images/`
 
-## Step 2: Apply Database Migrations
+## Step 1: Apply Database Migrations
 
 Apply the migration for the new `hide_price` field:
 
@@ -25,9 +25,9 @@ railway run python manage.py migrate
 
 This will add the `hide_price` field to the `ResortRoomType` model in production.
 
-## Step 3: Run the Resort Creation Script
+## Step 2: Create Resorts (Data Only)
 
-Run the management command to create all 8 resorts with 83 accommodation types:
+Run the management command to create all 18 resorts with 161 accommodation types:
 
 ```bash
 railway run python manage.py create_resorts_with_images
@@ -38,43 +38,51 @@ railway run python manage.py create_resorts_with_images
 - Create all accommodation types with correct data
 - Set `hide_price=True` for all room types
 - Set `is_packaged=False` and `is_room_type=True` for all resorts
-- Skip image uploads (images will be uploaded in next step)
+- Skip image uploads (images will be referenced from frontend in next steps)
 
-## Step 4: Upload Images from Frontend URLs
+## Step 3: Add Card Images & Hero Banners to Gallery
 
-Now upload the images from your deployed frontend to Django media storage:
+Add Card Image and Resort Hero Banner URLs to each resort's `gallery_images` field:
 
 ```bash
-railway run python manage.py upload_resort_images_from_urls --base-url https://your-frontend-url.com
+railway run python manage.py add_card_images_to_gallery
 ```
 
-Replace `https://your-frontend-url.com` with your actual frontend URL.
+This will add 3 images per resort (54 total):
+- Card Image (for resort cards)
+- Resort Hero Banner 1 (for gallery)
+- Resort Hero Banner 2 (for gallery)
 
-This script will:
-- Download images from your deployed frontend
-- Upload them to Django's media storage (S3, Cloudinary, etc.)
-- Upload hero images (Card Images) for all resorts
-- Upload room type images for all accommodation types
+All URLs point to `https://threadtravels.com/images/...`
 
-**Example:**
+## Step 4: Add Room Type Image URLs
+
+Add room type image URLs to each room type's `amenities` field (with special `__IMAGE_URL__:` prefix):
+
 ```bash
-railway run python manage.py upload_resort_images_from_urls --base-url https://travel-agency-frontend.vercel.app
+railway run python manage.py add_room_type_image_urls
 ```
+
+This will add image URLs for all 161 room types across 18 resorts.
+
+The serializer will automatically:
+- Extract the image URL from amenities
+- Filter it out from the amenities list shown to users
+- Use it as the `image_url` field
 
 ## Step 5: Verify the Data
 
-Check that the resorts and images were uploaded successfully:
+Check that the resorts and image URLs were added successfully:
 
 ```bash
-railway run python manage.py shell -c "from api.models import Resort, ResortRoomType; resorts = Resort.objects.filter(is_room_type=True); print(f'Resorts: {resorts.count()}'); print(f'Room Types: {ResortRoomType.objects.count()}'); print(f'Resorts with hero images: {resorts.exclude(hero_image=\"\").count()}'); print(f'Room types with images: {ResortRoomType.objects.exclude(image=\"\").count()}')"
+railway run python manage.py shell -c "from api.models import Resort, ResortRoomType; resorts = Resort.objects.filter(is_room_type=True); print(f'Resorts: {resorts.count()}'); print(f'Room Types: {ResortRoomType.objects.count()}'); print(f'Resorts with gallery images: {resorts.exclude(gallery_images=[]).count()}')"
 ```
 
 Expected output:
 ```
-Resorts: 8
-Room Types: 83
-Resorts with hero images: 8
-Room types with images: 83
+Resorts: 18
+Room Types: 161
+Resorts with gallery images: 18
 ```
 
 ## Alternative: Update Existing Resorts
@@ -145,22 +153,25 @@ After deployment, verify:
 **Commands to run in Railway (in order):**
 
 ```bash
-# 0. Make sure frontend is deployed first!
+# 0. Make sure frontend is deployed first at https://threadtravels.com!
 
 # 1. Apply migrations
 railway run python manage.py migrate
 
-# 2. Create resorts (without images)
+# 2. Create resorts (data only, no images)
 railway run python manage.py create_resorts_with_images
 
-# 3. Upload images from frontend URLs
-railway run python manage.py upload_resort_images_from_urls --base-url https://your-frontend-url.com
+# 3. Add card images & hero banners to gallery_images
+railway run python manage.py add_card_images_to_gallery
 
-# 4. Verify everything
-railway run python manage.py shell -c "from api.models import Resort, ResortRoomType; print(f'Resorts: {Resort.objects.filter(is_room_type=True).count()}'); print(f'Room Types: {ResortRoomType.objects.count()}')"
+# 4. Add room type image URLs to amenities
+railway run python manage.py add_room_type_image_urls
+
+# 5. Verify everything
+railway run python manage.py shell -c "from api.models import Resort, ResortRoomType; resorts = Resort.objects.filter(is_room_type=True); print(f'Resorts: {resorts.count()}'); print(f'Room Types: {ResortRoomType.objects.count()}'); print(f'Resorts with gallery: {resorts.exclude(gallery_images=[]).count()}')"
 ```
 
-**That's it! All resorts with images will be in production.**
+**That's it! All resorts with image URLs will be in production.**
 
 ---
 
@@ -174,6 +185,16 @@ railway run python manage.py shell -c "from api.models import Resort, ResortRoom
 6. **Sun Siyam Olhuveli** - 14 accommodation types
 7. **Sun Siyam Vilu Reef** - 9 accommodation types
 8. **Sun Siyam World** - 10 accommodation types
+9. **Cinnamon Velifushi Maldives** - 5 accommodation types
+10. **Cinnamon Hakuraa Huraa Maldives** - 4 accommodation types
+11. **Cinnamon Dhonveli Maldives** - 8 accommodation types
+12. **Ellaidhoo Maldives by Cinnamon** - 3 accommodation types
+13. **Velassaru Maldives** - 10 accommodation types
+14. **Kuramathi Maldives** - 12 accommodation types
+15. **Kurumba Maldives** - 10 accommodation types
+16. **Dhigufaru Island Resort** - 8 accommodation types
+17. **Villa Nautica Paradise Island** - 10 accommodation types
+18. **Holiday Inn Resort Kandooma Maldives** - 8 accommodation types
 
-**Total: 83 accommodation types across 8 resorts**
+**Total: 161 accommodation types across 18 resorts**
 
