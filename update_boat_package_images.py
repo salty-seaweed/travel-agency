@@ -47,8 +47,7 @@ def update_boat_package_images():
     ]
     
     # Base path for images (relative to public folder)
-    # Note: URL encode the space as %20 for proper browser loading
-    base_path = "/images/Boat%20related%20pics"
+    base_path = "/images/boat-related-pics"
     
     # Full image paths
     full_image_paths = [f"{base_path}/{img}" for img in all_images]

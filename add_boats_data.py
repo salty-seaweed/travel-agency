@@ -62,8 +62,8 @@ def create_boats(amenities):
     # Get or create location
     location, _ = Location.objects.get_or_create(
         island='Maamigili',
+        atoll='Alif Dhaal',
         defaults={
-            'atoll': 'Alif Dhaal',
             'latitude': 3.4667,
             'longitude': 72.8333
         }
