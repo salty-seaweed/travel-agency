@@ -11,7 +11,8 @@ from .models import (
     HomepageHero, HomepageFeature, HomepageTestimonial, HomepageStatistic, HomepageCTASection, HomepageSettings, HomepageContent, HomepageImage,
     PageHero, Language, TranslationKey, Translation, CulturalContent, RegionalSettings, LocalizedPage, LocalizedFAQ,
     AboutPageContent, AboutPageValue, AboutPageStatistic, FeaturedDestination, PackageVariant,
-    Resort, ResortImage, ResortReview, ResortAmenity, ResortRoomType
+    Resort, ResortImage, ResortReview, ResortAmenity, ResortRoomType,
+    Boat, BoatImage, BoatActivity, BoatActivityImage, BoatPackage, BoatBooking, BoatReview, BoatAmenity
 )
 
 class FlexibleImageField(serializers.ImageField):
@@ -1973,4 +1974,385 @@ class ResortDetailSerializer(ResortSerializer):
     amenities_list = ResortAmenitySerializer(source='amenities', many=True, read_only=True)
     
     class Meta(ResortSerializer.Meta):
-        pass 
+        pass
+
+
+# ============================================================================
+# BOAT SERIALIZERS
+# ============================================================================
+
+class BoatAmenitySerializer(serializers.ModelSerializer):
+    """Serializer for boat amenities"""
+    
+    class Meta:
+        model = BoatAmenity
+        fields = '__all__'
+
+
+class BoatImageSerializer(serializers.ModelSerializer):
+    """Serializer for boat images"""
+    image_url = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = BoatImage
+        fields = '__all__'
+    
+    def get_image_url(self, obj):
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            return obj.image.url
+        return None
+
+
+class BoatActivityImageSerializer(serializers.ModelSerializer):
+    """Serializer for boat activity images"""
+    image_url = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = BoatActivityImage
+        fields = '__all__'
+    
+    def get_image_url(self, obj):
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            return obj.image.url
+        return None
+
+
+class BoatActivityListSerializer(serializers.ModelSerializer):
+    """List serializer for boat activities"""
+    suitable_boats_count = serializers.SerializerMethodField()
+    hero_image_url = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = BoatActivity
+        fields = [
+            'id', 'name', 'description', 'activity_type', 'duration_hours',
+            'duration_description', 'min_participants', 'max_participants',
+            'difficulty_level', 'hero_image_url', 'is_featured', 'is_active',
+            'suitable_boats_count', 'display_order'
+        ]
+    
+    def get_suitable_boats_count(self, obj):
+        return obj.suitable_boats.filter(is_active=True).count()
+    
+    def get_hero_image_url(self, obj):
+        if obj.hero_image:
+            # Check if it's a string path (frontend static file or URL)
+            hero_image_str = str(obj.hero_image)
+            if hero_image_str.startswith('http') or hero_image_str.startswith('images/'):
+                # It's a URL or frontend path, return as is
+                return f'/{hero_image_str}' if not hero_image_str.startswith('http') else hero_image_str
+            
+            # It's an uploaded file, build absolute URI
+            try:
+                request = self.context.get('request')
+                if request:
+                    return request.build_absolute_uri(obj.hero_image.url)
+                return obj.hero_image.url
+            except:
+                pass
+        return None
+
+
+class BoatActivitySerializer(serializers.ModelSerializer):
+    """Full serializer for boat activities"""
+    suitable_boats_details = serializers.SerializerMethodField()
+    images = BoatActivityImageSerializer(many=True, read_only=True)
+    hero_image_url = serializers.SerializerMethodField()
+    average_rating = serializers.SerializerMethodField()
+    review_count = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = BoatActivity
+        fields = '__all__'
+    
+    def get_suitable_boats_details(self, obj):
+        from api.models import Boat
+        boats = obj.suitable_boats.filter(is_active=True)
+        return BoatListSerializer(boats, many=True, context=self.context).data
+    
+    def get_hero_image_url(self, obj):
+        if obj.hero_image:
+            # Check if it's a string path (frontend static file or URL)
+            hero_image_str = str(obj.hero_image)
+            if hero_image_str.startswith('http') or hero_image_str.startswith('images/'):
+                # It's a URL or frontend path, return as is
+                return f'/{hero_image_str}' if not hero_image_str.startswith('http') else hero_image_str
+            
+            # It's an uploaded file, build absolute URI
+            try:
+                request = self.context.get('request')
+                if request:
+                    return request.build_absolute_uri(obj.hero_image.url)
+                return obj.hero_image.url
+            except:
+                pass
+        return None
+    
+    def get_average_rating(self, obj):
+        reviews = obj.reviews.filter(is_approved=True)
+        if reviews.exists():
+            return round(sum(review.rating for review in reviews) / reviews.count(), 1)
+        return 0
+    
+    def get_review_count(self, obj):
+        return obj.reviews.filter(is_approved=True).count()
+
+
+class BoatListSerializer(serializers.ModelSerializer):
+    """List serializer for boats"""
+    hero_image_url = serializers.SerializerMethodField()
+    activities_count = serializers.SerializerMethodField()
+    packages_count = serializers.SerializerMethodField()
+    average_rating = serializers.SerializerMethodField()
+    review_count = serializers.SerializerMethodField()
+    speed_range = serializers.CharField(read_only=True)
+    
+    class Meta:
+        model = Boat
+        fields = [
+            'id', 'name', 'description', 'boat_type', 'length_feet',
+            'engine_details', 'cruising_speed_knots', 'top_speed_knots',
+            'passenger_capacity', 'hero_image_url', 'is_featured', 'is_active',
+            'activities_count', 'packages_count', 'average_rating', 'review_count',
+            'speed_range', 'display_order', 'departure_location'
+        ]
+    
+    def get_hero_image_url(self, obj):
+        if obj.hero_image:
+            # Check if it's a string path (frontend static file or URL)
+            hero_image_str = str(obj.hero_image)
+            if hero_image_str.startswith('http') or hero_image_str.startswith('images/'):
+                # It's a URL or frontend path, return as is
+                return f'/{hero_image_str}' if not hero_image_str.startswith('http') else hero_image_str
+            
+            # It's an uploaded file, build absolute URI
+            try:
+                request = self.context.get('request')
+                if request:
+                    return request.build_absolute_uri(obj.hero_image.url)
+                return obj.hero_image.url
+            except:
+                pass
+        
+        # Fallback to first gallery image
+        if obj.gallery_images and len(obj.gallery_images) > 0:
+            return obj.gallery_images[0]
+        
+        # Fallback to first image from images relation
+        first_image = obj.images.filter(is_active=True).first()
+        if first_image and first_image.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(first_image.image.url)
+            return first_image.image.url
+        
+        return None
+    
+    def get_activities_count(self, obj):
+        return obj.activities.filter(is_active=True).count()
+    
+    def get_packages_count(self, obj):
+        return obj.packages.filter(is_active=True).count()
+    
+    def get_average_rating(self, obj):
+        reviews = obj.reviews.filter(is_approved=True)
+        if reviews.exists():
+            return round(sum(review.rating for review in reviews) / reviews.count(), 1)
+        return 0
+    
+    def get_review_count(self, obj):
+        return obj.reviews.filter(is_approved=True).count()
+
+
+class BoatSerializer(serializers.ModelSerializer):
+    """Full serializer for boats"""
+    amenities_list = BoatAmenitySerializer(source='amenities', many=True, read_only=True)
+    images = BoatImageSerializer(many=True, read_only=True)
+    activities = BoatActivityListSerializer(many=True, read_only=True)
+    packages = serializers.SerializerMethodField()
+    hero_image_url = serializers.SerializerMethodField()
+    location_name = serializers.CharField(source='location.island', read_only=True)
+    average_rating = serializers.SerializerMethodField()
+    review_count = serializers.SerializerMethodField()
+    speed_range = serializers.CharField(read_only=True)
+    
+    class Meta:
+        model = Boat
+        fields = '__all__'
+    
+    def get_packages(self, obj):
+        packages = obj.packages.filter(is_active=True).order_by('display_order', 'price')
+        return BoatPackageListSerializer(packages, many=True, context=self.context).data
+    
+    def get_hero_image_url(self, obj):
+        if obj.hero_image:
+            # Check if it's a string path (frontend static file or URL)
+            hero_image_str = str(obj.hero_image)
+            if hero_image_str.startswith('http') or hero_image_str.startswith('images/'):
+                # It's a URL or frontend path, return as is
+                return f'/{hero_image_str}' if not hero_image_str.startswith('http') else hero_image_str
+            
+            # It's an uploaded file, build absolute URI
+            try:
+                request = self.context.get('request')
+                if request:
+                    return request.build_absolute_uri(obj.hero_image.url)
+                return obj.hero_image.url
+            except:
+                pass
+        
+        # Fallback to first gallery image
+        if obj.gallery_images and len(obj.gallery_images) > 0:
+            return obj.gallery_images[0]
+        
+        # Fallback to first image from images relation
+        first_image = obj.images.filter(is_active=True).first()
+        if first_image and first_image.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(first_image.image.url)
+            return first_image.image.url
+        
+        return None
+    
+    def get_average_rating(self, obj):
+        reviews = obj.reviews.filter(is_approved=True)
+        if reviews.exists():
+            return round(sum(review.rating for review in reviews) / reviews.count(), 1)
+        return 0
+    
+    def get_review_count(self, obj):
+        return obj.reviews.filter(is_approved=True).count()
+
+
+class BoatPackageListSerializer(serializers.ModelSerializer):
+    """List serializer for boat packages"""
+    boat_name = serializers.CharField(source='boat.name', read_only=True)
+    boat_id = serializers.IntegerField(source='boat.id', read_only=True)
+    hero_image_url = serializers.SerializerMethodField()
+    discounted_price = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
+    
+    class Meta:
+        model = BoatPackage
+        fields = [
+            'id', 'name', 'description', 'boat_id', 'boat_name', 'package_tier',
+            'price', 'discounted_price', 'currency', 'duration_hours',
+            'duration_description', 'hero_image_url', 'is_featured', 'is_active',
+            'discount_percentage', 'display_order', 'booking_notice_description',
+            'includes'
+        ]
+    
+    def get_hero_image_url(self, obj):
+        # First priority: gallery images (these are the package-specific images)
+        if obj.gallery_images and len(obj.gallery_images) > 0:
+            return obj.gallery_images[0]
+        
+        # Second priority: hero_image field
+        if obj.hero_image:
+            hero_image_str = str(obj.hero_image)
+            # Check if it's already a full path or URL
+            if hero_image_str.startswith('http'):
+                return hero_image_str
+            if hero_image_str.startswith('/images/') or hero_image_str.startswith('images/'):
+                return hero_image_str if hero_image_str.startswith('/') else f'/{hero_image_str}'
+            
+            # It's an uploaded file, build absolute URI
+            try:
+                request = self.context.get('request')
+                if request:
+                    return request.build_absolute_uri(obj.hero_image.url)
+                return obj.hero_image.url
+            except:
+                pass
+        
+        # Fallback to boat's hero image
+        if obj.boat and obj.boat.hero_image:
+            boat_image_str = str(obj.boat.hero_image)
+            if boat_image_str.startswith('http'):
+                return boat_image_str
+            if boat_image_str.startswith('/images/') or boat_image_str.startswith('images/'):
+                return boat_image_str if boat_image_str.startswith('/') else f'/{boat_image_str}'
+            
+            try:
+                request = self.context.get('request')
+                if request:
+                    return request.build_absolute_uri(obj.boat.hero_image.url)
+                return obj.boat.hero_image.url
+            except:
+                pass
+        
+        return None
+
+
+class BoatPackageSerializer(serializers.ModelSerializer):
+    """Full serializer for boat packages"""
+    boat_details = BoatListSerializer(source='boat', read_only=True)
+    activities_included_details = BoatActivityListSerializer(source='activities_included', many=True, read_only=True)
+    hero_image_url = serializers.SerializerMethodField()
+    discounted_price = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
+    
+    class Meta:
+        model = BoatPackage
+        fields = '__all__'
+    
+    def get_hero_image_url(self, obj):
+        if obj.hero_image:
+            # Check if it's a string path (frontend static file or URL)
+            hero_image_str = str(obj.hero_image)
+            if hero_image_str.startswith('http') or hero_image_str.startswith('images/'):
+                # It's a URL or frontend path, return as is
+                return f'/{hero_image_str}' if not hero_image_str.startswith('http') else hero_image_str
+            
+            # It's an uploaded file, build absolute URI
+            try:
+                request = self.context.get('request')
+                if request:
+                    return request.build_absolute_uri(obj.hero_image.url)
+                return obj.hero_image.url
+            except:
+                pass
+        
+        # Fallback to boat's hero image
+        if obj.boat and obj.boat.hero_image:
+            boat_image_str = str(obj.boat.hero_image)
+            if boat_image_str.startswith('http') or boat_image_str.startswith('images/'):
+                return f'/{boat_image_str}' if not boat_image_str.startswith('http') else boat_image_str
+            
+            try:
+                request = self.context.get('request')
+                if request:
+                    return request.build_absolute_uri(obj.boat.hero_image.url)
+                return obj.boat.hero_image.url
+            except:
+                pass
+        
+        return None
+
+
+class BoatBookingSerializer(serializers.ModelSerializer):
+    """Serializer for boat bookings"""
+    boat_name = serializers.CharField(source='boat.name', read_only=True)
+    activity_name = serializers.CharField(source='activity.name', read_only=True)
+    package_name = serializers.CharField(source='package.name', read_only=True)
+    
+    class Meta:
+        model = BoatBooking
+        fields = '__all__'
+        read_only_fields = ('created_at', 'updated_at', 'confirmed_at', 'completed_at')
+
+
+class BoatReviewSerializer(serializers.ModelSerializer):
+    """Serializer for boat reviews"""
+    boat_name = serializers.CharField(source='boat.name', read_only=True)
+    activity_name = serializers.CharField(source='activity.name', read_only=True)
+    
+    class Meta:
+        model = BoatReview
+        fields = '__all__'
+        read_only_fields = ('created_at', 'updated_at') 

@@ -4,7 +4,8 @@ from .models import (
     Page, PageBlock, MediaAsset, Menu, MenuItem, Redirect, PageVersion, PageReview, CommentThread, Comment,
     TransferType, AtollTransfer, ResortTransfer, TransferFAQ, TransferContactMethod, 
     TransferBookingStep, TransferBenefit, TransferPricingFactor, TransferContent,
-    PageHero, Resort, ResortImage, ResortReview, ResortAmenity, ResortRoomType
+    PageHero, Resort, ResortImage, ResortReview, ResortAmenity, ResortRoomType,
+    Boat, BoatImage, BoatActivity, BoatActivityImage, BoatPackage, BoatBooking, BoatReview, BoatAmenity
 )
 
 @admin.register(PropertyType)
@@ -448,3 +449,315 @@ class ResortAmenityAdmin(admin.ModelAdmin):
     search_fields = ('name', 'description')
     list_editable = ('is_active', 'order')
     ordering = ('category', 'order', 'name')
+
+
+# ============================================================================
+# BOAT ADMIN
+# ============================================================================
+
+@admin.register(BoatAmenity)
+class BoatAmenityAdmin(admin.ModelAdmin):
+    list_display = ('name', 'icon', 'is_active', 'created_at')
+    list_filter = ('is_active', 'created_at')
+    search_fields = ('name', 'description')
+    list_editable = ('is_active',)
+    ordering = ('name',)
+
+
+class BoatImageInline(admin.TabularInline):
+    model = BoatImage
+    extra = 1
+    fields = ('image', 'caption', 'alt_text', 'display_order', 'is_active')
+    ordering = ('display_order',)
+
+
+@admin.register(Boat)
+class BoatAdmin(admin.ModelAdmin):
+    list_display = (
+        'name',
+        'boat_type',
+        'length_feet',
+        'passenger_capacity',
+        'departure_location',
+        'is_featured',
+        'is_active',
+        'display_order'
+    )
+    list_filter = ('boat_type', 'is_featured', 'is_active', 'has_cabin', 'created_at')
+    search_fields = ('name', 'description', 'departure_location', 'engine_details')
+    list_editable = ('is_featured', 'is_active', 'display_order')
+    readonly_fields = ('created_at', 'updated_at', 'speed_range')
+    filter_horizontal = ('amenities',)
+    inlines = [BoatImageInline]
+    
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('name', 'description', 'detailed_description', 'boat_type')
+        }),
+        ('Specifications', {
+            'fields': (
+                'length_feet', 'engine_details', 'cruising_speed_knots', 'top_speed_knots',
+                'speed_range', 'passenger_capacity', 'crew_size', 'fuel_tank_liters', 'live_bait_well_liters'
+            )
+        }),
+        ('Features', {
+            'fields': (
+                'has_cabin', 'has_toilet', 'has_shower', 'has_sound_system',
+                'has_gps', 'has_fish_finder', 'has_radar', 'has_outriggers', 'amenities'
+            )
+        }),
+        ('Location', {
+            'fields': ('departure_location', 'location')
+        }),
+        ('Media', {
+            'fields': ('hero_image', 'gallery_images', 'video_url')
+        }),
+        ('Marketing', {
+            'fields': ('featured_highlights', 'meta_title', 'meta_description', 'meta_keywords')
+        }),
+        ('Status', {
+            'fields': ('is_featured', 'is_active', 'is_available', 'display_order')
+        }),
+        ('Internationalization', {
+            'fields': ('language', 'localized_name', 'localized_description'),
+            'classes': ('collapse',)
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('location', 'language').prefetch_related('amenities')
+
+
+@admin.register(BoatImage)
+class BoatImageAdmin(admin.ModelAdmin):
+    list_display = ('boat', 'caption', 'display_order', 'is_active', 'created_at')
+    list_filter = ('is_active', 'created_at')
+    search_fields = ('boat__name', 'caption', 'alt_text')
+    list_editable = ('display_order', 'is_active')
+    readonly_fields = ('created_at',)
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('boat')
+
+
+class BoatActivityImageInline(admin.TabularInline):
+    model = BoatActivityImage
+    extra = 1
+    fields = ('image', 'caption', 'alt_text', 'display_order', 'is_active')
+    ordering = ('display_order',)
+
+
+@admin.register(BoatActivity)
+class BoatActivityAdmin(admin.ModelAdmin):
+    list_display = (
+        'name',
+        'activity_type',
+        'duration_hours',
+        'difficulty_level',
+        'min_participants',
+        'max_participants',
+        'is_featured',
+        'is_active',
+        'display_order'
+    )
+    list_filter = ('activity_type', 'difficulty_level', 'is_featured', 'is_active', 'created_at')
+    search_fields = ('name', 'description')
+    list_editable = ('is_featured', 'is_active', 'display_order')
+    readonly_fields = ('created_at', 'updated_at')
+    filter_horizontal = ('suitable_boats',)
+    inlines = [BoatActivityImageInline]
+    
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('name', 'description', 'detailed_description', 'activity_type')
+        }),
+        ('Details', {
+            'fields': (
+                'duration_hours', 'duration_description', 'min_participants',
+                'max_participants', 'difficulty_level', 'suitable_boats'
+            )
+        }),
+        ('Inclusions & Requirements', {
+            'fields': ('includes', 'excludes', 'requirements', 'target_species')
+        }),
+        ('Media', {
+            'fields': ('hero_image', 'gallery_images', 'video_url')
+        }),
+        ('Marketing', {
+            'fields': ('featured_highlights', 'meta_title', 'meta_description')
+        }),
+        ('Status', {
+            'fields': ('is_featured', 'is_active', 'display_order')
+        }),
+        ('Internationalization', {
+            'fields': ('language', 'localized_name', 'localized_description'),
+            'classes': ('collapse',)
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('language').prefetch_related('suitable_boats')
+
+
+@admin.register(BoatActivityImage)
+class BoatActivityImageAdmin(admin.ModelAdmin):
+    list_display = ('activity', 'caption', 'display_order', 'is_active', 'created_at')
+    list_filter = ('is_active', 'created_at')
+    search_fields = ('activity__name', 'caption', 'alt_text')
+    list_editable = ('display_order', 'is_active')
+    readonly_fields = ('created_at',)
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('activity')
+
+
+@admin.register(BoatPackage)
+class BoatPackageAdmin(admin.ModelAdmin):
+    list_display = (
+        'name',
+        'boat',
+        'package_tier',
+        'price',
+        'currency',
+        'duration_hours',
+        'is_featured',
+        'is_active',
+        'display_order'
+    )
+    list_filter = ('package_tier', 'is_featured', 'is_active', 'boat', 'created_at')
+    search_fields = ('name', 'description', 'boat__name')
+    list_editable = ('is_featured', 'is_active', 'display_order')
+    readonly_fields = ('created_at', 'updated_at', 'discounted_price')
+    filter_horizontal = ('activities_included',)
+    
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('name', 'description', 'detailed_description', 'boat', 'package_tier')
+        }),
+        ('Pricing', {
+            'fields': ('price', 'currency', 'discounted_price', 'discount_percentage', 'pricing_notes')
+        }),
+        ('Duration', {
+            'fields': ('duration_hours', 'duration_description')
+        }),
+        ('Package Details', {
+            'fields': ('includes', 'activities_included', 'max_participants', 'additional_notes')
+        }),
+        ('Booking Requirements', {
+            'fields': ('booking_notice_hours', 'booking_notice_description')
+        }),
+        ('Special Offers', {
+            'fields': ('special_offers',)
+        }),
+        ('Media', {
+            'fields': ('hero_image', 'gallery_images')
+        }),
+        ('Marketing', {
+            'fields': ('featured_highlights', 'meta_title', 'meta_description')
+        }),
+        ('Status', {
+            'fields': ('is_featured', 'is_active', 'is_available', 'display_order')
+        }),
+        ('Internationalization', {
+            'fields': ('language', 'localized_name', 'localized_description'),
+            'classes': ('collapse',)
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('boat', 'language').prefetch_related('activities_included')
+
+
+@admin.register(BoatBooking)
+class BoatBookingAdmin(admin.ModelAdmin):
+    list_display = (
+        'customer_name',
+        'boat',
+        'activity',
+        'package',
+        'preferred_date',
+        'number_of_participants',
+        'status',
+        'created_at'
+    )
+    list_filter = ('status', 'preferred_date', 'boat', 'activity', 'created_at')
+    search_fields = ('customer_name', 'customer_email', 'customer_phone', 'customer_whatsapp')
+    readonly_fields = ('created_at', 'updated_at', 'confirmed_at', 'completed_at')
+    
+    fieldsets = (
+        ('Customer Information', {
+            'fields': ('customer', 'customer_name', 'customer_email', 'customer_phone', 'customer_whatsapp')
+        }),
+        ('Booking Details', {
+            'fields': ('boat', 'activity', 'package', 'preferred_date', 'preferred_time', 'number_of_participants')
+        }),
+        ('Special Requests', {
+            'fields': ('special_requests', 'dietary_requirements')
+        }),
+        ('Pricing', {
+            'fields': ('quoted_price', 'currency')
+        }),
+        ('Status & Notes', {
+            'fields': ('status', 'admin_notes')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at', 'confirmed_at', 'completed_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('customer', 'boat', 'activity', 'package')
+
+
+@admin.register(BoatReview)
+class BoatReviewAdmin(admin.ModelAdmin):
+    list_display = (
+        'reviewer_name',
+        'boat',
+        'activity',
+        'rating',
+        'title',
+        'is_verified',
+        'is_approved',
+        'is_featured',
+        'created_at'
+    )
+    list_filter = ('rating', 'is_verified', 'is_approved', 'is_featured', 'boat', 'created_at')
+    search_fields = ('reviewer_name', 'title', 'review_text', 'boat__name')
+    list_editable = ('is_approved', 'is_featured')
+    readonly_fields = ('created_at', 'updated_at')
+    
+    fieldsets = (
+        ('Reviewer Information', {
+            'fields': ('customer', 'reviewer_name', 'reviewer_email', 'reviewer_country')
+        }),
+        ('Review Details', {
+            'fields': ('boat', 'activity', 'booking', 'rating', 'title', 'review_text')
+        }),
+        ('Additional Ratings', {
+            'fields': ('boat_condition_rating', 'crew_rating', 'value_rating')
+        }),
+        ('Verification & Status', {
+            'fields': ('is_verified', 'verified_booking', 'is_approved', 'is_featured')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('boat', 'activity', 'booking', 'customer')

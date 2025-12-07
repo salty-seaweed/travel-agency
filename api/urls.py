@@ -7,7 +7,10 @@ from .views import (
     HomepageContentViewSet, HomepageManagementViewSet, HomepageImageViewSet,
     AboutPageContentViewSet, AboutPageValueViewSet, AboutPageStatisticViewSet,
     FeaturedDestinationViewSet, ResortViewSet, ResortRoomTypeViewSet, ResortImageViewSet, ResortReviewViewSet, ResortAmenityViewSet,
-    resorts_by_category, resorts_by_atoll, featured_resorts
+    resorts_by_category, resorts_by_atoll, featured_resorts,
+    BoatViewSet, BoatImageViewSet, BoatActivityViewSet, BoatActivityImageViewSet, BoatPackageViewSet,
+    BoatBookingViewSet, BoatReviewViewSet, BoatAmenityViewSet,
+    featured_boats, featured_boat_packages, boats_by_activity_type
 )
 
 router = DefaultRouter()
@@ -81,6 +84,16 @@ router.register(r'resort-images', ResortImageViewSet)
 router.register(r'resort-reviews', ResortReviewViewSet)
 router.register(r'resort-amenities', ResortAmenityViewSet)
 
+# Boat Management URLs
+router.register(r'boats', BoatViewSet)
+router.register(r'boat-images', BoatImageViewSet)
+router.register(r'boat-activities', BoatActivityViewSet)
+router.register(r'boat-activity-images', BoatActivityImageViewSet)
+router.register(r'boat-packages', BoatPackageViewSet)
+router.register(r'boat-bookings', BoatBookingViewSet)
+router.register(r'boat-reviews', BoatReviewViewSet)
+router.register(r'boat-amenities', BoatAmenityViewSet)
+
 urlpatterns = [
     path('', include(router.urls)),
     path('upload-image/', views.upload_image, name='upload_image'),
@@ -104,6 +117,11 @@ urlpatterns = [
     path('resorts/by-category/', resorts_by_category, name='resorts_by_category'),
     path('resorts/by-atoll/', resorts_by_atoll, name='resorts_by_atoll'),
     path('resorts/featured/', featured_resorts, name='featured_resorts'),
+    
+    # Boat custom endpoints
+    path('boats/featured/', featured_boats, name='featured_boats'),
+    path('boat-packages/featured/', featured_boat_packages, name='featured_boat_packages'),
+    path('boats/by-activity-type/', boats_by_activity_type, name='boats_by_activity_type'),
 ]
 
 # Internationalization URL patterns

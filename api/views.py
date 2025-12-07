@@ -22,7 +22,8 @@ from .models import (
     HomepageCTASection, HomepageSettings, HomepageContent, HomepageImage, PageHero,
     Language, Translation, TranslationKey, CulturalContent, RegionalSettings, LocalizedPage, LocalizedFAQ,
     AboutPageContent, AboutPageValue, AboutPageStatistic, FeaturedDestination,
-    Resort, ResortImage, ResortReview, ResortAmenity, ResortRoomType
+    Resort, ResortImage, ResortReview, ResortAmenity, ResortRoomType,
+    Boat, BoatImage, BoatActivity, BoatActivityImage, BoatPackage, BoatBooking, BoatReview, BoatAmenity
 )
 from .serializers import (
     PropertyTypeSerializer, AmenitySerializer, LocationSerializer, DestinationSerializer, ExperienceSerializer,
@@ -44,7 +45,10 @@ from .serializers import (
     LanguageDetectionSerializer, AboutPageContentSerializer, AboutPageValueSerializer, 
     AboutPageStatisticSerializer, AboutPageDataSerializer, FeaturedDestinationSerializer,
     ResortSerializer, ResortListSerializer, ResortDetailSerializer, ResortImageSerializer, 
-    ResortReviewSerializer, ResortAmenitySerializer, ResortRoomTypeSerializer
+    ResortReviewSerializer, ResortAmenitySerializer, ResortRoomTypeSerializer,
+    BoatSerializer, BoatListSerializer, BoatImageSerializer, BoatActivitySerializer, BoatActivityListSerializer,
+    BoatActivityImageSerializer, BoatPackageSerializer, BoatPackageListSerializer, BoatBookingSerializer,
+    BoatReviewSerializer, BoatAmenitySerializer
 )
 from rest_framework.decorators import permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
@@ -3274,5 +3278,244 @@ def featured_resorts(request):
         
         serializer = ResortListSerializer(resorts, many=True, context={'request': request})
         return Response(serializer.data)
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+
+
+# ============================================================================
+# BOAT VIEWSETS
+# ============================================================================
+
+class BoatAmenityViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing boat amenities"""
+    queryset = BoatAmenity.objects.filter(is_active=True)
+    serializer_class = BoatAmenitySerializer
+    permission_classes = [AllowAny]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['is_active']
+    search_fields = ['name', 'description']
+    ordering_fields = ['name']
+    ordering = ['name']
+
+
+class BoatViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing boats"""
+    queryset = Boat.objects.filter(is_active=True).select_related('location', 'language').prefetch_related('amenities', 'images', 'activities', 'packages', 'reviews')
+    serializer_class = BoatSerializer
+    permission_classes = [AllowAny]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['boat_type', 'is_featured', 'is_active', 'is_available']
+    search_fields = ['name', 'description', 'departure_location']
+    ordering_fields = ['name', 'length_feet', 'passenger_capacity', 'display_order', 'created_at']
+    ordering = ['-is_featured', 'display_order', 'name']
+    
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return BoatListSerializer
+        return BoatSerializer
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        
+        # Filter by minimum capacity
+        min_capacity = self.request.query_params.get('min_capacity')
+        if min_capacity:
+            queryset = queryset.filter(passenger_capacity__gte=min_capacity)
+        
+        # Filter by activity
+        activity_id = self.request.query_params.get('activity')
+        if activity_id:
+            queryset = queryset.filter(activities__id=activity_id)
+        
+        return queryset
+
+
+class BoatImageViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing boat images"""
+    queryset = BoatImage.objects.filter(is_active=True)
+    serializer_class = BoatImageSerializer
+    permission_classes = [AllowAny]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['boat', 'is_active']
+    ordering_fields = ['display_order', 'created_at']
+    ordering = ['display_order', 'created_at']
+
+
+class BoatActivityViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing boat activities"""
+    queryset = BoatActivity.objects.filter(is_active=True).prefetch_related('suitable_boats', 'images', 'reviews')
+    serializer_class = BoatActivitySerializer
+    permission_classes = [AllowAny]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['activity_type', 'difficulty_level', 'is_featured', 'is_active']
+    search_fields = ['name', 'description']
+    ordering_fields = ['name', 'duration_hours', 'display_order', 'created_at']
+    ordering = ['-is_featured', 'display_order', 'name']
+    
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return BoatActivityListSerializer
+        return BoatActivitySerializer
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        
+        # Filter by boat
+        boat_id = self.request.query_params.get('boat')
+        if boat_id:
+            queryset = queryset.filter(suitable_boats__id=boat_id)
+        
+        return queryset
+
+
+class BoatActivityImageViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing boat activity images"""
+    queryset = BoatActivityImage.objects.filter(is_active=True)
+    serializer_class = BoatActivityImageSerializer
+    permission_classes = [AllowAny]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['activity', 'is_active']
+    ordering_fields = ['display_order', 'created_at']
+    ordering = ['display_order', 'created_at']
+
+
+class BoatPackageViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing boat packages"""
+    queryset = BoatPackage.objects.filter(is_active=True).select_related('boat', 'language').prefetch_related('activities_included')
+    serializer_class = BoatPackageSerializer
+    permission_classes = [AllowAny]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['boat', 'package_tier', 'is_featured', 'is_active', 'is_available']
+    search_fields = ['name', 'description']
+    ordering_fields = ['name', 'price', 'display_order', 'created_at']
+    ordering = ['-is_featured', 'boat', 'display_order', 'price']
+    
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return BoatPackageListSerializer
+        return BoatPackageSerializer
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        
+        # Filter by price range
+        min_price = self.request.query_params.get('min_price')
+        max_price = self.request.query_params.get('max_price')
+        if min_price:
+            queryset = queryset.filter(price__gte=min_price)
+        if max_price:
+            queryset = queryset.filter(price__lte=max_price)
+        
+        return queryset
+
+
+class BoatBookingViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing boat bookings"""
+    queryset = BoatBooking.objects.all().select_related('customer', 'boat', 'activity', 'package')
+    serializer_class = BoatBookingSerializer
+    permission_classes = [AllowAny]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['status', 'boat', 'activity', 'package', 'preferred_date']
+    search_fields = ['customer_name', 'customer_email', 'customer_phone']
+    ordering_fields = ['preferred_date', 'created_at', 'status']
+    ordering = ['-created_at']
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        
+        # If user is authenticated, show only their bookings (unless admin)
+        if self.request.user.is_authenticated and not self.request.user.is_staff:
+            try:
+                customer = Customer.objects.get(user=self.request.user)
+                queryset = queryset.filter(customer=customer)
+            except Customer.DoesNotExist:
+                queryset = queryset.none()
+        
+        return queryset
+
+
+class BoatReviewViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing boat reviews"""
+    queryset = BoatReview.objects.filter(is_approved=True).select_related('boat', 'activity', 'customer')
+    serializer_class = BoatReviewSerializer
+    permission_classes = [AllowAny]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['boat', 'activity', 'rating', 'is_verified', 'is_featured']
+    search_fields = ['reviewer_name', 'title', 'review_text']
+    ordering_fields = ['rating', 'created_at']
+    ordering = ['-created_at']
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        
+        # Filter by boat
+        boat_id = self.request.query_params.get('boat')
+        if boat_id:
+            queryset = queryset.filter(boat_id=boat_id)
+        
+        # Filter by minimum rating
+        min_rating = self.request.query_params.get('min_rating')
+        if min_rating:
+            queryset = queryset.filter(rating__gte=min_rating)
+        
+        return queryset
+
+
+# Custom API endpoints for boats
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def featured_boats(request):
+    """Get featured boats"""
+    try:
+        boats = Boat.objects.filter(
+            is_featured=True,
+            is_active=True
+        ).select_related('location', 'language').prefetch_related('amenities', 'images', 'activities', 'packages')
+        
+        serializer = BoatListSerializer(boats, many=True, context={'request': request})
+        return Response(serializer.data)
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def featured_boat_packages(request):
+    """Get featured boat packages"""
+    try:
+        packages = BoatPackage.objects.filter(
+            is_featured=True,
+            is_active=True
+        ).select_related('boat', 'language').prefetch_related('activities_included')
+        
+        serializer = BoatPackageListSerializer(packages, many=True, context={'request': request})
+        return Response(serializer.data)
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def boats_by_activity_type(request):
+    """Get boats grouped by activity type"""
+    try:
+        activity_types = BoatActivity.ACTIVITY_TYPES
+        result = {}
+        
+        for activity_key, activity_name in activity_types:
+            activities = BoatActivity.objects.filter(
+                activity_type=activity_key,
+                is_active=True
+            ).prefetch_related('suitable_boats')
+            
+            serializer = BoatActivityListSerializer(activities, many=True, context={'request': request})
+            result[activity_key] = {
+                'name': activity_name,
+                'activities': serializer.data,
+                'count': activities.count()
+            }
+        
+        return Response(result)
     except Exception as e:
         return Response({'error': str(e)}, status=500)

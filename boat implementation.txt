@@ -1,0 +1,288 @@
+📋 BOAT COMPONENT IMPLEMENTATION PLAN
+Based on analyzing your project, here's my comprehensive plan:
+1. BACKEND IMPLEMENTATION
+A. Database Models (api/models.py)
+Boat Model - Main boat entity with:
+Basic info (name, description, specifications)
+Boat specs (length, engines, speed, capacity)
+Pricing info
+Features & amenities
+Images/videos
+Location/departure points
+BoatActivity Model - Different activities offered:
+Big Game Fishing (main focus)
+Trolling
+Casting & Popping
+Jigging
+Island Hopping
+Whale/Manta/Dolphin watching
+Custom excursions
+BoatImage Model - Image gallery
+BoatReview Model - Customer reviews
+BoatAmenity Model - Boat features (toilet, shower, sound system, etc.)
+B. API Endpoints (api/views.py, api/serializers.py, api/urls.py)
+GET /api/boats/ - List all boats with filters
+GET /api/boats/:id/ - Single boat details
+GET /api/boats/featured/ - Featured boats
+GET /api/boat-activities/ - List activities
+CRUD operations for admin management
+C. Admin Interface (api/admin.py)
+Boat management
+Activity management
+Image/review management
+2. FRONTEND IMPLEMENTATION
+A. Type Definitions (frontend/src/types/index.ts)
+Boat interface
+BoatActivity interface
+BoatImage interface
+BoatReview interface
+Filter types
+B. API Service Layer (frontend/src/api.ts)
+getBoats() - Fetch boats with filters
+getBoat(id) - Fetch single boat
+getFeaturedBoats() - Featured boats
+getBoatActivities() - Activities list
+C. Custom Hooks (frontend/src/hooks/useBoats.ts)
+useBoats() - Fetch boats with filters
+useBoat(id) - Single boat
+useFeaturedBoats() - Featured boats
+useBoatActivities() - Activities
+D. Components
+Main Pages:
+BoatsPage (frontend/src/components/boat/BoatsPage.tsx)
+List view with filters
+Category tabs (Big Game Fishing, Island Hopping, etc.)
+Grid/list layout
+BoatDetailPage (frontend/src/components/boat/BoatDetailPage.tsx)
+Full boat details
+Image gallery
+Specifications
+Activities offered
+Pricing
+Booking CTA
+Section Components:
+BoatsSection (frontend/src/components/experiences-homepage/sections/BoatsSection.tsx)
+Homepage section (below resorts)
+Featured boats showcase
+Link to full boats page
+BoatCard - Reusable boat card component
+BoatActivityCard - Activity showcase
+BoatSpecifications - Technical specs display
+Admin Components:
+BoatAdmin (frontend/src/components/admin/BoatAdmin.tsx)
+Manage boats
+Add/edit/delete
+Image upload
+Activity assignment
+3. NAVIGATION UPDATES
+A. Main Navigation (frontend/src/components/Navigation.tsx)
+Add "Boats" tab after "Resorts"
+Hide "Contact" tab (move to footer only)
+B. Mobile Navigation (frontend/src/components/MobileNavigation.tsx)
+Add boats to mobile menu
+C. Admin Navigation (frontend/src/components/admin/AdminLayout.tsx)
+Add "Boats" to admin sidebar
+4. HOMEPAGE INTEGRATION
+Update frontend/src/components/experiences-homepage/HomePage.tsx
+Add <BoatsSection /> after <ExperiencesResortsSection />
+Lazy load for performance
+5. CONTENT STRUCTURE
+Based on your text files:
+Big Game Fishing (Primary Focus):
+Premium 38ft sportfishing boat
+Triple Mercury 300HP engines
+50+ knot speed
+Target species: Yellowfin Tuna, Sailfish, Wahoo, Mahi-Mahi, Dogtooth Tuna
+Expert Maldivian crew
+Full cabin comfort
+Additional Activities:
+Trolling expeditions
+Casting & Popping
+Jigging
+Island hopping
+Whale shark & manta watching
+Dolphin watching
+Custom sea explorer trips
+Boat Fleet:
+38ft Premium Sportfishing (main boat)
+26ft Center Console (secondary boat)
+6. DESIGN CONSISTENCY
+Follow existing resort card design
+Use same color scheme (sky/blue gradients)
+Maintain responsive design patterns
+Use Chakra UI components
+Follow existing typography/spacing
+7. IMPLEMENTATION ORDER
+Backend first:
+Models → Serializers → Views → URLs → Admin
+Run migrations
+Test API endpoints
+Frontend types & API:
+Type definitions
+API functions
+Custom hooks
+Frontend components:
+Boat cards & detail pages
+Homepage section
+Admin interface
+Navigation updates:
+Add boats tab
+Hide contact tab
+Testing & refinement:
+Test all flows
+Add placeholder images
+Ensure responsive design
+8. KEY FEATURES
+✅ Filterable boat list (by activity type, capacity, price)
+✅ Featured boats on homepage
+✅ Detailed boat specifications
+✅ Activity-based browsing
+✅ WhatsApp booking integration
+✅ Image galleries
+✅ Customer reviews
+✅ Admin CRUD operations
+✅ Responsive design
+✅ SEO optimization
+
+
+
+
+📋 UPDATED BOAT COMPONENT IMPLEMENTATION PLAN
+KEY CHANGES:
+✅ Pricing: Both WhatsApp contact + Package-based pricing (Silver/Gold packages)
+✅ Booking: Activity-first selection → then choose boat
+✅ Homepage: Split into TWO sections (Boats + Boat Packages)
+✅ Fleet: 2 boats now (38ft Premium, 26ft Center Console)
+✅ Admin: Separate boat management from packages
+✅ Boat Packages: Separate from travel packages, live on boats page
+REVISED STRUCTURE:
+1. BACKEND MODELS
+A. Boat Model (The physical boats)
+- name (e.g., "38ft Premium Sportfishing")- description- boat_type (sportfishing, center_console, etc.)- specifications:  - length  - engines (e.g., "Triple Mercury 300HP")  - cruising_speed  - top_speed  - capacity  - fuel_tank- features:  - cabin (yes/no)  - toilet (yes/no)  - shower (yes/no)  - sound_system (yes/no)  - etc.- departure_location- is_featured- images/videos
+B. BoatActivity Model (What you can do)
+- name (e.g., "Big Game Fishing", "Trolling", "Island Hopping")- description- activity_type (fishing, excursion, wildlife_watching)- duration_options (half_day, full_day, custom)- suitable_boats (M2M with Boat)- min_participants- max_participants- difficulty_level- includes (JSON: gear, equipment, etc.)- is_featured- images
+C. BoatPackage Model (Silver/Gold packages)
+- name (e.g., "Silver Package - 38ft", "Gold Package - 26ft")- boat (FK to Boat)- package_tier (silver, gold)- price- currency- duration (8 hours full day)- description- includes (JSON array)- activities_included (M2M with BoatActivity)- special_offers (e.g., "Year-End 20% OFF")- booking_notice (e.g., "48 hours advance")- is_active- display_order
+D. BoatBooking Model (For tracking inquiries)
+- customer info- selected_activity (FK)- selected_boat (FK, optional)- selected_package (FK, optional)- preferred_date- participants- special_requests- status (inquiry, confirmed, completed)
+2. FRONTEND STRUCTURE
+A. Pages
+1. BoatsPage (/boats)
+Tab 1: Our Fleet - Shows the 2 boats with specs
+Tab 2: Activities - Browse by activity type
+Tab 3: Packages - Silver/Gold packages for each boat
+2. BoatDetailPage (/boats/:id)
+Full boat specifications
+Activities available on this boat
+Packages for this boat
+Image gallery
+Booking CTA
+3. ActivityDetailPage (/boats/activities/:id)
+Activity description
+Suitable boats for this activity
+Pricing options
+"Book This Activity" → Select boat → Choose package
+4. BoatPackageDetailPage (/boats/packages/:id)
+Package details (Silver/Gold)
+What's included
+Boat specifications
+Activity options
+Direct booking
+B. Homepage Sections (Below Resorts)
+Section 1: Featured Boats
+<BoatsFleetSection />
+Show 2 boats with hero images
+Quick specs highlight
+"Explore Our Fleet" CTA
+Section 2: Boat Packages
+<BoatPackagesSection />
+Featured packages (Silver/Gold from both boats)
+Price display
+"View All Packages" CTA
+3. BOOKING FLOW
+Option A: Activity-First (Primary)
+1. Browse Activities → 2. Select Activity (e.g., "Big Game Fishing") → 3. Choose Boat (38ft or 26ft) → 4. Select Package (Silver/Gold) → 5. WhatsApp Inquiry with pre-filled details
+Option B: Boat-First
+1. Browse Boats → 2. Select Boat → 3. View Available Activities → 4. Choose Package → 5. WhatsApp Inquiry
+Option C: Package-First
+1. Browse Packages → 2. Select Package (already includes boat) → 3. WhatsApp Inquiry
+4. NAVIGATION UPDATES
+Main Navigation:
+const navigation = [  { name: 'Home', href: '/', icon: HomeIcon },  { name: 'Packages', href: '/packages', icon: StarIcon, featured: true },  { name: 'Resorts', href: '/resorts', icon: BuildingOfficeIcon, featured: true },  { name: 'Boats', href: '/boats', icon: SparklesIcon, featured: true }, // NEW  { name: 'Transportation', href: '/transportation', icon: SparklesIcon },  { name: 'About', href: '/about', icon: InformationCircleIcon },  // Contact removed from nav (stays in footer)];
+5. PACKAGE STRUCTURE FROM YOUR PRICING DOC
+38ft Premium Boat:
+Silver Package - $2,799
+Full-day charter (8 hours)
+Seasonal fresh fruits
+Soft drinks & water
+Captain & crew
+All fishing gear
+Live bait well
+Towels
+Gold Package - $2,999
+Everything in Silver PLUS:
+Meal for 2 persons
+Snorkeling equipment
+Phone/GoPro video
+Enhanced service
+Itinerary assistance
+Personalized fishing guidance
+"From Ocean to Plate" - Cook your catch
+26ft Center Console:
+Silver Package - $1,950
+Same inclusions as 38ft Silver
+Gold Package - $2,250
+Same inclusions as 38ft Gold
+Special Notes:
+"Individual & flexible pricing - call/WhatsApp for custom offers"
+"More days = cheaper price"
+48-hour advance booking required
+Year-end offers (20% off, 30% off add-ons)
+6. ADMIN INTERFACE
+New Admin Section: "Boats"
+Manage Boats (CRUD)
+Manage Activities (CRUD)
+Manage Boat Packages (CRUD)
+View Boat Bookings/Inquiries
+Upload boat images/videos
+Separate from:
+Travel Packages (existing)
+Resorts
+Transportation
+7. IMPLEMENTATION CHECKLIST
+Backend:
+[ ] Create Boat model
+[ ] Create BoatActivity model
+[ ] Create BoatPackage model
+[ ] Create BoatBooking model
+[ ] Create BoatImage model
+[ ] Create BoatAmenity model
+[ ] Serializers for all models
+[ ] ViewSets and API endpoints
+[ ] Admin interface
+[ ] Run migrations
+Frontend - Types & API:
+[ ] Type definitions
+[ ] API service functions
+[ ] Custom hooks (useBoats, useBoatActivities, useBoatPackages)
+Frontend - Components:
+[ ] BoatsPage (with 3 tabs)
+[ ] BoatDetailPage
+[ ] ActivityDetailPage
+[ ] BoatPackageDetailPage
+[ ] BoatCard component
+[ ] ActivityCard component
+[ ] PackageCard component
+[ ] BoatsFleetSection (homepage)
+[ ] BoatPackagesSection (homepage)
+[ ] BoatAdmin components
+Navigation:
+[ ] Add Boats to main nav
+[ ] Remove Contact from main nav
+[ ] Add Boats to mobile nav
+[ ] Add Boats to admin sidebar
+Integration:
+[ ] Add both sections to homepage
+[ ] WhatsApp booking integration
+[ ] SEO optimization
+[ ] Responsive design testing

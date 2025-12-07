@@ -1757,3 +1757,400 @@ class LocalizedFAQ(models.Model):
 
     def __str__(self):
         return f"{self.language.code} - {self.category}: {self.question[:50]}"
+
+
+# ============================================================================
+# BOAT MODELS - Big Game Fishing & Excursions
+# ============================================================================
+
+class BoatAmenity(models.Model):
+    """Amenities available on boats"""
+    name = models.CharField(max_length=100)
+    icon = models.CharField(max_length=100, blank=True, help_text="Icon name for frontend")
+    description = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "Boat Amenity"
+        verbose_name_plural = "Boat Amenities"
+        ordering = ['name']
+    
+    def __str__(self):
+        return self.name
+
+
+class Boat(models.Model):
+    """Physical boats available for charter"""
+    BOAT_TYPES = [
+        ('sportfishing', 'Sportfishing'),
+        ('center_console', 'Center Console'),
+        ('yacht', 'Yacht'),
+        ('speedboat', 'Speedboat'),
+        ('catamaran', 'Catamaran'),
+    ]
+    
+    # Basic Information
+    name = models.CharField(max_length=200, help_text="e.g., '38ft Premium Sportfishing'")
+    description = models.TextField()
+    detailed_description = models.TextField(blank=True)
+    boat_type = models.CharField(max_length=50, choices=BOAT_TYPES, default='sportfishing')
+    
+    # Specifications
+    length_feet = models.PositiveIntegerField(help_text="Length in feet")
+    engine_details = models.CharField(max_length=200, help_text="e.g., 'Triple Mercury 300HP'")
+    cruising_speed_knots = models.PositiveIntegerField(help_text="Cruising speed in knots")
+    top_speed_knots = models.PositiveIntegerField(help_text="Top speed in knots")
+    passenger_capacity = models.PositiveIntegerField(default=10)
+    crew_size = models.PositiveIntegerField(default=2)
+    fuel_tank_liters = models.PositiveIntegerField(null=True, blank=True)
+    live_bait_well_liters = models.PositiveIntegerField(null=True, blank=True)
+    
+    # Features
+    has_cabin = models.BooleanField(default=False)
+    has_toilet = models.BooleanField(default=False)
+    has_shower = models.BooleanField(default=False)
+    has_sound_system = models.BooleanField(default=False)
+    has_gps = models.BooleanField(default=True)
+    has_fish_finder = models.BooleanField(default=True)
+    has_radar = models.BooleanField(default=False)
+    has_outriggers = models.BooleanField(default=False)
+    amenities = models.ManyToManyField(BoatAmenity, blank=True, related_name='boats')
+    
+    # Location
+    departure_location = models.CharField(max_length=200, help_text="e.g., 'ADh. Maamigili'")
+    location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True, blank=True, related_name='boats')
+    
+    # Media
+    hero_image = models.ImageField(upload_to='boats/hero/', blank=True, null=True)
+    gallery_images = models.JSONField(default=list, blank=True, help_text="List of image URLs")
+    video_url = models.URLField(blank=True, help_text="Boat video URL")
+    
+    # Marketing
+    featured_highlights = models.JSONField(default=list, blank=True, help_text="Key selling points")
+    meta_title = models.CharField(max_length=200, blank=True)
+    meta_description = models.TextField(blank=True)
+    meta_keywords = models.CharField(max_length=500, blank=True)
+    
+    # Status
+    is_featured = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    is_available = models.BooleanField(default=True)
+    display_order = models.PositiveIntegerField(default=0)
+    
+    # Internationalization
+    language = models.ForeignKey(Language, on_delete=models.CASCADE, related_name='boats', null=True, blank=True)
+    localized_name = models.CharField(max_length=200, blank=True)
+    localized_description = models.TextField(blank=True)
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-is_featured', 'display_order', 'name']
+        verbose_name = 'Boat'
+        verbose_name_plural = 'Boats'
+    
+    def __str__(self):
+        return f"{self.name} ({self.length_feet}ft)"
+    
+    @property
+    def speed_range(self):
+        """Return speed range as string"""
+        return f"{self.cruising_speed_knots}-{self.top_speed_knots} knots"
+
+
+class BoatImage(models.Model):
+    """Images for boats"""
+    boat = models.ForeignKey(Boat, on_delete=models.CASCADE, related_name='images')
+    image = models.ImageField(upload_to='boats/gallery/')
+    caption = models.CharField(max_length=200, blank=True)
+    alt_text = models.CharField(max_length=200, blank=True)
+    display_order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['display_order', 'created_at']
+        verbose_name = 'Boat Image'
+        verbose_name_plural = 'Boat Images'
+    
+    def __str__(self):
+        return f"{self.boat.name} - Image {self.display_order}"
+
+
+class BoatActivity(models.Model):
+    """Activities available on boats"""
+    ACTIVITY_TYPES = [
+        ('fishing', 'Fishing'),
+        ('excursion', 'Excursion'),
+        ('wildlife_watching', 'Wildlife Watching'),
+        ('water_sports', 'Water Sports'),
+        ('island_hopping', 'Island Hopping'),
+        ('custom', 'Custom Experience'),
+    ]
+    
+    DIFFICULTY_LEVELS = [
+        ('easy', 'Easy'),
+        ('moderate', 'Moderate'),
+        ('challenging', 'Challenging'),
+        ('expert', 'Expert'),
+    ]
+    
+    # Basic Information
+    name = models.CharField(max_length=200, help_text="e.g., 'Big Game Fishing', 'Trolling'")
+    description = models.TextField()
+    detailed_description = models.TextField(blank=True)
+    activity_type = models.CharField(max_length=50, choices=ACTIVITY_TYPES)
+    
+    # Details
+    duration_hours = models.PositiveIntegerField(default=8, help_text="Typical duration in hours")
+    duration_description = models.CharField(max_length=100, blank=True, help_text="e.g., 'Full day', 'Half day'")
+    min_participants = models.PositiveIntegerField(default=1)
+    max_participants = models.PositiveIntegerField(default=10)
+    difficulty_level = models.CharField(max_length=20, choices=DIFFICULTY_LEVELS, default='moderate')
+    
+    # Suitable Boats
+    suitable_boats = models.ManyToManyField(Boat, related_name='activities', blank=True)
+    
+    # What's Included/Excluded
+    includes = models.JSONField(default=list, help_text="List of what's included")
+    excludes = models.JSONField(default=list, help_text="List of what's not included")
+    requirements = models.JSONField(default=list, help_text="Requirements for participants")
+    target_species = models.JSONField(default=list, blank=True, help_text="For fishing activities: target fish species")
+    
+    # Media
+    hero_image = models.ImageField(upload_to='boat_activities/', blank=True, null=True)
+    gallery_images = models.JSONField(default=list, blank=True)
+    video_url = models.URLField(blank=True)
+    
+    # Marketing
+    featured_highlights = models.JSONField(default=list, blank=True)
+    meta_title = models.CharField(max_length=200, blank=True)
+    meta_description = models.TextField(blank=True)
+    
+    # Status
+    is_featured = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    display_order = models.PositiveIntegerField(default=0)
+    
+    # Internationalization
+    language = models.ForeignKey(Language, on_delete=models.CASCADE, related_name='boat_activities', null=True, blank=True)
+    localized_name = models.CharField(max_length=200, blank=True)
+    localized_description = models.TextField(blank=True)
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-is_featured', 'display_order', 'name']
+        verbose_name = 'Boat Activity'
+        verbose_name_plural = 'Boat Activities'
+    
+    def __str__(self):
+        return self.name
+
+
+class BoatActivityImage(models.Model):
+    """Images for boat activities"""
+    activity = models.ForeignKey(BoatActivity, on_delete=models.CASCADE, related_name='images')
+    image = models.ImageField(upload_to='boat_activities/gallery/')
+    caption = models.CharField(max_length=200, blank=True)
+    alt_text = models.CharField(max_length=200, blank=True)
+    display_order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['display_order', 'created_at']
+        verbose_name = 'Activity Image'
+        verbose_name_plural = 'Activity Images'
+    
+    def __str__(self):
+        return f"{self.activity.name} - Image {self.display_order}"
+
+
+class BoatPackage(models.Model):
+    """Boat charter packages (Silver/Gold tiers)"""
+    PACKAGE_TIERS = [
+        ('silver', 'Silver Package'),
+        ('gold', 'Gold Package'),
+        ('platinum', 'Platinum Package'),
+        ('custom', 'Custom Package'),
+    ]
+    
+    # Basic Information
+    name = models.CharField(max_length=200, help_text="e.g., 'Silver Package - 38ft'")
+    description = models.TextField()
+    detailed_description = models.TextField(blank=True)
+    
+    # Package Details
+    boat = models.ForeignKey(Boat, on_delete=models.CASCADE, related_name='packages')
+    package_tier = models.CharField(max_length=20, choices=PACKAGE_TIERS)
+    
+    # Pricing
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    currency = models.CharField(max_length=3, default='USD')
+    pricing_notes = models.TextField(blank=True, help_text="e.g., 'More days = cheaper price'")
+    
+    # Duration
+    duration_hours = models.PositiveIntegerField(default=8)
+    duration_description = models.CharField(max_length=100, default='Full-day charter (8 hours)')
+    
+    # What's Included
+    includes = models.JSONField(default=list, help_text="List of inclusions")
+    
+    # Activities
+    activities_included = models.ManyToManyField(BoatActivity, blank=True, related_name='packages')
+    
+    # Special Offers
+    special_offers = models.JSONField(default=list, blank=True, help_text="Current promotions")
+    discount_percentage = models.PositiveIntegerField(default=0, help_text="Discount percentage if applicable")
+    
+    # Booking Requirements
+    booking_notice_hours = models.PositiveIntegerField(default=48, help_text="Minimum advance booking in hours")
+    booking_notice_description = models.CharField(max_length=200, default='48 hours advance booking required')
+    
+    # Additional Info
+    max_participants = models.PositiveIntegerField(null=True, blank=True)
+    additional_notes = models.TextField(blank=True)
+    
+    # Media
+    hero_image = models.ImageField(upload_to='boat_packages/', blank=True, null=True)
+    gallery_images = models.JSONField(default=list, blank=True)
+    
+    # Marketing
+    featured_highlights = models.JSONField(default=list, blank=True)
+    meta_title = models.CharField(max_length=200, blank=True)
+    meta_description = models.TextField(blank=True)
+    
+    # Status
+    is_featured = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    is_available = models.BooleanField(default=True)
+    display_order = models.PositiveIntegerField(default=0)
+    
+    # Internationalization
+    language = models.ForeignKey(Language, on_delete=models.CASCADE, related_name='boat_packages', null=True, blank=True)
+    localized_name = models.CharField(max_length=200, blank=True)
+    localized_description = models.TextField(blank=True)
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-is_featured', 'boat', 'display_order']
+        verbose_name = 'Boat Package'
+        verbose_name_plural = 'Boat Packages'
+    
+    def __str__(self):
+        return f"{self.name} - ${self.price}"
+    
+    @property
+    def discounted_price(self):
+        """Calculate discounted price if discount is active"""
+        if self.discount_percentage > 0:
+            discount = (self.price * self.discount_percentage) / 100
+            return self.price - discount
+        return self.price
+
+
+class BoatBooking(models.Model):
+    """Boat booking inquiries and confirmations"""
+    STATUS_CHOICES = [
+        ('inquiry', 'Inquiry'),
+        ('pending', 'Pending Confirmation'),
+        ('confirmed', 'Confirmed'),
+        ('completed', 'Completed'),
+        ('cancelled', 'Cancelled'),
+    ]
+    
+    # Customer Information
+    customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True, related_name='boat_bookings')
+    customer_name = models.CharField(max_length=200)
+    customer_email = models.EmailField()
+    customer_phone = models.CharField(max_length=20)
+    customer_whatsapp = models.CharField(max_length=20, blank=True)
+    
+    # Booking Details
+    boat = models.ForeignKey(Boat, on_delete=models.SET_NULL, null=True, blank=True, related_name='bookings')
+    activity = models.ForeignKey(BoatActivity, on_delete=models.SET_NULL, null=True, blank=True, related_name='bookings')
+    package = models.ForeignKey(BoatPackage, on_delete=models.SET_NULL, null=True, blank=True, related_name='bookings')
+    
+    # Date and Participants
+    preferred_date = models.DateField()
+    preferred_time = models.TimeField(null=True, blank=True)
+    number_of_participants = models.PositiveIntegerField(default=1)
+    
+    # Special Requests
+    special_requests = models.TextField(blank=True)
+    dietary_requirements = models.TextField(blank=True)
+    
+    # Pricing
+    quoted_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    currency = models.CharField(max_length=3, default='USD')
+    
+    # Status
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='inquiry')
+    admin_notes = models.TextField(blank=True)
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    confirmed_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Boat Booking'
+        verbose_name_plural = 'Boat Bookings'
+    
+    def __str__(self):
+        return f"{self.customer_name} - {self.preferred_date} ({self.status})"
+
+
+class BoatReview(models.Model):
+    """Customer reviews for boats and activities"""
+    boat = models.ForeignKey(Boat, on_delete=models.CASCADE, related_name='reviews')
+    activity = models.ForeignKey(BoatActivity, on_delete=models.SET_NULL, null=True, blank=True, related_name='reviews')
+    booking = models.ForeignKey(BoatBooking, on_delete=models.SET_NULL, null=True, blank=True, related_name='reviews')
+    
+    # Reviewer Information
+    customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True)
+    reviewer_name = models.CharField(max_length=200)
+    reviewer_email = models.EmailField(blank=True)
+    reviewer_country = models.CharField(max_length=100, blank=True)
+    
+    # Review Content
+    rating = models.PositiveIntegerField(help_text="Rating out of 5")
+    title = models.CharField(max_length=200)
+    review_text = models.TextField()
+    
+    # Additional Ratings
+    boat_condition_rating = models.PositiveIntegerField(null=True, blank=True, help_text="Rating out of 5")
+    crew_rating = models.PositiveIntegerField(null=True, blank=True, help_text="Rating out of 5")
+    value_rating = models.PositiveIntegerField(null=True, blank=True, help_text="Rating out of 5")
+    
+    # Verification
+    is_verified = models.BooleanField(default=False)
+    verified_booking = models.BooleanField(default=False)
+    
+    # Status
+    is_approved = models.BooleanField(default=False)
+    is_featured = models.BooleanField(default=False)
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Boat Review'
+        verbose_name_plural = 'Boat Reviews'
+    
+    def __str__(self):
+        return f"{self.reviewer_name} - {self.boat.name} ({self.rating}/5)"

@@ -537,4 +537,327 @@ export async function deleteResortImage(id: number): Promise<void> {
   await apiRequest(`/resort-images/${id}/`, {
     method: 'DELETE',
   });
+}
+
+// ============================================================================
+// BOAT API FUNCTIONS
+// ============================================================================
+
+// Boat functions
+export async function getBoats(filters?: BoatFilters): Promise<PaginatedResponse<Boat>> {
+  const params = new URLSearchParams();
+  
+  if (filters) {
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        params.append(key, value.toString());
+      }
+    });
+  }
+  
+  const queryString = params.toString();
+  const endpoint = queryString ? `/boats/?${queryString}` : `/boats/`;
+  
+  const response = await apiRequest(endpoint);
+  return response;
+}
+
+export async function getBoat(id: number): Promise<Boat> {
+  const response = await apiRequest(`/boats/${id}/`);
+  return response;
+}
+
+export async function getFeaturedBoats(): Promise<Boat[]> {
+  const response = await apiRequest(`/boats/featured/`);
+  return response;
+}
+
+export async function getBoatImages(boatId: number): Promise<BoatImage[]> {
+  const response = await apiRequest(`/boat-images/?boat=${boatId}`);
+  return response.results || response;
+}
+
+export async function createBoat(boatData: BoatFormData): Promise<Boat> {
+  const formData = new FormData();
+  
+  Object.entries(boatData).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      if (key === 'hero_image' && value instanceof File) {
+        formData.append(key, value);
+      } else if (Array.isArray(value)) {
+        formData.append(key, JSON.stringify(value));
+      } else if (typeof value === 'object') {
+        formData.append(key, JSON.stringify(value));
+      } else {
+        formData.append(key, value.toString());
+      }
+    }
+  });
+  
+  const response = await apiRequest(`/boats/`, {
+    method: 'POST',
+    body: formData,
+  });
+  return response;
+}
+
+export async function updateBoat(id: number, boatData: Partial<BoatFormData>): Promise<Boat> {
+  const formData = new FormData();
+  
+  Object.entries(boatData).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      if (key === 'hero_image' && value instanceof File) {
+        formData.append(key, value);
+      } else if (Array.isArray(value)) {
+        formData.append(key, JSON.stringify(value));
+      } else if (typeof value === 'object') {
+        formData.append(key, JSON.stringify(value));
+      } else {
+        formData.append(key, value.toString());
+      }
+    }
+  });
+  
+  const response = await apiRequest(`/boats/${id}/`, {
+    method: 'PATCH',
+    body: formData,
+  });
+  return response;
+}
+
+export async function deleteBoat(id: number): Promise<void> {
+  await apiRequest(`/boats/${id}/`, {
+    method: 'DELETE',
+  });
+}
+
+// Boat Activity functions
+export async function getBoatActivities(filters?: BoatActivityFilters): Promise<PaginatedResponse<BoatActivity>> {
+  const params = new URLSearchParams();
+  
+  if (filters) {
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        params.append(key, value.toString());
+      }
+    });
+  }
+  
+  const queryString = params.toString();
+  const endpoint = queryString ? `/boat-activities/?${queryString}` : `/boat-activities/`;
+  
+  const response = await apiRequest(endpoint);
+  return response;
+}
+
+export async function getBoatActivity(id: number): Promise<BoatActivity> {
+  const response = await apiRequest(`/boat-activities/${id}/`);
+  return response;
+}
+
+export async function getBoatActivitiesByType(): Promise<Record<string, {
+  name: string;
+  activities: BoatActivity[];
+  count: number;
+}>> {
+  const response = await apiRequest(`/boats/by-activity-type/`);
+  return response;
+}
+
+export async function createBoatActivity(activityData: BoatActivityFormData): Promise<BoatActivity> {
+  const formData = new FormData();
+  
+  Object.entries(activityData).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      if (key === 'hero_image' && value instanceof File) {
+        formData.append(key, value);
+      } else if (Array.isArray(value)) {
+        formData.append(key, JSON.stringify(value));
+      } else if (typeof value === 'object') {
+        formData.append(key, JSON.stringify(value));
+      } else {
+        formData.append(key, value.toString());
+      }
+    }
+  });
+  
+  const response = await apiRequest(`/boat-activities/`, {
+    method: 'POST',
+    body: formData,
+  });
+  return response;
+}
+
+export async function updateBoatActivity(id: number, activityData: Partial<BoatActivityFormData>): Promise<BoatActivity> {
+  const formData = new FormData();
+  
+  Object.entries(activityData).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      if (key === 'hero_image' && value instanceof File) {
+        formData.append(key, value);
+      } else if (Array.isArray(value)) {
+        formData.append(key, JSON.stringify(value));
+      } else if (typeof value === 'object') {
+        formData.append(key, JSON.stringify(value));
+      } else {
+        formData.append(key, value.toString());
+      }
+    }
+  });
+  
+  const response = await apiRequest(`/boat-activities/${id}/`, {
+    method: 'PATCH',
+    body: formData,
+  });
+  return response;
+}
+
+export async function deleteBoatActivity(id: number): Promise<void> {
+  await apiRequest(`/boat-activities/${id}/`, {
+    method: 'DELETE',
+  });
+}
+
+// Boat Package functions
+export async function getBoatPackages(filters?: BoatPackageFilters): Promise<PaginatedResponse<BoatPackage>> {
+  const params = new URLSearchParams();
+  
+  if (filters) {
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        params.append(key, value.toString());
+      }
+    });
+  }
+  
+  const queryString = params.toString();
+  const endpoint = queryString ? `/boat-packages/?${queryString}` : `/boat-packages/`;
+  
+  const response = await apiRequest(endpoint);
+  return response;
+}
+
+export async function getBoatPackage(id: number): Promise<BoatPackage> {
+  const response = await apiRequest(`/boat-packages/${id}/`);
+  return response;
+}
+
+export async function getFeaturedBoatPackages(): Promise<BoatPackage[]> {
+  const response = await apiRequest(`/boat-packages/featured/`);
+  return response;
+}
+
+export async function createBoatPackage(packageData: BoatPackageFormData): Promise<BoatPackage> {
+  const formData = new FormData();
+  
+  Object.entries(packageData).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      if (key === 'hero_image' && value instanceof File) {
+        formData.append(key, value);
+      } else if (Array.isArray(value)) {
+        formData.append(key, JSON.stringify(value));
+      } else if (typeof value === 'object') {
+        formData.append(key, JSON.stringify(value));
+      } else {
+        formData.append(key, value.toString());
+      }
+    }
+  });
+  
+  const response = await apiRequest(`/boat-packages/`, {
+    method: 'POST',
+    body: formData,
+  });
+  return response;
+}
+
+export async function updateBoatPackage(id: number, packageData: Partial<BoatPackageFormData>): Promise<BoatPackage> {
+  const formData = new FormData();
+  
+  Object.entries(packageData).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      if (key === 'hero_image' && value instanceof File) {
+        formData.append(key, value);
+      } else if (Array.isArray(value)) {
+        formData.append(key, JSON.stringify(value));
+      } else if (typeof value === 'object') {
+        formData.append(key, JSON.stringify(value));
+      } else {
+        formData.append(key, value.toString());
+      }
+    }
+  });
+  
+  const response = await apiRequest(`/boat-packages/${id}/`, {
+    method: 'PATCH',
+    body: formData,
+  });
+  return response;
+}
+
+export async function deleteBoatPackage(id: number): Promise<void> {
+  await apiRequest(`/boat-packages/${id}/`, {
+    method: 'DELETE',
+  });
+}
+
+// Boat Booking functions
+export async function createBoatBooking(bookingData: BoatBookingFormData): Promise<BoatBooking> {
+  const response = await apiRequest(`/boat-bookings/`, {
+    method: 'POST',
+    body: JSON.stringify(bookingData),
+  });
+  return response;
+}
+
+export async function getBoatBookings(): Promise<BoatBooking[]> {
+  const response = await apiRequest(`/boat-bookings/`);
+  return response.results || response;
+}
+
+export async function getBoatBooking(id: number): Promise<BoatBooking> {
+  const response = await apiRequest(`/boat-bookings/${id}/`);
+  return response;
+}
+
+export async function updateBoatBooking(id: number, bookingData: Partial<BoatBookingFormData>): Promise<BoatBooking> {
+  const response = await apiRequest(`/boat-bookings/${id}/`, {
+    method: 'PATCH',
+    body: JSON.stringify(bookingData),
+  });
+  return response;
+}
+
+// Boat Review functions
+export async function getBoatReviews(boatId: number): Promise<BoatReview[]> {
+  const response = await apiRequest(`/boat-reviews/?boat=${boatId}`);
+  return response.results || response;
+}
+
+export async function createBoatReview(reviewData: BoatReviewFormData): Promise<BoatReview> {
+  const response = await apiRequest(`/boat-reviews/`, {
+    method: 'POST',
+    body: JSON.stringify(reviewData),
+  });
+  return response;
+}
+
+export async function updateBoatReview(id: number, reviewData: Partial<BoatReviewFormData>): Promise<BoatReview> {
+  const response = await apiRequest(`/boat-reviews/${id}/`, {
+    method: 'PATCH',
+    body: JSON.stringify(reviewData),
+  });
+  return response;
+}
+
+export async function deleteBoatReview(id: number): Promise<void> {
+  await apiRequest(`/boat-reviews/${id}/`, {
+    method: 'DELETE',
+  });
+}
+
+// Boat Amenity functions
+export async function getBoatAmenities(): Promise<BoatAmenity[]> {
+  const response = await apiRequest(`/boat-amenities/`);
+  return response.results || response;
 } 

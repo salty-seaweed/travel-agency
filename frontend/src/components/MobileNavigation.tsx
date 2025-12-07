@@ -50,7 +50,7 @@ export function MobileNavigation({ className = '' }: MobileNavigationProps) {
   const navigationItems = [
     { name: 'Home', href: '/', icon: HomeIcon },
     { name: 'Packages', href: '/packages', icon: StarIcon },
-    { name: 'Transport', href: '/transportation', icon: SparklesIcon },
+    { name: 'Boats', href: '/boats', icon: SparklesIcon },
     { name: 'Profile', href: '/customer/dashboard', icon: UserIcon, requiresAuth: true }
   ];
 

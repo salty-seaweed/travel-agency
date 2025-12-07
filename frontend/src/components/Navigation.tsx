@@ -69,10 +69,10 @@ export const Navigation = React.memo(() => {
     { name: t('navigation.home'), href: '/', icon: HomeIcon },
     { name: t('navigation.packages'), href: '/packages', icon: StarIcon, featured: true },
     { name: t('navigation.resorts'), href: '/resorts', icon: BuildingOfficeIcon, featured: true },
+    { name: t('navigation.boats'), href: '/boats', icon: SparklesIcon, featured: true },
     { name: t('navigation.transportation'), href: '/transportation', icon: SparklesIcon },
-  
     { name: t('navigation.about'), href: '/about', icon: InformationCircleIcon },
-    { name: t('navigation.contact'), href: '/contact', icon: ChatBubbleLeftRightIcon },
+    // Contact removed from navigation (available in footer)
   ];
 
   const isActive = (path: string) => location.pathname === path;

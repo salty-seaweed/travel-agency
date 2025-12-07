@@ -21,6 +21,8 @@ const ExperiencesTestimonialsSection = React.lazy(() => import('./sections/Testi
 const ExperiencesReviewsSection = React.lazy(() => import('./sections/ReviewsSection').then(module => ({ default: module.ExperiencesReviewsSection })));
 const ExperiencesNewsletterSection = React.lazy(() => import('./sections/NewsletterSection').then(module => ({ default: module.ExperiencesNewsletterSection })));
 const RecentlyViewedSection = React.lazy(() => import('./sections/RecentlyViewedSection').then(module => ({ default: module.RecentlyViewedSection })));
+const BoatsFleetSection = React.lazy(() => import('./sections/BoatsFleetSection').then(module => ({ default: module.BoatsFleetSection })));
+const BoatPackagesSection = React.lazy(() => import('./sections/BoatPackagesSection').then(module => ({ default: module.BoatPackagesSection })));
 
 // Section loading fallbacks
 const SectionSkeleton = ({ height = "400px" }: { height?: string }) => (
@@ -161,6 +163,16 @@ export const ExperiencesHomePage = React.memo(() => {
         {/* Resorts Section - Above curated packages */}
         <Suspense fallback={<SectionSkeleton height="500px" />}>
           <ExperiencesResortsSection />
+        </Suspense>
+
+        {/* Boats Fleet Section */}
+        <Suspense fallback={<SectionSkeleton height="500px" />}>
+          <BoatsFleetSection />
+        </Suspense>
+
+        {/* Boat Packages Section */}
+        <Suspense fallback={<SectionSkeleton height="500px" />}>
+          <BoatPackagesSection />
         </Suspense>
 
         {/* Trending Deals */}

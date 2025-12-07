@@ -851,4 +851,409 @@ export interface ResortFiltersProps {
   onClearFilters: () => void;
 }
 
+// ============================================================================
+// BOAT TYPES
+// ============================================================================
+
+export interface BoatAmenity extends BaseEntity {
+  name: string;
+  icon?: string;
+  description?: string;
+  is_active: boolean;
+}
+
+export interface BoatImage extends BaseEntity {
+  boat: number;
+  image: string;
+  image_url?: string;
+  caption?: string;
+  alt_text?: string;
+  display_order: number;
+  is_active: boolean;
+}
+
+export interface BoatActivityImage extends BaseEntity {
+  activity: number;
+  image: string;
+  image_url?: string;
+  caption?: string;
+  alt_text?: string;
+  display_order: number;
+  is_active: boolean;
+}
+
+export interface BoatActivity extends BaseEntity {
+  name: string;
+  description: string;
+  detailed_description?: string;
+  activity_type: 'fishing' | 'excursion' | 'wildlife_watching' | 'water_sports' | 'island_hopping' | 'custom';
+  duration_hours: number;
+  duration_description?: string;
+  min_participants: number;
+  max_participants: number;
+  difficulty_level: 'easy' | 'moderate' | 'challenging' | 'expert';
+  suitable_boats: number[];
+  suitable_boats_details?: Boat[];
+  suitable_boats_count?: number;
+  includes: string[];
+  excludes: string[];
+  requirements: string[];
+  target_species?: string[];
+  hero_image?: string;
+  hero_image_url?: string;
+  gallery_images: string[];
+  video_url?: string;
+  featured_highlights: string[];
+  meta_title?: string;
+  meta_description?: string;
+  is_featured: boolean;
+  is_active: boolean;
+  display_order: number;
+  language?: number;
+  localized_name?: string;
+  localized_description?: string;
+  images?: BoatActivityImage[];
+  average_rating?: number;
+  review_count?: number;
+}
+
+export interface Boat extends BaseEntity {
+  name: string;
+  description: string;
+  detailed_description?: string;
+  boat_type: 'sportfishing' | 'center_console' | 'yacht' | 'speedboat' | 'catamaran';
+  
+  // Specifications
+  length_feet: number;
+  engine_details: string;
+  cruising_speed_knots: number;
+  top_speed_knots: number;
+  passenger_capacity: number;
+  crew_size: number;
+  fuel_tank_liters?: number;
+  live_bait_well_liters?: number;
+  speed_range?: string;
+  
+  // Features
+  has_cabin: boolean;
+  has_toilet: boolean;
+  has_shower: boolean;
+  has_sound_system: boolean;
+  has_gps: boolean;
+  has_fish_finder: boolean;
+  has_radar: boolean;
+  has_outriggers: boolean;
+  amenities: BoatAmenity[];
+  amenities_list?: BoatAmenity[]; // Alternative field name from serializer
+  
+  // Location
+  departure_location: string;
+  location?: Location | null;
+  location_name?: string;
+  
+  // Media
+  hero_image?: string;
+  hero_image_url?: string;
+  gallery_images: string[];
+  video_url?: string;
+  images?: BoatImage[];
+  
+  // Marketing
+  featured_highlights: string[];
+  meta_title?: string;
+  meta_description?: string;
+  meta_keywords?: string;
+  
+  // Status
+  is_featured: boolean;
+  is_active: boolean;
+  is_available: boolean;
+  display_order: number;
+  
+  // Internationalization
+  language?: number;
+  localized_name?: string;
+  localized_description?: string;
+  
+  // Related data
+  activities?: BoatActivity[];
+  activities_count?: number;
+  packages?: BoatPackage[];
+  packages_count?: number;
+  reviews?: BoatReview[];
+  average_rating?: number;
+  review_count?: number;
+}
+
+export interface BoatPackage extends BaseEntity {
+  name: string;
+  description: string;
+  detailed_description?: string;
+  boat: number;
+  boat_details?: Boat;
+  boat_name?: string;
+  boat_id?: number;
+  package_tier: 'silver' | 'gold' | 'platinum' | 'custom';
+  
+  // Pricing
+  price: string;
+  discounted_price?: string;
+  currency: string;
+  pricing_notes?: string;
+  discount_percentage: number;
+  
+  // Duration
+  duration_hours: number;
+  duration_description: string;
+  
+  // Package Details
+  includes: string[];
+  activities_included: number[];
+  activities_included_details?: BoatActivity[];
+  max_participants?: number;
+  additional_notes?: string;
+  
+  // Booking Requirements
+  booking_notice_hours: number;
+  booking_notice_description: string;
+  
+  // Special Offers
+  special_offers: string[];
+  
+  // Media
+  hero_image?: string;
+  hero_image_url?: string;
+  gallery_images: string[];
+  
+  // Marketing
+  featured_highlights: string[];
+  meta_title?: string;
+  meta_description?: string;
+  
+  // Status
+  is_featured: boolean;
+  is_active: boolean;
+  is_available: boolean;
+  display_order: number;
+  
+  // Internationalization
+  language?: number;
+  localized_name?: string;
+  localized_description?: string;
+}
+
+export interface BoatBooking extends BaseEntity {
+  customer?: number;
+  customer_name: string;
+  customer_email: string;
+  customer_phone: string;
+  customer_whatsapp?: string;
+  
+  boat?: number;
+  boat_name?: string;
+  activity?: number;
+  activity_name?: string;
+  package?: number;
+  package_name?: string;
+  
+  preferred_date: string;
+  preferred_time?: string;
+  number_of_participants: number;
+  
+  special_requests?: string;
+  dietary_requirements?: string;
+  
+  quoted_price?: string;
+  currency: string;
+  
+  status: 'inquiry' | 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  admin_notes?: string;
+  
+  confirmed_at?: string;
+  completed_at?: string;
+}
+
+export interface BoatReview extends BaseEntity {
+  boat: number;
+  boat_name?: string;
+  activity?: number;
+  activity_name?: string;
+  booking?: number;
+  customer?: number;
+  
+  reviewer_name: string;
+  reviewer_email?: string;
+  reviewer_country?: string;
+  
+  rating: 1 | 2 | 3 | 4 | 5;
+  title: string;
+  review_text: string;
+  
+  boat_condition_rating?: number;
+  crew_rating?: number;
+  value_rating?: number;
+  
+  is_verified: boolean;
+  verified_booking: boolean;
+  is_approved: boolean;
+  is_featured: boolean;
+}
+
+// Boat form types
+export interface BoatFormData {
+  name: string;
+  description: string;
+  detailed_description?: string;
+  boat_type: Boat['boat_type'];
+  length_feet: number;
+  engine_details: string;
+  cruising_speed_knots: number;
+  top_speed_knots: number;
+  passenger_capacity: number;
+  crew_size: number;
+  fuel_tank_liters?: number;
+  live_bait_well_liters?: number;
+  has_cabin: boolean;
+  has_toilet: boolean;
+  has_shower: boolean;
+  has_sound_system: boolean;
+  has_gps: boolean;
+  has_fish_finder: boolean;
+  has_radar: boolean;
+  has_outriggers: boolean;
+  amenities: number[];
+  departure_location: string;
+  location?: number;
+  hero_image?: File | string;
+  gallery_images?: string[];
+  video_url?: string;
+  featured_highlights?: string[];
+  meta_title?: string;
+  meta_description?: string;
+  meta_keywords?: string;
+  is_featured: boolean;
+  is_active: boolean;
+  is_available: boolean;
+  display_order: number;
+}
+
+export interface BoatActivityFormData {
+  name: string;
+  description: string;
+  detailed_description?: string;
+  activity_type: BoatActivity['activity_type'];
+  duration_hours: number;
+  duration_description?: string;
+  min_participants: number;
+  max_participants: number;
+  difficulty_level: BoatActivity['difficulty_level'];
+  suitable_boats: number[];
+  includes: string[];
+  excludes: string[];
+  requirements: string[];
+  target_species?: string[];
+  hero_image?: File | string;
+  gallery_images?: string[];
+  video_url?: string;
+  featured_highlights?: string[];
+  meta_title?: string;
+  meta_description?: string;
+  is_featured: boolean;
+  is_active: boolean;
+  display_order: number;
+}
+
+export interface BoatPackageFormData {
+  name: string;
+  description: string;
+  detailed_description?: string;
+  boat: number;
+  package_tier: BoatPackage['package_tier'];
+  price: string;
+  currency: string;
+  pricing_notes?: string;
+  discount_percentage: number;
+  duration_hours: number;
+  duration_description: string;
+  includes: string[];
+  activities_included: number[];
+  max_participants?: number;
+  additional_notes?: string;
+  booking_notice_hours: number;
+  booking_notice_description: string;
+  special_offers?: string[];
+  hero_image?: File | string;
+  gallery_images?: string[];
+  featured_highlights?: string[];
+  meta_title?: string;
+  meta_description?: string;
+  is_featured: boolean;
+  is_active: boolean;
+  is_available: boolean;
+  display_order: number;
+}
+
+export interface BoatBookingFormData {
+  customer_name: string;
+  customer_email: string;
+  customer_phone: string;
+  customer_whatsapp?: string;
+  boat?: number;
+  activity?: number;
+  package?: number;
+  preferred_date: string;
+  preferred_time?: string;
+  number_of_participants: number;
+  special_requests?: string;
+  dietary_requirements?: string;
+}
+
+export interface BoatReviewFormData {
+  boat: number;
+  activity?: number;
+  reviewer_name: string;
+  reviewer_email?: string;
+  reviewer_country?: string;
+  rating: 1 | 2 | 3 | 4 | 5;
+  title: string;
+  review_text: string;
+  boat_condition_rating?: number;
+  crew_rating?: number;
+  value_rating?: number;
+}
+
+// Boat filter types
+export interface BoatFilters {
+  boat_type?: string;
+  min_capacity?: number;
+  activity?: number;
+  is_featured?: boolean;
+  is_available?: boolean;
+  search?: string;
+  page?: number;
+  page_size?: number;
+}
+
+export interface BoatActivityFilters {
+  activity_type?: string;
+  difficulty_level?: string;
+  boat?: number;
+  is_featured?: boolean;
+  search?: string;
+  page?: number;
+  page_size?: number;
+}
+
+export interface BoatPackageFilters {
+  boat?: number;
+  package_tier?: string;
+  min_price?: number;
+  max_price?: number;
+  is_featured?: boolean;
+  is_available?: boolean;
+  search?: string;
+  page?: number;
+  page_size?: number;
+}
+
 // All types are already exported above as part of their interface declarations 

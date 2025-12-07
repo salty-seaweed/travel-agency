@@ -20,6 +20,12 @@ const ResortsPage = React.lazy(() => import('./components/resort/ResortsPage').t
 const ResortDetailPage = React.lazy(() => import('./components/resort/ResortDetailPage').then(module => ({ default: module.ResortDetailPage })));
 const ResortRoomBookingPage = React.lazy(() => import('./components/resort/ResortRoomBookingPage').then(module => ({ default: module.ResortRoomBookingPage })));
 
+// Boat components
+const BoatsPage = React.lazy(() => import('./components/boat/BoatsPage').then(module => ({ default: module.BoatsPage })));
+const BoatDetailPage = React.lazy(() => import('./components/boat/BoatDetailPage').then(module => ({ default: module.BoatDetailPage })));
+const ActivityDetailPage = React.lazy(() => import('./components/boat/ActivityDetailPage').then(module => ({ default: module.ActivityDetailPage })));
+const BoatPackageDetailPage = React.lazy(() => import('./components/boat/BoatPackageDetailPage').then(module => ({ default: module.BoatPackageDetailPage })));
+
 const PackageBookingPage = React.lazy(() => import('./components/PackageBookingPage').then(module => ({ default: module.PackageBookingPage })));
 const BookingForm = React.lazy(() => import('./components/BookingForm').then(module => ({ default: module.BookingForm })));
 const ContactPage = React.lazy(() => import('./components/ContactPage').then(module => ({ default: module.ContactPage })));
@@ -117,6 +123,27 @@ function AppContent() {
           <Route path="resorts" element={
             <Suspense fallback={<RouteLoading />}>
               <ResortsPage />
+            </Suspense>
+          } />
+          {/* Boat Routes - More specific routes must come first */}
+          <Route path="boats" element={
+            <Suspense fallback={<RouteLoading />}>
+              <BoatsPage />
+            </Suspense>
+          } />
+          <Route path="boats/activities/:id" element={
+            <Suspense fallback={<RouteLoading />}>
+              <ActivityDetailPage />
+            </Suspense>
+          } />
+          <Route path="boats/packages/:id" element={
+            <Suspense fallback={<RouteLoading />}>
+              <BoatPackageDetailPage />
+            </Suspense>
+          } />
+          <Route path="boats/:id" element={
+            <Suspense fallback={<RouteLoading />}>
+              <BoatDetailPage />
             </Suspense>
           } />
           <Route path="resorts/:id" element={

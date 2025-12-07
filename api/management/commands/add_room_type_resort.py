@@ -144,3 +144,5 @@ class Command(BaseCommand):
         return created_room_types
 
 
+
+
