@@ -11,7 +11,7 @@ import {
   useColorModeValue,
   Flex,
 } from '@chakra-ui/react';
-import { ClockIcon, CheckIcon, UserGroupIcon, SparklesIcon } from '@heroicons/react/24/outline';
+import { ClockIcon, CheckIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import { BoatPackage } from '../../types';
 import { LazyImage } from '../LazyImage';
 
@@ -19,14 +19,20 @@ interface PackageCardProps {
   boatPackage: BoatPackage;
   className?: string;
   loading?: boolean;
+  compact?: boolean;
 }
 
-export function PackageCard({ boatPackage, className = '', loading = false }: PackageCardProps) {
+export function PackageCard({ boatPackage, className = '', loading = false, compact = false }: PackageCardProps) {
+  // All hooks must be called at the top level
   const cardBg = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
   const textColor = useColorModeValue('gray.900', 'white');
   const mutedColor = useColorModeValue('gray.600', 'gray.400');
   const accentColor = useColorModeValue('blue.600', 'blue.400');
+  const ctaBg = useColorModeValue('blue.50', 'blue.900');
+
+  const imageHeight = compact ? '140px' : '200px';
+  const padding = compact ? 4 : 5;
 
   if (loading) {
     return (
@@ -39,8 +45,8 @@ export function PackageCard({ boatPackage, className = '', loading = false }: Pa
         borderColor={borderColor}
         className={className}
       >
-        <Box h="200px" bg="gray.200" className="animate-pulse" />
-        <Box p={5}>
+        <Box h={imageHeight} bg="gray.200" className="animate-pulse" />
+        <Box p={padding}>
           <Box h="20px" bg="gray.200" borderRadius="md" mb={3} className="animate-pulse" />
           <Box h="16px" bg="gray.200" borderRadius="md" mb={2} w="80%" className="animate-pulse" />
           <Box h="16px" bg="gray.200" borderRadius="md" w="60%" className="animate-pulse" />
@@ -77,7 +83,7 @@ export function PackageCard({ boatPackage, className = '', loading = false }: Pa
         transition="all 0.3s ease"
         _hover={{
           shadow: 'xl',
-          transform: 'translateY(-6px)',
+          transform: 'translateY(-4px)',
           borderColor: 'blue.400',
         }}
         h="full"
@@ -85,7 +91,7 @@ export function PackageCard({ boatPackage, className = '', loading = false }: Pa
         flexDirection="column"
       >
         {/* Image Section */}
-        <Box position="relative" h="200px" overflow="hidden">
+        <Box position="relative" h={imageHeight} overflow="hidden">
           {packageImage ? (
             <LazyImage
               src={packageImage}
@@ -106,7 +112,7 @@ export function PackageCard({ boatPackage, className = '', loading = false }: Pa
               alignItems="center"
               justifyContent="center"
             >
-              <Icon as={SparklesIcon} boxSize={12} color="white" opacity={0.5} />
+              <Icon as={SparklesIcon} boxSize={compact ? 8 : 12} color="white" opacity={0.5} />
             </Box>
           )}
           
@@ -121,26 +127,26 @@ export function PackageCard({ boatPackage, className = '', loading = false }: Pa
           />
 
           {/* Top badges */}
-          <HStack position="absolute" top={3} left={3} spacing={2}>
+          <HStack position="absolute" top={2} left={2} spacing={1}>
             <Badge
               bgGradient={tier.gradient}
               color="white"
               fontSize="xs"
-              px={2}
-              py={1}
+              px={compact ? 1.5 : 2}
+              py={0.5}
               borderRadius="md"
               textTransform="uppercase"
               fontWeight="bold"
             >
               {boatPackage.package_tier}
             </Badge>
-            {boatPackage.is_featured && (
+            {boatPackage.is_featured && !compact && (
               <Badge
                 bg="orange.400"
                 color="white"
                 fontSize="xs"
                 px={2}
-                py={1}
+                py={0.5}
                 borderRadius="md"
               >
                 <HStack spacing={1}>
@@ -155,13 +161,13 @@ export function PackageCard({ boatPackage, className = '', loading = false }: Pa
           {hasDiscount && (
             <Badge
               position="absolute"
-              top={3}
-              right={3}
+              top={2}
+              right={2}
               bg="red.500"
               color="white"
-              fontSize="sm"
-              px={2}
-              py={1}
+              fontSize="xs"
+              px={1.5}
+              py={0.5}
               borderRadius="md"
               fontWeight="bold"
             >
@@ -170,7 +176,7 @@ export function PackageCard({ boatPackage, className = '', loading = false }: Pa
           )}
 
           {/* Price on image */}
-          <Box position="absolute" bottom={3} left={3}>
+          <Box position="absolute" bottom={2} left={2}>
             <VStack align="flex-start" spacing={0}>
               {hasDiscount && (
                 <Text fontSize="xs" color="whiteAlpha.800" textDecoration="line-through">
@@ -178,7 +184,7 @@ export function PackageCard({ boatPackage, className = '', loading = false }: Pa
                 </Text>
               )}
               <HStack spacing={1} align="baseline">
-                <Text fontSize="xl" fontWeight="bold" color="white" textShadow="0 2px 4px rgba(0,0,0,0.3)">
+                <Text fontSize={compact ? 'md' : 'xl'} fontWeight="bold" color="white" textShadow="0 2px 4px rgba(0,0,0,0.3)">
                   {boatPackage.currency} {displayPrice}
                 </Text>
                 <Text fontSize="xs" color="whiteAlpha.900">/charter</Text>
@@ -188,33 +194,35 @@ export function PackageCard({ boatPackage, className = '', loading = false }: Pa
         </Box>
 
         {/* Content Section */}
-        <VStack align="stretch" p={5} spacing={3} flex={1}>
+        <VStack align="stretch" p={padding} spacing={compact ? 2 : 3} flex={1}>
           {/* Title */}
-          <Heading size="sm" color={textColor} noOfLines={1}>
+          <Heading size={compact ? 'xs' : 'sm'} color={textColor} noOfLines={1}>
             {boatPackage.name}
           </Heading>
 
-          {/* Description */}
-          <Text color={mutedColor} fontSize="sm" noOfLines={2} lineHeight="tall">
-            {boatPackage.description}
-          </Text>
+          {/* Description - hide in compact mode */}
+          {!compact && (
+            <Text color={mutedColor} fontSize="sm" noOfLines={2} lineHeight="tall">
+              {boatPackage.description}
+            </Text>
+          )}
 
           {/* Boat & Duration Info */}
-          <HStack spacing={4} fontSize="xs" color={mutedColor}>
+          <HStack spacing={compact ? 2 : 4} fontSize="xs" color={mutedColor}>
             {boatPackage.boat_name && (
               <HStack spacing={1}>
                 <Box w={1.5} h={1.5} bg={accentColor} borderRadius="full" />
-                <Text>{boatPackage.boat_name}</Text>
+                <Text noOfLines={1}>{boatPackage.boat_name}</Text>
               </HStack>
             )}
             <HStack spacing={1}>
-              <Icon as={ClockIcon} boxSize={3.5} />
+              <Icon as={ClockIcon} boxSize={3} />
               <Text>{boatPackage.duration_description}</Text>
             </HStack>
           </HStack>
 
-          {/* Inclusions Preview */}
-          {boatPackage.includes && boatPackage.includes.length > 0 && (
+          {/* Inclusions Preview - hide in compact mode */}
+          {!compact && boatPackage.includes && boatPackage.includes.length > 0 && (
             <VStack align="stretch" spacing={1.5} pt={2}>
               {boatPackage.includes.slice(0, 3).map((item, index) => (
                 <HStack key={index} spacing={2} fontSize="xs" color={mutedColor}>
@@ -231,21 +239,21 @@ export function PackageCard({ boatPackage, className = '', loading = false }: Pa
           )}
 
           {/* Spacer to push button to bottom */}
-          <Box flex={1} minH={2} />
+          <Box flex={1} minH={compact ? 1 : 2} />
 
           {/* CTA hint */}
           <Flex
             justify="center"
             align="center"
-            py={2}
-            px={4}
-            bg={useColorModeValue('blue.50', 'blue.900')}
+            py={compact ? 1.5 : 2}
+            px={compact ? 2 : 4}
+            bg={ctaBg}
             borderRadius="lg"
             color={accentColor}
             fontWeight="medium"
-            fontSize="sm"
+            fontSize={compact ? 'xs' : 'sm'}
           >
-            View Package Details →
+            View Details →
           </Flex>
         </VStack>
       </Box>

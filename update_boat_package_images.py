@@ -11,7 +11,7 @@ import sys
 import django
 
 # Setup Django environment
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travel_agency.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travel_agency.settings_minimal')
 django.setup()
 
 from api.models import BoatPackage

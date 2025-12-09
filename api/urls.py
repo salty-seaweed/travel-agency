@@ -95,7 +95,7 @@ router.register(r'boat-reviews', BoatReviewViewSet)
 router.register(r'boat-amenities', BoatAmenityViewSet)
 
 urlpatterns = [
-    path('', include(router.urls)),
+    # Custom endpoints MUST come before router.urls to avoid being caught by router's pk lookup
     path('upload-image/', views.upload_image, name='upload_image'),
     path('search/', views.search, name='search'),
     path('analytics/', views.analytics, name='analytics'),
@@ -109,19 +109,22 @@ urlpatterns = [
     path('homepage/public/', HomepageManagementViewSet.as_view({'get': 'public_content'}), name='homepage-public-content'),
     path('about/data/', views.about_page_data, name='about_page_data'),
     path('featured-destinations/public/', views.featured_destinations, name='featured_destinations_public'),
-    path('pages/', include(router.urls)),
     path('pages/by-slug/<str:slug>/', views.page_by_slug, name='page_by_slug'),
     path('health/', views.health_check, name='health_check'),
     
-    # Resort custom endpoints
+    # Resort custom endpoints - before router
     path('resorts/by-category/', resorts_by_category, name='resorts_by_category'),
     path('resorts/by-atoll/', resorts_by_atoll, name='resorts_by_atoll'),
     path('resorts/featured/', featured_resorts, name='featured_resorts'),
     
-    # Boat custom endpoints
+    # Boat custom endpoints - before router
     path('boats/featured/', featured_boats, name='featured_boats'),
     path('boat-packages/featured/', featured_boat_packages, name='featured_boat_packages'),
     path('boats/by-activity-type/', boats_by_activity_type, name='boats_by_activity_type'),
+    
+    # Router URLs last (catches /<resource>/ and /<resource>/<pk>/)
+    path('', include(router.urls)),
+    path('pages/', include(router.urls)),
 ]
 
 # Internationalization URL patterns

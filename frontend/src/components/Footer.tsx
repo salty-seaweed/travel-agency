@@ -37,6 +37,7 @@ export function Footer() {
     { name: t('footer.links.packages', 'Packages'), href: '/packages' },
     { name: t('footer.links.properties', 'Properties'), href: '/properties' },
     { name: t('footer.links.transportation', 'Transportation'), href: '/transportation' },
+    { name: t('footer.links.maldivesInfo', 'Maldives Info'), href: '/maldives-info' },
     { name: t('footer.links.about', 'About'), href: '/about' },
     { name: t('footer.links.contact', 'Contact'), href: '/contact' },
   ];

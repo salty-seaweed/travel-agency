@@ -32,6 +32,7 @@ const ContactPage = React.lazy(() => import('./components/ContactPage').then(mod
 const AboutPage = React.lazy(() => import('./components/AboutPage').then(module => ({ default: module.AboutPage })));
 const BlogPage = React.lazy(() => import('./components/BlogPage').then(module => ({ default: module.BlogPage })));
 const FAQPage = React.lazy(() => import('./components/FAQPage').then(module => ({ default: module.FAQPage })));
+const MaldivesInfoPage = React.lazy(() => import('./components/maldives-info').then(module => ({ default: module.MaldivesInfoPage })));
 
 const TransportationPage = React.lazy(() => import('./components/TransportationPage').then(module => ({ default: module.TransportationPage })));
 const CustomerLogin = React.lazy(() => import('./components/auth/CustomerLogin').then(module => ({ default: module.CustomerLogin })));
@@ -174,6 +175,11 @@ function AppContent() {
           <Route path="faq" element={
             <Suspense fallback={<RouteLoading />}>
               <FAQPage />
+            </Suspense>
+          } />
+          <Route path="maldives-info" element={
+            <Suspense fallback={<RouteLoading />}>
+              <MaldivesInfoPage />
             </Suspense>
           } />
           
