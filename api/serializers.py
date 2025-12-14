@@ -1780,10 +1780,30 @@ class ResortSerializer(serializers.ModelSerializer):
     
     def get_hero_image_url(self, obj):
         # First try gallery_images for Card Image (frontend URL - works in production)
-        if obj.gallery_images and isinstance(obj.gallery_images, list):
+        if obj.gallery_images and isinstance(obj.gallery_images, list) and len(obj.gallery_images) > 0:
+            # Look for card image marker first
             for img_url in obj.gallery_images:
-                if 'Card' in img_url or 'card' in img_url:
-                    return img_url
+                if isinstance(img_url, str):
+                    # Check for marker format
+                    if img_url.startswith('__CARD_IMAGE__:'):
+                        url = img_url.replace('__CARD_IMAGE__:', '').strip()
+                        if url and (url.startswith('http') or url.startswith('https')):
+                            return url
+                    # Check for 'Card' or 'card' in URL (old format)
+                    elif ('Card' in img_url or 'card' in img_url) and (img_url.startswith('http') or img_url.startswith('https')):
+                        return img_url
+            
+            # Fallback: use first image in gallery (card image is always first)
+            first_img = obj.gallery_images[0]
+            if isinstance(first_img, str):
+                # Extract from marker if present
+                if first_img.startswith('__CARD_IMAGE__:'):
+                    url = first_img.replace('__CARD_IMAGE__:', '').strip()
+                    if url and (url.startswith('http') or url.startswith('https')):
+                        return url
+                # Use directly if it's a valid URL
+                elif first_img.startswith('http') or first_img.startswith('https'):
+                    return first_img
         
         # Try the resort's hero_image field
         if obj.hero_image:
@@ -1884,10 +1904,30 @@ class ResortListSerializer(serializers.ModelSerializer):
     
     def get_hero_image_url(self, obj):
         # First try gallery_images for Card Image (frontend URL - works in production)
-        if obj.gallery_images and isinstance(obj.gallery_images, list):
+        if obj.gallery_images and isinstance(obj.gallery_images, list) and len(obj.gallery_images) > 0:
+            # Look for card image marker first
             for img_url in obj.gallery_images:
-                if 'Card' in img_url or 'card' in img_url:
-                    return img_url
+                if isinstance(img_url, str):
+                    # Check for marker format
+                    if img_url.startswith('__CARD_IMAGE__:'):
+                        url = img_url.replace('__CARD_IMAGE__:', '').strip()
+                        if url and (url.startswith('http') or url.startswith('https')):
+                            return url
+                    # Check for 'Card' or 'card' in URL (old format)
+                    elif ('Card' in img_url or 'card' in img_url) and (img_url.startswith('http') or img_url.startswith('https')):
+                        return img_url
+            
+            # Fallback: use first image in gallery (card image is always first)
+            first_img = obj.gallery_images[0]
+            if isinstance(first_img, str):
+                # Extract from marker if present
+                if first_img.startswith('__CARD_IMAGE__:'):
+                    url = first_img.replace('__CARD_IMAGE__:', '').strip()
+                    if url and (url.startswith('http') or url.startswith('https')):
+                        return url
+                # Use directly if it's a valid URL
+                elif first_img.startswith('http') or first_img.startswith('https'):
+                    return first_img
         
         # Try the resort's hero_image field
         if obj.hero_image:

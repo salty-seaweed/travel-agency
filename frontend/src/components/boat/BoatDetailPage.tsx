@@ -323,11 +323,8 @@ export function BoatDetailPage() {
                             </Text>
                           </VStack>
                           <VStack align="flex-end" spacing={0}>
-                            <Text fontSize="2xl" fontWeight="bold" color={accentColor}>
-                              {pkg.currency} {pkg.price}
-                            </Text>
-                            <Text fontSize="xs" color={mutedColor}>
-                              per charter
+                            <Text fontSize="lg" fontWeight="bold" color={accentColor}>
+                              Contact for Price
                             </Text>
                           </VStack>
                         </Flex>

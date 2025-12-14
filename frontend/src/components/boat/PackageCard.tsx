@@ -175,19 +175,13 @@ export function PackageCard({ boatPackage, className = '', loading = false, comp
             </Badge>
           )}
 
-          {/* Price on image */}
+          {/* Price on image - Show "Contact for Price" */}
           <Box position="absolute" bottom={2} left={2}>
             <VStack align="flex-start" spacing={0}>
-              {hasDiscount && (
-                <Text fontSize="xs" color="whiteAlpha.800" textDecoration="line-through">
-                  {boatPackage.currency} {originalPrice}
-                </Text>
-              )}
               <HStack spacing={1} align="baseline">
-                <Text fontSize={compact ? 'md' : 'xl'} fontWeight="bold" color="white" textShadow="0 2px 4px rgba(0,0,0,0.3)">
-                  {boatPackage.currency} {displayPrice}
+                <Text fontSize={compact ? 'sm' : 'md'} fontWeight="bold" color="white" textShadow="0 2px 4px rgba(0,0,0,0.3)">
+                  Contact for Price
                 </Text>
-                <Text fontSize="xs" color="whiteAlpha.900">/charter</Text>
               </HStack>
             </VStack>
           </Box>

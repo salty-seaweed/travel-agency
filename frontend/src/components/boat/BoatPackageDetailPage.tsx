@@ -174,16 +174,10 @@ export function BoatPackageDetailPage() {
               </HStack>
               <HStack spacing={3}>
                 <VStack align="flex-end" spacing={0}>
-                  {hasDiscount && (
-                    <Text fontSize="sm" color={mutedColor} textDecoration="line-through">
-                      {boatPackage.currency} {boatPackage.price}
-                    </Text>
-                  )}
                   <HStack spacing={1}>
-                    <Text fontSize="2xl" fontWeight="bold" color={accentColor}>
-                      {boatPackage.currency} {displayPrice}
+                    <Text fontSize="xl" fontWeight="bold" color={accentColor}>
+                      Contact for Price
                     </Text>
-                    <Text fontSize="sm" color={mutedColor}>/charter</Text>
                   </HStack>
                 </VStack>
               </HStack>
@@ -556,17 +550,10 @@ export function BoatPackageDetailPage() {
               >
                 <VStack align="stretch" spacing={5}>
                   <VStack align="flex-start" spacing={1}>
-                    {hasDiscount && (
-                      <Text fontSize="md" color={mutedColor} textDecoration="line-through">
-                        {boatPackage.currency} {boatPackage.price}
-                      </Text>
-                    )}
-                    <HStack align="baseline">
-                      <Heading size="xl" color={textColor}>
-                        {boatPackage.currency} {displayPrice}
-                      </Heading>
-                      <Text fontSize="sm" color={mutedColor}>per charter</Text>
-                    </HStack>
+                    <Heading size="lg" color={textColor}>
+                      Contact for Price
+                    </Heading>
+                    <Text fontSize="sm" color={mutedColor}>per charter</Text>
                   </VStack>
 
                   <Divider />
