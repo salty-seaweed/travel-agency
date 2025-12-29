@@ -79,7 +79,7 @@ function AppContent() {
         <title>Thread Travels & Tours - Your Maldives Paradise</title>
         <meta name="description" content="Discover the perfect Maldives getaway with Thread Travels & Tours. Luxury accommodations, exclusive packages, and unforgettable experiences." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+        <link rel="icon" type="image/svg+xml" href="/src/assets/logo.svg" />
         {/* Preload critical resources */}
         <link rel="preload" href="/src/assets/logo.svg" as="image" type="image/svg+xml" />
         <link rel="dns-prefetch" href="//web-production-a324.up.railway.app" />
