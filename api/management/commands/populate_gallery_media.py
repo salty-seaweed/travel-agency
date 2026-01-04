@@ -76,9 +76,23 @@ class Command(BaseCommand):
         
         # Print settings info
         self.stdout.write(f"\n[CONFIG] Django Settings:")
+        self.stdout.write(f"  DJANGO_SETTINGS_MODULE: {os.environ.get('DJANGO_SETTINGS_MODULE', 'Not set')}")
         self.stdout.write(f"  MEDIA_ROOT: {settings.MEDIA_ROOT}")
         self.stdout.write(f"  MEDIA_URL: {settings.MEDIA_URL}")
         self.stdout.write(f"  BASE_DIR: {settings.BASE_DIR}")
+        
+        # Ensure media directories exist
+        gallery_images_dir = os.path.join(settings.MEDIA_ROOT, 'gallery', 'images')
+        gallery_videos_dir = os.path.join(settings.MEDIA_ROOT, 'gallery', 'videos')
+        try:
+            os.makedirs(gallery_images_dir, exist_ok=True)
+            os.makedirs(gallery_videos_dir, exist_ok=True)
+            self.stdout.write(f"  [INFO] Created/verified media directories:")
+            self.stdout.write(f"    - {gallery_images_dir}")
+            self.stdout.write(f"    - {gallery_videos_dir}")
+        except Exception as e:
+            self.stdout.write(self.style.WARNING(f"  [WARNING] Could not create media directories: {e}"))
+        
         if hasattr(settings, 'DEFAULT_FILE_STORAGE'):
             self.stdout.write(f"  DEFAULT_FILE_STORAGE: {settings.DEFAULT_FILE_STORAGE}")
             if 's3' in str(settings.DEFAULT_FILE_STORAGE).lower():
