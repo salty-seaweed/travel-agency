@@ -12,7 +12,8 @@ from .models import (
     PageHero, Language, TranslationKey, Translation, CulturalContent, RegionalSettings, LocalizedPage, LocalizedFAQ,
     AboutPageContent, AboutPageValue, AboutPageStatistic, FeaturedDestination, PackageVariant,
     Resort, ResortImage, ResortReview, ResortAmenity, ResortRoomType,
-    Boat, BoatImage, BoatActivity, BoatActivityImage, BoatPackage, BoatBooking, BoatReview, BoatAmenity
+    Boat, BoatImage, BoatActivity, BoatActivityImage, BoatPackage, BoatBooking, BoatReview, BoatAmenity,
+    GalleryMedia
 )
 
 class FlexibleImageField(serializers.ImageField):
@@ -2395,4 +2396,43 @@ class BoatReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = BoatReview
         fields = '__all__'
-        read_only_fields = ('created_at', 'updated_at') 
+        read_only_fields = ('created_at', 'updated_at')
+
+
+class GalleryMediaSerializer(serializers.ModelSerializer):
+    """Serializer for gallery media (images, videos, GIFs)"""
+    file_url = serializers.SerializerMethodField()
+    thumbnail_url = serializers.SerializerMethodField()
+    package_name = serializers.CharField(source='package.name', read_only=True)
+    resort_name = serializers.CharField(source='resort.name', read_only=True)
+    boat_name = serializers.CharField(source='boat.name', read_only=True)
+    tags_list = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = GalleryMedia
+        fields = '__all__'
+        read_only_fields = ('created_at', 'updated_at')
+    
+    def get_file_url(self, obj):
+        """Get the URL of the media file"""
+        if obj.file_url:
+            request = self.context.get('request')
+            if request and not obj.file_url.startswith('http'):
+                return request.build_absolute_uri(obj.file_url)
+            return obj.file_url
+        return ''
+    
+    def get_thumbnail_url(self, obj):
+        """Get the URL of the thumbnail"""
+        if obj.thumbnail_url:
+            request = self.context.get('request')
+            if request and not obj.thumbnail_url.startswith('http'):
+                return request.build_absolute_uri(obj.thumbnail_url)
+            return obj.thumbnail_url
+        return ''
+    
+    def get_tags_list(self, obj):
+        """Convert comma-separated tags to list"""
+        if obj.tags:
+            return [tag.strip() for tag in obj.tags.split(',') if tag.strip()]
+        return [] 

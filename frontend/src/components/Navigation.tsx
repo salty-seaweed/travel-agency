@@ -29,7 +29,7 @@ import {
   HomeIcon,
   StarIcon,
   BuildingOfficeIcon,
-
+  PhotoIcon,
   InformationCircleIcon,
   ChatBubbleLeftRightIcon,
   // MagnifyingGlassIcon, // TEMPORARILY DISABLED
@@ -47,7 +47,7 @@ import { useCustomerAuth } from '../hooks/useCustomerAuth';
 import { useSmartTranslation } from '../hooks/useSmartTranslation';
 import { useTranslation } from '../i18n';
 import logo from '../assets/logo.svg';
-import { LanguageSwitcher } from './LanguageSwitcher';
+import { GoogleTranslateSwitcher } from './GoogleTranslateSwitcher';
 import { CurrencySelector } from './CurrencySelector';
 
 interface NavigationItem {
@@ -70,7 +70,7 @@ export const Navigation = React.memo(() => {
     { name: t('navigation.packages'), href: '/packages', icon: StarIcon, featured: true },
     { name: t('navigation.resorts'), href: '/resorts', icon: BuildingOfficeIcon, featured: true },
     { name: t('navigation.boats'), href: '/boats', icon: SparklesIcon, featured: true },
-    { name: t('navigation.transportation'), href: '/transportation', icon: SparklesIcon },
+    { name: t('navigation.gallery', 'Gallery'), href: '/gallery', icon: PhotoIcon, featured: true },
     { name: t('navigation.maldivesInfo', 'Maldives Info'), href: '/maldives-info', icon: InformationCircleIcon, featured: true },
     { name: t('navigation.about'), href: '/about', icon: InformationCircleIcon },
     // Contact removed from navigation (available in footer)
@@ -316,24 +316,20 @@ export const Navigation = React.memo(() => {
                   {/* Currency Selector */}
                   <CurrencySelector size="sm" variant="outline" showLabel={false} />
 
-                  {/* Language Switcher */}
-                  <LanguageSwitcher 
-                    variant="dropdown" 
-                    showLabels={true}
-                    className="hidden md:flex"
-                  />
+                  {/* Google Translate Switcher */}
+                  <Box display={{ base: 'none', md: 'block' }}>
+                    <GoogleTranslateSwitcher variant="dropdown" />
+                  </Box>
                 </HStack>
               ) : (
                 <HStack spacing={3} ml={4} display={{ base: 'none', md: 'flex' }}>
                   {/* Currency Selector */}
                   <CurrencySelector size="sm" variant="outline" showLabel={false} />
 
-                  {/* Language Switcher */}
-                  <LanguageSwitcher 
-                    variant="dropdown" 
-                    showLabels={true}
-                    className="hidden md:flex"
-                  />
+                  {/* Google Translate Switcher */}
+                  <Box display={{ base: 'none', md: 'block' }}>
+                    <GoogleTranslateSwitcher variant="dropdown" />
+                  </Box>
 
                   {/* Book Now Button - Simplified */}
                   <Button
@@ -458,7 +454,7 @@ export const Navigation = React.memo(() => {
 
               <Divider my={6} />
 
-              {/* Mobile Language Switcher */}
+              {/* Mobile Currency and Translation */}
               <VStack spacing={4} align="stretch">
                 <Text fontSize="lg" fontWeight="semibold" color="gray.700" px={2}>
                   Currency
@@ -468,14 +464,10 @@ export const Navigation = React.memo(() => {
                 </Box>
 
                 <Text fontSize="lg" fontWeight="semibold" color="gray.700" px={2}>
-                  Language
+                  Translate
                 </Text>
                 <Box px={2}>
-                  <LanguageSwitcher 
-                    variant="buttons" 
-                    showLabels={true}
-                    className="w-full"
-                  />
+                  <GoogleTranslateSwitcher variant="buttons" className="w-full" />
                 </Box>
               </VStack>
 

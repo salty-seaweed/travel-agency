@@ -2154,3 +2154,118 @@ class BoatReview(models.Model):
     
     def __str__(self):
         return f"{self.reviewer_name} - {self.boat.name} ({self.rating}/5)"
+
+
+class GalleryMedia(models.Model):
+    """Standalone gallery media for showcasing photos, videos, and GIFs"""
+    MEDIA_TYPES = [
+        ('image', 'Image'),
+        ('video', 'Video'),
+        ('gif', 'GIF'),
+    ]
+    
+    # Media type and file
+    media_type = models.CharField(max_length=10, choices=MEDIA_TYPES, default='image')
+    image = models.ImageField(upload_to='gallery/images/', null=True, blank=True)
+    video = models.FileField(upload_to='gallery/videos/', null=True, blank=True)
+    video_url = models.URLField(blank=True, help_text="External video URL (YouTube, Vimeo, etc.)")
+    video_thumbnail = models.ImageField(upload_to='gallery/video_thumbnails/', null=True, blank=True)
+    
+    # Metadata
+    title = models.CharField(max_length=200, blank=True)
+    caption = models.TextField(blank=True)
+    alt_text = models.CharField(max_length=255, blank=True)
+    photographer = models.CharField(max_length=200, blank=True)
+    location = models.CharField(max_length=200, blank=True)
+    
+    # Display settings
+    display_order = models.PositiveIntegerField(default=0, help_text="Lower numbers appear first")
+    is_featured = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    
+    # Optional linking (not required - can be standalone)
+    package = models.ForeignKey(Package, on_delete=models.SET_NULL, null=True, blank=True, related_name='gallery_media')
+    resort = models.ForeignKey(Resort, on_delete=models.SET_NULL, null=True, blank=True, related_name='gallery_media')
+    boat = models.ForeignKey(Boat, on_delete=models.SET_NULL, null=True, blank=True, related_name='gallery_media')
+    
+    # Tags for filtering/searching
+    tags = models.CharField(max_length=500, blank=True, help_text="Comma-separated tags")
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['display_order', '-is_featured', '-created_at']
+        verbose_name = 'Gallery Media'
+        verbose_name_plural = 'Gallery Media'
+    
+    def __str__(self):
+        media_type_display = self.get_media_type_display()
+        title = self.title or f"{media_type_display} #{self.id}"
+        return title
+    
+    @property
+    def file_url(self):
+        """Get the URL of the media file"""
+        if self.media_type == 'image' and self.image:
+            return self.image.url
+        elif self.media_type == 'gif' and self.image:
+            return self.image.url
+        elif self.media_type == 'video':
+            if self.video:
+                return self.video.url
+            elif self.video_url:
+                return self.video_url
+        return ''
+    
+    @property
+    def thumbnail_url(self):
+        """Get the URL of the thumbnail for display"""
+        if self.media_type == 'image' or self.media_type == 'gif':
+            return self.image.url if self.image else ''
+        elif self.media_type == 'video':
+            if self.video_thumbnail:
+                return self.video_thumbnail.url
+            elif self.video:
+                return self.video.url  # Fallback to video itself
+            elif self.video_url:
+                # Try to extract thumbnail from YouTube/Vimeo URL
+                return self._extract_video_thumbnail(self.video_url)
+        return ''
+    
+    def _extract_video_thumbnail(self, url):
+        """Extract thumbnail URL from YouTube or Vimeo URL"""
+        import re
+        # YouTube
+        youtube_match = re.search(r'(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)', url)
+        if youtube_match:
+            video_id = youtube_match.group(1)
+            return f"https://img.youtube.com/vi/{video_id}/maxresdefault.jpg"
+        
+        # Vimeo
+        vimeo_match = re.search(r'vimeo\.com\/(\d+)', url)
+        if vimeo_match:
+            video_id = vimeo_match.group(1)
+            # Vimeo requires API call for thumbnail, return placeholder for now
+            return ''
+        
+        return ''
+    
+    def clean(self):
+        """Ensure only appropriate fields are set based on media type"""
+        from django.core.exceptions import ValidationError
+        
+        if self.media_type == 'image':
+            if not self.image:
+                raise ValidationError({'image': 'Image file is required for image media type.'})
+        elif self.media_type == 'gif':
+            if not self.image:
+                raise ValidationError({'image': 'GIF file is required for GIF media type.'})
+        elif self.media_type == 'video':
+            if not self.video and not self.video_url:
+                raise ValidationError({'video': 'Video file or URL is required for video media type.'})
+    
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)

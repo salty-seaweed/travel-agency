@@ -35,6 +35,7 @@ const FAQPage = React.lazy(() => import('./components/FAQPage').then(module => (
 const MaldivesInfoPage = React.lazy(() => import('./components/maldives-info').then(module => ({ default: module.MaldivesInfoPage })));
 
 const TransportationPage = React.lazy(() => import('./components/TransportationPage').then(module => ({ default: module.TransportationPage })));
+const GalleryPage = React.lazy(() => import('./components/GalleryPage').then(module => ({ default: module.GalleryPage })));
 const CustomerLogin = React.lazy(() => import('./components/auth/CustomerLogin').then(module => ({ default: module.CustomerLogin })));
 const CustomerRegister = React.lazy(() => import('./components/auth/CustomerRegister').then(module => ({ default: module.CustomerRegister })));
 const CustomerProtectedRoute = React.lazy(() => import('./components/auth/CustomerProtectedRoute').then(module => ({ default: module.CustomerProtectedRoute })));
@@ -186,6 +187,11 @@ function AppContent() {
           <Route path="transportation" element={
             <Suspense fallback={<RouteLoading />}>
               <TransportationPage />
+            </Suspense>
+          } />
+          <Route path="gallery" element={
+            <Suspense fallback={<RouteLoading />}>
+              <GalleryPage />
             </Suspense>
           } />
           {/* CMS Pages - Dynamic routing for CMS-created pages */}

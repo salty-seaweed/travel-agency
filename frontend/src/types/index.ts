@@ -1073,6 +1073,35 @@ export interface BoatBooking extends BaseEntity {
   completed_at?: string;
 }
 
+export interface GalleryMedia extends BaseEntity {
+  id: number;
+  media_type: 'image' | 'video' | 'gif';
+  image?: string | null;
+  video?: string | null;
+  video_url?: string | null;
+  video_thumbnail?: string | null;
+  title?: string;
+  caption?: string;
+  alt_text?: string;
+  photographer?: string;
+  location?: string;
+  display_order: number;
+  is_featured: boolean;
+  is_active: boolean;
+  package?: number | null;
+  resort?: number | null;
+  boat?: number | null;
+  package_name?: string;
+  resort_name?: string;
+  boat_name?: string;
+  tags?: string;
+  tags_list?: string[];
+  file_url: string;
+  thumbnail_url: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface BoatReview extends BaseEntity {
   boat: number;
   boat_name?: string;

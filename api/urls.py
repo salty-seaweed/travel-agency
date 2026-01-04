@@ -10,7 +10,8 @@ from .views import (
     resorts_by_category, resorts_by_atoll, featured_resorts,
     BoatViewSet, BoatImageViewSet, BoatActivityViewSet, BoatActivityImageViewSet, BoatPackageViewSet,
     BoatBookingViewSet, BoatReviewViewSet, BoatAmenityViewSet,
-    featured_boats, featured_boat_packages, boats_by_activity_type
+    featured_boats, featured_boat_packages, boats_by_activity_type,
+    GalleryMediaViewSet
 )
 
 router = DefaultRouter()
@@ -93,6 +94,7 @@ router.register(r'boat-packages', BoatPackageViewSet)
 router.register(r'boat-bookings', BoatBookingViewSet)
 router.register(r'boat-reviews', BoatReviewViewSet)
 router.register(r'boat-amenities', BoatAmenityViewSet)
+router.register(r'gallery-media', GalleryMediaViewSet)
 
 urlpatterns = [
     # Custom endpoints MUST come before router.urls to avoid being caught by router's pk lookup

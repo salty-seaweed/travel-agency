@@ -5,7 +5,8 @@ from .models import (
     TransferType, AtollTransfer, ResortTransfer, TransferFAQ, TransferContactMethod, 
     TransferBookingStep, TransferBenefit, TransferPricingFactor, TransferContent,
     PageHero, Resort, ResortImage, ResortReview, ResortAmenity, ResortRoomType,
-    Boat, BoatImage, BoatActivity, BoatActivityImage, BoatPackage, BoatBooking, BoatReview, BoatAmenity
+    Boat, BoatImage, BoatActivity, BoatActivityImage, BoatPackage, BoatBooking, BoatReview, BoatAmenity,
+    GalleryMedia
 )
 
 @admin.register(PropertyType)
@@ -761,3 +762,37 @@ class BoatReviewAdmin(admin.ModelAdmin):
     
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('boat', 'activity', 'booking', 'customer')
+
+
+@admin.register(GalleryMedia)
+class GalleryMediaAdmin(admin.ModelAdmin):
+    list_display = ('title', 'media_type', 'is_featured', 'is_active', 'display_order', 'created_at')
+    list_filter = ('media_type', 'is_featured', 'is_active', 'created_at')
+    search_fields = ('title', 'caption', 'photographer', 'location', 'tags')
+    list_editable = ('is_featured', 'is_active', 'display_order')
+    ordering = ('display_order', '-is_featured', '-created_at')
+    
+    fieldsets = (
+        ('Media', {
+            'fields': ('media_type', 'image', 'video', 'video_url', 'video_thumbnail')
+        }),
+        ('Information', {
+            'fields': ('title', 'caption', 'alt_text', 'photographer', 'location', 'tags')
+        }),
+        ('Optional Linking', {
+            'fields': ('package', 'resort', 'boat'),
+            'description': 'Optional: Link this media to a package, resort, or boat'
+        }),
+        ('Display Settings', {
+            'fields': ('display_order', 'is_featured', 'is_active')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    readonly_fields = ('created_at', 'updated_at')
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('package', 'resort', 'boat')

@@ -7,6 +7,7 @@ from django.db import connection
 from rest_framework import viewsets, status, serializers
 from rest_framework.generics import ListAPIView, CreateAPIView, UpdateAPIView
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter, OrderingFilter
 from django.utils import timezone
 from datetime import datetime, timedelta
 import os
@@ -23,7 +24,8 @@ from .models import (
     Language, Translation, TranslationKey, CulturalContent, RegionalSettings, LocalizedPage, LocalizedFAQ,
     AboutPageContent, AboutPageValue, AboutPageStatistic, FeaturedDestination,
     Resort, ResortImage, ResortReview, ResortAmenity, ResortRoomType,
-    Boat, BoatImage, BoatActivity, BoatActivityImage, BoatPackage, BoatBooking, BoatReview, BoatAmenity
+    Boat, BoatImage, BoatActivity, BoatActivityImage, BoatPackage, BoatBooking, BoatReview, BoatAmenity,
+    GalleryMedia
 )
 from .serializers import (
     PropertyTypeSerializer, AmenitySerializer, LocationSerializer, DestinationSerializer, ExperienceSerializer,
@@ -48,7 +50,7 @@ from .serializers import (
     ResortReviewSerializer, ResortAmenitySerializer, ResortRoomTypeSerializer,
     BoatSerializer, BoatListSerializer, BoatImageSerializer, BoatActivitySerializer, BoatActivityListSerializer,
     BoatActivityImageSerializer, BoatPackageSerializer, BoatPackageListSerializer, BoatBookingSerializer,
-    BoatReviewSerializer, BoatAmenitySerializer
+    BoatReviewSerializer, BoatAmenitySerializer, GalleryMediaSerializer
 )
 from rest_framework.decorators import permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
@@ -3493,6 +3495,41 @@ def featured_boat_packages(request):
         return Response(serializer.data)
     except Exception as e:
         return Response({'error': str(e)}, status=500)
+
+
+class GalleryMediaViewSet(viewsets.ModelViewSet):
+    """ViewSet for gallery media (images, videos, GIFs)"""
+    queryset = GalleryMedia.objects.filter(is_active=True).select_related('package', 'resort', 'boat')
+    serializer_class = GalleryMediaSerializer
+    permission_classes = [AllowAny]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = ['media_type', 'is_featured', 'package', 'resort', 'boat']
+    search_fields = ['title', 'caption', 'photographer', 'location', 'tags']
+    ordering_fields = ['display_order', 'is_featured', 'created_at']
+    ordering = ['display_order', '-is_featured', '-created_at']
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        
+        # Filter by media type
+        media_type = self.request.query_params.get('media_type')
+        if media_type:
+            queryset = queryset.filter(media_type=media_type)
+        
+        # Filter by featured
+        featured = self.request.query_params.get('featured')
+        if featured == 'true':
+            queryset = queryset.filter(is_featured=True)
+        
+        # Filter by tags
+        tags = self.request.query_params.get('tags')
+        if tags:
+            tag_list = [tag.strip() for tag in tags.split(',')]
+            queryset = queryset.filter(tags__icontains=tag_list[0])
+            for tag in tag_list[1:]:
+                queryset = queryset.filter(tags__icontains=tag)
+        
+        return queryset
 
 
 @api_view(['GET'])
