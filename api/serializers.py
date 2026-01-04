@@ -2462,15 +2462,46 @@ class GalleryMediaSerializer(serializers.ModelSerializer):
     
     def get_file_url(self, obj):
         """Get the URL of the media file"""
-        # Get the raw URL from the model property
-        raw_url = obj.file_url
-        return self._build_absolute_url(raw_url)
+        try:
+            # Get the raw URL from the model property, handling potential errors
+            if obj.media_type in ['image', 'gif'] and obj.image:
+                raw_url = obj.image.url
+            elif obj.media_type == 'video':
+                if obj.video:
+                    raw_url = obj.video.url
+                elif obj.video_url:
+                    raw_url = obj.video_url
+                else:
+                    raw_url = ''
+            else:
+                raw_url = ''
+            return self._build_absolute_url(raw_url)
+        except Exception as e:
+            # If there's an error accessing the file URL, return empty string
+            return ''
     
     def get_thumbnail_url(self, obj):
         """Get the URL of the thumbnail"""
-        # Get the raw URL from the model property
-        raw_url = obj.thumbnail_url
-        return self._build_absolute_url(raw_url)
+        try:
+            # Get the raw URL from the model property, handling potential errors
+            if obj.media_type in ['image', 'gif']:
+                raw_url = obj.image.url if obj.image else ''
+            elif obj.media_type == 'video':
+                if obj.video_thumbnail:
+                    raw_url = obj.video_thumbnail.url
+                elif obj.video:
+                    raw_url = obj.video.url
+                elif obj.video_url:
+                    # Use model's thumbnail extraction method
+                    raw_url = obj.thumbnail_url if hasattr(obj, 'thumbnail_url') else ''
+                else:
+                    raw_url = ''
+            else:
+                raw_url = ''
+            return self._build_absolute_url(raw_url)
+        except Exception as e:
+            # If there's an error accessing the file URL, return empty string
+            return ''
     
     def get_tags_list(self, obj):
         """Convert comma-separated tags to list"""
