@@ -43,7 +43,9 @@ class Command(BaseCommand):
             if path.exists() and path.is_dir():
                 return path
         
-        base_dir = Path(__file__).parent.parent.parent.parent.parent
+        # Use settings.BASE_DIR for project root
+        from django.conf import settings
+        base_dir = Path(settings.BASE_DIR)
         possible_paths = [
             Path('/app/gallery_source'),  # Docker build copies files here for production
             base_dir / 'frontend' / 'public' / 'images' / 'Gallery Media',
@@ -76,7 +78,7 @@ class Command(BaseCommand):
         self.stdout.write(f"\n[CONFIG] Django Settings:")
         self.stdout.write(f"  MEDIA_ROOT: {settings.MEDIA_ROOT}")
         self.stdout.write(f"  MEDIA_URL: {settings.MEDIA_URL}")
-        self.stdout.write(f"  BASE_DIR: {Path(__file__).parent.parent.parent.parent.parent}")
+        self.stdout.write(f"  BASE_DIR: {settings.BASE_DIR}")
         if hasattr(settings, 'DEFAULT_FILE_STORAGE'):
             self.stdout.write(f"  DEFAULT_FILE_STORAGE: {settings.DEFAULT_FILE_STORAGE}")
             if 's3' in str(settings.DEFAULT_FILE_STORAGE).lower():
