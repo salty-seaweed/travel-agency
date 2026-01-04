@@ -72,6 +72,14 @@ RUN mkdir -p /app/logs /app/media /app/staticfiles && \
     chmod 755 /app/media /app/staticfiles /app/logs && \
     chown -R appuser:appuser /app /home/appuser
 
+# Copy gallery media source files to a location accessible by populate script
+# This ensures files are available in production even if frontend folder structure differs
+RUN if [ -d "frontend/public/images/Gallery Media" ]; then \
+        mkdir -p /app/gallery_source && \
+        cp -r frontend/public/images/Gallery\ Media/* /app/gallery_source/ 2>/dev/null || true && \
+        chown -R appuser:appuser /app/gallery_source; \
+    fi
+
 # Run as root to ensure write access to mounted volumes (e.g., Railway)
 USER root
 

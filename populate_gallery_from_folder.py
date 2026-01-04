@@ -47,6 +47,7 @@ def populate_from_folder():
     # Get the folder path - try multiple possible locations
     base_dir = Path(__file__).parent
     possible_paths = [
+        Path('/app/gallery_source'),  # Docker build copies files here for production
         base_dir / 'frontend' / 'public' / 'images' / 'Gallery Media',
         base_dir / 'frontend' / 'public' / 'Gallery Media',
         base_dir / 'Gallery Media',
