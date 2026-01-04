@@ -2413,10 +2413,10 @@ class GalleryMediaSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ('created_at', 'updated_at')
     
-    def get_file_url(self, obj):
-        """Get the URL of the media file"""
-        # Get the raw URL from the model property
-        raw_url = obj.file_url
+    def _build_absolute_url(self, raw_url):
+        """Build absolute URL with proper fallbacks for production"""
+        from django.conf import settings
+        
         if not raw_url:
             return ''
         
@@ -2428,40 +2428,49 @@ class GalleryMediaSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         if request:
             try:
-                return request.build_absolute_uri(raw_url)
+                # Try build_absolute_uri first
+                absolute_url = request.build_absolute_uri(raw_url)
+                # In production, ensure HTTPS is used
+                if not settings.DEBUG and absolute_url.startswith('http://'):
+                    absolute_url = absolute_url.replace('http://', 'https://', 1)
+                return absolute_url
             except Exception:
-                # Fallback: construct URL manually
-                scheme = request.scheme
-                host = request.get_host()
-                return f"{scheme}://{host}{raw_url}"
+                # Fallback: construct URL manually from request
+                try:
+                    scheme = request.scheme
+                    # Force HTTPS in production
+                    if not settings.DEBUG:
+                        scheme = 'https'
+                    host = request.get_host()
+                    return f"{scheme}://{host}{raw_url}"
+                except Exception:
+                    pass
         
-        # Fallback: return relative URL (frontend should handle)
+        # Final fallback: use BACKEND_URL from environment if available
+        backend_url = os.getenv('BACKEND_URL', '')
+        if backend_url:
+            # Clean up backend URL (remove trailing slashes, ensure https in production)
+            backend_url = backend_url.rstrip('/')
+            if not settings.DEBUG and not backend_url.startswith('https://'):
+                backend_url = backend_url.replace('http://', 'https://', 1)
+            if not backend_url.startswith('http'):
+                backend_url = f"https://{backend_url}" if not settings.DEBUG else f"http://{backend_url}"
+            return f"{backend_url}{raw_url}"
+        
+        # Last resort: return relative URL (frontend should handle)
         return raw_url
+    
+    def get_file_url(self, obj):
+        """Get the URL of the media file"""
+        # Get the raw URL from the model property
+        raw_url = obj.file_url
+        return self._build_absolute_url(raw_url)
     
     def get_thumbnail_url(self, obj):
         """Get the URL of the thumbnail"""
         # Get the raw URL from the model property
         raw_url = obj.thumbnail_url
-        if not raw_url:
-            return ''
-        
-        # If already absolute URL, return as-is
-        if raw_url.startswith('http://') or raw_url.startswith('https://'):
-            return raw_url
-        
-        # Try to build absolute URL from request context
-        request = self.context.get('request')
-        if request:
-            try:
-                return request.build_absolute_uri(raw_url)
-            except Exception:
-                # Fallback: construct URL manually
-                scheme = request.scheme
-                host = request.get_host()
-                return f"{scheme}://{host}{raw_url}"
-        
-        # Fallback: return relative URL (frontend should handle)
-        return raw_url
+        return self._build_absolute_url(raw_url)
     
     def get_tags_list(self, obj):
         """Convert comma-separated tags to list"""
