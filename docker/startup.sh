@@ -23,6 +23,15 @@ python manage.py migrate --verbosity=1
 echo "🎨 Collecting static files..."
 python manage.py collectstatic --noinput --clear --verbosity=1
 
+# Populate gallery media if source files are available (idempotent - only runs if gallery is empty)
+echo "📸 Checking gallery media..."
+if [ -d "/app/gallery_source" ] && [ "$(ls -A /app/gallery_source 2>/dev/null)" ]; then
+    echo "🎨 Populating gallery media from source files..."
+    python manage.py populate_gallery_media || echo "⚠️  Gallery population failed or skipped (this is OK if gallery already has items)"
+else
+    echo "ℹ️  Gallery source files not found, skipping gallery population"
+fi
+
 # Start gunicorn
 echo "🌐 Starting Gunicorn server..."
 exec gunicorn travel_agency.wsgi:application \

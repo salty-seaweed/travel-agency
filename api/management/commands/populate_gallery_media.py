@@ -118,6 +118,13 @@ class Command(BaseCommand):
         if options['clear']:
             deleted_count = self.clear_existing_gallery()
         
+        # Check if gallery already has items (for idempotency - skip if not clearing)
+        existing_count = GalleryMedia.objects.filter(is_active=True).count()
+        if existing_count > 0 and not options['clear']:
+            self.stdout.write(self.style.WARNING(f"\n  [INFO] Gallery already has {existing_count} items. Skipping population."))
+            self.stdout.write(self.style.WARNING(f"  [INFO] Use --clear flag to clear existing items and repopulate."))
+            return
+        
         # Find gallery folder
         custom_folder = options.get('folder')
         gallery_folder = self.find_gallery_folder(custom_folder)
