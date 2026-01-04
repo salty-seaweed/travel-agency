@@ -19,6 +19,7 @@ from api.models import GalleryMedia
 from django.core.files import File
 from django.core.files.base import ContentFile
 from django.conf import settings
+from django.db import connection
 
 def clear_existing_gallery():
     """Delete all existing gallery media"""
@@ -43,12 +44,30 @@ def populate_from_folder():
     """Populate gallery from files in frontend/public/images/Gallery Media"""
     print("\n[POPULATING] Adding files from Gallery Media folder...")
     
-    # Get the folder path
+    # Get the folder path - try multiple possible locations
     base_dir = Path(__file__).parent
-    gallery_folder = base_dir / 'frontend' / 'public' / 'images' / 'Gallery Media'
+    possible_paths = [
+        base_dir / 'frontend' / 'public' / 'images' / 'Gallery Media',
+        base_dir / 'frontend' / 'public' / 'Gallery Media',
+        base_dir / 'Gallery Media',
+        Path('/app/frontend/public/images/Gallery Media'),  # Railway/Docker path
+        Path('/app/Gallery Media'),  # Alternative Railway path
+    ]
     
-    if not gallery_folder.exists():
-        print(f"  [ERROR] Folder not found: {gallery_folder}")
+    gallery_folder = None
+    for path in possible_paths:
+        if path.exists() and path.is_dir():
+            gallery_folder = path
+            print(f"  [INFO] Found gallery folder at: {gallery_folder}")
+            break
+    
+    if not gallery_folder:
+        print(f"  [ERROR] Gallery Media folder not found in any of these locations:")
+        for path in possible_paths:
+            print(f"    - {path}")
+        print(f"\n  [NOTE] In production, you may need to:")
+        print(f"    1. Upload files to the server first")
+        print(f"    2. Or use a script that downloads from URLs (like resort scripts)")
         return 0
     
     # Get all files
@@ -100,39 +119,57 @@ def populate_from_folder():
                 print(f"  [SKIP] Already exists: {filename} (ID: {existing.id})")
                 continue
             
-            # Read file content
-            with open(file_path, 'rb') as f:
-                file_content = f.read()
-            
-            # Create ContentFile from file content
-            content_file = ContentFile(file_content, name=filename)
-            
-            # Create GalleryMedia entry WITH the file in create() to satisfy validation
+            # Use the EXACT same pattern as resort scripts: File(f) directly from open file
+            # This is the key difference - resort scripts use File(f), not ContentFile
             if media_type == 'video':
-                gallery_media = GalleryMedia.objects.create(
+                # For videos, use temporary video_url to pass validation, then replace with file
+                gallery_media = GalleryMedia(
                     media_type='video',
-                    video=content_file,  # Set file directly in create()
+                    video_url='https://temp.com/video.mp4',  # Temporary to pass validation
                     title=title or f"Video {idx + 1}",
                     caption=f"Video from gallery collection",
-                    alt_text=filename,  # Use filename for duplicate detection
+                    alt_text=filename,
                     display_order=idx * 10,
                     is_featured=False,
                     is_active=True,
                     tags="gallery,video"
                 )
+                # Save object first (passes validation because video_url is set)
+                gallery_media.save()
+                # Now save the actual file using field.save() with File(f) - EXACT pattern from resort scripts
+                with open(file_path, 'rb') as f:
+                    gallery_media.video.save(
+                        filename,
+                        File(f),  # Use File(f) directly, not ContentFile
+                        save=True
+                    )
+                # Clear temporary video_url
+                gallery_media.video_url = ''
+                gallery_media.save(update_fields=['video_url'])
                 video_count += 1
             else:
-                gallery_media = GalleryMedia.objects.create(
+                # For images, use the EXACT same pattern as resort scripts:
+                # Create object first with skip_validation, then use field.save() with File(f)
+                gallery_media = GalleryMedia(
                     media_type='image' if media_type != 'gif' else 'gif',
-                    image=content_file,  # Set file directly in create()
                     title=title or f"Image {idx + 1}",
                     caption=f"Image from gallery collection",
-                    alt_text=filename,  # Use filename for duplicate detection
+                    alt_text=filename,
                     display_order=idx * 10,
                     is_featured=False,
                     is_active=True,
                     tags="gallery,image"
                 )
+                # Save object first WITHOUT image, skipping validation
+                gallery_media.save(skip_validation=True)
+                
+                # Now add the file using field.save() - EXACT pattern from resort scripts
+                with open(file_path, 'rb') as f:
+                    gallery_media.image.save(
+                        filename,
+                        File(f),  # Use File(f) directly - EXACT pattern from resort scripts
+                        save=True
+                    )
                 image_count += 1
             
             # Verify file was saved

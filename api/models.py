@@ -2256,6 +2256,11 @@ class GalleryMedia(models.Model):
         """Ensure only appropriate fields are set based on media type"""
         from django.core.exceptions import ValidationError
         
+        # Skip validation if we're in the middle of saving a file (field.save() was called)
+        # This allows us to create the object first, then add the file
+        if hasattr(self, '_skip_validation'):
+            return
+        
         if self.media_type == 'image':
             if not self.image:
                 raise ValidationError({'image': 'Image file is required for image media type.'})
@@ -2267,5 +2272,13 @@ class GalleryMedia(models.Model):
                 raise ValidationError({'video': 'Video file or URL is required for video media type.'})
     
     def save(self, *args, **kwargs):
-        self.clean()
+        # Allow skipping validation for file uploads
+        skip_validation = kwargs.pop('skip_validation', False)
+        if skip_validation:
+            self._skip_validation = True
+        try:
+            self.clean()
+        finally:
+            if hasattr(self, '_skip_validation'):
+                delattr(self, '_skip_validation')
         super().save(*args, **kwargs)
