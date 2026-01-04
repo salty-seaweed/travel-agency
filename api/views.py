@@ -3508,6 +3508,12 @@ class GalleryMediaViewSet(viewsets.ModelViewSet):
     ordering_fields = ['display_order', 'is_featured', 'created_at']
     ordering = ['display_order', '-is_featured', '-created_at']
     
+    def get_serializer_context(self):
+        """Ensure request is in serializer context for building absolute URLs"""
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+    
     def get_queryset(self):
         queryset = super().get_queryset()
         

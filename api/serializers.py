@@ -2415,21 +2415,53 @@ class GalleryMediaSerializer(serializers.ModelSerializer):
     
     def get_file_url(self, obj):
         """Get the URL of the media file"""
-        if obj.file_url:
-            request = self.context.get('request')
-            if request and not obj.file_url.startswith('http'):
-                return request.build_absolute_uri(obj.file_url)
-            return obj.file_url
-        return ''
+        # Get the raw URL from the model property
+        raw_url = obj.file_url
+        if not raw_url:
+            return ''
+        
+        # If already absolute URL, return as-is
+        if raw_url.startswith('http://') or raw_url.startswith('https://'):
+            return raw_url
+        
+        # Try to build absolute URL from request context
+        request = self.context.get('request')
+        if request:
+            try:
+                return request.build_absolute_uri(raw_url)
+            except Exception:
+                # Fallback: construct URL manually
+                scheme = request.scheme
+                host = request.get_host()
+                return f"{scheme}://{host}{raw_url}"
+        
+        # Fallback: return relative URL (frontend should handle)
+        return raw_url
     
     def get_thumbnail_url(self, obj):
         """Get the URL of the thumbnail"""
-        if obj.thumbnail_url:
-            request = self.context.get('request')
-            if request and not obj.thumbnail_url.startswith('http'):
-                return request.build_absolute_uri(obj.thumbnail_url)
-            return obj.thumbnail_url
-        return ''
+        # Get the raw URL from the model property
+        raw_url = obj.thumbnail_url
+        if not raw_url:
+            return ''
+        
+        # If already absolute URL, return as-is
+        if raw_url.startswith('http://') or raw_url.startswith('https://'):
+            return raw_url
+        
+        # Try to build absolute URL from request context
+        request = self.context.get('request')
+        if request:
+            try:
+                return request.build_absolute_uri(raw_url)
+            except Exception:
+                # Fallback: construct URL manually
+                scheme = request.scheme
+                host = request.get_host()
+                return f"{scheme}://{host}{raw_url}"
+        
+        # Fallback: return relative URL (frontend should handle)
+        return raw_url
     
     def get_tags_list(self, obj):
         """Convert comma-separated tags to list"""

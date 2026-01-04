@@ -127,6 +127,23 @@ export function GalleryPage() {
     }
   }, [isOpen]);
 
+  // Helper function to ensure absolute URLs
+  const ensureAbsoluteUrl = (url: string): string => {
+    if (!url) return '';
+    // If already absolute, return as-is
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+    // If relative, construct absolute URL using API base URL
+    if (url.startsWith('/')) {
+      // Extract base URL from apiBaseUrl (remove /api suffix if present)
+      const baseUrl = config.apiBaseUrl.replace(/\/api\/?$/, '');
+      return `${baseUrl}${url}`;
+    }
+    // If relative without leading slash, prepend API base
+    return `${config.apiBaseUrl}/${url}`;
+  };
+
   // Fetch gallery media
   useEffect(() => {
     const fetchGalleryMedia = async () => {
@@ -140,7 +157,13 @@ export function GalleryPage() {
         const data = await response.json();
         // Handle paginated or non-paginated response
         const items = Array.isArray(data) ? data : (data.results || []);
-        setGalleryItems(items);
+        // Ensure all URLs are absolute
+        const itemsWithAbsoluteUrls = items.map((item: GalleryMediaItem) => ({
+          ...item,
+          file_url: ensureAbsoluteUrl(item.file_url),
+          thumbnail_url: ensureAbsoluteUrl(item.thumbnail_url),
+        }));
+        setGalleryItems(itemsWithAbsoluteUrls);
       } catch (err) {
         console.error('Error fetching gallery media:', err);
         setError(err instanceof Error ? err.message : 'Failed to load gallery');
