@@ -2415,6 +2415,7 @@ class GalleryMediaSerializer(serializers.ModelSerializer):
     
     def _build_absolute_url(self, raw_url):
         """Build absolute URL with proper fallbacks for production"""
+        import os
         from django.conf import settings
         
         if not raw_url:
@@ -2424,38 +2425,36 @@ class GalleryMediaSerializer(serializers.ModelSerializer):
         if raw_url.startswith('http://') or raw_url.startswith('https://'):
             return raw_url
         
-        # Try to build absolute URL from request context
+        # In production, prioritize BACKEND_URL to ensure media is accessible from Railway
+        # This is critical when frontend is on Vercel and backend is on Railway
+        backend_url = os.getenv('BACKEND_URL', '')
+        if backend_url and not settings.DEBUG:
+            # Clean up backend URL (remove trailing slashes, ensure https in production)
+            backend_url = backend_url.rstrip('/')
+            if not backend_url.startswith('https://'):
+                backend_url = backend_url.replace('http://', 'https://', 1)
+            if not backend_url.startswith('http'):
+                backend_url = f"https://{backend_url}"
+            # Ensure raw_url starts with / if it's a relative path
+            if raw_url and not raw_url.startswith('/'):
+                raw_url = '/' + raw_url
+            return f"{backend_url}{raw_url}"
+        
+        # Try to build absolute URL from request context (for development or if BACKEND_URL not set)
         request = self.context.get('request')
         if request:
             try:
-                # Try build_absolute_uri first
+                # Use the same simple pattern as ResortImageSerializer and PackageImageSerializer
                 absolute_url = request.build_absolute_uri(raw_url)
                 # In production, ensure HTTPS is used
                 if not settings.DEBUG and absolute_url.startswith('http://'):
                     absolute_url = absolute_url.replace('http://', 'https://', 1)
                 return absolute_url
-            except Exception:
-                # Fallback: construct URL manually from request
-                try:
-                    scheme = request.scheme
-                    # Force HTTPS in production
-                    if not settings.DEBUG:
-                        scheme = 'https'
-                    host = request.get_host()
-                    return f"{scheme}://{host}{raw_url}"
-                except Exception:
-                    pass
-        
-        # Final fallback: use BACKEND_URL from environment if available
-        backend_url = os.getenv('BACKEND_URL', '')
-        if backend_url:
-            # Clean up backend URL (remove trailing slashes, ensure https in production)
-            backend_url = backend_url.rstrip('/')
-            if not settings.DEBUG and not backend_url.startswith('https://'):
-                backend_url = backend_url.replace('http://', 'https://', 1)
-            if not backend_url.startswith('http'):
-                backend_url = f"https://{backend_url}" if not settings.DEBUG else f"http://{backend_url}"
-            return f"{backend_url}{raw_url}"
+            except Exception as e:
+                # Log the error for debugging but continue to fallback
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.warning(f"Failed to build absolute URL from request: {e}")
         
         # Last resort: return relative URL (frontend should handle)
         return raw_url
@@ -2470,14 +2469,50 @@ class GalleryMediaSerializer(serializers.ModelSerializer):
                 if obj.video:
                     raw_url = obj.video.url
                 elif obj.video_url:
+                    # External video URL - return as-is if already absolute
+                    if obj.video_url.startswith('http://') or obj.video_url.startswith('https://'):
+                        return obj.video_url
                     raw_url = obj.video_url
                 else:
-                    raw_url = ''
+                    return ''
             else:
-                raw_url = ''
+                return ''
+            
+            if not raw_url:
+                return ''
+            
+            # In production, prioritize BACKEND_URL to ensure media is accessible from Railway
+            # This is critical when frontend is on Vercel and backend is on Railway
+            import os
+            from django.conf import settings
+            backend_url = os.getenv('BACKEND_URL', '')
+            if backend_url and not settings.DEBUG and raw_url.startswith('/'):
+                backend_url = backend_url.rstrip('/')
+                if not backend_url.startswith('https://'):
+                    backend_url = backend_url.replace('http://', 'https://', 1)
+                if not backend_url.startswith('http'):
+                    backend_url = f"https://{backend_url}"
+                return f"{backend_url}{raw_url}"
+            
+            # Use the same simple pattern as other working serializers (for development)
+            request = self.context.get('request')
+            if request and raw_url.startswith('/'):
+                try:
+                    absolute_url = request.build_absolute_uri(raw_url)
+                    # In production, ensure HTTPS is used
+                    if not settings.DEBUG and absolute_url.startswith('http://'):
+                        absolute_url = absolute_url.replace('http://', 'https://', 1)
+                    return absolute_url
+                except Exception:
+                    pass
+            
+            # Fallback to the more complex method if simple approach fails
             return self._build_absolute_url(raw_url)
         except Exception as e:
-            # If there's an error accessing the file URL, return empty string
+            # If there's an error accessing the file URL, log and return empty string
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error getting file URL for gallery media {obj.id}: {e}")
             return ''
     
     def get_thumbnail_url(self, obj):
@@ -2498,9 +2533,42 @@ class GalleryMediaSerializer(serializers.ModelSerializer):
                     raw_url = ''
             else:
                 raw_url = ''
+            
+            if not raw_url:
+                return ''
+            
+            # In production, prioritize BACKEND_URL to ensure media is accessible from Railway
+            # This is critical when frontend is on Vercel and backend is on Railway
+            import os
+            from django.conf import settings
+            backend_url = os.getenv('BACKEND_URL', '')
+            if backend_url and not settings.DEBUG and raw_url.startswith('/'):
+                backend_url = backend_url.rstrip('/')
+                if not backend_url.startswith('https://'):
+                    backend_url = backend_url.replace('http://', 'https://', 1)
+                if not backend_url.startswith('http'):
+                    backend_url = f"https://{backend_url}"
+                return f"{backend_url}{raw_url}"
+            
+            # Use the same simple pattern as other working serializers (for development)
+            request = self.context.get('request')
+            if request and raw_url.startswith('/'):
+                try:
+                    absolute_url = request.build_absolute_uri(raw_url)
+                    # In production, ensure HTTPS is used
+                    if not settings.DEBUG and absolute_url.startswith('http://'):
+                        absolute_url = absolute_url.replace('http://', 'https://', 1)
+                    return absolute_url
+                except Exception:
+                    pass
+            
+            # Fallback to the more complex method if simple approach fails
             return self._build_absolute_url(raw_url)
         except Exception as e:
-            # If there's an error accessing the file URL, return empty string
+            # If there's an error accessing the file URL, log and return empty string
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error getting thumbnail URL for gallery media {obj.id}: {e}")
             return ''
     
     def get_tags_list(self, obj):
