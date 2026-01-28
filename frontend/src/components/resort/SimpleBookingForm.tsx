@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { XMarkIcon, PhoneIcon, EnvelopeIcon, GiftIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, PhoneIcon, EnvelopeIcon, GiftIcon, CreditCardIcon } from '@heroicons/react/24/outline';
 import { useNotification } from '../../hooks';
 import { useTranslation } from '../../i18n';
 import { useWhatsApp } from '../../hooks/useQueries';
@@ -360,6 +360,32 @@ ${formData.specialRequests ? `💬 *Special Requests:*\n${formData.specialReques
             </div>
 
             <div className="simple-booking-actions">
+              <button
+                type="button"
+                onClick={() => {
+                  // Calculate total price based on nights and room price
+                  const checkIn = new Date(formData.checkIn);
+                  const checkOut = new Date(formData.checkOut);
+                  const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
+                  const roomPrice = (resort as any)?.price_per_night_from || (resort as any)?.price_per_night || 200;
+                  const totalAmount = roomPrice * nights * formData.rooms;
+                  const description = `${resort.name} - ${nights} night(s), ${formData.rooms} room(s)`;
+                  window.location.href = `/payment/checkout?amount=${totalAmount}&description=${encodeURIComponent(description)}&currency=USD&customer_name=${encodeURIComponent(formData.name)}&customer_email=${encodeURIComponent(formData.email)}&customer_phone=${encodeURIComponent(formData.phone)}`;
+                }}
+                className="simple-booking-button"
+                style={{
+                  backgroundColor: '#805AD5',
+                  color: 'white',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                }}
+              >
+                <CreditCardIcon style={{ width: '20px', height: '20px' }} />
+                {t('simpleBooking.actions.payNow', 'Pay Now with BML')}
+              </button>
+              
               <button
                 type="button"
                 onClick={handleWhatsAppDirect}

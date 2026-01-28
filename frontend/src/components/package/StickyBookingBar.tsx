@@ -21,6 +21,7 @@ import {
   HeartIcon,
   ShareIcon,
   ChatBubbleLeftRightIcon,
+  CreditCardIcon,
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import { useCurrency } from '../../contexts/CurrencyContext';
@@ -145,8 +146,25 @@ export function StickyBookingBar({
               <Icon as={ShareIcon} h={4} w={4} />
             </Button>
             
-            <Button colorScheme="green" size="sm" onClick={onBookNow} flex={1} minW="120px">
-              <Icon as={ChatBubbleLeftRightIcon} h={4} w={4} mr={2} />
+            <Button 
+              colorScheme="purple" 
+              size="sm" 
+              onClick={() => {
+                const currentPrice = selectedVariant
+                  ? parseFloat(String(selectedVariant.price))
+                  : parseFloat(typeof packageData.price === 'string' ? packageData.price.replace(/[^0-9.]/g, '') : (packageData.price as any));
+                const description = `${packageData.name} - Package Booking`;
+                window.location.href = `/payment/checkout?amount=${currentPrice}&description=${encodeURIComponent(description)}&currency=USD`;
+              }}
+              flex={1}
+              minW="100px"
+            >
+              <Icon as={CreditCardIcon} h={4} w={4} mr={1} />
+              Pay Now
+            </Button>
+            
+            <Button colorScheme="green" size="sm" onClick={onBookNow} flex={1} minW="100px">
+              <Icon as={ChatBubbleLeftRightIcon} h={4} w={4} mr={1} />
               Book
             </Button>
           </HStack>

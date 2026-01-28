@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { XMarkIcon, GiftIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, GiftIcon, CheckCircleIcon, CreditCardIcon } from '@heroicons/react/24/outline';
 import { whatsappBooking } from '../../services/whatsapp-booking';
 import { useWhatsApp } from '../../hooks/useQueries';
 import { Resort } from '../../types';
@@ -313,6 +313,30 @@ ${packageBenefits.length > 0 ? `✨ *Additional Benefits:*\n${packageBenefits.ma
                         placeholder="Any special requests or questions..."
                       />
                     </div>
+
+                    {/* Pay Now Button */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!formData.checkIn) {
+                          alert('Please select a check-in date first');
+                          return;
+                        }
+                        // Extract price from package price string (e.g., "$1,500" -> 1500)
+                        const priceStr = packagePrice.replace(/[^0-9.]/g, '');
+                        const amount = parseFloat(priceStr) || 0;
+                        if (amount === 0) {
+                          alert('Package price not available. Please contact us via WhatsApp.');
+                          return;
+                        }
+                        const description = `${resort.name} - ${packageOffer?.title || 'Package Booking'}`;
+                        window.location.href = `/payment/checkout?amount=${amount}&description=${encodeURIComponent(description)}&currency=USD&customer_name=${encodeURIComponent(formData.name)}&customer_email=${encodeURIComponent(formData.email)}&customer_phone=${encodeURIComponent(formData.phone)}`;
+                      }}
+                      className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 mb-3"
+                    >
+                      <CreditCardIcon className="h-5 w-5" />
+                      Pay Now with BML
+                    </button>
 
                     {/* Submit Button */}
                     <button

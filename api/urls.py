@@ -124,6 +124,16 @@ urlpatterns = [
     path('boat-packages/featured/', featured_boat_packages, name='featured_boat_packages'),
     path('boats/by-activity-type/', boats_by_activity_type, name='boats_by_activity_type'),
     
+    # Payment Gateway endpoints
+    path('payments/create/', views.create_payment, name='create_payment'),
+    path('payments/links/create/', views.create_payment_link, name='create_payment_link'),
+    path('payments/links/<str:token>/', views.get_payment_link, name='get_payment_link'),
+    path('payments/links/', views.list_payment_links, name='list_payment_links'),
+    path('payments/<int:payment_id>/status/', views.get_payment_status, name='get_payment_status'),
+    path('payments/', views.list_payments, name='list_payments'),
+    path('payments/webhook/', views.bml_webhook, name='bml_webhook'),
+    path('merchant-info/', views.get_merchant_info, name='get_merchant_info'),
+    
     # Router URLs last (catches /<resource>/ and /<resource>/<pk>/)
     path('', include(router.urls)),
     path('pages/', include(router.urls)),

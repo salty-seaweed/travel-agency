@@ -201,6 +201,29 @@ export function Footer() {
         </VStack>
 
         <VStack spacing={4}>
+          {/* Payment Method Logos - BML Compliance Requirement #1 */}
+          <Box textAlign="center" py={2}>
+            <Text fontSize="xs" color="gray.500" mb={2}>
+              We Accept:
+            </Text>
+            <HStack spacing={3} justify="center" flexWrap="wrap">
+              <Text fontSize="xs" fontWeight="semibold" color="gray.600">
+                Visa
+              </Text>
+              <Text fontSize="xs" color="gray.400">•</Text>
+              <Text fontSize="xs" fontWeight="semibold" color="gray.600">
+                Mastercard
+              </Text>
+              <Text fontSize="xs" color="gray.400">•</Text>
+              <Text fontSize="xs" fontWeight="semibold" color="gray.600">
+                American Express
+              </Text>
+            </HStack>
+            <Text fontSize="xs" color="gray.500" mt={1}>
+              Secure payment via Bank of Maldives
+            </Text>
+          </Box>
+
           <HStack spacing={6} flexWrap="wrap" justify="center">
             <Link to="/terms">
               <Text fontSize="sm" _hover={{ color: linkHoverColor }}>

@@ -6,7 +6,7 @@ from .models import (
     TransferBookingStep, TransferBenefit, TransferPricingFactor, TransferContent,
     PageHero, Resort, ResortImage, ResortReview, ResortAmenity, ResortRoomType,
     Boat, BoatImage, BoatActivity, BoatActivityImage, BoatPackage, BoatBooking, BoatReview, BoatAmenity,
-    GalleryMedia
+    GalleryMedia, Payment, PaymentLink, MerchantInfo
 )
 
 @admin.register(PropertyType)
@@ -796,3 +796,94 @@ class GalleryMediaAdmin(admin.ModelAdmin):
     
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('package', 'resort', 'boat')
+
+
+# Payment Gateway Admin Models
+@admin.register(Payment)
+class PaymentAdmin(admin.ModelAdmin):
+    list_display = ('transaction_id', 'amount', 'currency', 'status', 'customer_name', 'customer_email', 'created_at')
+    list_filter = ('status', 'currency', 'payment_method', 'created_at')
+    search_fields = ('transaction_id', 'bml_reference', 'customer_name', 'customer_email', 'customer_phone')
+    readonly_fields = ('transaction_id', 'bml_reference', 'bml_session_id', 'bml_payment_url', 'webhook_data', 'created_at', 'updated_at', 'completed_at', 'is_successful', 'is_pending')
+    fieldsets = (
+        ('Transaction Information', {
+            'fields': ('transaction_id', 'bml_reference', 'bml_session_id', 'bml_payment_url', 'amount', 'currency', 'status', 'payment_method')
+        }),
+        ('Customer Information', {
+            'fields': ('customer_name', 'customer_email', 'customer_phone', 'customer_info')
+        }),
+        ('Related Booking', {
+            'fields': ('booking',)
+        }),
+        ('Payment Details', {
+            'fields': ('description', 'webhook_data')
+        }),
+        ('Status', {
+            'fields': ('is_successful', 'is_pending')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at', 'completed_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('booking')
+
+
+@admin.register(PaymentLink)
+class PaymentLinkAdmin(admin.ModelAdmin):
+    list_display = ('token', 'amount', 'currency', 'status', 'customer_name', 'customer_email', 'expires_at', 'created_at')
+    list_filter = ('status', 'currency', 'created_at', 'expires_at')
+    search_fields = ('token', 'customer_name', 'customer_email', 'customer_phone', 'description')
+    readonly_fields = ('token', 'status', 'payment', 'created_at', 'updated_at', 'used_at', 'is_valid', 'is_expired')
+    fieldsets = (
+        ('Payment Information', {
+            'fields': ('token', 'amount', 'currency', 'description', 'status')
+        }),
+        ('Customer Information', {
+            'fields': ('customer_name', 'customer_email', 'customer_phone')
+        }),
+        ('Expiration', {
+            'fields': ('expires_at', 'is_expired', 'is_valid')
+        }),
+        ('Related Payment', {
+            'fields': ('payment',)
+        }),
+        ('Admin Information', {
+            'fields': ('created_by', 'notes')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at', 'used_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('created_by', 'payment')
+
+
+@admin.register(MerchantInfo)
+class MerchantInfoAdmin(admin.ModelAdmin):
+    list_display = ('trading_name', 'company_name', 'email', 'phone', 'is_active', 'updated_at')
+    list_filter = ('is_active', 'created_at', 'updated_at')
+    search_fields = ('trading_name', 'company_name', 'email', 'phone')
+    readonly_fields = ('created_at', 'updated_at')
+    fieldsets = (
+        ('Company Information', {
+            'fields': ('trading_name', 'company_name', 'registration_number')
+        }),
+        ('Address Information', {
+            'fields': ('complete_address', 'postal_address')
+        }),
+        ('Contact Information', {
+            'fields': ('email', 'phone', 'customer_service_email', 'customer_service_phone', 'website')
+        }),
+        ('Settings', {
+            'fields': ('is_active',)
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )

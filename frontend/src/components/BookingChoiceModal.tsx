@@ -29,6 +29,7 @@ import {
   CalendarIcon,
   MapPinIcon,
   CurrencyDollarIcon,
+  CreditCardIcon,
 } from '@heroicons/react/24/outline';
 import { whatsappBooking } from '../services/whatsapp-booking';
 import type { Package } from '../types';
@@ -240,7 +241,59 @@ export function BookingChoiceModal({ isOpen, onClose, package: pkg, onFormBookin
                 <div className="flex-1 h-px bg-gray-200"></div>
               </div>
 
-              {/* Option 2: Booking Form */}
+              {/* Option 2: Pay Now with BML */}
+              <Card 
+                className="w-full cursor-pointer hover:shadow-lg transition-all duration-300 border-2 border-transparent hover:border-purple-200"
+                onClick={() => {
+                  const currentPrice = selectedVariant
+                    ? parseFloat(String(selectedVariant.price))
+                    : parseFloat(typeof pkg.price === 'string' ? (pkg.price as any).replace(/[^0-9.]/g, '') : (pkg.price as any));
+                  const description = `${pkg.name} - ${getDestinationsLabel()}`;
+                  window.location.href = `/payment/checkout?amount=${currentPrice}&description=${encodeURIComponent(description)}&currency=USD`;
+                }}
+              >
+                <CardBody className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl flex items-center justify-center">
+                        <Icon as={CreditCardIcon} className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <Heading size="md" className="text-gray-900 mb-1">
+                          {t('bookingModal.payNow.title', 'Pay Now with BML')}
+                        </Heading>
+                        <Text className="text-gray-600 text-sm">
+                          {t('bookingModal.payNow.description', 'Secure payment via Bank of Maldives')}
+                        </Text>
+                      </div>
+                    </div>
+                    <Icon as={ArrowRightIcon} className="w-5 h-5 text-gray-400" />
+                  </div>
+                  
+                  <div className="mt-4 grid grid-cols-3 gap-4 text-xs text-gray-500">
+                    <div className="flex items-center gap-1">
+                      <Icon as={ShieldCheckIcon} className="w-3 h-3 text-green-500" />
+                      <span>{t('bookingModal.payNow.features.secure', 'Secure')}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Icon as={ClockIcon} className="w-3 h-3 text-blue-500" />
+                      <span>{t('bookingModal.payNow.features.instant', 'Instant')}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Icon as={CurrencyDollarIcon} className="w-3 h-3 text-yellow-500" />
+                      <span>{t('bookingModal.payNow.features.usd', 'USD')}</span>
+                    </div>
+                  </div>
+                </CardBody>
+              </Card>
+
+              <div className="flex items-center w-full">
+                <div className="flex-1 h-px bg-gray-200"></div>
+                <Text className="px-4 text-gray-500 text-sm font-medium">{t('bookingModal.or', 'OR')}</Text>
+                <div className="flex-1 h-px bg-gray-200"></div>
+              </div>
+
+              {/* Option 3: Booking Form */}
               <Card
                 className={`w-full cursor-pointer hover:shadow-lg transition-all duration-300 border-2 border-transparent hover:border-blue-200 ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
                 onClick={handleFormBooking}

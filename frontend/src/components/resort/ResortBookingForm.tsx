@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, CreditCardIcon } from '@heroicons/react/24/outline';
 import { getWhatsAppUrl } from '../../config';
 import { Resort } from '../../types';
 import { useWhatsApp } from '../../hooks/useQueries';
@@ -215,20 +215,43 @@ ${formData.message ? `Message: ${formData.message}` : ''}`;
             </div>
 
             {/* Submit Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-200">
+            <div className="flex flex-col gap-3 pt-4 border-t border-gray-200">
               <button
                 type="button"
-                onClick={onClose}
-                className="flex-1 border border-gray-300 text-gray-700 py-3 px-6 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+                onClick={() => {
+                  if (!formData.checkIn || !formData.checkOut) {
+                    alert('Please select check-in and check-out dates first');
+                    return;
+                  }
+                  const checkIn = new Date(formData.checkIn);
+                  const checkOut = new Date(formData.checkOut);
+                  const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
+                  const roomPrice = (resort as any)?.price_per_night_from || (resort as any)?.price_per_night || 200;
+                  const totalAmount = roomPrice * nights * parseInt(formData.adults || '2');
+                  const description = `${resort.name} - ${nights} night(s), ${formData.adults} adult(s)`;
+                  window.location.href = `/payment/checkout?amount=${totalAmount}&description=${encodeURIComponent(description)}&currency=USD&customer_name=${encodeURIComponent(`${formData.firstName} ${formData.lastName}`)}&customer_email=${encodeURIComponent(formData.email)}&customer_phone=${encodeURIComponent(formData.phone)}`;
+                }}
+                className="w-full bg-purple-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-purple-700 transition-colors flex items-center justify-center gap-2"
               >
-                Cancel
+                <CreditCardIcon className="h-5 w-5" />
+                Pay Now with BML
               </button>
-              <button
-                type="submit"
-                className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 transition-colors"
-              >
-                Submit Booking Request
-              </button>
+              
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="flex-1 border border-gray-300 text-gray-700 py-3 px-6 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                >
+                  Submit Booking Request
+                </button>
+              </div>
             </div>
 
             <p className="text-xs text-gray-500 text-center">

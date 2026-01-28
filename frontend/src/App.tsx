@@ -36,6 +36,18 @@ const MaldivesInfoPage = React.lazy(() => import('./components/maldives-info').t
 
 const TransportationPage = React.lazy(() => import('./components/TransportationPage').then(module => ({ default: module.TransportationPage })));
 const GalleryPage = React.lazy(() => import('./components/GalleryPage').then(module => ({ default: module.GalleryPage })));
+
+// Payment components
+const PaymentCheckout = React.lazy(() => import('./components/payment/PaymentCheckout').then(module => ({ default: module.PaymentCheckout })));
+const PaymentSuccess = React.lazy(() => import('./components/payment/PaymentSuccess').then(module => ({ default: module.PaymentSuccess })));
+const PaymentFailure = React.lazy(() => import('./components/payment/PaymentFailure').then(module => ({ default: module.PaymentFailure })));
+const StandalonePaymentPage = React.lazy(() => import('./components/payment/StandalonePaymentPage').then(module => ({ default: module.StandalonePaymentPage })));
+
+// Policy pages
+const TermsPage = React.lazy(() => import('./components/policy/TermsPage').then(module => ({ default: module.TermsPage })));
+const PrivacyPage = React.lazy(() => import('./components/policy/PrivacyPage').then(module => ({ default: module.PrivacyPage })));
+const RefundPage = React.lazy(() => import('./components/policy/RefundPage').then(module => ({ default: module.RefundPage })));
+const SecurityPage = React.lazy(() => import('./components/policy/SecurityPage').then(module => ({ default: module.SecurityPage })));
 const CustomerLogin = React.lazy(() => import('./components/auth/CustomerLogin').then(module => ({ default: module.CustomerLogin })));
 const CustomerRegister = React.lazy(() => import('./components/auth/CustomerRegister').then(module => ({ default: module.CustomerRegister })));
 const CustomerProtectedRoute = React.lazy(() => import('./components/auth/CustomerProtectedRoute').then(module => ({ default: module.CustomerProtectedRoute })));
@@ -194,6 +206,56 @@ function AppContent() {
               <GalleryPage />
             </Suspense>
           } />
+          
+          {/* Payment Routes */}
+          <Route path="payment/checkout" element={
+            <Suspense fallback={<RouteLoading />}>
+              <PaymentCheckout />
+            </Suspense>
+          } />
+          <Route path="payment/success" element={
+            <Suspense fallback={<RouteLoading />}>
+              <PaymentSuccess />
+            </Suspense>
+          } />
+          <Route path="payment/cancel" element={
+            <Suspense fallback={<RouteLoading />}>
+              <PaymentFailure />
+            </Suspense>
+          } />
+          <Route path="pay/:token" element={
+            <Suspense fallback={<RouteLoading />}>
+              <StandalonePaymentPage />
+            </Suspense>
+          } />
+          
+          {/* Policy Pages */}
+          <Route path="terms" element={
+            <Suspense fallback={<RouteLoading />}>
+              <TermsPage />
+            </Suspense>
+          } />
+          <Route path="privacy" element={
+            <Suspense fallback={<RouteLoading />}>
+              <PrivacyPage />
+            </Suspense>
+          } />
+          <Route path="cancellation" element={
+            <Suspense fallback={<RouteLoading />}>
+              <RefundPage />
+            </Suspense>
+          } />
+          <Route path="refund" element={
+            <Suspense fallback={<RouteLoading />}>
+              <RefundPage />
+            </Suspense>
+          } />
+          <Route path="security" element={
+            <Suspense fallback={<RouteLoading />}>
+              <SecurityPage />
+            </Suspense>
+          } />
+          
           {/* CMS Pages - Dynamic routing for CMS-created pages */}
           <Route path="page/:slug" element={
             <Suspense fallback={<RouteLoading />}>

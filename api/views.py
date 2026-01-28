@@ -25,7 +25,7 @@ from .models import (
     AboutPageContent, AboutPageValue, AboutPageStatistic, FeaturedDestination,
     Resort, ResortImage, ResortReview, ResortAmenity, ResortRoomType,
     Boat, BoatImage, BoatActivity, BoatActivityImage, BoatPackage, BoatBooking, BoatReview, BoatAmenity,
-    GalleryMedia
+    GalleryMedia, Payment, PaymentLink, MerchantInfo
 )
 from .serializers import (
     PropertyTypeSerializer, AmenitySerializer, LocationSerializer, DestinationSerializer, ExperienceSerializer,
@@ -50,7 +50,8 @@ from .serializers import (
     ResortReviewSerializer, ResortAmenitySerializer, ResortRoomTypeSerializer,
     BoatSerializer, BoatListSerializer, BoatImageSerializer, BoatActivitySerializer, BoatActivityListSerializer,
     BoatActivityImageSerializer, BoatPackageSerializer, BoatPackageListSerializer, BoatBookingSerializer,
-    BoatReviewSerializer, BoatAmenitySerializer, GalleryMediaSerializer
+    BoatReviewSerializer, BoatAmenitySerializer, GalleryMediaSerializer,
+    PaymentSerializer, PaymentCreateSerializer, PaymentLinkSerializer, PaymentLinkCreateSerializer, MerchantInfoSerializer
 )
 from rest_framework.decorators import permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
@@ -3562,3 +3563,354 @@ def boats_by_activity_type(request):
         return Response(result)
     except Exception as e:
         return Response({'error': str(e)}, status=500)
+
+
+# Payment Gateway Views
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def create_payment(request):
+    """Create a payment session with BML gateway"""
+    from .services.bml_payment import get_bml_service
+    import uuid
+    
+    try:
+        serializer = PaymentCreateSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        data = serializer.validated_data
+        bml_service = get_bml_service()
+        
+        # Generate unique transaction ID
+        transaction_id = f"TXN-{uuid.uuid4().hex[:16].upper()}"
+        
+        # Build return URLs
+        base_url = request.build_absolute_uri('/').rstrip('/')
+        return_url = data.get('return_url') or f"{base_url}/payment/success?transaction_id={transaction_id}"
+        cancel_url = data.get('cancel_url') or f"{base_url}/payment/cancel?transaction_id={transaction_id}"
+        
+        # Create payment record
+        payment = Payment.objects.create(
+            transaction_id=transaction_id,
+            amount=data['amount'],
+            currency=data.get('currency', 'USD'),
+            description=data.get('description', ''),
+            customer_name=data['customer_name'],
+            customer_email=data['customer_email'],
+            customer_phone=data.get('customer_phone', ''),
+            status='pending',
+        )
+        
+        # Link to booking if provided
+        if data.get('booking_id'):
+            try:
+                booking = Booking.objects.get(id=data['booking_id'])
+                payment.booking = booking
+                payment.save()
+            except Booking.DoesNotExist:
+                pass
+        
+        # Create payment session with BML
+        try:
+            bml_response = bml_service.create_payment_session(
+                amount=data['amount'],
+                currency=data.get('currency', 'USD'),
+                description=data.get('description', 'Payment for travel services'),
+                customer_name=data['customer_name'],
+                customer_email=data['customer_email'],
+                customer_phone=data.get('customer_phone', ''),
+                return_url=return_url,
+                cancel_url=cancel_url,
+                metadata={
+                    'transaction_id': transaction_id,
+                    'payment_id': payment.id,
+                }
+            )
+            
+            # Update payment with BML session info
+            payment.bml_session_id = bml_response.get('id') or bml_response.get('sessionId')
+            payment.bml_payment_url = bml_response.get('paymentUrl') or bml_response.get('url')
+            payment.bml_reference = bml_response.get('reference')
+            payment.save()
+            
+            return Response({
+                'payment_id': payment.id,
+                'transaction_id': transaction_id,
+                'payment_url': payment.bml_payment_url,
+                'status': payment.status,
+            }, status=status.HTTP_201_CREATED)
+            
+        except Exception as e:
+            payment.status = 'failed'
+            payment.save()
+            return Response({
+                'error': 'Failed to create payment session',
+                'detail': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+    except Exception as e:
+        return Response({
+            'error': 'Failed to process payment request',
+            'detail': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_payment_link(request):
+    """Create a standalone payment link (admin only)"""
+    from datetime import timedelta
+    
+    try:
+        serializer = PaymentLinkCreateSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        data = serializer.validated_data
+        
+        # Calculate expiration
+        expires_at = data.get('expires_at')
+        if not expires_at and data.get('expires_in_days'):
+            expires_at = timezone.now() + timedelta(days=data['expires_in_days'])
+        
+        # Create payment link
+        payment_link = PaymentLink.objects.create(
+            amount=data['amount'],
+            currency=data.get('currency', 'USD'),
+            description=data.get('description', ''),
+            customer_name=data.get('customer_name', ''),
+            customer_email=data.get('customer_email', ''),
+            customer_phone=data.get('customer_phone', ''),
+            expires_at=expires_at,
+            notes=data.get('notes', ''),
+            created_by=request.user,
+            status='active',
+        )
+        
+        serializer = PaymentLinkSerializer(payment_link, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+    except Exception as e:
+        return Response({
+            'error': 'Failed to create payment link',
+            'detail': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_payment_link(request, token):
+    """Get payment link details by token"""
+    try:
+        payment_link = PaymentLink.objects.get(token=token)
+        
+        # Check if expired
+        if payment_link.is_expired:
+            payment_link.status = 'expired'
+            payment_link.save()
+        
+        if not payment_link.is_valid:
+            return Response({
+                'error': 'Payment link is not valid',
+                'status': payment_link.status
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        serializer = PaymentLinkSerializer(payment_link, context={'request': request})
+        return Response(serializer.data)
+        
+    except PaymentLink.DoesNotExist:
+        return Response({
+            'error': 'Payment link not found'
+        }, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({
+            'error': 'Failed to retrieve payment link',
+            'detail': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_payment_status(request, payment_id):
+    """Get payment status"""
+    from .services.bml_payment import get_bml_service
+    
+    try:
+        payment = Payment.objects.get(id=payment_id)
+        
+        # Optionally check with BML API for latest status
+        if payment.bml_session_id:
+            try:
+                bml_service = get_bml_service()
+                bml_status = bml_service.get_payment_status(payment.bml_session_id)
+                
+                # Update payment status if changed
+                bml_status_value = bml_status.get('status', '').lower()
+                if bml_status_value and bml_status_value != payment.status:
+                    payment.status = bml_status_value
+                    if bml_status_value == 'completed':
+                        payment.completed_at = timezone.now()
+                    payment.save()
+            except:
+                pass  # Continue with stored status if API call fails
+        
+        serializer = PaymentSerializer(payment)
+        return Response(serializer.data)
+        
+    except Payment.DoesNotExist:
+        return Response({
+            'error': 'Payment not found'
+        }, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({
+            'error': 'Failed to retrieve payment status',
+            'detail': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+@transaction.atomic
+def bml_webhook(request):
+    """Handle webhook from BML payment gateway"""
+    from .services.bml_payment import get_bml_service
+    import json
+    import logging
+    
+    logger = logging.getLogger(__name__)
+    
+    try:
+        # Get raw body for signature verification
+        raw_body = request.body.decode('utf-8')
+        payload = json.loads(raw_body) if raw_body else {}
+        
+        # Verify webhook signature (if provided)
+        signature = request.headers.get('X-BML-Signature') or request.headers.get('X-Signature')
+        if signature:
+            bml_service = get_bml_service()
+            if not bml_service.verify_webhook_signature(raw_body, signature):
+                logger.warning("Invalid webhook signature")
+                return Response({'error': 'Invalid signature'}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        # Process webhook data
+        bml_service = get_bml_service()
+        webhook_data = bml_service.process_webhook(payload)
+        
+        # Find payment by BML reference or transaction ID
+        payment_id = webhook_data.get('payment_id')
+        reference = webhook_data.get('reference')
+        status_value = webhook_data.get('status', '').lower()
+        
+        payment = None
+        if reference:
+            try:
+                payment = Payment.objects.get(bml_reference=reference)
+            except Payment.DoesNotExist:
+                pass
+        
+        if not payment and payment_id:
+            try:
+                payment = Payment.objects.get(bml_session_id=payment_id)
+            except Payment.DoesNotExist:
+                pass
+        
+        if not payment:
+            logger.warning(f"Payment not found for webhook: {payload}")
+            return Response({'error': 'Payment not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Update payment status
+        old_status = payment.status
+        payment.status = status_value
+        payment.webhook_data = webhook_data
+        payment.bml_reference = reference or payment.bml_reference
+        
+        if status_value == 'completed':
+            payment.completed_at = timezone.now()
+            
+            # Create pending booking if payment is successful and linked to a booking
+            if payment.booking:
+                payment.booking.status = 'pending'  # Admin will review and confirm
+                payment.booking.save()
+            elif not payment.booking:
+                # If no booking exists, we might want to create one based on payment metadata
+                # This depends on your business logic
+                pass
+        
+        payment.save()
+        
+        logger.info(f"Payment {payment.transaction_id} updated: {old_status} -> {status_value}")
+        
+        return Response({
+            'status': 'success',
+            'payment_id': payment.id,
+            'transaction_id': payment.transaction_id,
+            'status': payment.status
+        })
+        
+    except json.JSONDecodeError:
+        return Response({'error': 'Invalid JSON'}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        logger.error(f"Webhook processing error: {str(e)}")
+        return Response({
+            'error': 'Webhook processing failed',
+            'detail': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def list_payment_links(request):
+    """List all payment links (admin only)"""
+    try:
+        payment_links = PaymentLink.objects.all().order_by('-created_at')
+        serializer = PaymentLinkSerializer(payment_links, many=True, context={'request': request})
+        return Response(serializer.data)
+    except Exception as e:
+        return Response({
+            'error': 'Failed to retrieve payment links',
+            'detail': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def list_payments(request):
+    """List all payments (admin only)"""
+    try:
+        payments = Payment.objects.all().order_by('-created_at')
+        serializer = PaymentSerializer(payments, many=True)
+        return Response(serializer.data)
+    except Exception as e:
+        return Response({
+            'error': 'Failed to retrieve payments',
+            'detail': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_merchant_info(request):
+    """Get merchant information for compliance display"""
+    try:
+        merchant_info = MerchantInfo.objects.filter(is_active=True).first()
+        if merchant_info:
+            serializer = MerchantInfoSerializer(merchant_info)
+            return Response(serializer.data)
+        else:
+            # Return default from settings if no active merchant info
+            from django.conf import settings
+            return Response({
+                'trading_name': getattr(settings, 'MERCHANT_NAME', ''),
+                'company_name': getattr(settings, 'MERCHANT_NAME', ''),
+                'complete_address': getattr(settings, 'MERCHANT_ADDRESS', ''),
+                'postal_address': getattr(settings, 'MERCHANT_POSTAL_ADDRESS', ''),
+                'email': getattr(settings, 'MERCHANT_EMAIL', ''),
+                'phone': getattr(settings, 'MERCHANT_PHONE', ''),
+                'customer_service_phone': getattr(settings, 'MERCHANT_CUSTOMER_SERVICE', ''),
+                'customer_service_email': getattr(settings, 'MERCHANT_EMAIL', ''),
+            })
+    except Exception as e:
+        return Response({
+            'error': 'Failed to retrieve merchant information',
+            'detail': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

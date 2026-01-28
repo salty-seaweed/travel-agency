@@ -24,6 +24,7 @@ import {
   TruckIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
+  CreditCardIcon,
 } from '@heroicons/react/24/outline';
 import { useWhatsApp } from '../../hooks/useQueries';
 import { useCurrency } from '../../contexts/CurrencyContext';
@@ -336,6 +337,24 @@ export function PackageSidebar({ packageData, onBookNow, selectedVariant }: Pack
         </CardHeader>
         <CardBody>
           <VStack spacing={4}>
+            <Button
+              colorScheme="purple"
+              size="lg"
+              w="full"
+              leftIcon={<Icon as={CreditCardIcon} />}
+              onClick={() => {
+                const currentPrice = selectedVariant
+                  ? parseFloat(String(selectedVariant.price))
+                  : parseFloat(typeof packageData.price === 'string' ? packageData.price.replace(/[^0-9.]/g, '') : (packageData.price as any));
+                const description = `${packageData.name} - Package Booking`;
+                window.location.href = `/payment/checkout?amount=${currentPrice}&description=${encodeURIComponent(description)}&currency=USD`;
+              }}
+              _hover={{ transform: 'translateY(-2px)' }}
+              transition="all 0.2s"
+            >
+              Pay Now with BML
+            </Button>
+            
             <Button
               variant="outline"
               size="lg"

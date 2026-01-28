@@ -252,3 +252,20 @@ SIMPLE_JWT = {
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
     'TOKEN_TYPE_CLAIM': 'token_type',
 }
+
+# BML Payment Gateway Configuration
+BML_API_KEY = os.getenv('BML_API_KEY', '')
+BML_API_BASE_URL = os.getenv(
+    'BML_API_BASE_URL',
+    'https://api.uat.merchants.bankofmaldives.com.mv/public'
+)
+BML_WEBHOOK_SECRET = os.getenv('BML_WEBHOOK_SECRET', '')
+BML_MERCHANT_COUNTRY = os.getenv('BML_MERCHANT_COUNTRY', 'Maldives')
+
+# Merchant Information (for BML compliance)
+MERCHANT_NAME = os.getenv('MERCHANT_NAME', 'Thread Travels & Tours')
+MERCHANT_ADDRESS = os.getenv('MERCHANT_ADDRESS', '')
+MERCHANT_POSTAL_ADDRESS = os.getenv('MERCHANT_POSTAL_ADDRESS', '')
+MERCHANT_EMAIL = os.getenv('MERCHANT_EMAIL', 'info@threadtravels.com')
+MERCHANT_PHONE = os.getenv('MERCHANT_PHONE', '+9607441097')
+MERCHANT_CUSTOMER_SERVICE = os.getenv('MERCHANT_CUSTOMER_SERVICE', '+9607441097')
