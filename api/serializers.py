@@ -13,7 +13,7 @@ from .models import (
     AboutPageContent, AboutPageValue, AboutPageStatistic, FeaturedDestination, PackageVariant,
     Resort, ResortImage, ResortReview, ResortAmenity, ResortRoomType,
     Boat, BoatImage, BoatActivity, BoatActivityImage, BoatPackage, BoatBooking, BoatReview, BoatAmenity,
-    GalleryMedia
+    GalleryMedia, Payment, PaymentLink, MerchantInfo
 )
 
 class FlexibleImageField(serializers.ImageField):
@@ -2461,13 +2461,27 @@ class GalleryMediaSerializer(serializers.ModelSerializer):
     
     def get_file_url(self, obj):
         """Get the URL of the media file"""
+        import os
+        import logging
+        from django.conf import settings
+        logger = logging.getLogger(__name__)
+        
         try:
             # Get the raw URL from the model property, handling potential errors
+            raw_url = ''
             if obj.media_type in ['image', 'gif'] and obj.image:
-                raw_url = obj.image.url
+                try:
+                    raw_url = obj.image.url
+                except Exception as e:
+                    logger.warning(f"Error accessing image.url for gallery media {obj.id}: {e}")
+                    return ''
             elif obj.media_type == 'video':
                 if obj.video:
-                    raw_url = obj.video.url
+                    try:
+                        raw_url = obj.video.url
+                    except Exception as e:
+                        logger.warning(f"Error accessing video.url for gallery media {obj.id}: {e}")
+                        return ''
                 elif obj.video_url:
                     # External video URL - return as-is if already absolute
                     if obj.video_url.startswith('http://') or obj.video_url.startswith('https://'):
@@ -2479,70 +2493,103 @@ class GalleryMediaSerializer(serializers.ModelSerializer):
                 return ''
             
             if not raw_url:
+                logger.warning(f"Empty raw_url for gallery media {obj.id}, media_type={obj.media_type}")
                 return ''
             
-            # In production, prioritize BACKEND_URL to ensure media is accessible from Railway
-            # This is critical when frontend is on Vercel and backend is on Railway
-            import os
-            from django.conf import settings
-            backend_url = os.getenv('BACKEND_URL', '')
-            if backend_url and not settings.DEBUG and raw_url.startswith('/'):
-                backend_url = backend_url.rstrip('/')
-                if not backend_url.startswith('https://'):
-                    backend_url = backend_url.replace('http://', 'https://', 1)
-                if not backend_url.startswith('http'):
-                    backend_url = f"https://{backend_url}"
-                return f"{backend_url}{raw_url}"
-            
-            # Use the same simple pattern as other working serializers (for development)
+            # Use the same simple pattern as other working serializers (ResortImageSerializer, BoatImageSerializer)
+            # This works for other media in production, so it should work for gallery too
             request = self.context.get('request')
-            if request and raw_url.startswith('/'):
+            if request:
                 try:
                     absolute_url = request.build_absolute_uri(raw_url)
                     # In production, ensure HTTPS is used
                     if not settings.DEBUG and absolute_url.startswith('http://'):
                         absolute_url = absolute_url.replace('http://', 'https://', 1)
+                    logger.debug(f"Built gallery media URL using request: {absolute_url}")
                     return absolute_url
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.warning(f"Error building absolute URL from request for gallery media {obj.id}: {e}")
             
-            # Fallback to the more complex method if simple approach fails
-            return self._build_absolute_url(raw_url)
+            # Fallback: try BACKEND_URL if request.build_absolute_uri failed or no request context
+            backend_url = os.getenv('BACKEND_URL', '')
+            if backend_url and raw_url.startswith('/'):
+                backend_url = backend_url.rstrip('/')
+                if not backend_url.startswith('https://'):
+                    backend_url = backend_url.replace('http://', 'https://', 1)
+                if not backend_url.startswith('http'):
+                    backend_url = f"https://{backend_url}"
+                final_url = f"{backend_url}{raw_url}"
+                logger.debug(f"Built gallery media URL using BACKEND_URL fallback: {final_url}")
+                return final_url
+            
+            # Last resort: return relative URL (frontend should handle)
+            logger.warning(f"Could not build absolute URL for gallery media {obj.id}, returning relative: {raw_url}")
+            return raw_url
         except Exception as e:
             # If there's an error accessing the file URL, log and return empty string
-            import logging
-            logger = logging.getLogger(__name__)
-            logger.error(f"Error getting file URL for gallery media {obj.id}: {e}")
+            logger.error(f"Error getting file URL for gallery media {obj.id}: {e}", exc_info=True)
             return ''
     
     def get_thumbnail_url(self, obj):
         """Get the URL of the thumbnail"""
+        import os
+        import logging
+        from django.conf import settings
+        logger = logging.getLogger(__name__)
+        
         try:
             # Get the raw URL from the model property, handling potential errors
+            raw_url = ''
             if obj.media_type in ['image', 'gif']:
-                raw_url = obj.image.url if obj.image else ''
+                if obj.image:
+                    try:
+                        raw_url = obj.image.url
+                    except Exception as e:
+                        logger.warning(f"Error accessing image.url for thumbnail gallery media {obj.id}: {e}")
+                        return ''
+                else:
+                    return ''
             elif obj.media_type == 'video':
                 if obj.video_thumbnail:
-                    raw_url = obj.video_thumbnail.url
-                elif obj.video:
-                    raw_url = obj.video.url
+                    try:
+                        raw_url = obj.video_thumbnail.url
+                    except Exception as e:
+                        logger.warning(f"Error accessing video_thumbnail.url for gallery media {obj.id}: {e}")
+                        # Fall through to try video.url
+                        pass
+                if not raw_url and obj.video:
+                    try:
+                        raw_url = obj.video.url
+                    except Exception as e:
+                        logger.warning(f"Error accessing video.url for thumbnail gallery media {obj.id}: {e}")
+                        return ''
                 elif obj.video_url:
                     # Use model's thumbnail extraction method
                     raw_url = obj.thumbnail_url if hasattr(obj, 'thumbnail_url') else ''
                 else:
-                    raw_url = ''
+                    return ''
             else:
-                raw_url = ''
+                return ''
             
             if not raw_url:
                 return ''
             
-            # In production, prioritize BACKEND_URL to ensure media is accessible from Railway
-            # This is critical when frontend is on Vercel and backend is on Railway
-            import os
-            from django.conf import settings
+            # Use the same simple pattern as other working serializers (ResortImageSerializer, BoatImageSerializer)
+            # This works for other media in production, so it should work for gallery too
+            request = self.context.get('request')
+            if request:
+                try:
+                    absolute_url = request.build_absolute_uri(raw_url)
+                    # In production, ensure HTTPS is used
+                    if not settings.DEBUG and absolute_url.startswith('http://'):
+                        absolute_url = absolute_url.replace('http://', 'https://', 1)
+                    return absolute_url
+                except Exception as e:
+                    logger.warning(f"Error building absolute URL from request for thumbnail gallery media {obj.id}: {e}")
+            
+            # Fallback: try BACKEND_URL if request.build_absolute_uri failed or no request context
             backend_url = os.getenv('BACKEND_URL', '')
-            if backend_url and not settings.DEBUG and raw_url.startswith('/'):
+            if backend_url and raw_url.startswith('/'):
                 backend_url = backend_url.rstrip('/')
                 if not backend_url.startswith('https://'):
                     backend_url = backend_url.replace('http://', 'https://', 1)
@@ -2550,29 +2597,112 @@ class GalleryMediaSerializer(serializers.ModelSerializer):
                     backend_url = f"https://{backend_url}"
                 return f"{backend_url}{raw_url}"
             
-            # Use the same simple pattern as other working serializers (for development)
-            request = self.context.get('request')
-            if request and raw_url.startswith('/'):
-                try:
-                    absolute_url = request.build_absolute_uri(raw_url)
-                    # In production, ensure HTTPS is used
-                    if not settings.DEBUG and absolute_url.startswith('http://'):
-                        absolute_url = absolute_url.replace('http://', 'https://', 1)
-                    return absolute_url
-                except Exception:
-                    pass
-            
-            # Fallback to the more complex method if simple approach fails
-            return self._build_absolute_url(raw_url)
+            # Last resort: return relative URL (frontend should handle)
+            return raw_url
         except Exception as e:
             # If there's an error accessing the file URL, log and return empty string
-            import logging
-            logger = logging.getLogger(__name__)
-            logger.error(f"Error getting thumbnail URL for gallery media {obj.id}: {e}")
+            logger.error(f"Error getting thumbnail URL for gallery media {obj.id}: {e}", exc_info=True)
             return ''
     
     def get_tags_list(self, obj):
         """Convert comma-separated tags to list"""
         if obj.tags:
             return [tag.strip() for tag in obj.tags.split(',') if tag.strip()]
-        return [] 
+        return []
+
+
+# Payment Serializers
+class PaymentSerializer(serializers.ModelSerializer):
+    booking_id = serializers.IntegerField(source='booking.id', read_only=True, allow_null=True)
+    
+    class Meta:
+        model = Payment
+        fields = [
+            'id', 'transaction_id', 'bml_reference', 'amount', 'currency',
+            'status', 'payment_method', 'booking_id', 'customer_name',
+            'customer_email', 'customer_phone', 'description', 'bml_session_id',
+            'bml_payment_url', 'created_at', 'updated_at', 'completed_at',
+            'is_successful', 'is_pending'
+        ]
+        read_only_fields = [
+            'id', 'transaction_id', 'bml_reference', 'status', 'bml_session_id',
+            'bml_payment_url', 'created_at', 'updated_at', 'completed_at',
+            'is_successful', 'is_pending'
+        ]
+
+
+class PaymentCreateSerializer(serializers.Serializer):
+    """Serializer for creating a payment session"""
+    amount = serializers.DecimalField(max_digits=10, decimal_places=2)
+    currency = serializers.CharField(max_length=3, default='USD')
+    description = serializers.CharField(required=False, allow_blank=True)
+    customer_name = serializers.CharField(max_length=200)
+    customer_email = serializers.EmailField()
+    customer_phone = serializers.CharField(max_length=20, required=False, allow_blank=True)
+    booking_id = serializers.IntegerField(required=False, allow_null=True)
+    return_url = serializers.URLField(required=False)
+    cancel_url = serializers.URLField(required=False)
+    
+    def validate_amount(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("Amount must be greater than zero")
+        return value
+
+
+class PaymentLinkSerializer(serializers.ModelSerializer):
+    payment_url = serializers.SerializerMethodField()
+    is_valid = serializers.BooleanField(read_only=True)
+    is_expired = serializers.BooleanField(read_only=True)
+    created_by_username = serializers.CharField(source='created_by.username', read_only=True, allow_null=True)
+    
+    class Meta:
+        model = PaymentLink
+        fields = [
+            'id', 'token', 'amount', 'currency', 'description',
+            'customer_name', 'customer_email', 'customer_phone',
+            'status', 'expires_at', 'payment_url', 'is_valid',
+            'is_expired', 'notes', 'created_by_username',
+            'created_at', 'updated_at', 'used_at'
+        ]
+        read_only_fields = [
+            'id', 'token', 'status', 'payment_url', 'is_valid',
+            'is_expired', 'created_at', 'updated_at', 'used_at'
+        ]
+    
+    def get_payment_url(self, obj):
+        """Generate the payment URL for this link"""
+        request = self.context.get('request')
+        if request:
+            base_url = request.build_absolute_uri('/').rstrip('/')
+            return f"{base_url}/pay/{obj.token}"
+        return f"/pay/{obj.token}"
+
+
+class PaymentLinkCreateSerializer(serializers.ModelSerializer):
+    """Serializer for creating a payment link"""
+    expires_in_days = serializers.IntegerField(required=False, min_value=1, max_value=365)
+    
+    class Meta:
+        model = PaymentLink
+        fields = [
+            'amount', 'currency', 'description', 'customer_name',
+            'customer_email', 'customer_phone', 'expires_in_days',
+            'expires_at', 'notes'
+        ]
+    
+    def validate_amount(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("Amount must be greater than zero")
+        return value
+
+
+class MerchantInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MerchantInfo
+        fields = [
+            'id', 'trading_name', 'company_name', 'complete_address',
+            'postal_address', 'email', 'phone', 'customer_service_phone',
+            'customer_service_email', 'website', 'registration_number',
+            'is_active', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at'] 
