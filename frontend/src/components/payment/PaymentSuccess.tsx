@@ -19,7 +19,7 @@ import {
   HomeIcon,
 } from '@heroicons/react/24/outline';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { getPaymentStatus } from '../../services/bml-api';
+import { getPaymentStatus, getPaymentByTransaction } from '../../services/bml-api';
 import { useCurrency } from '../../contexts/CurrencyContext';
 import type { Payment } from '../../types/payment';
 
@@ -34,24 +34,73 @@ export function PaymentSuccess() {
 
   const transactionId = searchParams.get('transaction_id');
   const paymentId = searchParams.get('payment_id');
+  const [isVerifying, setIsVerifying] = useState(false);
 
   useEffect(() => {
-    if (paymentId) {
-      getPaymentStatus(parseInt(paymentId))
-        .then(setPayment)
-        .catch((err) => setError(err.message || 'Failed to load payment details'))
-        .finally(() => setIsLoading(false));
-    } else {
-      setIsLoading(false);
-      setError('Payment ID not found');
-    }
-  }, [paymentId]);
+    const loadPayment = async () => {
+      try {
+        if (paymentId) {
+          const p = await getPaymentStatus(parseInt(paymentId));
+          setPayment(p);
+        } else if (transactionId) {
+          const p = await getPaymentByTransaction(transactionId);
+          setPayment(p);
+        } else {
+          setError('Payment ID or transaction ID not found');
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load payment details');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadPayment();
+  }, [paymentId, transactionId]);
+
+  useEffect(() => {
+    if (!payment || payment.status !== 'pending' || !payment.id) return;
+    setIsVerifying(true);
+    const POLL_INTERVAL_MS = 3000;
+    const POLL_TIMEOUT_MS = 60000;
+    const start = Date.now();
+    const interval = setInterval(async () => {
+      if (Date.now() - start > POLL_TIMEOUT_MS) {
+        clearInterval(interval);
+        setIsVerifying(false);
+        return;
+      }
+      try {
+        const p = await getPaymentStatus(payment.id);
+        setPayment(p);
+        if (p.status !== 'pending') {
+          clearInterval(interval);
+          setIsVerifying(false);
+        }
+      } catch {
+        clearInterval(interval);
+        setIsVerifying(false);
+      }
+    }, POLL_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [payment?.id, payment?.status]);
 
   if (isLoading) {
     return (
       <Box p={8} textAlign="center">
         <Spinner size="xl" />
         <Text mt={4}>Loading payment details...</Text>
+      </Box>
+    );
+  }
+
+  if (isVerifying) {
+    return (
+      <Box p={8} textAlign="center">
+        <Spinner size="xl" />
+        <Text mt={4}>Verifying payment...</Text>
+        <Text mt={2} fontSize="sm" color="gray.600">
+          Please wait while we confirm your payment with the bank.
+        </Text>
       </Box>
     );
   }
@@ -209,4 +258,6 @@ export function PaymentSuccess() {
     </Box>
   );
 }
+
+
 

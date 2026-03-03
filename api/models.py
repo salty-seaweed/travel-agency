@@ -771,8 +771,9 @@ class Booking(models.Model):
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=20, choices=BOOKING_STATUS_CHOICES, default='pending')
     special_requests = models.TextField(blank=True)
-    # Payment relationship (added for BML integration)
-    payment = models.OneToOneField('Payment', on_delete=models.SET_NULL, null=True, blank=True, related_name='booking_payment')
+    payment = models.OneToOneField(
+        'Payment', on_delete=models.SET_NULL, null=True, blank=True, related_name='booking_payment'
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -2286,10 +2287,9 @@ class GalleryMedia(models.Model):
         super().save(*args, **kwargs)
 
 
-# BML Payment Gateway Models (Railway rebuild trigger)
 class Payment(models.Model):
-    """Track payment transactions with BML payment gateway"""
-    PAYMENT_STATUS_CHOICES = [
+    """BML payment gateway transaction record"""
+    STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('processing', 'Processing'),
         ('completed', 'Completed'),
@@ -2297,176 +2297,118 @@ class Payment(models.Model):
         ('cancelled', 'Cancelled'),
         ('refunded', 'Refunded'),
     ]
-    
     PAYMENT_METHOD_CHOICES = [
         ('bml', 'BML Payment Gateway'),
         ('card', 'Credit/Debit Card'),
     ]
-    
-    # Transaction Information
-    transaction_id = models.CharField(max_length=255, unique=True, help_text="Internal transaction ID")
-    bml_reference = models.CharField(max_length=255, blank=True, null=True, help_text="BML transaction reference")
+
+    transaction_id = models.CharField(max_length=255, unique=True)
+    bml_reference = models.CharField(max_length=255, blank=True, null=True)
+    bml_session_id = models.CharField(max_length=255, blank=True, null=True, db_index=True)
+    bml_payment_url = models.URLField(max_length=500, blank=True, null=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     currency = models.CharField(max_length=3, default='USD')
-    status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='pending')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES, default='bml')
-    
-    # Related Booking (nullable for standalone payments)
-    booking = models.OneToOneField('Booking', on_delete=models.SET_NULL, null=True, blank=True, related_name='payment_record')
-    
-    # Customer Information
+    description = models.TextField(blank=True)
     customer_name = models.CharField(max_length=200)
     customer_email = models.EmailField()
     customer_phone = models.CharField(max_length=20, blank=True)
-    
-    # Additional Information
-    customer_info = models.JSONField(default=dict, blank=True, help_text="Additional customer information")
-    description = models.TextField(blank=True, help_text="Payment description")
-    
-    # BML Gateway Information
-    bml_session_id = models.CharField(max_length=255, blank=True, null=True, help_text="BML payment session ID")
-    bml_payment_url = models.URLField(blank=True, null=True, help_text="BML payment gateway URL")
-    webhook_data = models.JSONField(default=dict, blank=True, help_text="Webhook response data")
-    
-    # Timestamps
+    customer_info = models.JSONField(blank=True, default=dict)
+    booking = models.OneToOneField(Booking, on_delete=models.SET_NULL, null=True, blank=True, related_name='payment_record')
+    webhook_data = models.JSONField(blank=True, default=dict)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     completed_at = models.DateTimeField(null=True, blank=True)
-    
+
     class Meta:
         ordering = ['-created_at']
         verbose_name = 'Payment'
         verbose_name_plural = 'Payments'
-        indexes = [
-            models.Index(fields=['transaction_id']),
-            models.Index(fields=['status']),
-            models.Index(fields=['bml_reference']),
-        ]
-    
+
     def __str__(self):
-        return f"Payment {self.transaction_id} - {self.amount} {self.currency} ({self.status})"
-    
+        return f"{self.transaction_id} - {self.amount} {self.currency}"
+
     @property
     def is_successful(self):
         return self.status == 'completed'
-    
+
     @property
     def is_pending(self):
-        return self.status in ['pending', 'processing']
+        return self.status in ('pending', 'processing')
 
 
 class PaymentLink(models.Model):
-    """Standalone payment links that can be shared with customers"""
+    """Standalone payment link (admin-created) for collecting payments"""
     STATUS_CHOICES = [
         ('active', 'Active'),
         ('used', 'Used'),
         ('expired', 'Expired'),
         ('cancelled', 'Cancelled'),
     ]
-    
-    # Unique token for the payment link
-    token = models.CharField(max_length=64, unique=True, db_index=True, help_text="Unique token for the payment link")
-    
-    # Payment Information
+
+    token = models.CharField(max_length=64, unique=True, db_index=True, blank=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     currency = models.CharField(max_length=3, default='USD')
-    description = models.TextField(help_text="Description of what the payment is for")
-    
-    # Customer Information (optional - can be filled when link is used)
+    description = models.TextField(blank=True)
     customer_name = models.CharField(max_length=200, blank=True)
     customer_email = models.EmailField(blank=True)
     customer_phone = models.CharField(max_length=20, blank=True)
-    
-    # Status and Expiration
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
-    expires_at = models.DateTimeField(null=True, blank=True, help_text="Link expiration date (optional)")
-    
-    # Related Payment (created when link is used)
+    expires_at = models.DateTimeField(null=True, blank=True)
     payment = models.OneToOneField(Payment, on_delete=models.SET_NULL, null=True, blank=True, related_name='payment_link')
-    
-    # Admin Information
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='created_payment_links')
-    notes = models.TextField(blank=True, help_text="Internal notes about this payment link")
-    
-    # Timestamps
+    notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     used_at = models.DateTimeField(null=True, blank=True)
-    
+
     class Meta:
         ordering = ['-created_at']
-        verbose_name = 'Payment Link'
-        verbose_name_plural = 'Payment Links'
-        indexes = [
-            models.Index(fields=['token']),
-            models.Index(fields=['status']),
-        ]
-    
+
     def __str__(self):
-        return f"Payment Link {self.token[:8]}... - {self.amount} {self.currency}"
-    
+        return f"{self.token[:8]}... - {self.amount} {self.currency}"
+
     @property
     def is_expired(self):
         if not self.expires_at:
             return False
-        from django.utils import timezone
         return timezone.now() > self.expires_at
-    
+
     @property
     def is_valid(self):
-        return self.status == 'active' and not self.is_expired
-    
-    def generate_token(self):
-        """Generate a unique token for the payment link"""
-        import secrets
-        import string
-        alphabet = string.ascii_letters + string.digits
-        token = ''.join(secrets.choice(alphabet) for _ in range(64))
-        # Ensure uniqueness
-        while PaymentLink.objects.filter(token=token).exists():
-            token = ''.join(secrets.choice(alphabet) for _ in range(64))
-        return token
-    
+        return (
+            self.status == 'active'
+            and not self.is_expired
+            and self.payment is None
+        )
+
     def save(self, *args, **kwargs):
         if not self.token:
-            self.token = self.generate_token()
+            import uuid
+            self.token = uuid.uuid4().hex
         super().save(*args, **kwargs)
 
 
 class MerchantInfo(models.Model):
-    """Merchant information for BML compliance requirements"""
-    # Company Information
-    trading_name = models.CharField(max_length=200, help_text="Trading name as registered with BML")
-    company_name = models.CharField(max_length=200, help_text="Full company name")
-    complete_address = models.TextField(help_text="Complete address of permanent establishment")
-    postal_address = models.TextField(help_text="Postal address")
-    
-    # Contact Information
-    email = models.EmailField(help_text="Primary business email")
-    phone = models.CharField(max_length=20, help_text="Phone number with country code")
-    customer_service_phone = models.CharField(max_length=20, blank=True, help_text="Customer service phone number")
-    customer_service_email = models.EmailField(blank=True, help_text="Customer service email")
-    
-    # Additional Information
+    """Merchant information for BML compliance and display"""
+    trading_name = models.CharField(max_length=200)
+    company_name = models.CharField(max_length=200)
+    complete_address = models.TextField(blank=True)
+    postal_address = models.TextField(blank=True)
+    email = models.EmailField()
+    phone = models.CharField(max_length=50)
+    customer_service_phone = models.CharField(max_length=50, blank=True)
+    customer_service_email = models.EmailField(blank=True)
     website = models.URLField(blank=True)
     registration_number = models.CharField(max_length=100, blank=True)
-    
-    # Settings
-    is_active = models.BooleanField(default=True, help_text="Use this merchant information")
-    
-    # Timestamps
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
-        verbose_name = 'Merchant Information'
-        verbose_name_plural = 'Merchant Information'
-    
+        verbose_name = 'Merchant Info'
+        verbose_name_plural = 'Merchant Info'
+
     def __str__(self):
-        return f"{self.trading_name} - {self.company_name}"
-    
-    def save(self, *args, **kwargs):
-        # Ensure only one active merchant info
-        if self.is_active:
-            MerchantInfo.objects.filter(is_active=True).exclude(pk=self.pk).update(is_active=False)
-        super().save(*args, **kwargs)
+        return self.trading_name

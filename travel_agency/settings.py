@@ -14,11 +14,20 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 
-# Load environment variables
-load_dotenv()
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load environment variables from project root .env
+_env_path = BASE_DIR / '.env'
+if _env_path.exists():
+    for encoding in ('utf-8', 'utf-8-sig', 'utf-16', 'utf-16-le'):
+        try:
+            load_dotenv(_env_path, encoding=encoding)
+            break
+        except UnicodeDecodeError:
+            continue
+else:
+    load_dotenv()
 
 
 # Quick-start development settings - unsuitable for production
@@ -255,12 +264,17 @@ SIMPLE_JWT = {
 
 # BML Payment Gateway Configuration
 BML_API_KEY = os.getenv('BML_API_KEY', '')
+BML_APP_ID = os.getenv('BML_APP_ID', '')
 BML_API_BASE_URL = os.getenv(
     'BML_API_BASE_URL',
     'https://api.uat.merchants.bankofmaldives.com.mv/public'
 )
+BML_API_MODE = os.getenv('BML_API_MODE', 'transactions')  # transactions | sessions
 BML_WEBHOOK_SECRET = os.getenv('BML_WEBHOOK_SECRET', '')
 BML_MERCHANT_COUNTRY = os.getenv('BML_MERCHANT_COUNTRY', 'Maldives')
+
+# Frontend base URL for payment return links (e.g. https://app.example.com)
+FRONTEND_BASE_URL = os.getenv('FRONTEND_BASE_URL', os.getenv('FRONTEND_URL', ''))
 
 # Merchant Information (for BML compliance)
 MERCHANT_NAME = os.getenv('MERCHANT_NAME', 'Thread Travels & Tours')

@@ -37,7 +37,7 @@ export async function createPayment(
 }
 
 /**
- * Get payment status
+ * Get payment status by payment ID
  */
 export async function getPaymentStatus(paymentId: number): Promise<Payment> {
   const response = await fetch(`${API_BASE}/payments/${paymentId}/status/`, {
@@ -50,6 +50,28 @@ export async function getPaymentStatus(paymentId: number): Promise<Payment> {
   if (!response.ok) {
     const error = await response.json();
     throw new Error(error.detail || error.error || 'Failed to get payment status');
+  }
+
+  return response.json();
+}
+
+/**
+ * Get payment by transaction ID (when payment_id is missing from return URL)
+ */
+export async function getPaymentByTransaction(transactionId: string): Promise<Payment> {
+  const response = await fetch(
+    `${API_BASE}/payments/by-transaction/${encodeURIComponent(transactionId)}/`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || error.error || 'Payment not found');
   }
 
   return response.json();
@@ -156,4 +178,6 @@ export async function getMerchantInfo(): Promise<MerchantInfo> {
 
   return response.json();
 }
+
+
 

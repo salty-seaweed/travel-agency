@@ -84,3 +84,5 @@ export function TermsPage() {
   return <PolicyPage title="Terms & Conditions" content={content} />;
 }
 
+
+

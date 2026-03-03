@@ -2640,8 +2640,8 @@ class PaymentCreateSerializer(serializers.Serializer):
     customer_email = serializers.EmailField()
     customer_phone = serializers.CharField(max_length=20, required=False, allow_blank=True)
     booking_id = serializers.IntegerField(required=False, allow_null=True)
-    return_url = serializers.URLField(required=False)
-    cancel_url = serializers.URLField(required=False)
+    return_url = serializers.CharField(required=False, allow_blank=True)
+    cancel_url = serializers.CharField(required=False, allow_blank=True)
     
     def validate_amount(self, value):
         if value <= 0:
@@ -2670,12 +2670,15 @@ class PaymentLinkSerializer(serializers.ModelSerializer):
         ]
     
     def get_payment_url(self, obj):
-        """Generate the payment URL for this link"""
-        request = self.context.get('request')
-        if request:
-            base_url = request.build_absolute_uri('/').rstrip('/')
-            return f"{base_url}/pay/{obj.token}"
-        return f"/pay/{obj.token}"
+        """Generate the payment URL for this link (frontend /pay/{token} page)."""
+        from django.conf import settings
+        frontend_base = getattr(settings, 'FRONTEND_BASE_URL', '').rstrip('/')
+        if not frontend_base:
+            request = self.context.get('request')
+            if request:
+                frontend_base = request.build_absolute_uri('/').rstrip('/')
+        base = frontend_base or ''
+        return f"{base}/pay/{obj.token}" if base else f"/pay/{obj.token}"
 
 
 class PaymentLinkCreateSerializer(serializers.ModelSerializer):

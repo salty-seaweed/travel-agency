@@ -3571,6 +3571,8 @@ def boats_by_activity_type(request):
 def create_payment(request):
     """Create a payment session with BML gateway"""
     from .services.bml_payment import get_bml_service
+    from django.conf import settings
+    from urllib.parse import urlparse
     import uuid
     
     try:
@@ -3584,12 +3586,7 @@ def create_payment(request):
         # Generate unique transaction ID
         transaction_id = f"TXN-{uuid.uuid4().hex[:16].upper()}"
         
-        # Build return URLs
-        base_url = request.build_absolute_uri('/').rstrip('/')
-        return_url = data.get('return_url') or f"{base_url}/payment/success?transaction_id={transaction_id}"
-        cancel_url = data.get('cancel_url') or f"{base_url}/payment/cancel?transaction_id={transaction_id}"
-        
-        # Create payment record
+        # Create payment record first (needed for return URLs)
         payment = Payment.objects.create(
             transaction_id=transaction_id,
             amount=data['amount'],
@@ -3609,6 +3606,17 @@ def create_payment(request):
                 payment.save()
             except Booking.DoesNotExist:
                 pass
+        
+        # Build frontend base URL for return links
+        frontend_base = getattr(settings, 'FRONTEND_BASE_URL', '').rstrip('/')
+        if not frontend_base and data.get('return_url'):
+            parsed = urlparse(data['return_url'])
+            frontend_base = f"{parsed.scheme}://{parsed.netloc}"
+        if not frontend_base:
+            frontend_base = request.build_absolute_uri('/').rstrip('/')
+        
+        return_url = f"{frontend_base}/payment/success?payment_id={payment.id}&transaction_id={transaction_id}"
+        cancel_url = f"{frontend_base}/payment/cancel?payment_id={payment.id}&transaction_id={transaction_id}"
         
         # Create payment session with BML
         try:
@@ -3731,6 +3739,67 @@ def get_payment_link(request, token):
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
+def payment_redirect(request):
+    """
+    Backend redirect handler for BML single redirectUrl.
+    BML redirects here with sessionId/transactionId; we resolve status and redirect to frontend.
+    """
+    from django.shortcuts import redirect
+    from django.conf import settings
+    from .services.bml_payment import get_bml_service
+    
+    session_id = request.GET.get('sessionId') or request.GET.get('transactionId') or request.GET.get('id')
+    status_param = request.GET.get('status', '').lower()
+    
+    frontend_base = getattr(settings, 'FRONTEND_BASE_URL', '').rstrip('/')
+    if not frontend_base:
+        frontend_base = request.build_absolute_uri('/').rstrip('/')
+    
+    if not session_id:
+        return redirect(f"{frontend_base}/payment/cancel?error=Missing+session+identifier")
+    
+    payment = None
+    try:
+        payment = Payment.objects.get(bml_session_id=session_id)
+    except Payment.DoesNotExist:
+        pass
+    
+    if not payment:
+        return redirect(f"{frontend_base}/payment/cancel?error=Payment+not+found")
+    
+    success = status_param in ('completed', 'succeeded', 'paid', 'success')
+    if not success and status_param not in ('failed', 'canceled', 'cancelled'):
+        try:
+            bml_service = get_bml_service()
+            bml_status = bml_service.get_payment_status(session_id)
+            raw = (bml_status.get('status') or bml_status.get('paymentStatus') or '').lower()
+            success = raw in ('completed', 'succeeded', 'paid', 'success')
+        except Exception:
+            pass
+    
+    if success:
+        return redirect(
+            f"{frontend_base}/payment/success?payment_id={payment.id}&transaction_id={payment.transaction_id}"
+        )
+    return redirect(
+        f"{frontend_base}/payment/cancel?payment_id={payment.id}&transaction_id={payment.transaction_id}&error=Payment+failed+or+cancelled"
+    )
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_payment_by_transaction(request, transaction_id):
+    """Get payment by transaction_id (for frontend when payment_id is missing from URL)."""
+    try:
+        payment = Payment.objects.get(transaction_id=transaction_id)
+        serializer = PaymentSerializer(payment)
+        return Response(serializer.data)
+    except Payment.DoesNotExist:
+        return Response({'error': 'Payment not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
 def get_payment_status(request, payment_id):
     """Get payment status"""
     from .services.bml_payment import get_bml_service
@@ -3738,21 +3807,24 @@ def get_payment_status(request, payment_id):
     try:
         payment = Payment.objects.get(id=payment_id)
         
-        # Optionally check with BML API for latest status
         if payment.bml_session_id:
             try:
                 bml_service = get_bml_service()
                 bml_status = bml_service.get_payment_status(payment.bml_session_id)
-                
-                # Update payment status if changed
-                bml_status_value = bml_status.get('status', '').lower()
-                if bml_status_value and bml_status_value != payment.status:
-                    payment.status = bml_status_value
-                    if bml_status_value == 'completed':
+                raw_status = (
+                    bml_status.get('status') or
+                    bml_status.get('paymentStatus') or
+                    bml_status.get('transactionStatus') or
+                    ''
+                )
+                normalized = bml_service._normalize_status(raw_status)
+                if normalized and normalized != payment.status:
+                    payment.status = normalized
+                    if normalized == 'completed':
                         payment.completed_at = timezone.now()
                     payment.save()
-            except:
-                pass  # Continue with stored status if API call fails
+            except Exception:
+                pass
         
         serializer = PaymentSerializer(payment)
         return Response(serializer.data)
@@ -3811,6 +3883,20 @@ def bml_webhook(request):
         if not payment and payment_id:
             try:
                 payment = Payment.objects.get(bml_session_id=payment_id)
+            except Payment.DoesNotExist:
+                pass
+        
+        if not payment and reference:
+            try:
+                payment = Payment.objects.get(transaction_id=reference)
+            except Payment.DoesNotExist:
+                pass
+        
+        metadata = payload.get('metadata', {}) or {}
+        local_id = metadata.get('localId') or metadata.get('transaction_id')
+        if not payment and local_id:
+            try:
+                payment = Payment.objects.get(transaction_id=local_id)
             except Payment.DoesNotExist:
                 pass
         

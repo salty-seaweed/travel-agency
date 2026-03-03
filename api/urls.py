@@ -126,6 +126,8 @@ urlpatterns = [
     
     # Payment Gateway endpoints
     path('payments/create/', views.create_payment, name='create_payment'),
+    path('payments/redirect/', views.payment_redirect, name='payment_redirect'),
+    path('payments/by-transaction/<str:transaction_id>/', views.get_payment_by_transaction, name='get_payment_by_transaction'),
     path('payments/links/create/', views.create_payment_link, name='create_payment_link'),
     path('payments/links/<str:token>/', views.get_payment_link, name='get_payment_link'),
     path('payments/links/', views.list_payment_links, name='list_payment_links'),

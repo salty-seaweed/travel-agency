@@ -24,7 +24,9 @@ export function PaymentFailure() {
   const navigate = useNavigate();
   
   const transactionId = searchParams.get('transaction_id');
-  const error = searchParams.get('error') || 'Payment was cancelled or failed';
+  const paymentId = searchParams.get('payment_id');
+  const errorParam = searchParams.get('error') || '';
+  const error = decodeURIComponent(errorParam.replace(/\+/g, ' ')) || 'Payment was cancelled or failed';
 
   return (
     <Box maxW="600px" mx="auto" p={6}>
@@ -98,4 +100,6 @@ export function PaymentFailure() {
     </Box>
   );
 }
+
+
 

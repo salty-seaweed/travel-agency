@@ -73,3 +73,5 @@ export function RefundPage() {
   return <PolicyPage title="Refund & Cancellation Policy" content={content} />;
 }
 
+
+
