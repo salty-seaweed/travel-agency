@@ -194,7 +194,7 @@ export function PaymentSuccess() {
                 <Text fontWeight="semibold">Important</Text>
               </HStack>
               <Text fontSize="sm" color="gray.700">
-                Please retain a copy of this transaction record and our policies for your records.
+                Please retain a copy of this transaction record and our Policies and Rules for your records.
                 You can access our{' '}
                 <Button
                   variant="link"

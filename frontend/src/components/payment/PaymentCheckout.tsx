@@ -341,6 +341,10 @@ export function PaymentCheckout({
                 .
               </Text>
 
+              <Text fontSize="sm" color="gray.700" fontWeight="medium">
+                Please retain a copy of your transaction records and our Policies and Rules for your records.
+              </Text>
+
               <Checkbox
                 isChecked={termsAccepted}
                 onChange={(e) => setTermsAccepted(e.target.checked)}
@@ -355,15 +359,14 @@ export function PaymentCheckout({
           </CardBody>
         </Card>
 
-        {/* Card Brand Logos */}
+        {/* Card Brand Marks - full color, equal prominence per BML requirements */}
         <Box textAlign="center" py={4}>
-          <Text fontSize="sm" color="gray.600" mb={2}>
-            We accept the following payment methods:
+          <Text fontSize="sm" color="gray.600" mb={3}>
+            We accept the following card types:
           </Text>
-          <HStack justify="center" spacing={4} flexWrap="wrap">
-            <Text fontSize="xs" color="gray.500">
-              Visa • Mastercard • American Express
-            </Text>
+          <HStack justify="center" spacing={6} flexWrap="wrap" gap={4} align="center">
+            <Box as="img" src="/images/cards/visa.svg" alt="Visa" h="24px" w="auto" objectFit="contain" />
+            <Box as="img" src="/images/cards/mastercard.svg" alt="Mastercard" h="24px" w="auto" objectFit="contain" />
           </HStack>
         </Box>
 
