@@ -18,44 +18,47 @@ import {
   WrapItem,
 } from '@chakra-ui/react';
 import {
-  MapPinIcon,
   ArrowRightIcon,
   GlobeAltIcon,
   CameraIcon,
   HeartIcon,
   SparklesIcon,
   ClockIcon,
-  CurrencyDollarIcon,
   UsersIcon,
 } from '@heroicons/react/24/outline';
 import { useTranslation } from '../../../i18n';
 import { useNavigate } from 'react-router-dom';
-import { useFeaturedExperiences, useWhatsApp } from '../../../hooks/useQueries';
+import { useFeaturedExperiences } from '../../../hooks/useQueries';
 
 interface ExperiencesActivitiesSectionProps {
-  homepageContent?: any;
+  homepageContent?: unknown;
 }
 
-export const ExperiencesActivitiesSection: React.FC<ExperiencesActivitiesSectionProps> = ({
-  homepageContent
-}) => {
+type ExperienceCard = {
+  id: number;
+  name: string;
+  experience_type: string;
+  description?: string;
+  image?: string;
+  duration?: string;
+  price?: string;
+};
+
+export const ExperiencesActivitiesSection: React.FC<ExperiencesActivitiesSectionProps> = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  
+
   const bgColor = useColorModeValue('gray.50', 'gray.900');
   const cardBg = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
-  const textColor = useColorModeValue('gray.800', 'white');
-  const mutedTextColor = useColorModeValue('gray.600', 'gray.300');
 
-  const { data: experiences, isLoading } = useFeaturedExperiences();
-  const { getWhatsAppUrl } = useWhatsApp();
+  const { data: experiences } = useFeaturedExperiences();
 
   const handleViewAllExperiences = () => {
     navigate('/packages');
   };
 
-  const handleExperienceClick = (experience: any) => {
+  const handleExperienceClick = (experience: ExperienceCard) => {
     // Navigate to packages page with the selected experience pre-selected
     const params = new URLSearchParams();
     params.set('custom_builder', 'true');
@@ -103,11 +106,11 @@ export const ExperiencesActivitiesSection: React.FC<ExperiencesActivitiesSection
       <Container maxW="7xl">
         <VStack spacing={12}>
           <VStack spacing={4}>
-            <Badge colorScheme="teal" variant="solid" px={4} py={2} borderRadius="full" fontSize="sm" fontWeight="semibold">
-              <Icon as={SparklesIcon} className="w-4 h-4 mr-2" />
+            <Badge colorScheme="teal" variant="subtle" px={4} py={2} borderRadius="full" fontSize="sm" fontWeight="semibold">
+              <Icon as={SparklesIcon} className="mr-2 h-4 w-4" />
               {t('homepage.activities.badge', 'Custom Experiences')}
             </Badge>
-            <Heading size="xl" fontWeight="bold">
+            <Heading size="xl" fontWeight="bold" className="font-display tracking-tight text-slate-900">
               {t('homepage.activities.title', 'Build Your Custom Package')}
             </Heading>
             <Text fontSize="lg" color="gray.600" maxW="2xl">
@@ -116,21 +119,22 @@ export const ExperiencesActivitiesSection: React.FC<ExperiencesActivitiesSection
           </VStack>
 
           <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={8} w="full">
-            {displayExperiences.map((experience: any) => {
+            {displayExperiences.map((experience: ExperienceCard) => {
               const IconComponent = getExperienceIcon(experience.experience_type);
               const colorScheme = getExperienceColor(experience.experience_type);
               
               return (
-                <Card 
-                  key={experience.id} 
-                  bg={cardBg} 
-                  border="1px solid" 
-                  borderColor={borderColor} 
-                  shadow="md"
+                <Card
+                  key={experience.id}
+                  bg={cardBg}
+                  border="1px solid"
+                  borderColor={borderColor}
+                  shadow="sm"
                   borderRadius="xl"
                   overflow="hidden"
-                  transition="all 0.3s" 
-                  _hover={{ transform: 'translateY(-4px)', shadow: 'xl', borderColor: `${colorScheme}.300` }}
+                  transition="all 0.3s"
+                  className="!border-slate-200/90"
+                  _hover={{ transform: 'translateY(-4px)', shadow: 'md', borderColor: 'gray.300' }}
                   cursor="pointer"
                   onClick={() => handleExperienceClick(experience)}
                 >

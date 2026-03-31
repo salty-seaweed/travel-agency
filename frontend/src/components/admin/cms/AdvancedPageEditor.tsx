@@ -79,7 +79,7 @@ export const AdvancedPageEditor: React.FC<AdvancedPageEditorProps> = ({
       text: '#1f2937',
     },
     typography: {
-      fontFamily: 'Inter, sans-serif',
+      fontFamily: '"Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif',
       fontSize: '16px',
       lineHeight: '1.6',
       fontWeight: '400',

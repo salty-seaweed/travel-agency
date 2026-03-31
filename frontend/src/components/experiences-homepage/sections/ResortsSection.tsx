@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Box, VStack, Text, Button, Container, Heading, SimpleGrid, useColorModeValue } from '@chakra-ui/react';
+import { Box, VStack, Text, Button, Container, Heading, SimpleGrid, HStack, useColorModeValue } from '@chakra-ui/react';
 import { Link } from 'react-router-dom';
+import { MapPinIcon } from '@heroicons/react/24/outline';
 import { LazyImage } from '../../LazyImage';
 import { LoadingSpinner } from '../../LoadingSpinner';
 import { useTranslation } from '../../../i18n';
@@ -14,31 +15,24 @@ export const ExperiencesResortsSection: React.FC = () => {
   const [resorts, setResorts] = useState<Resort[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const cardBg = useColorModeValue('white', 'gray.800');
-  const borderColor = useColorModeValue('gray.200', 'gray.700');
   const textColor = useColorModeValue('gray.800', 'white');
   const mutedTextColor = useColorModeValue('gray.600', 'gray.300');
 
   useEffect(() => {
     const fetchResorts = async () => {
       try {
-        console.log('Fetching resorts...', { userCountry });
         setLoading(true);
-        
+
         try {
           const data = await getFeaturedResorts(userCountry || undefined);
-          console.log('Featured resorts data:', data);
           // Limit to 6 resorts for homepage display
           const limitedData = Array.isArray(data) ? data.slice(0, 6) : [];
           setResorts(limitedData);
-        } catch (featuredError) {
-          // Fallback to any resorts if no featured ones
-          console.log('Trying fallback resorts...');
-          const fallbackData = await getResorts({ 
+        } catch {
+          const fallbackData = await getResorts({
             page_size: 6,
-            country: userCountry || undefined 
+            country: userCountry || undefined,
           });
-          console.log('Fallback resorts data:', fallbackData);
           setResorts(fallbackData.results || []);
         }
       } catch (err) {
@@ -54,11 +48,11 @@ export const ExperiencesResortsSection: React.FC = () => {
 
   if (loading) {
     return (
-      <Box py={20} bg="white">
+      <Box py={20} bg="gray.50">
         <Container maxW="7xl">
           <VStack spacing={12} align="center">
             <VStack spacing={4} textAlign="center" maxW="3xl">
-              <Heading size="2xl" color={textColor}>
+              <Heading size="2xl" color={textColor} className="font-display tracking-tight">
                 {t('homepage.resorts.title', 'Luxury Resorts in Maldives')}
               </Heading>
               <Text fontSize="lg" color={mutedTextColor} maxW="2xl">
@@ -73,7 +67,6 @@ export const ExperiencesResortsSection: React.FC = () => {
   }
 
   if (error) {
-    console.error('Resorts section error:', error);
     return (
       <Box py={16} bg="gray.50">
         <Container maxW="7xl">
@@ -87,13 +80,12 @@ export const ExperiencesResortsSection: React.FC = () => {
   }
 
   if (!resorts || resorts.length === 0) {
-    console.log('No resorts found, showing empty state');
     return (
-      <Box py={20} bg="white">
+      <Box py={20} bg="gray.50">
         <Container maxW="7xl">
           <VStack spacing={12} align="center">
             <VStack spacing={4} textAlign="center" maxW="3xl">
-              <Heading size="2xl" color={textColor}>
+              <Heading size="2xl" color={textColor} className="font-display tracking-tight">
                 {t('homepage.resorts.title', 'Luxury Resorts in Maldives')}
               </Heading>
               <Text fontSize="lg" color={mutedTextColor} maxW="2xl">
@@ -107,14 +99,8 @@ export const ExperiencesResortsSection: React.FC = () => {
               size="lg"
               px={8}
               py={6}
-              borderRadius="xl"
-              bg="green.400"
-              color="white"
-              _hover={{
-                bg: 'green.500',
-                transform: 'translateY(-2px)',
-              }}
-              transition="all 0.3s ease"
+              borderRadius="lg"
+              className="!border-0 !bg-slate-900 !font-semibold !text-white !shadow-sm hover:!bg-slate-800"
             >
               {t('homepage.resorts.viewAll', 'View All Resorts')}
             </Button>
@@ -125,15 +111,12 @@ export const ExperiencesResortsSection: React.FC = () => {
   }
 
   return (
-    <Box py={20} bg="white">
+    <Box py={20} bg="gray.50">
       <Container maxW="7xl">
         <VStack spacing={12} align="center">
           {/* Section Header */}
           <VStack spacing={6} textAlign="center" maxW="4xl">
-            <Heading 
-              size="2xl" 
-              color={textColor}
-            >
+            <Heading size="2xl" color={textColor} className="font-display tracking-tight">
               {t('homepage.resorts.title', 'Luxury Resorts in Maldives')}
             </Heading>
             <Text 
@@ -150,17 +133,8 @@ export const ExperiencesResortsSection: React.FC = () => {
             {resorts.slice(0, 6).map((resort) => (
               <Box
                 key={resort.id}
-                bg="white"
-                borderRadius="none"
-                overflow="hidden"
-                boxShadow="none"
-                border="none"
-                transition="all 0.4s ease"
-                _hover={{
-                  transform: 'translateY(-8px)',
-                }}
+                className="group overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
                 position="relative"
-                group
               >
                 <Link to={`/resorts/${resort.id}`}>
                   {/* Resort Image */}
@@ -217,11 +191,12 @@ export const ExperiencesResortsSection: React.FC = () => {
                         {resort.description}
                       </Text>
 
-                      <Box display="flex" alignItems="center" gap={2}>
+                      <HStack spacing={1.5} alignItems="center">
+                        <MapPinIcon className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
                         <Text fontSize="sm" color={mutedTextColor}>
-                          📍 {resort.full_location || `${resort.atoll}, Maldives`}
+                          {resort.full_location || `${resort.atoll}, Maldives`}
                         </Text>
-                      </Box>
+                      </HStack>
 
                     </VStack>
                   </Box>
@@ -237,14 +212,8 @@ export const ExperiencesResortsSection: React.FC = () => {
             size="lg"
             px={8}
             py={6}
-            borderRadius="xl"
-            bg="green.400"
-            color="white"
-            _hover={{
-              bg: 'green.500',
-              transform: 'translateY(-2px)',
-            }}
-            transition="all 0.3s ease"
+            borderRadius="lg"
+            className="!border-0 !bg-slate-900 !font-semibold !text-white !shadow-sm hover:!bg-slate-800"
           >
             {t('homepage.resorts.viewAll', 'View All Resorts')}
           </Button>

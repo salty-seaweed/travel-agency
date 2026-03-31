@@ -5,9 +5,24 @@
 
 /* Ensure proper integration between Tailwind and Chakra UI */
 @layer base {
-  /* Preserve Chakra UI's CSS variables and base styles */
   :root {
     color-scheme: light;
+    --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+      "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    --font-display: "Playfair Display", Georgia, ui-serif, serif;
+    --package-editorial-linen: #f9f6f0;
+    --package-editorial-espresso: #2c2a29;
+    --package-editorial-terracotta: #c45c3e;
+    --package-editorial-forest: #1e3d36;
+  }
+
+  .package-detail-surface {
+    background-color: var(--package-editorial-linen);
+    background-image: radial-gradient(
+      ellipse 120% 80% at 50% -20%,
+      rgba(196, 92, 62, 0.06) 0%,
+      transparent 55%
+    );
   }
 }
 
@@ -28,7 +43,17 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-sans);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display);
+  font-weight: 600;
 }
 
 /* Improved touch targets for mobile accessibility */
@@ -1448,7 +1473,7 @@ img {
 
 /* CMS Content Styling */
 .cms-content {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-sans);
   line-height: 1.7;
   color: #374151;
 }

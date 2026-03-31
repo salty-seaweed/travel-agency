@@ -67,6 +67,7 @@
   },
   "navigation": {
     "home": "Главная",
+    "more": "Ещё",
     "properties": "Отели",
     "packages": "Туры",
     "transportation": "Транспорт",

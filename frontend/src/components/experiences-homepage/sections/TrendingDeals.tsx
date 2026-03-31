@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useCurrency } from '../../../contexts/CurrencyContext';
 import {
   Box,
@@ -12,38 +12,19 @@ import {
   Badge,
   Icon,
   useColorModeValue,
-  Image,
   Card,
   CardBody,
   SimpleGrid,
-  Progress,
   List,
   ListItem,
   ListIcon,
   Divider,
-  Wrap,
-  WrapItem,
 } from '@chakra-ui/react';
-import { 
-  HeartIcon, 
-  ClockIcon, 
-  UserGroupIcon, 
-  ArrowRightIcon, 
-  FireIcon,
-  StarIcon,
-  CheckIcon,
-  MapPinIcon,
-  UsersIcon,
-  MinusIcon,
-  PlusIcon,
-  InformationCircleIcon,
-} from '@heroicons/react/24/outline';
-import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
+import { HeartIcon, ArrowRightIcon, FireIcon, CheckIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from '../../../i18n';
 import type { Package as ApiPackage } from '../../../types';
 import { useWhatsApp } from '../../../hooks/useQueries';
 import { SmartLazyImage } from '../../SmartLazyImage';
-import { useImagePreloader } from '../../../hooks/useImagePreloader';
 
 interface Props { packages?: ApiPackage[]; }
 
@@ -56,7 +37,7 @@ interface LocalPackage {
   pricing_type?: 'per_person' | 'per_couple' | 'per_room' | 'per_group';
   duration: string;
   nights: number;
-  destinations: any[];
+  destinations: string[];
   highlights: string[];
   included: string[];
   maxTravelers: number;
@@ -81,16 +62,21 @@ const convertApiPackageToCardFormat = (apiPackage: ApiPackage): LocalPackage => 
     duration: apiPackage.duration.toString(),
     nights: calculatedNights,
     // Map destinations from PackageDestination relationship
-    destinations: Array.isArray(apiPackage.destinations) 
-      ? apiPackage.destinations.map((dest: any) => dest.island || dest.name || dest).filter(Boolean)
+    destinations: Array.isArray(apiPackage.destinations)
+      ? apiPackage.destinations
+          .map((dest) => dest.location?.island || 'Maldives')
+          .filter(Boolean)
       : [],
     // Map highlights - handle both array and comma-separated string
     highlights: Array.isArray(apiPackage.highlights)
       ? apiPackage.highlights
       : (apiPackage.highlights && typeof apiPackage.highlights === 'string' ? (apiPackage.highlights as string).split(',').map((h: string) => h.trim()).filter(Boolean) : []),
     // Map included items from PackageInclusion relationship
-    included: Array.isArray(apiPackage.inclusions) 
-      ? apiPackage.inclusions.filter((inc: any) => inc.category === 'included').map((inc: any) => inc.item).filter(Boolean)
+    included: Array.isArray(apiPackage.inclusions)
+      ? apiPackage.inclusions
+          .filter((inc) => inc.category === 'included')
+          .map((inc) => inc.item)
+          .filter(Boolean)
       : [],
     // Map max travelers from group_size field
     maxTravelers: apiPackage.group_size?.max || apiPackage.group_size?.recommended || 4,
@@ -112,23 +98,8 @@ export const ExperiencesTrendingDeals: React.FC<Props> = ({ packages = [] }) => 
   const { formatPrice } = useCurrency();
   
   const bgColor = useColorModeValue('gray.50', 'gray.900');
-  const cardBg = useColorModeValue('white', 'gray.800');
-  const borderColor = useColorModeValue('gray.200', 'gray.700');
   const textColor = useColorModeValue('gray.800', 'white');
   const mutedTextColor = useColorModeValue('gray.600', 'gray.300');
-
-  const [wishlist, setWishlist] = useState<number[]>([]);
-
-  useEffect(() => {
-    const saved = localStorage.getItem('wishlist_packages');
-    if (saved) {
-      try { setWishlist(JSON.parse(saved)); } catch { /* noop */ }
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem('wishlist_packages', JSON.stringify(wishlist));
-  }, [wishlist]);
 
   const topPackages: LocalPackage[] = useMemo(() => 
     packages.map(convertApiPackageToCardFormat)
@@ -136,18 +107,6 @@ export const ExperiencesTrendingDeals: React.FC<Props> = ({ packages = [] }) => 
       .slice(0, 6), 
     [packages]
   );
-
-  // Preload images for better performance
-  const { isPreloading } = useImagePreloader({
-    packages: topPackages,
-    enablePreloading: false // Disabled to prevent infinite loops with local images
-  });
-
-  const toggleWishlist = (id: number) => {
-    setWishlist((prev) => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
-  };
-
-  const isWished = (id: number) => wishlist.includes(id);
 
   const handleWhatsAppBooking = (pkg: LocalPackage) => {
     const message = `Hi! I'm interested in booking the "${pkg.name}" package. Can you provide more details?`;
@@ -160,13 +119,19 @@ export const ExperiencesTrendingDeals: React.FC<Props> = ({ packages = [] }) => 
       <Container maxW="7xl">
         <VStack spacing={12}>
           <VStack spacing={4} textAlign="center">
-            <Badge colorScheme="green" variant="solid" px={4} py={2} borderRadius="full" fontSize="sm" fontWeight="semibold">
+            <Badge colorScheme="blue" variant="subtle" px={4} py={2} borderRadius="full" fontSize="sm" fontWeight="semibold">
               <HStack spacing={2}>
-                <Icon as={FireIcon} className="w-4 h-4" />
+                <Icon as={FireIcon} className="h-4 w-4" />
                 <Text>{t('homepage.trending.badge', 'Best Maldives Deals')}</Text>
               </HStack>
             </Badge>
-            <Heading size="2xl" color={textColor} fontWeight="bold" fontSize={{ base: '2xl', md: '3xl', lg: '4xl' }}>
+            <Heading
+              size="2xl"
+              color={textColor}
+              fontWeight="bold"
+              fontSize={{ base: '2xl', md: '3xl', lg: '4xl' }}
+              className="font-display tracking-tight"
+            >
               {t('homepage.trending.title', 'Curated Maldives Packages')}
             </Heading>
             <Text fontSize="lg" color={mutedTextColor} maxW="2xl" lineHeight="1.6">
@@ -184,18 +149,18 @@ export const ExperiencesTrendingDeals: React.FC<Props> = ({ packages = [] }) => 
               const discountPercent = originalPrice && originalPrice > currentPrice
                 ? Math.round(((originalPrice - currentPrice) / originalPrice) * 100)
                 : 0;
-              const wished = isWished(pkg.id);
 
               return (
-                <Card 
-                  key={pkg.id} 
-                  shadow="lg" 
-                  borderRadius="xl" 
+                <Card
+                  key={pkg.id}
+                  shadow="sm"
+                  borderWidth="1px"
+                  borderColor="gray.200"
+                  borderRadius="xl"
                   overflow="hidden"
-                  _hover={{ transform: 'translateY(-4px)', shadow: 'xl' }} 
-                  transition="all 0.3s"
-                  display="flex" 
-                  flexDirection="column" 
+                  className="!border-slate-200/90 transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
+                  display="flex"
+                  flexDirection="column"
                   h="full"
                 >
                   <Box position="relative" h="250px" flexShrink={0}>
@@ -224,9 +189,9 @@ export const ExperiencesTrendingDeals: React.FC<Props> = ({ packages = [] }) => 
                       {/* Destinations - Simplified */}
                       {Array.isArray(pkg.destinations) && pkg.destinations.length > 0 && (
                         <HStack spacing={1} fontSize="sm" color="gray.600">
-                          <Icon as={MapPinIcon} className="w-4 h-4" color="sky.500" />
+                          <Icon as={MapPinIcon} className="h-4 w-4" color="sky.500" />
                           <Text noOfLines={1}>
-                            {pkg.destinations.slice(0, 2).map((d: any) => d.name || d).join(', ')}
+                            {pkg.destinations.slice(0, 2).join(', ')}
                             {pkg.destinations.length > 2 && ` +${pkg.destinations.length - 2}`}
                           </Text>
                         </HStack>
@@ -309,21 +274,18 @@ export const ExperiencesTrendingDeals: React.FC<Props> = ({ packages = [] }) => 
 
                         <HStack spacing={2} w="full">
                           <Button
-                            bgGradient="linear(to-r, emerald.500, teal.500)"
-                            _hover={{ bgGradient: 'linear(to-r, emerald.600, teal.600)' }}
-                            color="white"
                             flex={1}
                             size="sm"
                             onClick={() => handleWhatsAppBooking(pkg)}
                             leftIcon={<Icon as={HeartIcon} />}
+                            className="!rounded-lg !border-0 !bg-emerald-600 !font-semibold !text-white !shadow-sm hover:!bg-emerald-700"
                           >
                             {t('ui.buttons.bookNow')}
                           </Button>
                           <Button
-                            variant="outline"
-                            colorScheme="gray"
                             size="sm"
                             onClick={() => navigate(`/packages/${pkg.id}`)}
+                            className="!rounded-lg !border !border-slate-200/90 !bg-white !font-semibold !text-slate-800 !shadow-sm hover:!border-slate-300 hover:!bg-slate-50"
                           >
                             {t('homepage.trending.details', 'Details')}
                           </Button>
@@ -337,15 +299,14 @@ export const ExperiencesTrendingDeals: React.FC<Props> = ({ packages = [] }) => 
           </SimpleGrid>
 
           <VStack spacing={4}>
-            <Button 
-              size="lg" 
-              colorScheme="blue" 
-              variant="solid" 
-              px={8} 
-              py={6} 
-              borderRadius="lg" 
-              rightIcon={<Icon as={ArrowRightIcon} className="w-5 h-5" />} 
+            <Button
+              size="lg"
+              px={8}
+              py={6}
+              borderRadius="lg"
+              rightIcon={<Icon as={ArrowRightIcon} className="h-5 w-5" />}
               onClick={() => navigate('/packages?sort=featured')}
+              className="!border-0 !bg-slate-900 !font-semibold !text-white !shadow-sm hover:!bg-slate-800"
             >
               {t('homepage.trending.viewAll', 'View All Curated Packages')}
             </Button>

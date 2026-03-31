@@ -25,9 +25,11 @@ import { useTranslation } from '../../../i18n';
 import { useWhatsApp } from '../../../hooks/useQueries';
 import { Link } from 'react-router-dom';
 
-interface Props { homepageContent?: any; }
+interface Props {
+  homepageContent?: unknown;
+}
 
-export const ExperiencesTrustSection: React.FC<Props> = ({ homepageContent }) => {
+export const ExperiencesTrustSection: React.FC<Props> = () => {
   const { t } = useTranslation();
   const { getWhatsAppUrl } = useWhatsApp();
   
@@ -53,7 +55,7 @@ export const ExperiencesTrustSection: React.FC<Props> = ({ homepageContent }) =>
   ];
 
   // Remove hardcoded trust indicators - these should be managed through admin panel
-  const trustIndicators: any[] = [];
+  const trustIndicators: { value: string; label: string }[] = [];
 
   return (
     <Box bg={bgColor} py={16}>
@@ -89,14 +91,28 @@ export const ExperiencesTrustSection: React.FC<Props> = ({ homepageContent }) =>
                     <Button colorScheme="whatsapp" size="lg">{t('homepage.cta.chatWhatsApp')}</Button>
                   </a>
                   <Link to="/contact">
-                    <Button size="lg" variant="outline" rightIcon={<Icon as={ArrowRightIcon} className="w-5 h-5" />}>{t('homepage.cta.contactUs', 'Contact Now')}</Button>
+                    <Button
+                      size="lg"
+                      rightIcon={<Icon as={ArrowRightIcon} className="h-5 w-5" />}
+                      className="!rounded-lg !border !border-slate-200/90 !bg-white !font-semibold !text-slate-800 !shadow-sm hover:!border-slate-300 hover:!bg-slate-50"
+                    >
+                      {t('homepage.cta.contactUs', 'Contact Now')}
+                    </Button>
                   </Link>
                 </HStack>
               </VStack>
             </GridItem>
 
             <GridItem>
-              <Card bg={cardBg} border="1px solid" borderColor={borderColor} shadow="xl" borderRadius="xl" overflow="hidden">
+              <Card
+                bg={cardBg}
+                border="1px solid"
+                borderColor={borderColor}
+                shadow="md"
+                borderRadius="xl"
+                overflow="hidden"
+                className="!border-slate-200/90"
+              >
                 <CardBody p={8}>
                   <VStack spacing={8}>
                     <VStack spacing={2} textAlign="center">
@@ -137,13 +153,24 @@ export const ExperiencesTrustSection: React.FC<Props> = ({ homepageContent }) =>
 
           <VStack spacing={12} w="full">
             <VStack spacing={4} textAlign="center">
-              <Heading size="xl" color={textColor} fontWeight="bold">{t('trust.why.title', 'Why Choose Us?')}</Heading>
+              <Heading size="xl" color={textColor} fontWeight="bold" className="font-display tracking-tight">
+                {t('trust.why.title', 'Why Choose Us?')}
+              </Heading>
               <Text fontSize="lg" color={mutedTextColor} maxW="2xl" lineHeight="1.6">{t('trust.why.subtitle', 'We make Maldives trip planning simple and stress-free.')}</Text>
             </VStack>
 
             <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={8} w="full">
               {whyChooseUs.map((feature, index) => (
-                <Card key={index} bg={cardBg} border="1px solid" borderColor={borderColor} p={6} transition="all 0.3s" _hover={{ transform: 'translateY(-4px)', shadow: 'lg', borderColor: 'blue.300' }}>
+                <Card
+                  key={index}
+                  bg={cardBg}
+                  border="1px solid"
+                  borderColor={borderColor}
+                  p={6}
+                  transition="all 0.3s"
+                  className="!border-slate-200/90 hover:!border-slate-300"
+                  _hover={{ transform: 'translateY(-4px)', shadow: 'md' }}
+                >
                   <VStack spacing={4} align="start">
                     <Box p={3} borderRadius="lg" bg="blue.100" color="blue.600">
                       <Icon as={feature.icon} className="w-6 h-6" />

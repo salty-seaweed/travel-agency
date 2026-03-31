@@ -19,6 +19,18 @@ export default {
 
       // Professional brand color palette
       colors: {
+        // Editorial travel (package detail premium aesthetic)
+        editorial: {
+          linen: '#f9f6f0',
+          sand: '#f2ebe3',
+          parchment: '#ebe4d8',
+          espresso: '#2c2a29',
+          terracotta: '#c45c3e',
+          terracottaDark: '#a34a32',
+          forest: '#1e3d36',
+          forestLight: '#2a4b46',
+          mist: '#e8eef0',
+        },
         // Primary brand colors (Ocean/Travel theme)
         brand: {
           50: '#f0f9ff',   // Very light blue
@@ -106,11 +118,11 @@ export default {
         },
       },
 
-      // Bookmundi-style typography
       fontFamily: {
-        'sans': ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'Noto Sans', 'sans-serif', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'],
-        'display': ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-        'body': ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        sans: ['"Plus Jakarta Sans"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        serif: ['"Playfair Display"', 'Georgia', 'ui-serif', 'serif'],
+        display: ['"Playfair Display"', 'Georgia', 'ui-serif', 'serif'],
+        body: ['"Plus Jakarta Sans"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
 
       // Enhanced spacing
@@ -128,6 +140,8 @@ export default {
         'large': '0 10px 40px -10px rgba(0, 0, 0, 0.15), 0 2px 10px -2px rgba(0, 0, 0, 0.05)',
         'glow': '0 0 20px rgba(59, 130, 246, 0.3)',
         'glow-lg': '0 0 40px rgba(59, 130, 246, 0.4)',
+        'editorial': '0 24px 48px -12px rgba(44, 42, 41, 0.12), 0 8px 16px -8px rgba(44, 42, 41, 0.08)',
+        'editorial-glow': '0 0 32px rgba(196, 92, 62, 0.25)',
       },
 
       // Enhanced border radius

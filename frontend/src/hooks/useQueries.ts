@@ -653,7 +653,8 @@ export const useWhatsAppNumber = () => {
   const { data: homepageContent } = useHomepageContent();
 
   // Get WhatsApp number from homepage settings, fallback to default
-  const whatsappNumber = homepageContent?.settings?.whatsapp_number || '+9607441097';
+  const whatsappNumber =
+    homepageContent?.settings?.whatsapp_number || config.whatsappNumber;
 
   return {
     whatsappNumber,

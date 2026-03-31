@@ -16,43 +16,33 @@ import {
   CardBody,
   Grid,
   GridItem,
-  Badge,
   Icon,
   useColorModeValue,
-  Image,
-  SimpleGrid,
   useToast,
   Spinner,
 } from '@chakra-ui/react';
-import {
-  MapPinIcon,
-  CalendarIcon,
-  UserGroupIcon,
-  SparklesIcon,
-} from '@heroicons/react/24/outline';
-import { useDestinations, useFeaturedDestinations } from '../../../hooks/useQueries';
+import { MapPinIcon, CalendarIcon, UserGroupIcon } from '@heroicons/react/24/outline';
+import { useDestinations } from '../../../hooks/useQueries';
 import { useWhatsApp } from '../../../hooks/useQueries';
 import { useTranslation } from '../../../i18n';
 import { EnhancedImagePreloader } from '../../EnhancedImagePreloader';
 
 interface HeroSectionProps {
-  homepageContent?: any;
+  homepageContent?: unknown;
 }
 
-export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
-  homepageContent
-}) => {
+type DestinationList = NonNullable<ReturnType<typeof useDestinations>['data']>;
+type DestinationRow = DestinationList[number];
+
+export const ExperiencesHeroSection: React.FC<HeroSectionProps> = () => {
   const { t } = useTranslation();
   const toast = useToast();
   const navigate = useNavigate();
   const { data: destinations } = useDestinations();
-  const { data: featuredDestinations } = useFeaturedDestinations();
   const { getWhatsAppUrl } = useWhatsApp();
-  
+
   const cardBg = useColorModeValue('white', 'gray.800');
-  const borderColor = useColorModeValue('gray.200', 'gray.700');
   const textColor = useColorModeValue('gray.800', 'white');
-  const mutedTextColor = useColorModeValue('gray.600', 'gray.300');
 
   const [searchData, setSearchData] = useState({
     destination: '',
@@ -62,7 +52,7 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
   });
 
   const [showDestinationDropdown, setShowDestinationDropdown] = useState(false);
-  const [filteredDestinations, setFilteredDestinations] = useState<any[]>([]);
+  const [filteredDestinations, setFilteredDestinations] = useState<DestinationRow[]>([]);
   const [imagesLoaded, setImagesLoaded] = useState(false);
 
   // Support both images and GIFs for hero banner
@@ -73,9 +63,6 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
     "/images/optimized/hero/ishan62.webp",
     "/images/optimized/hero/sunset.jpg",
   ], []);
-  
-  // Check if any hero images are GIFs - GIFs will autoplay
-  const isGif = (url: string) => url.toLowerCase().endsWith('.gif');
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -105,8 +92,8 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
     }
   }, [searchData.destination, destinations]);
 
-  const handleDestinationSelect = (destination: any) => {
-    setSearchData(prev => ({ ...prev, destination: destination.name }));
+  const handleDestinationSelect = (destination: DestinationRow) => {
+    setSearchData((prev) => ({ ...prev, destination: destination.name }));
     setShowDestinationDropdown(false);
   };
 
@@ -132,37 +119,9 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
     navigate(`/packages?${params.toString()}`);
   };
 
-  const handlePopularDestinationClick = (destination: any) => {
-    setSearchData(prev => ({ ...prev, destination: destination.name }));
-  };
-
   const handleWhatsAppClick = () => {
     window.open(getWhatsAppUrl("Hi! I'd like help planning a Maldives experience"), '_blank');
   };
-
-  // Get trending destinations from featured destinations API first, then fallback to regular destinations
-  const trendingDestinations = useMemo(() => {
-    // First try to use featured destinations from admin panel
-    if (featuredDestinations && featuredDestinations.length > 0) {
-      return featuredDestinations.map((featured: any) => ({
-        name: featured.display_name || featured.destination_name || featured.name || 'Unknown Destination',
-        image: featured.image_url || featured.image || `/images/optimized/medium/ishan${Math.floor(Math.random() * 20) + 51}.webp`,
-        packages: featured.package_count || 0
-      }));
-    }
-
-    // Fallback to regular destinations if no featured destinations configured
-    if (destinations && destinations.length > 0) {
-      return destinations.slice(0, 4).map(dest => ({
-        name: dest.name || 'Unknown Destination',
-        image: dest.image || `/images/optimized/medium/ishan${Math.floor(Math.random() * 20) + 51}.webp`,
-        packages: dest.package_count || 0
-      }));
-    }
-
-    // No data available
-    return [];
-  }, [featuredDestinations, destinations]);
 
   return (
     <EnhancedImagePreloader
@@ -207,24 +166,27 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
         <VStack spacing={8} alignItems="center" minH="60vh" justify="center">
           {/* Hero Title and CTAs */}
           <VStack spacing={4} textAlign="center" maxW="3xl">
-            <Heading size="2xl" className="text-4xl md:text-5xl font-bold text-white">
+            <Heading
+              size="2xl"
+              className="font-display text-4xl font-semibold tracking-tight text-white md:text-5xl md:font-medium"
+            >
               {t('homepage.hero.title')}
             </Heading>
 
             <HStack spacing={3} pt={2}>
-              <Button 
-                colorScheme="whatsapp" 
-                size="md" 
+              <Button
+                colorScheme="whatsapp"
+                size="md"
                 onClick={handleWhatsAppClick}
+                className="!rounded-lg !font-semibold shadow-sm"
                 aria-label="Chat with us on WhatsApp for travel planning assistance"
               >
                 WhatsApp
               </Button>
               <Link to="/contact">
-                <Button 
-                  variant="outline" 
-                  colorScheme="whiteAlpha" 
+                <Button
                   size="md"
+                  className="!rounded-lg !border !border-white/80 !bg-white/10 !font-semibold !text-white backdrop-blur-sm hover:!bg-white/20"
                   aria-label="Go to contact page to send us a message"
                 >
                   Contact
@@ -235,13 +197,14 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
 
           {/* Horizontal Search Bar - Bookmundi Style */}
           <Box w="full" maxW="5xl">
-            <Card 
-              bg={cardBg} 
-              border="1px solid" 
-              borderColor={borderColor} 
-              shadow="2xl" 
-              borderRadius="2xl" 
+            <Card
+              bg={cardBg}
+              border="1px solid"
+              borderColor="gray.200"
+              shadow="lg"
+              borderRadius="2xl"
               overflow="visible"
+              className="!border-slate-200/90 !shadow-md"
             >
               <CardBody p={4}>
                 <Grid 
@@ -362,18 +325,15 @@ export const ExperiencesHeroSection: React.FC<HeroSectionProps> = ({
 
                   {/* Search Button */}
                   <GridItem>
-                    <Button 
-                      bgGradient="linear(to-r, sky.500, blue.500)"
-                      _hover={{ bgGradient: "linear(to-r, sky.600, blue.600)" }}
-                      color="white"
-                      size="lg" 
+                    <Button
+                      size="lg"
                       w="full"
                       h="50px"
                       onClick={handleCreateCustomExperience}
                       borderRadius="lg"
                       fontWeight="semibold"
-                      boxShadow="md"
-                      _active={{ transform: "scale(0.98)" }}
+                      className="!border-0 !bg-slate-900 !text-white !shadow-sm hover:!bg-slate-800"
+                      _active={{ transform: 'scale(0.98)' }}
                       aria-label="Search for packages matching your destination, dates, and traveler count"
                     >
                       {t('homepage.search.startPlanning', 'Search')}

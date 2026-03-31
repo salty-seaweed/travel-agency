@@ -1,12 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Container,
-  VStack,
-  HStack,
-  Grid,
-  GridItem,
   Center,
-  Text,
   Button,
   useToast,
   Box,
@@ -14,89 +9,118 @@ import {
   AlertIcon,
   AlertTitle,
   AlertDescription,
-  useDisclosure,
-  Heading,
-  Divider,
 } from '@chakra-ui/react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useFetch } from '../hooks/useFetch';
-import { SEO } from './SEO';
 import { AdvancedSEO } from './AdvancedSEO';
-import { Breadcrumbs, useBreadcrumbs } from './Breadcrumbs';
+import { useBreadcrumbs } from './Breadcrumbs';
 import { ErrorBoundary } from './ErrorBoundary';
 import { LoadingSpinner } from './LoadingSpinner';
 import { generatePackageStructuredData } from '../utils/seoOptimizations';
-import { PackageHeader } from './package/PackageHeader';
-import { PackageImageGallery } from './package/PackageImageGallery';
-import { PackageItinerary } from './package/PackageItinerary';
-import { PackageDestinations } from './package/PackageDestinations';
-import { GoogleMap } from './package/GoogleMap';
-import { PackageActivities } from './package/PackageActivities';
-import { PackageInclusions } from './package/PackageInclusions';
-import { PackageSidebar } from './package/PackageSidebar';
+import { PackageDetailLayout } from './package/PackageDetailLayout';
 import { StickyBookingBar } from './package/StickyBookingBar';
-import { BookingChoiceModal } from './BookingChoiceModal';
 import { PackageBookingForm } from './PackageBookingForm';
-import { PackageAboutSection } from './package/PackageAboutSection';
-import type { Package } from '../types';
+import { getStoredLayoutVariant } from './package/packageLayoutVariantStorage';
+import { getActivePackageDetailVariant } from '../theme/packageDetailVariants';
+import type { Package, PackageVariant } from '../types';
+import type { BookingInitialValues } from './package/packageDetailLayoutTypes';
 
 export function PackageDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const toast = useToast();
-  const { isOpen, onOpen, onClose } = useDisclosure();
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [showBookingForm, setShowBookingForm] = useState(false);
+  const [bookingPrefill, setBookingPrefill] = useState<BookingInitialValues | null>(null);
+  const layoutVariant = useMemo(
+    () => getStoredLayoutVariant() ?? getActivePackageDetailVariant(),
+    []
+  );
 
   const { data: packages, isLoading, error } = useFetch<Package>('/packages/');
-  const packageData = packages?.find(pkg => pkg.id === parseInt(id || '0'));
+  const packageData = packages?.find((pkg) => pkg.id === parseInt(id || '0', 10));
   const [selectedVariantId, setSelectedVariantId] = useState<number | null>(null);
-  
-  // Get breadcrumbs for SEO
+
   const breadcrumbs = useBreadcrumbs([
     { name: 'Home', href: '/' },
     { name: 'Travel Packages', href: '/packages' },
-    { name: packageData?.name || 'Package', href: `/packages/${id}`, isCurrentPage: true }
+    { name: packageData?.name || 'Package', href: `/packages/${id}`, isCurrentPage: true },
   ]);
 
   useEffect(() => {
-    if (packageData) {
-      // Set page title for SEO
-      document.title = `${packageData.name} - Travel Agency`;
-      // Preselect default variant if available
-      const variants: any[] = (packageData as any).variants || [];
-      const defaultVariant = variants.find(v => v.is_default) || variants[0];
-      setSelectedVariantId(defaultVariant ? defaultVariant.id : null);
-      
-      // Track recently viewed packages
-      const recentlyViewed = JSON.parse(localStorage.getItem('recently_viewed_packages') || '[]');
+    if (!packageData) return;
+    document.title = `${packageData.name} - Travel Agency`;
+    const variants = packageData.variants ?? [];
+    const defaultVariant = variants.find((v) => v.is_default) ?? variants[0];
+    setSelectedVariantId(defaultVariant?.id ?? null);
+
+    try {
+      const recentlyViewed = JSON.parse(
+        localStorage.getItem('recently_viewed_packages') || '[]'
+      ) as Array<{
+        id: number;
+        name: string;
+        image: string;
+        price: string;
+        duration: number;
+        viewedAt: number;
+      }>;
       const packageInfo = {
         id: packageData.id,
         name: packageData.name,
-        image: packageData.images && packageData.images.length > 0 ? packageData.images[0].image : '',
+        image:
+          packageData.images && packageData.images.length > 0
+            ? packageData.images[0].image
+            : '',
         price: String(packageData.price),
         duration: packageData.duration,
-        viewedAt: Date.now()
+        viewedAt: Date.now(),
       };
-      
-      // Remove if already exists and add to beginning
-      const filtered = recentlyViewed.filter((p: any) => p.id !== packageInfo.id);
-      const updated = [packageInfo, ...filtered].slice(0, 8); // Keep max 8
+      const filtered = recentlyViewed.filter((p) => p.id !== packageInfo.id);
+      const updated = [packageInfo, ...filtered].slice(0, 8);
       localStorage.setItem('recently_viewed_packages', JSON.stringify(updated));
+    } catch (e) {
+      console.error('PackageDetailPage: failed to update recently viewed', e);
     }
   }, [packageData]);
 
-  const handleBookNow = () => {
-    // Skip modal - go directly to booking form
+  const variantsList: PackageVariant[] = packageData?.variants ?? [];
+  const selectedVariant: PackageVariant | undefined =
+    selectedVariantId != null && variantsList.length > 0
+      ? variantsList.find((v) => v.id === selectedVariantId)
+      : undefined;
+
+  const viewPackage = useMemo((): Package | null => {
+    if (!packageData) return null;
+    if (selectedVariant) {
+      return {
+        ...packageData,
+        price: String(selectedVariant.price),
+        original_price: selectedVariant.original_price
+          ? String(selectedVariant.original_price)
+          : undefined,
+        duration: Number(selectedVariant.duration_days),
+      };
+    }
+    return packageData;
+  }, [packageData, selectedVariant]);
+
+  const handleBookNow = (init?: BookingInitialValues) => {
+    setBookingPrefill(init ?? null);
     setShowBookingForm(true);
+  };
+
+  const closeBookingForm = () => {
+    setShowBookingForm(false);
+    setBookingPrefill(null);
   };
 
   const handleAddToWishlist = () => {
     setIsWishlisted(!isWishlisted);
     toast({
       title: isWishlisted ? 'Removed from wishlist' : 'Added to wishlist',
-      description: isWishlisted 
-        ? 'Package removed from your wishlist' 
+      description: isWishlisted
+        ? 'Package removed from your wishlist'
         : 'Package added to your wishlist',
       status: 'success',
       duration: 2000,
@@ -105,24 +129,38 @@ export function PackageDetailPage() {
 
   const handleShare = () => {
     if (navigator.share) {
-      navigator.share({
-        title: packageData?.name || 'Travel Package',
-        text: packageData?.description || 'Check out this amazing travel package!',
-        url: window.location.href,
-      });
+      navigator
+        .share({
+          title: packageData?.name || 'Travel Package',
+          text: packageData?.description || 'Check out this amazing travel package!',
+          url: window.location.href,
+        })
+        .catch((err) => {
+          console.error('PackageDetailPage: Web Share failed', err);
+        });
     } else {
-      // Fallback for browsers that don't support Web Share API
-      navigator.clipboard.writeText(window.location.href);
-      toast({
-        title: 'Link copied',
-        description: 'Package link copied to clipboard',
-        status: 'success',
-        duration: 2000,
-      });
+      navigator.clipboard.writeText(window.location.href).then(
+        () => {
+          toast({
+            title: 'Link copied',
+            description: 'Package link copied to clipboard',
+            status: 'success',
+            duration: 2000,
+          });
+        },
+        (err) => {
+          console.error('PackageDetailPage: clipboard write failed', err);
+          toast({
+            title: 'Could not copy link',
+            description: 'Copy the address from your browser bar instead.',
+            status: 'error',
+            duration: 3000,
+          });
+        }
+      );
     }
   };
 
-  // Loading state
   if (isLoading) {
     return (
       <Container maxW="7xl" py={8}>
@@ -133,8 +171,7 @@ export function PackageDetailPage() {
     );
   }
 
-  // Error state
-  if (error || !packageData) {
+  if (error || !packageData || !viewPackage) {
     return (
       <Container maxW="7xl" py={8}>
         <Center minH="60vh">
@@ -143,7 +180,7 @@ export function PackageDetailPage() {
             <Box>
               <AlertTitle>Package not found</AlertTitle>
               <AlertDescription>
-                The package you're looking for doesn't exist or has been removed.
+                The package you&apos;re looking for doesn&apos;t exist or has been removed.
               </AlertDescription>
             </Box>
           </Alert>
@@ -157,240 +194,80 @@ export function PackageDetailPage() {
     );
   }
 
-  // Generate structured data for the package
-  const structuredData = packageData ? generatePackageStructuredData(packageData) : null;
+  const structuredData = generatePackageStructuredData(packageData);
+  const pkgWithOptionalPrice = packageData as Package & { price_from?: string };
 
   return (
     <>
-      {packageData && (
-        <AdvancedSEO
-          title={`${packageData.name} - Maldives Travel Package`}
-          description={packageData.description || `Discover ${packageData.name} with Thread Travels & Tours. Budget-friendly Maldives travel experience with island packages and multi-island adventures.`}
-          image={packageData.images?.[0]?.image}
-          type="product"
-          keywords={`${packageData.name}, Maldives package, Thread Travels, budget Maldives, island adventure, affordable paradise`}
-          structuredData={structuredData}
-          breadcrumbs={breadcrumbs}
-          price={packageData.price_from ? {
-            amount: packageData.price_from,
-            currency: 'USD',
-            availability: 'InStock'
-          } : undefined}
-        />
-      )}
-      
-      <ErrorBoundary level="page">
-      <Container maxW="7xl" py={4}>
-        {/* Breadcrumbs */}
-        <Breadcrumbs />
-      </Container>
-      
-      <Container maxW="7xl" py={8}>
-        {(() => {
-          // Compute selected variant and a view model merged with selected price/duration
-          const variants: any[] = (packageData as any)?.variants || [];
-          const selectedVariant = selectedVariantId && variants.length
-            ? variants.find(v => v.id === selectedVariantId)
-            : null;
-          const viewPackage: any = selectedVariant
+      <AdvancedSEO
+        title={`${packageData.name} - Maldives Travel Package`}
+        description={
+          packageData.description ||
+          `Discover ${packageData.name} with Thread Travels & Tours. Budget-friendly Maldives travel experience with island packages and multi-island adventures.`
+        }
+        image={packageData.images?.[0]?.image}
+        type="product"
+        keywords={`${packageData.name}, Maldives package, Thread Travels, budget Maldives, island adventure, affordable paradise`}
+        structuredData={structuredData}
+        breadcrumbs={breadcrumbs}
+        price={
+          pkgWithOptionalPrice.price_from != null &&
+          pkgWithOptionalPrice.price_from !== ''
             ? {
-                ...packageData,
-                price: String(selectedVariant.price),
-                original_price: selectedVariant.original_price ? String(selectedVariant.original_price) : undefined,
-                duration: Number(selectedVariant.duration_days),
-                selected_variant_id: selectedVariant.id,
+                amount: parseFloat(String(pkgWithOptionalPrice.price_from).replace(/[^0-9.]/g, '')) || 0,
+                currency: 'USD',
+                availability: 'InStock' as const,
               }
-            : packageData;
-          // Store on window for child closures (no re-render deps)
-          (window as any).__currentPackageVariant = selectedVariant;
-          (window as any).__currentPackage = viewPackage;
-          return null;
-        })()}
-        {/* Header Section */}
-        <PackageHeader
-          packageData={(() => {
-            const variants: any[] = (packageData as any)?.variants || [];
-            const selectedVariant = selectedVariantId && variants.length ? variants.find(v => v.id === selectedVariantId) : null;
-            return selectedVariant
-              ? ({ ...packageData, price: String(selectedVariant.price), original_price: selectedVariant.original_price ? String(selectedVariant.original_price) : undefined, duration: selectedVariant.duration_days } as any)
-              : (packageData as any);
-          })()}
+            : undefined
+        }
+      />
+
+      <ErrorBoundary level="page">
+        <PackageDetailLayout
+          packageData={packageData}
+          viewPackage={viewPackage}
+          selectedVariantId={selectedVariantId}
+          onVariantChange={setSelectedVariantId}
           onBookNow={handleBookNow}
+          onAddToWishlist={handleAddToWishlist}
+          onShare={handleShare}
+          isWishlisted={isWishlisted}
+          variant={layoutVariant}
+        />
+
+        <StickyBookingBar
+          packageData={viewPackage}
+          selectedVariant={selectedVariant}
+          onBookNow={() => handleBookNow()}
           onAddToWishlist={handleAddToWishlist}
           onShare={handleShare}
           isWishlisted={isWishlisted}
         />
 
-        <Grid templateColumns={{ base: '1fr', lg: '2fr 1fr' }} gap={8}>
-          {/* Main Content */}
-          <VStack spacing={8} align="stretch">
-            {/* Variant Selector */}
-            {Array.isArray((packageData as any).variants) && (packageData as any).variants.length > 0 && (
-              <Box p={6} bg="white" borderRadius="xl" border="1px solid" borderColor="gray.200">
-                <Heading size="md" color="gray.800" mb={4}>Select Duration</Heading>
-                <HStack spacing={3} flexWrap="wrap">
-                  {((packageData as any).variants as any[]).sort((a,b) => a.duration_days - b.duration_days).map(v => (
-                    <Button
-                      key={v.id}
-                      variant={selectedVariantId === v.id ? 'solid' : 'outline'}
-                      colorScheme="sky"
-                      onClick={() => setSelectedVariantId(v.id)}
-                    >
-                      {v.duration_days} days · ${parseFloat(String(v.price)).toFixed(0)}
-                    </Button>
-                  ))}
-                </HStack>
-              </Box>
-            )}
-            {/* Image Gallery */}
-            {packageData.images && packageData.images.length > 0 && (
-              <PackageImageGallery
-                images={packageData.images}
-                packageName={packageData.name}
-              />
-            )}
-
-            {/* About This Package Section */}
-            <PackageAboutSection packageData={packageData} />
-
-            {/* Itinerary Section */}
-            {packageData.itinerary && packageData.itinerary.length > 0 && (
-              <Box p={6} bg="white" borderRadius="xl" border="1px solid" borderColor="gray.200">
-                <Heading size="lg" color="gray.800" mb={6} display="flex" alignItems="center">
-                  📅 Detailed Itinerary
-                </Heading>
-                <PackageItinerary itinerary={packageData.itinerary} />
-              </Box>
-            )}
-
-            {/* Destinations & Map Section */}
-            {packageData.destinations?.length ? (
-              <Box p={6} bg="white" borderRadius="xl" border="1px solid" borderColor="gray.200">
-                <Heading size="lg" color="gray.800" mb={6} display="flex" alignItems="center">
-                  🗺️ Destinations & Journey Map
-                </Heading>
-                <VStack spacing={6} align="stretch">
-                  <GoogleMap destinations={packageData.destinations} height={400} />
-                  <Divider />
-                  <PackageDestinations destinations={packageData.destinations} />
-                </VStack>
-              </Box>
-            ) : null}
-
-            {/* Activities Section */}
-            {packageData.activities && packageData.activities.length > 0 && (
-              <Box p={6} bg="white" borderRadius="xl" border="1px solid" borderColor="gray.200">
-                <Heading size="lg" color="gray.800" mb={6} display="flex" alignItems="center">
-                  🎯 Activities & Experiences
-                </Heading>
-                <PackageActivities activities={packageData.activities} />
-              </Box>
-            )}
-
-            {/* What's Included Section */}
-            {packageData.inclusions && packageData.inclusions.length > 0 && (
-              <Box p={6} bg="white" borderRadius="xl" border="1px solid" borderColor="gray.200">
-                <Heading size="lg" color="gray.800" mb={6} display="flex" alignItems="center">
-                  ✅ What's Included
-                </Heading>
-                <PackageInclusions inclusions={packageData.inclusions} />
-              </Box>
-            )}
-
-            {/* Reviews Section */}
-            {packageData.reviews && packageData.reviews.length > 0 && (
-              <Box p={6} bg="white" borderRadius="xl" border="1px solid" borderColor="gray.200">
-                <Heading size="lg" color="gray.800" mb={6} display="flex" alignItems="center">
-                  ⭐ Customer Reviews
-                </Heading>
-                <VStack spacing={4} align="stretch">
-                  {packageData.reviews.slice(0, 3).map((review) => (
-                    <Box key={review.id} p={4} bg="gray.50" borderRadius="lg">
-                      <HStack justify="space-between" mb={2}>
-                        <Text fontWeight="medium" color="gray.800">
-                          {review.name}
-                        </Text>
-                        <Text fontSize="sm" color="gray.500">
-                          {new Date(review.created_at || '').toLocaleDateString()}
-                        </Text>
-                      </HStack>
-                      <Text fontSize="sm" color="gray.600" lineHeight="1.6">
-                        {review.comment}
-                      </Text>
-                    </Box>
-                  ))}
-                  {packageData.reviews.length > 3 && (
-                    <Button variant="outline" colorScheme="purple" size="sm">
-                      View all {packageData.reviews.length} reviews
-                    </Button>
-                  )}
-                </VStack>
-              </Box>
-            )}
-          </VStack>
-
-          {/* Sidebar */}
-          <GridItem>
-            <PackageSidebar
-              packageData={(() => {
-                const variants: any[] = (packageData as any)?.variants || [];
-                const selectedVariant = selectedVariantId && variants.length ? variants.find(v => v.id === selectedVariantId) : null;
-                return selectedVariant
-                  ? ({ ...packageData, price: String(selectedVariant.price), original_price: selectedVariant.original_price ? String(selectedVariant.original_price) : undefined, duration: selectedVariant.duration_days } as any)
-                  : (packageData as any);
-              })()}
-              onBookNow={handleBookNow}
-              selectedVariant={(() => {
-                const variants: any[] = (packageData as any)?.variants || [];
-                return selectedVariantId && variants.length ? variants.find(v => v.id === selectedVariantId) : null;
-              })()}
-            />
-          </GridItem>
-                 </Grid>
-       </Container>
-
-       {/* Sticky Booking Bar for Mobile */}
-       <StickyBookingBar
-         packageData={(() => {
-           const variants: any[] = (packageData as any)?.variants || [];
-           const selectedVariant = selectedVariantId && variants.length ? variants.find(v => v.id === selectedVariantId) : null;
-           return selectedVariant
-             ? ({ ...packageData, price: String(selectedVariant.price), original_price: selectedVariant.original_price ? String(selectedVariant.original_price) : undefined, duration: selectedVariant.duration_days } as any)
-             : (packageData as any);
-         })()}
-         selectedVariant={(() => {
-           const variants: any[] = (packageData as any)?.variants || [];
-           return selectedVariantId && variants.length ? variants.find(v => v.id === selectedVariantId) : null;
-         })()}
-         onBookNow={handleBookNow}
-         onAddToWishlist={handleAddToWishlist}
-         onShare={handleShare}
-         isWishlisted={isWishlisted}
-       />
-
-       {/* Booking Modal - Removed, now goes directly to form */}
-
-      <PackageBookingForm
-        isOpen={showBookingForm}
-        packageId={packageData.id}
-        packageName={packageData.name}
-        packagePrice={(() => {
-          if (selectedVariantId && (packageData as any).variants) {
-            const v = (packageData as any).variants.find((vv: any) => vv.id === selectedVariantId);
-            if (v) return parseFloat(String(v.price));
+        <PackageBookingForm
+          isOpen={showBookingForm}
+          packageId={packageData.id}
+          packageName={packageData.name}
+          packagePrice={
+            selectedVariantId && variantsList.length > 0
+              ? (() => {
+                  const v = variantsList.find((vv) => vv.id === selectedVariantId);
+                  return v ? parseFloat(String(v.price)) : parseFloat(String(packageData.price));
+                })()
+              : parseFloat(String(packageData.price))
           }
-          return parseFloat(packageData.price as any);
-        })()}
-        packageDurationDays={(() => {
-          if (selectedVariantId && (packageData as any).variants) {
-            const v = (packageData as any).variants.find((vv: any) => vv.id === selectedVariantId);
-            if (v) return Number(v.duration_days);
+          packageDurationDays={
+            selectedVariantId && variantsList.length > 0
+              ? (() => {
+                  const v = variantsList.find((vv) => vv.id === selectedVariantId);
+                  return v ? Number(v.duration_days) : packageData.duration;
+                })()
+              : packageData.duration
           }
-          return packageData.duration;
-        })()}
-        onClose={() => setShowBookingForm(false)}
-      />
-    </ErrorBoundary>
+          initialPrefill={bookingPrefill}
+          onClose={closeBookingForm}
+        />
+      </ErrorBoundary>
     </>
   );
-} 
+}

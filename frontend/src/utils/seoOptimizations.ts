@@ -140,23 +140,8 @@ export const addWebsiteStructuredData = () => {
   document.head.appendChild(script);
 };
 
-// Optimize fonts loading
-export const optimizeFontLoading = () => {
-  // Add font-display: swap to improve loading performance
-  const style = document.createElement('style');
-  style.textContent = `
-    @font-face {
-      font-family: 'Inter';
-      font-display: swap;
-    }
-    
-    /* Ensure text remains visible during webfont load */
-    .font-loading {
-      font-display: swap;
-    }
-  `;
-  document.head.appendChild(style);
-};
+/** Webfonts use Google Fonts link in index.html with display=swap. */
+export const optimizeFontLoading = () => {};
 
 // Add meta tags for better SEO if missing
 export const addMissingMetaTags = () => {

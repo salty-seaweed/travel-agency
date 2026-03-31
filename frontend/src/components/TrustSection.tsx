@@ -9,7 +9,6 @@ import {
   GlobeAltIcon,
   HeartIcon
 } from '@heroicons/react/24/outline';
-import { useTranslation } from '../i18n';
 import { Card } from './ui/Card';
 
 interface TrustSectionProps {
@@ -25,8 +24,6 @@ export function TrustSection({
   showGuarantees = true, 
   showStats = true 
 }: TrustSectionProps) {
-  const { t } = useTranslation();
-
   const certifications = [
     {
       icon: ShieldCheckIcon,
@@ -190,10 +187,6 @@ export function TrustSection({
         {/* Trust Badges */}
         <div className="mt-12 text-center">
           <div className="flex flex-wrap justify-center items-center gap-8 opacity-60">
-            <div className="flex items-center space-x-2">
-              <ShieldCheckIcon className="w-5 h-5 text-green-600" />
-              <span className="text-sm font-medium text-gray-600">SSL Secured</span>
-            </div>
             <div className="flex items-center space-x-2">
               <CheckCircleIcon className="w-5 h-5 text-blue-600" />
               <span className="text-sm font-medium text-gray-600">Verified Business</span>

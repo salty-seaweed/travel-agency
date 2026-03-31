@@ -21,6 +21,7 @@ const queryClient = new QueryClient({
 })
 import './i18n'
 import './main.css'
+import { SITE_FONT_BODY, SITE_FONT_HEADING } from './theme/siteFonts'
 
 // Silence all console output in production (prevents third-party logs too)
 if (import.meta.env.PROD) {
@@ -89,14 +90,15 @@ const theme = extendTheme({
     },
   },
   fonts: {
-    heading: 'Inter, system-ui, sans-serif',
-    body: 'Inter, system-ui, sans-serif',
+    heading: SITE_FONT_HEADING,
+    body: SITE_FONT_BODY,
   },
   styles: {
     global: {
       body: {
         bg: 'gray.50',
         color: 'gray.800',
+        fontFamily: SITE_FONT_BODY,
       },
     },
   },

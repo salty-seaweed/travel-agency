@@ -70,16 +70,15 @@ export const RecentlyViewedSection: React.FC = () => {
           <HStack justify="space-between" w="full">
             <HStack spacing={3}>
               <Icon as={ClockIcon} w={6} h={6} color="sky.500" />
-              <Heading size="lg" color={textColor}>
+              <Heading size="lg" color={textColor} className="font-display tracking-tight">
                 {t('homepage.recentlyViewed.title', 'Recently Viewed')}
               </Heading>
             </HStack>
             <Button
-              variant="ghost"
               size="sm"
               rightIcon={<Icon as={ArrowRightIcon} w={4} h={4} />}
               onClick={() => navigate('/packages')}
-              color="sky.600"
+              className="!font-semibold !text-slate-700 hover:!bg-slate-100"
             >
               View All Packages
             </Button>
@@ -97,10 +96,11 @@ export const RecentlyViewedSection: React.FC = () => {
                 overflow="hidden"
                 cursor="pointer"
                 transition="all 0.3s"
+                className="!border-slate-200/90"
                 _hover={{
                   transform: 'translateY(-4px)',
-                  shadow: 'lg',
-                  borderColor: 'sky.300'
+                  shadow: 'md',
+                  borderColor: 'gray.300',
                 }}
                 onClick={() => navigate(`/packages/${pkg.id}`)}
               >

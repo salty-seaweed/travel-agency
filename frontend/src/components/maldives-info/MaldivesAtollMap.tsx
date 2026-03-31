@@ -15,15 +15,10 @@ import {
   Flex,
   Image,
 } from '@chakra-ui/react';
-import {
-  MapPinIcon,
-  StarIcon,
-  EyeIcon,
-  XMarkIcon,
-} from '@heroicons/react/24/outline';
+import { StarIcon, EyeIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
-// Fix for default markers in react-leaflet
-delete (L.Icon.Default.prototype as any)._getIconUrl;
+// Fix for default markers in react-leaflet (bundlers omit default icon URLs)
+Reflect.deleteProperty(L.Icon.Default.prototype as Record<string, unknown>, '_getIconUrl');
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
   iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
@@ -376,24 +371,32 @@ function MapControls({ onResetView }: { onResetView: () => void }) {
 }
 
 export function MaldivesAtollMap() {
-  const [selectedAtoll, setSelectedAtoll] = useState<typeof atollsData[0] | null>(null);
+  const [selectedAtoll, setSelectedAtoll] = useState<(typeof atollsData)[0] | null>(null);
 
   return (
     <Box position="relative">
-      {/* Map Container */}
-      <Box
-        borderRadius="2xl"
-        overflow="hidden"
-        boxShadow="2xl"
-        border="4px solid"
-        borderColor="blue.100"
+      <Flex
+        direction={{ base: 'column', lg: 'row' }}
+        gap={{ base: 4, lg: 6 }}
+        align="flex-start"
       >
-        <MapContainer
-          center={[3.2028, 73.2207]}
-          zoom={6}
-          style={{ height: '600px', width: '100%' }}
-          scrollWheelZoom={true}
+        {/* Map Container */}
+        <Box
+          flex="1"
+          minW={0}
+          w="100%"
+          borderRadius="2xl"
+          overflow="hidden"
+          boxShadow="2xl"
+          border="4px solid"
+          borderColor="blue.100"
         >
+          <MapContainer
+            center={[3.2028, 73.2207]}
+            zoom={6}
+            style={{ height: '600px', width: '100%' }}
+            scrollWheelZoom={true}
+          >
           {/* Beautiful ocean tile layer */}
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -457,11 +460,152 @@ export function MaldivesAtollMap() {
             </React.Fragment>
           ))}
           
-          <MapControls onResetView={() => setSelectedAtoll(null)} />
-        </MapContainer>
-      </Box>
+            <MapControls onResetView={() => setSelectedAtoll(null)} />
+          </MapContainer>
+        </Box>
 
-      {/* Atoll List Panel (Mobile & below map) */}
+        {/* Selected atoll: beside map on lg+, below map on smaller screens (no viewport-fixed) */}
+        {selectedAtoll ? (
+          <Box
+            w={{ base: '100%', lg: '400px' }}
+            flexShrink={0}
+            maxH={{ base: 'min(70vh, 560px)', lg: '600px' }}
+            bg="white"
+            borderRadius="2xl"
+            boxShadow="2xl"
+            border="1px solid"
+            borderColor="gray.100"
+            overflow="hidden"
+            display="flex"
+            flexDirection="column"
+          >
+            <Box position="relative" h="180px" flexShrink={0}>
+              <Image
+                src={selectedAtoll.image}
+                alt={selectedAtoll.name}
+                w="full"
+                h="full"
+                objectFit="cover"
+              />
+              <Box
+                position="absolute"
+                top={0}
+                left={0}
+                right={0}
+                bottom={0}
+                bgGradient="linear(to-t, blackAlpha.700, transparent)"
+              />
+              <Button
+                position="absolute"
+                top={3}
+                right={3}
+                size="sm"
+                variant="ghost"
+                color="white"
+                onClick={() => setSelectedAtoll(null)}
+                _hover={{ bg: 'whiteAlpha.300' }}
+                aria-label="Close atoll details"
+              >
+                <Icon as={XMarkIcon} w={6} h={6} />
+              </Button>
+              <VStack
+                position="absolute"
+                bottom={4}
+                left={4}
+                align="start"
+                spacing={1}
+              >
+                <Badge bg={selectedAtoll.color} color="white" px={2} py={1} borderRadius="md">
+                  {selectedAtoll.localName}
+                </Badge>
+                <Heading as="h3" size="lg" color="white" textShadow="0 2px 4px rgba(0,0,0,0.3)">
+                  {selectedAtoll.name}
+                </Heading>
+              </VStack>
+            </Box>
+
+            <Box flex="1" minH={0} p={5} overflowY="auto">
+              <VStack align="start" spacing={4}>
+                <HStack spacing={4} w="full">
+                  <Box flex={1} bg="blue.50" p={3} borderRadius="lg" textAlign="center">
+                    <Text fontSize="2xl" fontWeight="bold" color="blue.600">
+                      {selectedAtoll.islands}
+                    </Text>
+                    <Text fontSize="xs" color="gray.600">
+                      Islands
+                    </Text>
+                  </Box>
+                  <Box flex={1} bg="green.50" p={3} borderRadius="lg" textAlign="center">
+                    <Text fontSize="2xl" fontWeight="bold" color="green.600">
+                      {selectedAtoll.resorts}
+                    </Text>
+                    <Text fontSize="xs" color="gray.600">
+                      Resorts
+                    </Text>
+                  </Box>
+                </HStack>
+
+                <Text color="gray.600" fontSize="sm" lineHeight="1.6">
+                  {selectedAtoll.description}
+                </Text>
+
+                <Box w="full">
+                  <Text fontWeight="bold" color="gray.700" mb={2} fontSize="sm">
+                    Highlights
+                  </Text>
+                  <Flex flexWrap="wrap" gap={2}>
+                    {selectedAtoll.highlights.map((highlight, index) => (
+                      <Badge key={index} colorScheme="purple" variant="subtle">
+                        {highlight}
+                      </Badge>
+                    ))}
+                  </Flex>
+                </Box>
+
+                <Box w="full">
+                  <Text fontWeight="bold" color="gray.700" mb={2} fontSize="sm">
+                    Marine life
+                  </Text>
+                  <Flex flexWrap="wrap" gap={2}>
+                    {selectedAtoll.marineLife.map((creature, index) => (
+                      <Badge key={index} colorScheme="cyan" variant="subtle">
+                        {creature}
+                      </Badge>
+                    ))}
+                  </Flex>
+                </Box>
+
+                <Box w="full">
+                  <Text fontWeight="bold" color="gray.700" mb={2} fontSize="sm">
+                    Best for
+                  </Text>
+                  <Flex flexWrap="wrap" gap={2}>
+                    {selectedAtoll.bestFor.map((item, index) => (
+                      <Badge key={index} colorScheme="orange" variant="subtle">
+                        {item}
+                      </Badge>
+                    ))}
+                  </Flex>
+                </Box>
+
+                <Button
+                  as="a"
+                  href={`/packages?atoll=${encodeURIComponent(selectedAtoll.name)}`}
+                  w="full"
+                  colorScheme="blue"
+                  size="lg"
+                  mt={2}
+                >
+                  <Icon as={StarIcon} mr={2} w={5} h={5} />
+                  Explore Packages
+                </Button>
+              </VStack>
+            </Box>
+          </Box>
+        ) : null}
+      </Flex>
+
+      {/* Atoll List Panel (below map + optional sidebar) */}
       <Box mt={6}>
         <Heading as="h3" size="md" mb={4} color="gray.700">
           All 26 Atolls at a Glance
@@ -505,172 +649,6 @@ export function MaldivesAtollMap() {
           ))}
         </SimpleGrid>
       </Box>
-
-      {/* Selected Atoll Detail Panel */}
-      {selectedAtoll && (
-        <Box
-          position="fixed"
-          bottom={{ base: 0, md: 'auto' }}
-          top={{ base: 'auto', md: '50%' }}
-          right={{ base: 0, md: 4 }}
-          left={{ base: 0, md: 'auto' }}
-          transform={{ base: 'none', md: 'translateY(-50%)' }}
-          w={{ base: 'full', md: '400px' }}
-          maxH={{ base: '70vh', md: '80vh' }}
-          bg="white"
-          borderRadius={{ base: '2xl 2xl 0 0', md: '2xl' }}
-          boxShadow="2xl"
-          zIndex={1100}
-          overflow="hidden"
-        >
-          {/* Header with image */}
-          <Box position="relative" h="180px">
-            <Image
-              src={selectedAtoll.image}
-              alt={selectedAtoll.name}
-              w="full"
-              h="full"
-              objectFit="cover"
-            />
-            <Box
-              position="absolute"
-              top={0}
-              left={0}
-              right={0}
-              bottom={0}
-              bgGradient="linear(to-t, blackAlpha.700, transparent)"
-            />
-            <Button
-              position="absolute"
-              top={3}
-              right={3}
-              size="sm"
-              variant="ghost"
-              color="white"
-              onClick={() => setSelectedAtoll(null)}
-              _hover={{ bg: 'whiteAlpha.300' }}
-            >
-              <Icon as={XMarkIcon} w={6} h={6} />
-            </Button>
-            <VStack
-              position="absolute"
-              bottom={4}
-              left={4}
-              align="start"
-              spacing={1}
-            >
-              <Badge
-                bg={selectedAtoll.color}
-                color="white"
-                px={2}
-                py={1}
-                borderRadius="md"
-              >
-                {selectedAtoll.localName}
-              </Badge>
-              <Heading as="h3" size="lg" color="white" textShadow="0 2px 4px rgba(0,0,0,0.3)">
-                {selectedAtoll.name}
-              </Heading>
-            </VStack>
-          </Box>
-          
-          {/* Content */}
-          <Box p={5} overflowY="auto" maxH={{ base: 'calc(70vh - 180px)', md: 'calc(80vh - 180px)' }}>
-            <VStack align="start" spacing={4}>
-              {/* Stats */}
-              <HStack spacing={4} w="full">
-                <Box flex={1} bg="blue.50" p={3} borderRadius="lg" textAlign="center">
-                  <Text fontSize="2xl" fontWeight="bold" color="blue.600">
-                    {selectedAtoll.islands}
-                  </Text>
-                  <Text fontSize="xs" color="gray.600">Islands</Text>
-                </Box>
-                <Box flex={1} bg="green.50" p={3} borderRadius="lg" textAlign="center">
-                  <Text fontSize="2xl" fontWeight="bold" color="green.600">
-                    {selectedAtoll.resorts}
-                  </Text>
-                  <Text fontSize="xs" color="gray.600">Resorts</Text>
-                </Box>
-              </HStack>
-              
-              {/* Description */}
-              <Text color="gray.600" fontSize="sm" lineHeight="1.6">
-                {selectedAtoll.description}
-              </Text>
-              
-              {/* Highlights */}
-              <Box w="full">
-                <Text fontWeight="bold" color="gray.700" mb={2} fontSize="sm">
-                  ✨ Highlights
-                </Text>
-                <Flex flexWrap="wrap" gap={2}>
-                  {selectedAtoll.highlights.map((highlight, index) => (
-                    <Badge key={index} colorScheme="purple" variant="subtle">
-                      {highlight}
-                    </Badge>
-                  ))}
-                </Flex>
-              </Box>
-              
-              {/* Marine Life */}
-              <Box w="full">
-                <Text fontWeight="bold" color="gray.700" mb={2} fontSize="sm">
-                  🐠 Marine Life
-                </Text>
-                <Flex flexWrap="wrap" gap={2}>
-                  {selectedAtoll.marineLife.map((creature, index) => (
-                    <Badge key={index} colorScheme="cyan" variant="subtle">
-                      {creature}
-                    </Badge>
-                  ))}
-                </Flex>
-              </Box>
-              
-              {/* Best For */}
-              <Box w="full">
-                <Text fontWeight="bold" color="gray.700" mb={2} fontSize="sm">
-                  🎯 Best For
-                </Text>
-                <Flex flexWrap="wrap" gap={2}>
-                  {selectedAtoll.bestFor.map((item, index) => (
-                    <Badge key={index} colorScheme="orange" variant="subtle">
-                      {item}
-                    </Badge>
-                  ))}
-                </Flex>
-              </Box>
-              
-              {/* CTA */}
-              <Button
-                as="a"
-                href={`/packages?atoll=${selectedAtoll.name}`}
-                w="full"
-                colorScheme="blue"
-                size="lg"
-                mt={2}
-              >
-                <Icon as={StarIcon} mr={2} w={5} h={5} />
-                Explore Packages
-              </Button>
-            </VStack>
-          </Box>
-        </Box>
-      )}
-
-      {/* Overlay when detail panel is open on mobile */}
-      {selectedAtoll && (
-        <Box
-          display={{ base: 'block', md: 'none' }}
-          position="fixed"
-          top={0}
-          left={0}
-          right={0}
-          bottom="70vh"
-          bg="blackAlpha.500"
-          zIndex={1050}
-          onClick={() => setSelectedAtoll(null)}
-        />
-      )}
 
       {/* Custom marker styles */}
       <style>{`

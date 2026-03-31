@@ -21,10 +21,11 @@ import {
 } from '@heroicons/react/24/outline';
 import { useTranslation } from '../i18n';
 import { useWhatsApp, useHomepageData } from '../hooks/useQueries';
+import { config } from '../config';
 
 export function Footer() {
   const { t } = useTranslation();
-  const { getWhatsAppUrl } = useWhatsApp();
+  const { getWhatsAppUrl, whatsappNumber } = useWhatsApp();
   const { data: settings } = useHomepageData();
   
   const bgColor = useColorModeValue('gray.700', 'gray.700');
@@ -150,13 +151,13 @@ export function Footer() {
               <HStack spacing={3}>
                 <Icon as={PhoneIcon} w={4} h={4} />
                 <Text fontSize="sm">
-                  {settings?.contact_phone || '+960 744 1097'}
+                  {whatsappNumber}
                 </Text>
               </HStack>
               <HStack spacing={3}>
                 <Icon as={EnvelopeIcon} w={4} h={4} />
                 <Text fontSize="sm">
-                  {settings?.contact_email || 'info@threadtravels.com'}
+                  {settings?.contact_email || config.supportEmail}
                 </Text>
               </HStack>
               <HStack spacing={3}>
@@ -180,11 +181,6 @@ export function Footer() {
             </HStack>
             <Text color="gray.500">|</Text>
             <HStack spacing={2}>
-              <Text fontSize="lg">🔒</Text>
-              <Text fontSize="sm" fontWeight="medium">SSL Secure</Text>
-            </HStack>
-            <Text color="gray.500">|</Text>
-            <HStack spacing={2}>
               <Text fontSize="lg">✓</Text>
               <Text fontSize="sm" fontWeight="medium">Verified Business</Text>
             </HStack>
@@ -196,7 +192,7 @@ export function Footer() {
           </HStack>
           
           <Text fontSize="xs" color="gray.400" textAlign="center">
-            Licensed Maldives Travel Agency • Member of MATATO • 24/7 Customer Support
+            Licensed Maldives Travel Agency • 24/7 Customer Support
           </Text>
         </VStack>
 

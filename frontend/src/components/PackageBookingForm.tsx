@@ -25,6 +25,7 @@ import { CheckCircleIcon } from '@heroicons/react/24/outline';
 import { LoadingSpinner } from './LoadingSpinner';
 import { useNotification } from '../hooks';
 import { useWhatsApp } from '../hooks/useQueries';
+import type { BookingInitialValues } from './package/packageDetailLayoutTypes';
 
 interface PackageBookingFormProps {
   packageId: number;
@@ -33,9 +34,19 @@ interface PackageBookingFormProps {
   packageDurationDays: number;
   isOpen: boolean;
   onClose: () => void;
+  /** Prefill when opened from compact booking sidebar (dates / guests). */
+  initialPrefill?: BookingInitialValues | null;
 }
 
-export function PackageBookingForm({ packageId, packageName, packagePrice, packageDurationDays, isOpen, onClose }: PackageBookingFormProps) {
+export function PackageBookingForm({
+  packageId,
+  packageName,
+  packagePrice,
+  packageDurationDays,
+  isOpen,
+  onClose,
+  initialPrefill = null,
+}: PackageBookingFormProps) {
   const { showSuccess, showError } = useNotification();
   const { getWhatsAppUrl } = useWhatsApp();
   const [loading, setLoading] = useState(false);
@@ -50,6 +61,20 @@ export function PackageBookingForm({ packageId, packageName, packagePrice, packa
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setFormData((prev) => ({
+      ...prev,
+      duration_days: packageDurationDays || 1,
+      ...(initialPrefill?.start_date != null && initialPrefill.start_date !== ''
+        ? { start_date: initialPrefill.start_date }
+        : {}),
+      ...(initialPrefill?.number_of_guests != null
+        ? { number_of_guests: initialPrefill.number_of_guests }
+        : {}),
+    }));
+  }, [isOpen, packageDurationDays, initialPrefill?.start_date, initialPrefill?.number_of_guests]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;

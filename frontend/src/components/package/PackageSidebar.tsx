@@ -1,19 +1,4 @@
 import {
-  Box,
-  VStack,
-  HStack,
-  Text,
-  Badge,
-  Icon,
-  Button,
-  Card,
-  CardHeader,
-  CardBody,
-  List,
-  ListItem,
-  ListIcon,
-} from '@chakra-ui/react';
-import {
   CalendarIcon,
   MapPinIcon,
   UsersIcon,
@@ -28,17 +13,70 @@ import {
 } from '@heroicons/react/24/outline';
 import { useWhatsApp } from '../../hooks/useQueries';
 import { useCurrency } from '../../contexts/CurrencyContext';
-import type { Package } from '../../types';
+import type { Package, PackageVariant } from '../../types';
+import { discountPercent, parsePackagePriceValue } from './utils/packageMoney';
 
-interface PackageSidebarProps {
+export interface PackageSidebarProps {
   packageData: Package;
   onBookNow: () => void;
-  selectedVariant?: any;
+  selectedVariant?: PackageVariant | null;
+  variants?: PackageVariant[];
+  selectedVariantId?: number | null;
+  onVariantChange?: (id: number) => void;
 }
 
-export function PackageSidebar({ packageData, onBookNow, selectedVariant }: PackageSidebarProps) {
+function pricingTypeLabel(pkg: Package): string {
+  switch (pkg.pricing_type) {
+    case 'per_couple':
+      return 'per couple';
+    case 'per_room':
+      return 'per room';
+    case 'per_group':
+      return 'per group';
+    default:
+      return 'per person';
+  }
+}
+
+function durationSummaryText(
+  pkg: Package,
+  selected: PackageVariant | null | undefined
+): string {
+  const label = pricingTypeLabel(pkg);
+  if (selected) {
+    return `${label} · ${selected.duration_days} days`;
+  }
+  const list = pkg.variants ?? [];
+  if (list.length === 0) {
+    return `${label} · ${pkg.duration} days`;
+  }
+  const durations = Array.from(
+    new Set(list.map((v) => Number(v.duration_days)).filter((n) => Number.isFinite(n)))
+  ).sort((a, b) => a - b);
+  if (durations.length === 0) {
+    return `${label} · ${pkg.duration} days`;
+  }
+  const range =
+    durations.length > 1
+      ? `${durations[0]}–${durations[durations.length - 1]}`
+      : String(durations[0]);
+  return `${label} · ${range} days`;
+}
+
+function finitePrice(n: number): number | null {
+  return Number.isFinite(n) ? n : null;
+}
+
+export function PackageSidebar({
+  packageData,
+  onBookNow,
+  selectedVariant,
+  variants = [],
+  selectedVariantId,
+  onVariantChange,
+}: PackageSidebarProps) {
   const { getWhatsAppUrl } = useWhatsApp();
-  const { formatPrice, convertPrice } = useCurrency();
+  const { formatPrice } = useCurrency();
 
   const handleWhatsApp = () => {
     const message = `Hi! I'd like to book the "${packageData.name}" package.`;
@@ -46,341 +84,297 @@ export function PackageSidebar({ packageData, onBookNow, selectedVariant }: Pack
     window.open(whatsappUrl, '_blank');
   };
 
+  const currentPrice = finitePrice(
+    selectedVariant
+      ? parsePackagePriceValue(selectedVariant.price)
+      : parsePackagePriceValue(packageData.price)
+  );
+  const originalPriceRaw = selectedVariant?.original_price
+    ? parsePackagePriceValue(selectedVariant.original_price)
+    : packageData.original_price &&
+        packageData.original_price !== '0' &&
+        packageData.original_price !== null
+      ? parsePackagePriceValue(packageData.original_price)
+      : Number.NaN;
+  const originalPrice = finitePrice(originalPriceRaw);
+
+  const showStrikethrough =
+    originalPrice !== null && currentPrice !== null && originalPrice !== currentPrice;
+
+  const savePct =
+    currentPrice !== null && originalPrice !== null
+      ? discountPercent(currentPrice, originalPrice)
+      : null;
+
+  const sortedVariants = [...variants].sort((a, b) => a.duration_days - b.duration_days);
+
+  const payNowHref = () => {
+    const amount =
+      currentPrice ??
+      parsePackagePriceValue(packageData.price);
+    const description = `${packageData.name} - Package Booking`;
+    return `/payment/checkout?amount=${amount}&description=${encodeURIComponent(description)}&currency=USD`;
+  };
+
   return (
-    <VStack spacing={6} align="stretch" position="sticky" top={4}>
-      {/* Pricing Card */}
-      <Card bg="sky.50" borderColor="sky.200">
-        <CardBody>
-          <VStack spacing={3}>
-            <Text fontSize="sm" color="gray.600" textAlign="center">Starting from</Text>
-            <HStack align="baseline" justify="center">
-            {(() => {
-              const currentPrice = selectedVariant
-                ? parseFloat(String(selectedVariant.price))
-                : parseFloat(typeof packageData.price === 'string' ? packageData.price.replace(/[^0-9.]/g, '') : (packageData.price as any));
-              const originalPrice = selectedVariant && selectedVariant.original_price
-                ? parseFloat(String(selectedVariant.original_price))
-                : (packageData.original_price && packageData.original_price !== '0' && packageData.original_price !== null
-                  ? parseFloat(typeof packageData.original_price === 'string' ? packageData.original_price.replace(/[^0-9.]/g, '') : (packageData.original_price as any))
-                  : null);
-
+    <div className="sticky top-4 z-[1]">
+      <div className="overflow-hidden rounded-2xl border border-editorial-espresso/10 bg-white/85 shadow-editorial backdrop-blur-md">
+        {sortedVariants.length > 0 && onVariantChange && (
+          <div className="border-b border-editorial-espresso/10 bg-editorial-sand/40 px-5 py-4">
+            <p className="font-display text-sm font-semibold tracking-wide text-editorial-espresso">
+              Choose duration
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {sortedVariants.map((v) => {
+                const active = selectedVariantId === v.id;
+                const p = parsePackagePriceValue(v.price);
+                const label = Number.isFinite(p) ? formatPrice(p) : v.price;
                 return (
-                  <>
-                    {originalPrice && originalPrice !== currentPrice && (
-                      <Text fontSize="lg" color="gray.400" textDecoration="line-through">
-                        {formatPrice(originalPrice)}
-                      </Text>
-                    )}
-                    <Text fontSize="3xl" fontWeight="bold" color="purple.600">
-                      {formatPrice(currentPrice)}
-                    </Text>
-                  </>
+                  <button
+                    key={v.id}
+                    type="button"
+                    onClick={() => onVariantChange(v.id)}
+                    className={`min-h-0 rounded-full px-3.5 py-2 text-sm font-medium transition-all ${
+                      active
+                        ? 'bg-editorial-forest text-white shadow-md ring-2 ring-editorial-forest/30'
+                        : 'bg-white/90 text-editorial-espresso ring-1 ring-editorial-espresso/15 hover:bg-editorial-linen hover:ring-editorial-terracotta/40'
+                    }`}
+                  >
+                    {v.duration_days} days · {label}
+                  </button>
                 );
-              })()}
-            </HStack>
-            <Text fontSize="sm" color="gray.600" textAlign="center">
-              {(() => {
-                const pricingText = packageData.pricing_type === 'per_couple' ? 'per couple' : 
-                                   packageData.pricing_type === 'per_room' ? 'per room' :
-                                   packageData.pricing_type === 'per_group' ? 'per group' :
-                                   'per person';
-                
-                if (selectedVariant) {
-                  return <>{pricingText} • {selectedVariant.duration_days} days</> as any;
-                }
-                const variants: any[] = (packageData as any).variants || [];
-                if (!variants.length) return <>{pricingText} • {packageData.duration} days</> as any;
-                const durations = Array.from(new Set(variants.map(v => Number(v.duration_days)).filter((n: any) => !isNaN(n)))).sort((a: number,b: number)=>a-b);
-                return <>{pricingText} • {durations[0]}{durations.length > 1 ? `-${durations[durations.length-1]}` : ''} days</> as any;
-              })()}
-            </Text>
-            {(() => {
-              // Calculate discount percentage safely
-              if (packageData.original_price && packageData.original_price !== packageData.price && packageData.original_price !== '0' && packageData.original_price !== null) {
-                try {
-                  const originalPrice = parseFloat(typeof packageData.original_price === 'string' ? packageData.original_price.replace(/[^0-9.]/g, '') : packageData.original_price);
-                  const currentPrice = parseFloat(typeof packageData.price === 'string' ? packageData.price.replace(/[^0-9.]/g, '') : packageData.price);
+              })}
+            </div>
+          </div>
+        )}
 
-                  if (originalPrice > currentPrice && originalPrice > 0) {
-                    const discountPercent = Math.round(((originalPrice - currentPrice) / originalPrice) * 100);
-                    return (
-                      <Badge colorScheme="green" size="sm">
-                        Save {discountPercent}%
-                      </Badge>
-                    );
-                  }
-                } catch (error) {
-                  console.warn('Error calculating discount:', error);
-                }
-              }
-              return null;
-            })()}
-          </VStack>
-        </CardBody>
-      </Card>
+        <div className="px-5 py-6 text-center">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-editorial-espresso/50">
+            Starting from
+          </p>
+          <div className="mt-2 flex flex-wrap items-baseline justify-center gap-2">
+            {showStrikethrough && originalPrice !== null && (
+              <span className="font-body text-lg text-neutral-400 line-through">
+                {formatPrice(originalPrice)}
+              </span>
+            )}
+            <span className="font-display text-4xl font-semibold text-editorial-terracotta md:text-[2.75rem]">
+              {currentPrice !== null ? formatPrice(currentPrice) : '—'}
+            </span>
+          </div>
+          <p className="mt-2 font-body text-sm text-editorial-espresso/70">
+            {durationSummaryText(packageData, selectedVariant ?? null)}
+          </p>
+          {savePct !== null && savePct > 0 && (
+            <span className="mt-3 inline-block rounded-full bg-editorial-terracotta/15 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-widest text-editorial-terracottaDark">
+              Save {savePct}%
+            </span>
+          )}
+        </div>
 
-      {/* Package Details */}
-      <Card>
-        <CardHeader>
-          <Text fontWeight="bold" fontSize="lg" color="gray.800">Package Details</Text>
-        </CardHeader>
-        <CardBody>
-          <VStack spacing={4} align="stretch">
-            <HStack justify="space-between">
-              <HStack spacing={2}>
-                <Icon as={CalendarIcon} h={4} w={4} color="purple.500" />
-                <Text color="gray.600">Duration:</Text>
-              </HStack>
-              <Text fontWeight="medium">{selectedVariant ? selectedVariant.duration_days : packageData.duration} days</Text>
-            </HStack>
-            
-            <HStack justify="space-between">
-              <HStack spacing={2}>
-                <Icon as={UsersIcon} h={4} w={4} color="purple.500" />
-                <Text color="gray.600">Group Size:</Text>
-              </HStack>
-              <Text fontWeight="medium">
-                {packageData.group_size?.min || 1}-{packageData.group_size?.max || 4} people
-              </Text>
-            </HStack>
-            
-            <HStack justify="space-between">
-              <HStack spacing={2}>
-                <Icon as={StarIcon} h={4} w={4} color="purple.500" />
-                <Text color="gray.600">Difficulty:</Text>
-              </HStack>
-              <Text fontWeight="medium" textTransform="capitalize">
-                {packageData.difficulty_level || 'Easy'}
-              </Text>
-            </HStack>
-            
-            <HStack justify="space-between">
-              <HStack spacing={2}>
-                <Icon as={MapPinIcon} h={4} w={4} color="purple.500" />
-                <Text color="gray.600">Category:</Text>
-              </HStack>
-              <Text fontWeight="medium" textTransform="capitalize">
+        <div className="border-t border-editorial-espresso/10 px-5 py-5">
+          <h3 className="font-display text-lg font-semibold text-editorial-espresso">Details</h3>
+          <ul className="mt-4 space-y-3 font-body text-sm">
+            <li className="flex items-center justify-between gap-3">
+              <span className="flex items-center gap-2 text-editorial-espresso/65">
+                <CalendarIcon className="h-4 w-4 shrink-0 text-editorial-forest" aria-hidden />
+                Duration
+              </span>
+              <span className="font-medium text-editorial-espresso">
+                {selectedVariant ? selectedVariant.duration_days : packageData.duration} days
+              </span>
+            </li>
+            <li className="flex items-center justify-between gap-3">
+              <span className="flex items-center gap-2 text-editorial-espresso/65">
+                <UsersIcon className="h-4 w-4 shrink-0 text-editorial-forest" aria-hidden />
+                Group size
+              </span>
+              <span className="font-medium text-editorial-espresso">
+                {packageData.group_size?.min ?? 1}–{packageData.group_size?.max ?? 4} people
+              </span>
+            </li>
+            <li className="flex items-center justify-between gap-3">
+              <span className="flex items-center gap-2 text-editorial-espresso/65">
+                <StarIcon className="h-4 w-4 shrink-0 text-editorial-forest" aria-hidden />
+                Difficulty
+              </span>
+              <span className="font-medium capitalize text-editorial-espresso">
+                {packageData.difficulty_level ?? 'easy'}
+              </span>
+            </li>
+            <li className="flex items-center justify-between gap-3">
+              <span className="flex items-center gap-2 text-editorial-espresso/65">
+                <MapPinIcon className="h-4 w-4 shrink-0 text-editorial-forest" aria-hidden />
+                Category
+              </span>
+              <span className="font-medium capitalize text-editorial-espresso">
                 {packageData.category || 'Adventure'}
-              </Text>
-            </HStack>
-          </VStack>
-        </CardBody>
-      </Card>
+              </span>
+            </li>
+          </ul>
+        </div>
 
-      {/* Accommodation Info */}
-      {(packageData.accommodation_type || packageData.room_type || packageData.meal_plan) && (
-        <Card>
-          <CardHeader>
-            <HStack spacing={2}>
-              <Icon as={HomeIcon} h={5} w={5} color="green.500" />
-              <Text fontWeight="bold" fontSize="lg" color="gray.800">Accommodation</Text>
-            </HStack>
-          </CardHeader>
-          <CardBody>
-            <VStack spacing={3} align="stretch">
+        {(packageData.accommodation_type || packageData.room_type || packageData.meal_plan) && (
+          <div className="border-t border-editorial-espresso/10 px-5 py-5">
+            <h3 className="flex items-center gap-2 font-display text-lg font-semibold text-editorial-espresso">
+              <HomeIcon className="h-5 w-5 text-editorial-forest" aria-hidden />
+              Accommodation
+            </h3>
+            <ul className="mt-3 space-y-2 font-body text-sm">
               {packageData.accommodation_type && (
-                <HStack justify="space-between">
-                  <Text color="gray.600">Type:</Text>
-                  <Text fontWeight="medium">{packageData.accommodation_type}</Text>
-                </HStack>
+                <li className="flex justify-between gap-3">
+                  <span className="text-editorial-espresso/65">Type</span>
+                  <span className="font-medium text-editorial-espresso">{packageData.accommodation_type}</span>
+                </li>
               )}
               {packageData.room_type && (
-                <HStack justify="space-between">
-                  <Text color="gray.600">Room:</Text>
-                  <Text fontWeight="medium">{packageData.room_type}</Text>
-                </HStack>
+                <li className="flex justify-between gap-3">
+                  <span className="text-editorial-espresso/65">Room</span>
+                  <span className="font-medium text-editorial-espresso">{packageData.room_type}</span>
+                </li>
               )}
               {packageData.meal_plan && (
-                <HStack justify="space-between">
-                  <Text color="gray.600">Meals:</Text>
-                  <Text fontWeight="medium">{packageData.meal_plan}</Text>
-                </HStack>
+                <li className="flex justify-between gap-3">
+                  <span className="text-editorial-espresso/65">Meals</span>
+                  <span className="font-medium text-editorial-espresso">{packageData.meal_plan}</span>
+                </li>
               )}
-            </VStack>
-          </CardBody>
-        </Card>
-      )}
+            </ul>
+          </div>
+        )}
 
-      {/* Transportation */}
-      {(packageData.transportation_details || packageData.airport_transfers) && (
-        <Card>
-          <CardHeader>
-            <HStack spacing={2}>
-              <Icon as={TruckIcon} h={5} w={5} color="blue.500" />
-              <Text fontWeight="bold" fontSize="lg" color="gray.800">Transportation</Text>
-            </HStack>
-          </CardHeader>
-          <CardBody>
+        {(packageData.transportation_details || packageData.airport_transfers) && (
+          <div className="border-t border-editorial-espresso/10 px-5 py-5">
+            <h3 className="flex items-center gap-2 font-display text-lg font-semibold text-editorial-espresso">
+              <TruckIcon className="h-5 w-5 text-editorial-forest" aria-hidden />
+              Transportation
+            </h3>
             {packageData.transportation_details && (
-              <VStack spacing={3} align="stretch" mb={3}>
+              <div className="mt-3 space-y-2">
                 {packageData.transportation_details.split('\n\n').map((section, index) => {
                   if (!section.trim()) return null;
                   const lines = section.split('\n');
-                  const title = lines[0];
+                  const title = lines[0] ?? '';
                   const content = lines.slice(1).join(' ');
-                  
                   return (
-                    <Box key={index} p={3} bg="gray.50" borderRadius="md">
-                      <Text fontWeight="semibold" color="blue.600" fontSize="sm" mb={1}>
+                    <div
+                      key={`transport-${index}`}
+                      className="rounded-xl bg-editorial-sand/50 px-3 py-2.5"
+                    >
+                      <p className="text-xs font-semibold uppercase tracking-wide text-editorial-forest">
                         {title.replace(':', '')}
-                      </Text>
-                      <Text color="gray.700" fontSize="sm" lineHeight="1.5">
-                        {content}
-                      </Text>
-                    </Box>
+                      </p>
+                      <p className="mt-1 text-sm leading-relaxed text-editorial-espresso/80">{content}</p>
+                    </div>
                   );
                 })}
-              </VStack>
+              </div>
             )}
             {packageData.airport_transfers && (
-              <HStack spacing={2}>
-                <Icon as={CheckCircleIcon} h={4} w={4} color="green.500" />
-                <Text fontSize="sm" color="gray.600">Airport transfers included</Text>
-              </HStack>
+              <p className="mt-3 flex items-center gap-2 text-sm text-editorial-espresso/75">
+                <CheckCircleIcon className="h-4 w-4 shrink-0 text-editorial-forest" aria-hidden />
+                Airport transfers included
+              </p>
             )}
-          </CardBody>
-        </Card>
-      )}
+          </div>
+        )}
 
-      {/* Additional Info - Always show with helpful defaults */}
-      <Card>
-        <CardHeader>
-          <Text fontWeight="bold" fontSize="lg" color="gray.800">Additional Information</Text>
-        </CardHeader>
-        <CardBody>
-          <VStack spacing={4} align="stretch">
-            {/* What to Bring */}
-            <Box>
-              <Text fontSize="sm" fontWeight="medium" color="gray.700" mb={2}>What to Bring:</Text>
-              <List spacing={1}>
-                {packageData.what_to_bring && packageData.what_to_bring.length > 0 ? (
-                  packageData.what_to_bring.slice(0, 4).map((item, index) => (
-                    <ListItem key={index} fontSize="sm" color="gray.600">
-                      <ListIcon as={CheckCircleIcon} color="blue.500" />
-                      {item}
-                    </ListItem>
-                  ))
-                ) : (
-                  // Default items based on package category
-                  <>
-                    <ListItem fontSize="sm" color="gray.600">
-                      <ListIcon as={CheckCircleIcon} color="blue.500" />
-                      Comfortable walking shoes
-                    </ListItem>
-                    <ListItem fontSize="sm" color="gray.600">
-                      <ListIcon as={CheckCircleIcon} color="blue.500" />
-                      Sun protection (hat, sunscreen)
-                    </ListItem>
-                    <ListItem fontSize="sm" color="gray.600">
-                      <ListIcon as={CheckCircleIcon} color="blue.500" />
-                      Camera for memories
-                    </ListItem>
-                    {packageData.category?.toLowerCase().includes('water') && (
-                      <ListItem fontSize="sm" color="gray.600">
-                        <ListIcon as={CheckCircleIcon} color="blue.500" />
-                        Swimwear & towel
-                      </ListItem>
-                    )}
-                  </>
-                )}
-              </List>
-            </Box>
-            
-            {/* Important Notes */}
-            <Box>
-              <Text fontSize="sm" fontWeight="medium" color="gray.700" mb={2}>Important Notes:</Text>
-              <List spacing={1}>
-                {packageData.important_notes && packageData.important_notes.length > 0 ? (
-                  packageData.important_notes.slice(0, 3).map((note, index) => (
-                    <ListItem key={index} fontSize="sm" color="gray.600">
-                      <ListIcon as={ExclamationTriangleIcon} color="orange.500" />
-                      {note}
-                    </ListItem>
-                  ))
-                ) : (
-                  // Default helpful notes
-                  <>
-                    <ListItem fontSize="sm" color="gray.600">
-                      <ListIcon as={ExclamationTriangleIcon} color="orange.500" />
-                      Weather conditions may affect activities
-                    </ListItem>
-                    <ListItem fontSize="sm" color="gray.600">
-                      <ListIcon as={ExclamationTriangleIcon} color="orange.500" />
-                      Advance booking recommended
-                    </ListItem>
-                    <ListItem fontSize="sm" color="gray.600">
-                      <ListIcon as={ExclamationTriangleIcon} color="orange.500" />
-                      Contact us for special requirements
-                    </ListItem>
-                  </>
-                )}
-              </List>
-            </Box>
-
-            {/* Best Time to Visit */}
+        <div className="border-t border-editorial-espresso/10 px-5 py-5">
+          <h3 className="font-display text-lg font-semibold text-editorial-espresso">Good to know</h3>
+          <div className="mt-4 space-y-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-editorial-espresso/55">
+                What to bring
+              </p>
+              <ul className="mt-2 space-y-1.5 text-sm text-editorial-espresso/75">
+                {(packageData.what_to_bring && packageData.what_to_bring.length > 0
+                  ? packageData.what_to_bring.slice(0, 4)
+                  : [
+                      'Comfortable walking shoes',
+                      'Sun protection (hat, sunscreen)',
+                      'Camera for memories',
+                      ...(packageData.category?.toLowerCase().includes('water')
+                        ? ['Swimwear and towel']
+                        : []),
+                    ]
+                ).map((item, index) => (
+                  <li key={index} className="flex gap-2">
+                    <CheckCircleIcon
+                      className="mt-0.5 h-4 w-4 shrink-0 text-editorial-forest"
+                      aria-hidden
+                    />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-editorial-espresso/55">
+                Important notes
+              </p>
+              <ul className="mt-2 space-y-1.5 text-sm text-editorial-espresso/75">
+                {(packageData.important_notes && packageData.important_notes.length > 0
+                  ? packageData.important_notes.slice(0, 3)
+                  : [
+                      'Weather conditions may affect activities',
+                      'Advance booking recommended',
+                      'Contact us for special requirements',
+                    ]
+                ).map((note, index) => (
+                  <li key={index} className="flex gap-2">
+                    <ExclamationTriangleIcon
+                      className="mt-0.5 h-4 w-4 shrink-0 text-editorial-terracotta"
+                      aria-hidden
+                    />
+                    <span>{note}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
             {(packageData.best_time_to_visit || packageData.weather_info) && (
-              <Box>
-                <Text fontSize="sm" fontWeight="medium" color="gray.700" mb={2}>Best Time to Visit:</Text>
-                <Text fontSize="sm" color="gray.600">
-                  {packageData.best_time_to_visit || packageData.weather_info || 'Year-round destination with tropical climate'}
-                </Text>
-              </Box>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-editorial-espresso/55">
+                  Best time to visit
+                </p>
+                <p className="mt-2 text-sm text-editorial-espresso/75">
+                  {packageData.best_time_to_visit ||
+                    packageData.weather_info ||
+                    'Year-round destination with tropical climate'}
+                </p>
+              </div>
             )}
-          </VStack>
-        </CardBody>
-      </Card>
+          </div>
+        </div>
 
-      {/* Contact & Booking */}
-      <Card>
-        <CardHeader>
-          <Text fontWeight="bold" fontSize="lg" color="gray.800">Ready to Book?</Text>
-        </CardHeader>
-        <CardBody>
-          <VStack spacing={4}>
-            <Button
-              colorScheme="purple"
-              size="lg"
-              w="full"
-              leftIcon={<Icon as={CreditCardIcon} />}
-              onClick={() => {
-                const currentPrice = selectedVariant
-                  ? parseFloat(String(selectedVariant.price))
-                  : parseFloat(typeof packageData.price === 'string' ? packageData.price.replace(/[^0-9.]/g, '') : (packageData.price as any));
-                const description = `${packageData.name} - Package Booking`;
-                window.location.href = `/payment/checkout?amount=${currentPrice}&description=${encodeURIComponent(description)}&currency=USD`;
-              }}
-              _hover={{ transform: 'translateY(-2px)' }}
-              transition="all 0.2s"
+        <div className="border-t border-editorial-espresso/10 bg-editorial-sand/30 px-5 py-5">
+          <h3 className="font-display text-lg font-semibold text-editorial-espresso">Ready to book?</h3>
+          <div className="mt-4 flex flex-col gap-3">
+            <a
+              href={payNowHref()}
+              className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-editorial-espresso px-4 py-3 text-center text-sm font-semibold text-white shadow-md transition hover:bg-editorial-forest hover:shadow-editorial-glow focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-editorial-forest"
             >
-              Pay Now with BML
-            </Button>
-            
-            <Button
-              variant="outline"
-              size="lg"
-              w="full"
-              leftIcon={<Icon as={ChatBubbleLeftRightIcon} />}
+              <CreditCardIcon className="h-5 w-5 shrink-0" aria-hidden />
+              Pay now with BML
+            </a>
+            <button
+              type="button"
               onClick={handleWhatsApp}
-              _hover={{ transform: 'translateY(-2px)' }}
-              transition="all 0.2s"
+              className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border-2 border-editorial-espresso/20 bg-white/90 px-4 py-3 text-sm font-semibold text-editorial-espresso transition hover:border-editorial-terracotta/50 hover:bg-editorial-linen focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-editorial-forest"
             >
+              <ChatBubbleLeftRightIcon className="h-5 w-5 shrink-0" aria-hidden />
               Book via WhatsApp
-            </Button>
-            
-            <Button
-              variant="outline"
-              size="lg"
-              w="full"
-              leftIcon={<Icon as={EnvelopeIcon} />}
+            </button>
+            <button
+              type="button"
               onClick={onBookNow}
-              _hover={{ transform: 'translateY(-2px)' }}
-              transition="all 0.2s"
+              className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border-2 border-editorial-espresso/15 bg-transparent px-4 py-3 text-sm font-semibold text-editorial-espresso transition hover:border-editorial-forest/40 hover:bg-white/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-editorial-forest"
             >
-              Fill Booking Form
-            </Button>
-          </VStack>
-        </CardBody>
-      </Card>
-    </VStack>
+              <EnvelopeIcon className="h-5 w-5 shrink-0" aria-hidden />
+              Fill booking form
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

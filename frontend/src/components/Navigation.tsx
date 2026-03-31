@@ -1,69 +1,84 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import type { ComponentType, SVGProps } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
-  Box,
-  Container,
-  Flex,
-  HStack,
-  VStack,
-  Text,
-  Button,
-  IconButton,
-  useDisclosure,
+  Dialog,
+  DialogBackdrop,
+  DialogPanel,
+  DialogTitle,
   Menu,
   MenuButton,
-  MenuList,
   MenuItem,
-  MenuDivider,
-  Icon,
-  Avatar,
-  Drawer,
-  DrawerBody,
-  DrawerHeader,
-  DrawerOverlay,
-  DrawerContent,
-  DrawerCloseButton,
-  Divider,
-} from '@chakra-ui/react';
+  MenuItems,
+} from '@headlessui/react';
 import {
   HomeIcon,
   StarIcon,
   BuildingOfficeIcon,
   PhotoIcon,
   InformationCircleIcon,
-  ChatBubbleLeftRightIcon,
-  // MagnifyingGlassIcon, // TEMPORARILY DISABLED
   UserIcon,
   Bars3Icon,
   XMarkIcon,
-  HeartIcon,
   BellIcon,
   ChevronDownIcon,
-  Cog6ToothIcon,
-  ArrowRightOnRectangleIcon,
   SparklesIcon,
+  ArrowRightOnRectangleIcon,
 } from '@heroicons/react/24/outline';
 import { useCustomerAuth } from '../hooks/useCustomerAuth';
-import { useSmartTranslation } from '../hooks/useSmartTranslation';
 import { useTranslation } from '../i18n';
 import logo from '../assets/logo.svg';
-import { GoogleTranslateSwitcher } from './GoogleTranslateSwitcher';
 import { CurrencySelector } from './CurrencySelector';
+import { cn } from '../styles/design-system';
+
+type NavIcon = ComponentType<SVGProps<SVGSVGElement>>;
 
 interface NavigationItem {
   name: string;
   href: string;
-  icon: any;
+  icon: NavIcon;
   featured?: boolean;
+}
+
+const NAV_LINK_BASE =
+  'relative inline-flex min-h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium leading-none transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-1';
+
+function NavLinkButton({
+  href,
+  label,
+  active,
+}: {
+  href: string;
+  label: string;
+  active: boolean;
+}) {
+  return (
+    <Link
+      to={href}
+      className={cn(
+        NAV_LINK_BASE,
+        active ? 'bg-sky-50 text-sky-600' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900',
+      )}
+      aria-label={`Navigate to ${label} page`}
+      aria-current={active ? 'page' : undefined}
+    >
+      {label}
+      {active ? (
+        <span
+          className="absolute bottom-0 left-1/2 h-0.5 w-5 -translate-x-1/2 rounded-full bg-sky-600"
+          aria-hidden
+        />
+      ) : null}
+    </Link>
+  );
 }
 
 export const Navigation = React.memo(() => {
   const location = useLocation();
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const { isAuthenticated, customerData, logout } = useCustomerAuth();
   const { t } = useTranslation();
-  // const { translateNav, translateButton } = useSmartTranslation(); // TEMPORARILY DISABLED
 
   const navigation: NavigationItem[] = [
     { name: t('navigation.home'), href: '/', icon: HomeIcon },
@@ -71,496 +86,324 @@ export const Navigation = React.memo(() => {
     { name: t('navigation.resorts'), href: '/resorts', icon: BuildingOfficeIcon, featured: true },
     { name: t('navigation.boats'), href: '/boats', icon: SparklesIcon, featured: true },
     { name: t('navigation.gallery', 'Gallery'), href: '/gallery', icon: PhotoIcon, featured: true },
-    { name: t('navigation.maldivesInfo', 'Maldives Info'), href: '/maldives-info', icon: InformationCircleIcon, featured: true },
+    {
+      name: t('navigation.maldivesInfo', 'Maldives Info'),
+      href: '/maldives-info',
+      icon: InformationCircleIcon,
+      featured: true,
+    },
     { name: t('navigation.about'), href: '/about', icon: InformationCircleIcon },
-    // Contact removed from navigation (available in footer)
   ];
 
-  const isActive = (path: string) => location.pathname === path;
+  const primaryNav = navigation.slice(0, 4);
+  const secondaryNav = navigation.slice(4);
 
-  // Handle scroll effect for header
+  const isActive = useCallback((path: string) => location.pathname === path, [location.pathname]);
+
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
-
+    const handleScroll = () => setIsScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Close mobile menu when route changes
   useEffect(() => {
-    onClose();
-  }, [location.pathname, onClose]);
+    setMobileOpen(false);
+  }, [location.pathname]);
 
   const handleLogout = () => {
     logout();
   };
 
+  const secondaryActive = secondaryNav.some((i) => isActive(i.href));
+
   return (
     <>
-      <Box
-        as="nav"
-        position="sticky"
-        top={0}
-        zIndex={50}
-        backdropFilter="blur(12px)"
-        borderBottom="1px solid"
-        borderColor={isScrolled ? "gray.200" : "gray.100"}
-        boxShadow={isScrolled ? 'md' : 'sm'}
-        transition="all 0.2s ease"
-        bg={isScrolled ? 'white' : 'whiteAlpha.900'}
-        style={{ paddingLeft: '0', paddingRight: '45px' }}
+      <nav
+        className={cn(
+          'sticky top-0 z-50 border-b backdrop-blur-md transition-all duration-200',
+          isScrolled ? 'border-gray-200 bg-white/95 shadow-md' : 'border-gray-100 bg-white/90 shadow-sm',
+        )}
       >
-        <Container maxW="7xl" px={{ base: 4, sm: 6, lg: 8 }}>
-          <Flex justify="space-between" align="center" h={{ base: '3.5rem', md: '4rem' }}>
-            {/* Logo - Normal size with full text */}
-            <Flex align="center" flexShrink={0}>
-              <Link to="/">
-                <Flex align="center" gap={2} _hover={{ opacity: 0.8 }} transition="all 0.2s ease">
-                  <Box
-                    w={{ base: '12', md: '14' }}
-                    h={{ base: '12', md: '14' }}
-                    borderRadius="xl"
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                    flexShrink={0}
-                  >
-                    <img 
-                      src={logo} 
-                      alt="Thread Travels Logo" 
-                      style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                    />
-                  </Box>
-                  <VStack align="start" spacing={0} display={{ base: 'none', sm: 'flex' }}>
-                    <Text
-                      fontSize={{ base: "xl", md: "2xl" }}
-                      fontWeight="700"
-                      color="gray.900"
-                      lineHeight="1.1"
-                      letterSpacing="-0.02em"
-                    >
-                      Thread Travels
-                    </Text>
-                    <Text
-                      fontSize={{ base: "xs", md: "sm" }}
-                      color="gray.600"
-                      fontWeight="500"
-                      lineHeight="1.2"
-                      letterSpacing="0.01em"
-                      textTransform="uppercase"
-                    >
-                      Travels & Tours Maldives
-                    </Text>
-                  </VStack>
-                </Flex>
-              </Link>
-            </Flex>
-
-            {/* Desktop Navigation - Clean, no icons */}
-            <HStack spacing={1} display={{ base: 'none', lg: 'flex' }}>
-              {navigation.map((item) => (
-                <Link key={item.name} to={item.href}>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    px={4}
-                    py={2}
-                    borderRadius="lg"
-                    fontWeight="medium"
-                    fontSize="sm"
-                    color={isActive(item.href) ? 'sky.600' : 'gray.700'}
-                    bg={isActive(item.href) ? 'sky.50' : 'transparent'}
-                    _hover={{
-                      bg: isActive(item.href) ? 'sky.100' : 'gray.100',
-                      color: isActive(item.href) ? 'sky.700' : 'gray.900',
-                    }}
-                    transition="all 0.2s ease"
-                    position="relative"
-                    aria-label={`Navigate to ${item.name} page`}
-                    aria-current={isActive(item.href) ? 'page' : undefined}
-                  >
-                    <Text>{item.name}</Text>
-                    {isActive(item.href) && (
-                      <Box
-                        position="absolute"
-                        bottom="-2px"
-                        left="50%"
-                        transform="translateX(-50%)"
-                        w="20px"
-                        h="2px"
-                        bg="sky.600"
-                        borderRadius="full"
-                      />
-                    )}
-                  </Button>
-                </Link>
-              ))}
-            </HStack>
-
-            {/* Right Side Actions */}
-            <HStack spacing={3}>
-              {/* Search Button - TEMPORARILY HIDDEN */}
-              {/* <IconButton
-                aria-label="Search"
-                icon={<Icon as={MagnifyingGlassIcon} h="5" w="5" />}
-                variant="ghost"
-                size="md"
-                borderRadius="2xl"
-                onClick={() => {}} // TODO: Open search
-                _hover={{
-                  transform: 'scale(1.05)',
-                  boxShadow: 'md',
-                }}
-                transition="all 0.3s ease"
-              /> */}
-
-              {/* User Menu */}
-              {isAuthenticated ? (
-                <HStack spacing={3} ml={4}>
-                  <IconButton
-                    aria-label="Notifications"
-                    icon={<Icon as={BellIcon} h="5" w="5" />}
-                    variant="ghost"
-                    size="md"
-                    borderRadius="2xl"
-                    position="relative"
-                    _hover={{
-                      transform: 'scale(1.05)',
-                      boxShadow: 'md',
-                    }}
-                    transition="all 0.3s ease"
-                  >
-                    <Box
-                      position="absolute"
-                      top="-1"
-                      right="-1"
-                      w="3"
-                      h="3"
-                      bg="red.500"
-                      borderRadius="full"
-                      animation="pulse 2s infinite"
-                    />
-                  </IconButton>
-                  
-                  {/* User Dropdown */}
-                  <Menu>
-                    <MenuButton
-                      as={Button}
-                      variant="ghost"
-                      size="md"
-                      px={4}
-                      py={3}
-                      borderRadius="2xl"
-                      fontWeight="semibold"
-                      fontSize="sm"
-                      _hover={{
-                        transform: 'scale(1.05)',
-                        boxShadow: 'md',
-                      }}
-                      transition="all 0.3s ease"
-                    >
-                      <HStack spacing={3}>
-                        <Avatar
-                          size="sm"
-                          bgGradient="linear(to-br, blue.500, indigo.600)"
-                          icon={<Icon as={UserIcon} h="4" w="4" color="white" />}
-                        />
-                        <Text display={{ base: 'none', md: 'block' }}>
-                          {customerData?.user?.first_name || 'User'}
-                        </Text>
-                        <Icon as={ChevronDownIcon} h="4" w="4" />
-                      </HStack>
-                    </MenuButton>
-                    
-                    <MenuList
-                      bg="white"
-                      borderRadius="2xl"
-                      boxShadow="2xl"
-                      border="1px solid"
-                      borderColor="gray.200"
-                      py={2}
-                    >
-                      <MenuItem
-                        icon={<Icon as={UserIcon} h="4" w="4" />}
-                        onClick={() => onClose()}
-                        as={Link}
-                        to="/dashboard"
-                      >
-                        Dashboard
-                      </MenuItem>
-                      <MenuItem
-                        icon={<Icon as={UserIcon} h="4" w="4" />}
-                        onClick={() => onClose()}
-                        as={Link}
-                        to="/profile"
-                      >
-                        Profile
-                      </MenuItem>
-                      <MenuDivider />
-                      <MenuItem 
-                        icon={<Text fontSize="lg">🚪</Text>}
-                        onClick={() => {
-                          handleLogout();
-                          onClose();
-                        }}
-                        color="red.600"
-                        _hover={{ bg: 'red.50' }}
-                      >
-                        Logout
-                      </MenuItem>
-                    </MenuList>
-                  </Menu>
-
-                  {/* Currency Selector */}
-                  <CurrencySelector size="sm" variant="outline" showLabel={false} />
-
-                  {/* Google Translate Switcher */}
-                  <Box display={{ base: 'none', md: 'block' }}>
-                    <GoogleTranslateSwitcher variant="dropdown" />
-                  </Box>
-                </HStack>
-              ) : (
-                <HStack spacing={3} ml={4} display={{ base: 'none', md: 'flex' }}>
-                  {/* Currency Selector */}
-                  <CurrencySelector size="sm" variant="outline" showLabel={false} />
-
-                  {/* Google Translate Switcher */}
-                  <Box display={{ base: 'none', md: 'block' }}>
-                    <GoogleTranslateSwitcher variant="dropdown" />
-                  </Box>
-
-                  {/* Book Now Button - Simplified */}
-                  <Button
-                    bgGradient="linear(to-r, sky.500, blue.500)"
-                    color="white"
-                    size="sm"
-                    px={6}
-                    py={2}
-                    borderRadius="lg"
-                    fontWeight="medium"
-                    fontSize="sm"
-                    as={Link}
-                    to="/packages"
-                    _hover={{
-                      bgGradient: 'linear(to-r, sky.600, blue.600)',
-                      transform: 'translateY(-1px)',
-                      boxShadow: 'md',
-                    }}
-                    transition="all 0.2s ease"
-                    aria-label="Browse and book travel packages"
-                  >
-                    {t('ui.buttons.bookNow')}
-                  </Button>
-                </HStack>
-              )}
-              
-              {/* Mobile language switcher removed as requested */}
-
-              {/* Mobile menu button */}
-              <IconButton
-                aria-label="Toggle mobile menu"
-                icon={<Icon as={isOpen ? XMarkIcon : Bars3Icon} h="6" w="6" />}
-                variant="ghost"
-                size="md"
-                borderRadius="2xl"
-                onClick={onOpen}
-                display={{ base: 'flex', lg: 'none' }}
-                _hover={{
-                  transform: 'scale(1.05)',
-                  boxShadow: 'md',
-                }}
-              />
-            </HStack>
-          </Flex>
-        </Container>
-      </Box>
-
-      {/* Mobile Navigation Drawer */}
-      <Drawer isOpen={isOpen} placement="right" onClose={onClose} size="full">
-        <DrawerOverlay />
-        <DrawerContent bg="white">
-          <DrawerCloseButton size="lg" />
-          <DrawerHeader borderBottomWidth="1px" borderColor="gray.200">
-            <Flex align="center">
-              <Box
-                w="12"
-                h="12"
-                borderRadius="xl"
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                mr={2}
-              >
-                <img 
-                  src={logo} 
-                  alt="Thread Travels Logo" 
-                  style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+        <div className="mx-auto flex h-14 max-w-7xl items-center gap-3 px-3 sm:px-4 lg:h-16 lg:px-6">
+          <div className="flex min-w-0 shrink-0 items-center">
+            <Link
+              to="/"
+              aria-label="Thread Travels home"
+              className="flex min-w-0 items-center gap-2 rounded-lg transition-opacity hover:opacity-80 sm:gap-2.5"
+            >
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:h-11 sm:w-11 md:h-12 md:w-12">
+                <img
+                  src={logo}
+                  alt=""
+                  className="h-full w-full object-contain"
+                  width={48}
+                  height={48}
                 />
-              </Box>
-              <VStack align="start" spacing={0}>
-                <Text 
-                  fontSize="xl" 
-                  fontWeight="700" 
-                  color="gray.900"
-                  lineHeight="1.1"
-                  letterSpacing="-0.02em"
-                >
+              </span>
+              <span className="hidden min-w-0 flex-col justify-center gap-0.5 sm:flex">
+                <span className="truncate font-display text-[1.05rem] font-semibold leading-tight tracking-tight text-slate-900 sm:text-lg md:text-xl md:font-medium">
                   Thread Travels
-                </Text>
-                <Text 
-                  fontSize="xs" 
-                  color="gray.600" 
-                  fontWeight="500"
-                  letterSpacing="0.01em"
-                  textTransform="uppercase"
-                  lineHeight="1.2"
-                >
+                </span>
+                <span className="hidden max-w-[14rem] truncate font-sans text-[0.65rem] font-semibold uppercase leading-tight tracking-[0.14em] text-sky-800/55 md:block">
                   Travels & Tours Maldives
-                </Text>
-              </VStack>
-            </Flex>
-          </DrawerHeader>
+                </span>
+              </span>
+            </Link>
+          </div>
 
-          <DrawerBody py={6}>
-            <VStack spacing={4} align="stretch">
-              {/* Mobile Navigation Links */}
-              {navigation.map((item) => (
-                <Link key={item.name} to={item.href} onClick={onClose}>
-                  <Button
-                    variant="ghost"
-                    size="lg"
-                    w="full"
-                    justifyContent="flex-start"
-                    px={6}
-                    py={4}
-                    borderRadius="xl"
-                    fontWeight="semibold"
-                    fontSize="md"
-                    color={isActive(item.href) ? 'sky.700' : 'gray.700'}
-                    bg={isActive(item.href) ? 'sky.50' : 'transparent'}
-                    _hover={{
-                      bg: isActive(item.href) ? 'sky.100' : 'gray.100',
-                    }}
-                    transition="all 0.2s ease"
-                    aria-label={`Navigate to ${item.name} page`}
-                    aria-current={isActive(item.href) ? 'page' : undefined}
-                  >
-                    <Text>{item.name}</Text>
-                  </Button>
-                </Link>
+          <div className="hidden min-h-0 min-w-0 flex-1 items-center justify-center px-2 lg:flex xl:px-6">
+            <div
+              className="flex flex-wrap items-center justify-center gap-x-1 gap-y-1 lg:gap-x-3 xl:gap-x-4"
+              role="navigation"
+              aria-label="Main"
+            >
+              {primaryNav.map((item) => (
+                <NavLinkButton
+                  key={item.href}
+                  href={item.href}
+                  label={item.name}
+                  active={isActive(item.href)}
+                />
               ))}
+              <Menu>
+                <MenuButton
+                  className={cn(
+                    NAV_LINK_BASE,
+                    'cursor-pointer border-0 bg-transparent text-left',
+                    secondaryActive
+                      ? 'bg-sky-50 text-sky-600 hover:bg-sky-100'
+                      : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900',
+                  )}
+                >
+                  <span className="shrink-0">{t('navigation.more', 'More')}</span>
+                  <ChevronDownIcon
+                    className="h-4 w-4 shrink-0 text-current opacity-60"
+                    aria-hidden
+                  />
+                </MenuButton>
+                <MenuItems
+                  transition
+                  anchor="bottom"
+                  modal={false}
+                  className="z-[100] mt-1 min-w-[12rem] origin-top rounded-xl border border-gray-200 bg-white py-1 shadow-lg outline-none [--anchor-gap:6px] data-[closed]:scale-95 data-[closed]:opacity-0"
+                >
+                  {secondaryNav.map((item) => {
+                    const Icon = item.icon;
+                    const active = isActive(item.href);
+                    return (
+                      <MenuItem key={item.href}>
+                        {({ focus }) => (
+                          <Link
+                            to={item.href}
+                            className={cn(
+                              'flex items-center gap-2 px-3 py-2 text-sm',
+                              focus && 'bg-gray-50',
+                              active ? 'bg-sky-50 font-semibold text-sky-800' : 'font-medium text-gray-800',
+                            )}
+                          >
+                            <Icon className="h-4 w-4 shrink-0 text-gray-500" aria-hidden />
+                            {item.name}
+                          </Link>
+                        )}
+                      </MenuItem>
+                    );
+                  })}
+                </MenuItems>
+              </Menu>
+            </div>
+          </div>
 
-              <Divider my={6} />
-
-              {/* Mobile Currency and Translation */}
-              <VStack spacing={4} align="stretch">
-                <Text fontSize="lg" fontWeight="semibold" color="gray.700" px={2}>
-                  Currency
-                </Text>
-                <Box px={2}>
-                  <CurrencySelector size="md" variant="outline" showLabel={true} />
-                </Box>
-
-                <Text fontSize="lg" fontWeight="semibold" color="gray.700" px={2}>
-                  Translate
-                </Text>
-                <Box px={2}>
-                  <GoogleTranslateSwitcher variant="buttons" className="w-full" />
-                </Box>
-              </VStack>
-
-              <Divider my={6} />
-
-              {/* Mobile User Actions */}
-              {isAuthenticated ? (
-                <VStack spacing={4} align="stretch">
-                  <Text fontSize="lg" fontWeight="semibold" color="gray.700" px={2}>
-                    Welcome, {customerData?.user?.first_name || 'User'}
-                  </Text>
-                  <Button
-                    variant="ghost"
-                    size="lg"
-                    w="full"
-                    justifyContent="flex-start"
-                    px={6}
-                    py={4}
-                    borderRadius="xl"
-                    as={Link}
-                    to="/customer/dashboard"
-                    onClick={onClose}
+          <div className="flex shrink-0 items-center gap-1.5 md:gap-2">
+            {isAuthenticated ? (
+              <>
+                <button
+                  type="button"
+                  className="relative rounded-2xl p-2 text-gray-600 transition hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+                  aria-label="Notifications"
+                >
+                  <BellIcon className="h-5 w-5" />
+                  <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500" aria-hidden />
+                </button>
+                <Menu>
+                  <MenuButton className="flex items-center gap-2 rounded-2xl px-2 py-1.5 text-sm font-semibold text-gray-800 transition hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 md:px-3">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white">
+                      <UserIcon className="h-4 w-4" aria-hidden />
+                    </span>
+                    <span className="hidden max-w-[7rem] truncate md:inline">
+                      {customerData?.user?.first_name ?? 'User'}
+                    </span>
+                    <ChevronDownIcon className="hidden h-4 w-4 shrink-0 md:block" aria-hidden />
+                  </MenuButton>
+                  <MenuItems
+                    transition
+                    anchor="bottom end"
+                    modal={false}
+                    className="z-[100] mt-1 w-48 origin-top-right rounded-2xl border border-gray-200 bg-white py-1 shadow-xl outline-none [--anchor-gap:6px] data-[closed]:scale-95 data-[closed]:opacity-0"
                   >
-                    <HStack spacing={4}>
-                      <Icon as={UserIcon} h="5" w="5" />
-                      <Text>Dashboard</Text>
-                    </HStack>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="lg"
-                    w="full"
-                    justifyContent="flex-start"
-                    px={6}
-                    py={4}
-                    borderRadius="xl"
-                    color="red.600"
+                    <MenuItem>
+                      {({ focus }) => (
+                        <Link
+                          to="/customer/dashboard"
+                          className={cn(
+                            'flex items-center gap-2 px-3 py-2 text-sm text-gray-800',
+                            focus && 'bg-gray-50',
+                          )}
+                        >
+                          <UserIcon className="h-4 w-4" aria-hidden />
+                          Dashboard
+                        </Link>
+                      )}
+                    </MenuItem>
+                    <div className="my-1 border-t border-gray-100" role="separator" />
+                    <MenuItem>
+                      {({ focus }) => (
+                        <button
+                          type="button"
+                          onClick={handleLogout}
+                          className={cn(
+                            'flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-red-600',
+                            focus && 'bg-red-50',
+                          )}
+                        >
+                          <ArrowRightOnRectangleIcon className="h-4 w-4" aria-hidden />
+                          Logout
+                        </button>
+                      )}
+                    </MenuItem>
+                  </MenuItems>
+                </Menu>
+                <CurrencySelector compact showLabel={false} variant="outline" size="sm" />
+              </>
+            ) : (
+              <div className="hidden items-center gap-2 md:flex">
+                <CurrencySelector compact showLabel={false} variant="outline" size="sm" />
+                <Link
+                  to="/packages"
+                  className="inline-flex min-h-9 items-center justify-center whitespace-nowrap rounded-lg border border-slate-200/90 bg-white px-3 py-2 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/40 focus-visible:ring-offset-1 lg:px-4"
+                  aria-label="Browse and book travel packages"
+                >
+                  {t('ui.buttons.bookNow')}
+                </Link>
+              </div>
+            )}
+
+            <button
+              type="button"
+              className="rounded-2xl p-2 text-gray-700 transition hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 lg:hidden"
+              aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={mobileOpen}
+              onClick={() => setMobileOpen((o) => !o)}
+            >
+              {mobileOpen ? <XMarkIcon className="h-6 w-6" /> : <Bars3Icon className="h-6 w-6" />}
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <Dialog open={mobileOpen} onClose={() => setMobileOpen(false)} className="relative z-[60] lg:hidden">
+        <DialogBackdrop
+          transition
+          className="fixed inset-0 bg-black/40 transition data-[closed]:opacity-0"
+        />
+        <div className="fixed inset-0 flex justify-end overflow-hidden">
+          <DialogPanel
+            transition
+            className="flex h-full w-full max-w-sm flex-col bg-white shadow-2xl transition duration-200 ease-out data-[closed]:translate-x-full"
+          >
+            <div className="flex items-center justify-between border-b border-gray-200 px-4 py-4">
+              <DialogTitle className="flex min-w-0 items-center gap-2">
+                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl">
+                  <img src={logo} alt="" className="h-full w-full object-contain" width={48} height={48} />
+                </span>
+                <span className="min-w-0 flex-col gap-0.5">
+                  <span className="block truncate font-display text-lg font-semibold leading-tight text-slate-900">
+                    Thread Travels
+                  </span>
+                  <span className="block truncate font-sans text-[0.65rem] font-semibold uppercase leading-tight tracking-[0.14em] text-sky-800/55">
+                    Travels & Tours Maldives
+                  </span>
+                </span>
+              </DialogTitle>
+              <button
+                type="button"
+                className="rounded-xl p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+                onClick={() => setMobileOpen(false)}
+                aria-label="Close menu"
+              >
+                <XMarkIcon className="h-6 w-6" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-4 py-6">
+              <div className="flex flex-col gap-1">
+                {navigation.map((item) => {
+                  const active = isActive(item.href);
+                  return (
+                    <Link
+                      key={item.href}
+                      to={item.href}
+                      onClick={() => setMobileOpen(false)}
+                      className={cn(
+                        'rounded-xl px-4 py-3 text-base font-semibold transition-colors',
+                        active ? 'bg-sky-50 text-sky-700' : 'text-gray-700 hover:bg-gray-100',
+                      )}
+                      aria-current={active ? 'page' : undefined}
+                    >
+                      {item.name}
+                    </Link>
+                  );
+                })}
+              </div>
+
+              <div className="my-8 border-t border-gray-200" role="separator" />
+
+              <p className="mb-2 px-1 text-sm font-semibold text-gray-700">Currency</p>
+              <CurrencySelector size="md" variant="outline" showLabel />
+
+              <div className="my-8 border-t border-gray-200" role="separator" />
+
+              {isAuthenticated ? (
+                <div className="flex flex-col gap-3">
+                  <p className="px-1 text-sm font-semibold text-gray-700">
+                    Welcome, {customerData?.user?.first_name ?? 'User'}
+                  </p>
+                  <Link
+                    to="/customer/dashboard"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-3 rounded-xl px-4 py-3 text-gray-800 hover:bg-gray-100"
+                  >
+                    <UserIcon className="h-5 w-5" aria-hidden />
+                    Dashboard
+                  </Link>
+                  <button
+                    type="button"
                     onClick={() => {
                       handleLogout();
-                      onClose();
+                      setMobileOpen(false);
                     }}
+                    className="flex items-center gap-3 rounded-xl px-4 py-3 text-left text-red-600 hover:bg-red-50"
                   >
-                    <HStack spacing={4}>
-                      <Text fontSize="lg">🚪</Text>
-                      <Text>Logout</Text>
-                    </HStack>
-                  </Button>
-                </VStack>
+                    <ArrowRightOnRectangleIcon className="h-5 w-5" aria-hidden />
+                    Logout
+                  </button>
+                </div>
               ) : (
-                <VStack spacing={4} align="stretch">
-                  {/* Login button temporarily hidden */}
-                  {/* <Button
-                    variant="outline"
-                    size="lg"
-                    w="full"
-                    px={6}
-                    py={4}
-                    borderRadius="xl"
-                    fontWeight="semibold"
-                    as={Link}
-                    to="/customer/login"
-                    onClick={onClose}
-                  >
-                    Login
-                  </Button> */}
-                  <Button
-                    bgGradient="linear(to-r, sky.500, blue.500)"
-                    _hover={{
-                      bgGradient: 'linear(to-r, sky.600, blue.600)',
-                    }}
-                    color="white"
-                    size="lg"
-                    w="full"
-                    px={6}
-                    py={4}
-                    borderRadius="xl"
-                    fontWeight="semibold"
-                    as={Link}
-                    to="/packages"
-                    onClick={onClose}
-                  >
-                    Book Now
-                  </Button>
-                </VStack>
+                <Link
+                  to="/packages"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-3 font-semibold text-slate-800 shadow-sm hover:bg-slate-50"
+                >
+                  Book Now
+                </Link>
               )}
-            </VStack>
-          </DrawerBody>
-        </DrawerContent>
-      </Drawer>
+            </div>
+          </DialogPanel>
+        </div>
+      </Dialog>
     </>
   );
 });
 
 Navigation.displayName = 'Navigation';
 
-export default Navigation; 
+export default Navigation;

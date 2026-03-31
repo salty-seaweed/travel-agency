@@ -70,7 +70,7 @@ export const AdvancedSEO: React.FC<AdvancedSEOProps> = ({
     url: 'https://threadtravels.com',
     contactPoint: {
       telephone: '+9607441097',
-      email: 'support@threadtravels.com',
+      email: 'info@threadtravels.com',
       contactType: 'customer service'
     }
   };

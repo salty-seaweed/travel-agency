@@ -20,7 +20,7 @@ export const BoatsFleetSection: React.FC = () => {
         <Container maxW="7xl">
           <VStack spacing={8} align="center">
             <VStack spacing={3} textAlign="center" maxW="3xl">
-              <Heading size="xl" color={textColor}>
+              <Heading size="xl" color={textColor} className="font-display tracking-tight">
                 Our Premium Fleet
               </Heading>
               <Text fontSize="md" color={mutedTextColor} maxW="2xl">
@@ -44,7 +44,7 @@ export const BoatsFleetSection: React.FC = () => {
         <VStack spacing={8} align="stretch">
           {/* Header */}
           <VStack spacing={3} textAlign="center" maxW="3xl" mx="auto">
-            <Heading size="xl" color={textColor}>
+            <Heading size="xl" color={textColor} className="font-display tracking-tight">
               Our Premium Fleet
             </Heading>
             <Text fontSize="md" color={mutedTextColor} maxW="2xl">
@@ -64,20 +64,13 @@ export const BoatsFleetSection: React.FC = () => {
             <Link to="/boats">
               <Button
                 size="md"
-                bgGradient="linear(to-r, sky.500, blue.500)"
-                color="white"
                 px={6}
                 py={5}
                 fontSize="md"
                 fontWeight="bold"
                 borderRadius="lg"
-                _hover={{
-                  bgGradient: 'linear(to-r, sky.600, blue.600)',
-                  transform: 'translateY(-2px)',
-                  boxShadow: 'lg',
-                }}
-                transition="all 0.3s ease"
                 rightIcon={<ArrowRightIcon style={{ width: '16px', height: '16px' }} />}
+                className="!border-0 !bg-slate-900 !text-white !shadow-sm hover:!bg-slate-800"
               >
                 Explore Our Fleet
               </Button>

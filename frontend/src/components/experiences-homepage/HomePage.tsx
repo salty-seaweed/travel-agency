@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useMemo, useCallback, Suspense } from 'react';
-import { Link } from 'react-router-dom';
-import { Box, VStack, Text, Button, Container, Heading, Icon, useToast, useColorModeValue } from '@chakra-ui/react';
+import React, { useState, useEffect, Suspense } from 'react';
+import { Box, VStack, Text, Button, Heading, Icon } from '@chakra-ui/react';
 import { ExclamationTriangleIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 import { useHomepageData, useHomepageContent } from '../../hooks/useQueries';
 import { LoadingSpinner } from '../LoadingSpinner';
@@ -11,7 +10,6 @@ import { useTranslation } from '../../i18n';
 
 // Lazy load sections for better performance
 const ExperiencesHeroSection = React.lazy(() => import('./sections/HeroSection').then(module => ({ default: module.ExperiencesHeroSection })));
-const ExperiencesSearchSection = React.lazy(() => import('./sections/SearchSection').then(module => ({ default: module.ExperiencesSearchSection })));
 const ExperiencesTrendingDeals = React.lazy(() => import('./sections/TrendingDeals').then(module => ({ default: module.ExperiencesTrendingDeals })));
 const ExperiencesResortsSection = React.lazy(() => import('./sections/ResortsSection').then(module => ({ default: module.ExperiencesResortsSection })));
 const ExperiencesTrustSection = React.lazy(() => import('./sections/TrustSection').then(module => ({ default: module.ExperiencesTrustSection })));
@@ -19,19 +17,22 @@ const ExperiencesDestinationsSection = React.lazy(() => import('./sections/Desti
 const ExperiencesActivitiesSection = React.lazy(() => import('./sections/ActivitiesSection').then(module => ({ default: module.ExperiencesActivitiesSection })));
 const ExperiencesTestimonialsSection = React.lazy(() => import('./sections/TestimonialsSection').then(module => ({ default: module.ExperiencesTestimonialsSection })));
 const ExperiencesReviewsSection = React.lazy(() => import('./sections/ReviewsSection').then(module => ({ default: module.ExperiencesReviewsSection })));
-const ExperiencesNewsletterSection = React.lazy(() => import('./sections/NewsletterSection').then(module => ({ default: module.ExperiencesNewsletterSection })));
 const RecentlyViewedSection = React.lazy(() => import('./sections/RecentlyViewedSection').then(module => ({ default: module.RecentlyViewedSection })));
 const BoatsFleetSection = React.lazy(() => import('./sections/BoatsFleetSection').then(module => ({ default: module.BoatsFleetSection })));
 const BoatPackagesSection = React.lazy(() => import('./sections/BoatPackagesSection').then(module => ({ default: module.BoatPackagesSection })));
 
 // Section loading fallbacks
-const SectionSkeleton = ({ height = "400px" }: { height?: string }) => (
-  <Box bg="white" p={6} borderRadius="xl" boxShadow="lg" height={height}>
+const SectionSkeleton = ({ height = '400px' }: { height?: string }) => (
+  <Box
+    className="rounded-2xl border border-slate-200/90 bg-white shadow-sm"
+    p={6}
+    height={height}
+  >
     <Box mb={4}>
       <Box bg="gray.200" height="32px" width="200px" borderRadius="lg" mb={3} />
       <Box bg="gray.200" height="16px" width="300px" borderRadius="lg" />
     </Box>
-    <Box bg="gray.200" height="200px" borderRadius="lg" />
+    <Box bg="gray.100" height="200px" borderRadius="xl" />
   </Box>
 );
 
@@ -40,7 +41,6 @@ export const ExperiencesHomePage = React.memo(() => {
   const { data: homepageContent } = useHomepageContent();
   const { measure } = usePerformanceMonitor('ExperiencesHomePage');
   const { t } = useTranslation();
-  const toast = useToast();
 
   // Progressive loading state with intersection observer for better performance
   const [loadedSections, setLoadedSections] = useState<Set<string>>(new Set(['hero']));
@@ -113,7 +113,7 @@ export const ExperiencesHomePage = React.memo(() => {
   // Show skeleton loading for better perceived performance
   if (isLoading) {
     return (
-      <Box className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <Box className="min-h-screen bg-gray-50">
         <LoadingSpinner variant="card-skeleton" count={4} />
       </Box>
     );
@@ -122,13 +122,19 @@ export const ExperiencesHomePage = React.memo(() => {
   if (isError) {
     return (
       <PageErrorBoundary pageName="Homepage">
-        <div className="min-h-screen flex items-center justify-center bg-red-50">
+        <div className="flex min-h-screen items-center justify-center bg-gray-50">
           <VStack textAlign="center" spacing={6} maxW="md">
-            <Icon as={ExclamationTriangleIcon} className="w-16 h-16 text-red-500" />
-            <Heading size="2xl" color="gray.900">{t('homepage.error.title', 'Failed to Load Homepage')}</Heading>
+            <Icon as={ExclamationTriangleIcon} className="h-16 w-16 text-red-500" />
+            <Heading size="2xl" className="font-display text-slate-900">
+              {t('homepage.error.title', 'Failed to Load Homepage')}
+            </Heading>
             <Text color="gray.600">{error?.message || t('homepage.error.message', 'Something went wrong. Please try again.')}</Text>
-            <Button onClick={() => window.location.reload()} colorScheme="blue" size="lg" className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700">
-              <Icon as={ArrowPathIcon} className="w-5 h-5 mr-2" /> {t('homepage.error.reload', 'Reload Page')}
+            <Button
+              onClick={() => window.location.reload()}
+              size="lg"
+              className="!min-h-11 !rounded-lg !border !border-slate-200/90 !bg-slate-900 !px-6 !text-white !shadow-sm hover:!bg-slate-800"
+            >
+              <Icon as={ArrowPathIcon} className="mr-2 h-5 w-5" /> {t('homepage.error.reload', 'Reload Page')}
             </Button>
           </VStack>
         </div>
